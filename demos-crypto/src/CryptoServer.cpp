@@ -219,14 +219,14 @@ unique_ptr<ThreadPool::ConsumerTask> CryptoServer::ProducerTask::produce(size_t 
 	
 	unique_ptr<char[]> buffer(new char[req_size]);
 	
-    if ((ret = recv_all(newsock_fd, buffer.get(), req_size, 0)) < 1)
+	if ((ret = recv_all(newsock_fd, buffer.get(), req_size, 0)) < 1)
 		throw system_error(errno, system_category(), "recv_all");
 	
-    string data(buffer.get(), ret);
-    
-    // Parse the received request
-    
-    unique_ptr<CryptoRequest> req(new CryptoRequest());
+	string data(buffer.get(), ret);
+	
+	// Parse the received request
+		
+	unique_ptr<CryptoRequest> req(new CryptoRequest());
 	req->ParseFromString(data);
 	
 	// Check if the task can be parallelized
