@@ -558,7 +558,7 @@ CryptoResponse_ZK_set CompleteZK(CryptoRequest_CompleteZKData data){
 		Key key = data.key();
 	    int iy,k,logm,curve = key.curve();
 		char c[100];//,hash[32];
-		char *coins;
+		//char *coins;
 		Big tempB,a,b,p,q,x,y,r,s1,s2,ch;
 		ECn g,h,c1,c2,tempE;
 		miracl *mip=&precision;
@@ -574,13 +574,13 @@ CryptoResponse_ZK_set CompleteZK(CryptoRequest_CompleteZKData data){
 		ECn ZKB1[logm],ZKY1[logm],ZKT1[logm],ZKW1[logm],ZKB2[logm],ZKY2[logm],ZKT2[logm],ZKW2[logm], ZKD1[logm],ZKD2[logm];//only for verification
 		*/
 		////////////////////////////////
-		coins = (char *) data.coins().c_str();
 		//cout<<"Complete ZK:"<<endl;
 		//cout<< "PK: "<<key.pk().x()<<" "<<key.pk().y()<<endl;
 		//cout<<"Curve: " << curve << endl;
 		//cout<<"log m: " << logm << endl;
-		//cout<<"coins: " << coins<<endl;
 		/*//Hash the coins SHA256
+		coins = (char *) data.coins().c_str();
+		//cout<<"coins: " << coins<<endl;
 		sha256 sh;
 		shs256_init(&sh);
 		for (int i=0;coins[i]!=0;i++) shs256_process(&sh,coins[i]);
@@ -589,11 +589,12 @@ CryptoResponse_ZK_set CompleteZK(CryptoRequest_CompleteZKData data){
 		stringstream ss; 
 		//only take the first 27 bytes for now to fit p224
 		for (int i=0;i<27;i++) ss << std::hex << (unsigned int)hash[i];
-		ch = (char *)ss.str().c_str();	*/
-		//only take the first 27 bytes for now to fit p224
 		mip->IOBASE=16;
-		string coins_s(coins, 2*27);
-		ch = (char *)coins_s.c_str();
+		ch = (char *)ss.str().c_str();	*/	
+		mip->IOBASE=16;
+		//only take the first 27 bytes for now to fit p224
+		string coins(data.coins(), 2*27);
+		ch = (char *)coins.c_str();
 		//Read g
 		a=-3;
 		q=(char *)(ecq[curve].c_str());	
