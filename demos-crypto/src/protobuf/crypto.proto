@@ -1,0 +1,119 @@
+message GG {
+	required string x = 1;
+	required bool y = 2;
+}
+
+message Com {
+	required GG c1 = 1;
+	required GG c2 = 2;
+}
+
+message Decom {
+	required string randomness = 1;
+	required string msg = 2;
+}
+
+message Key {
+	required GG pk = 1;
+	optional string sk = 2;
+	required int32 curve = 3;
+}
+
+message ZK1 {
+	repeated GG element = 1;
+}
+
+message ZK_state {
+	repeated string zp = 1;
+}
+
+message ZK2 {
+	repeated string zp = 1;
+}
+
+message CryptoRequest {
+	
+	enum CMD {
+		KeyGen = 0;
+		AddCom = 1;
+		AddDecom = 2;
+		GenBallot = 3;
+		CompleteZK = 4;
+		VerifyCom = 5;
+	}
+	
+	message KeyGenData {
+		required int32 N = 1;
+		required int32 m = 2;
+	}
+	
+	message GenBallotData {
+		required Key key = 1;
+		required int32 N = 2;
+		required int32 m = 3;
+		required int32 number = 4;
+	}
+	
+	message AddComData {
+		required Key key = 1;
+		repeated Com env = 2;
+	}
+	
+	message AddDecomData {
+		required Key key = 1;
+		repeated Decom decom = 2;
+	}
+	
+	message VerifyComData {
+		required Key key = 1;
+		required Com com = 2;
+		required Decom decom = 3;
+	}
+	
+	message CompleteZKData {
+		message ZK_set {
+			required ZK1 zk1 = 1;
+			required ZK_state zk_state = 2;
+		}
+		
+		required Key key = 1;
+		required int32 m = 2;
+		required string coins = 3;
+		repeated ZK_set zk_set = 4;
+	}
+	
+ 	required CMD command = 1;
+	optional KeyGenData kg = 2;
+	optional AddComData ab = 3;
+	optional AddDecomData ad = 4;
+	optional GenBallotData gb = 5;
+	optional CompleteZKData cz = 6;
+	optional VerifyComData vc = 7;
+}
+
+message CryptoResponse {
+	
+	message Ballots {
+		message SetB {
+			message Enc {
+				required Com com = 1;
+				required Decom decom = 2;
+				required ZK1 zk1 = 3;
+				required ZK_state zk_state = 4;
+			}
+			repeated Enc enc = 1;
+		}
+		repeated SetB eachBallot = 1;
+	}
+	
+	message ZK_set {
+		repeated ZK2 zk2 = 1;
+	}
+	
+	optional Key key = 1;
+	optional Ballots ballots = 2;
+	optional Com Gcombined = 3;
+	optional Decom Zcombined = 4;
+	optional bool check = 5;
+	optional ZK_set zk_set = 6;
+}
