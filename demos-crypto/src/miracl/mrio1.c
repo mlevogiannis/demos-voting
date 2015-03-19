@@ -46,7 +46,7 @@ int instr(_MIPD_ flash x,char *string)
     *  returns length in digits */
     int i,ipt,n,s,e,pads;
 	BOOL first_after_pad;
-    int ch,lc;
+    int ch,lc=0;
 #ifdef MR_FLASH
     BOOL frac;
 #endif
