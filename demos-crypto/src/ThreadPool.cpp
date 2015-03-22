@@ -10,6 +10,8 @@
 
 #include "ThreadPool.hpp"
 
+#define MAXQLEN 128
+
 using namespace std;
 
 
@@ -76,8 +78,6 @@ ThreadPool::~ThreadPool()
 	
 	for (size_t i = 0; i < thread_pool_size; i++)
 		pthread_join(thread_pool[i], nullptr);
-	
-	// TODO: Also wait for remaining producer threads
 }
 
 void ThreadPool::add_task(unique_ptr<ProducerTask> producer_task)
@@ -148,9 +148,9 @@ void* ThreadPool::producer(void *argp)
 	
 	pthread_mutex_lock(&mutex);
 	
-	// Check stop condition
+	// Check stop condition and task queue size
 	
-	if (thread_stop)
+	if (thread_stop || task_queue.size() > MAXQLEN)
 	{
 		pthread_mutex_unlock(&mutex);
 		pthread_exit(nullptr);
@@ -231,7 +231,7 @@ void* ThreadPool::consumer(void *argp)
 		// "Consume" the task
 		
 		try { consumer_task->consume(curr_worker, total_workers); }
-		catch (...) { continue; }
+		catch (...) { }
 		
 	}
 	
