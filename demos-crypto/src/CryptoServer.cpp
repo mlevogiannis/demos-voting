@@ -3,19 +3,19 @@
 #include <cmath>
 #include <string>
 #include <memory>
-#include <iostream>
 #include <stdexcept>
 #include <system_error>
 
 #include <errno.h>
 #include <unistd.h>
 #include <signal.h>
+#include <sys/un.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include <sys/un.h>
-#include <sys/types.h>
-#include <sys/socket.h>
 
 #include "crypto.hpp"
 #include "socket_io.hpp"
@@ -24,7 +24,8 @@
 #include "protobuf/crypto.pb.h"
 
 #define BACKLOG 128
-#define MAXRECV 16777216
+#define MAXRECV 16777216	// bytes
+#define TIMEOUT 300			// seconds
 
 using namespace std;
 
@@ -65,8 +66,7 @@ CryptoServer::CryptoServer(shared_ptr<ThreadPool> thread_pool, AF af, string pat
 	// Set socket REUSEADDR option
 	
 	int opt = SO_REUSEADDR;
-	if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
-		throw system_error(errno, system_category(), "setsockopt");
+	setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 	
 	// Bind socket to address
 	
@@ -138,8 +138,7 @@ CryptoServer::CryptoServer(shared_ptr<ThreadPool> thread_pool, AF af, string ip,
 		// Set socket REUSEADDR option
 		
 		int opt = SO_REUSEADDR;
-		if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
-			throw system_error(errno, system_category(), "setsockopt");
+		setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 		
 		// Bind socket to address
 		
@@ -175,6 +174,12 @@ void CryptoServer::accept()
 	struct sockaddr_un client;
 	socklen_t client_len = sizeof(struct sockaddr_un);
 	
+	struct timeval timeout;
+	socklen_t optlen = sizeof(timeout);
+	
+	timeout.tv_sec = TIMEOUT;
+	timeout.tv_usec = 0;
+	
 	// Main server loop
 	
 	while (true)
@@ -189,6 +194,11 @@ void CryptoServer::accept()
 		if ((newsock_fd = ::accept(sock_fd, (struct sockaddr*) &client, &client_len)) == -1)
 			continue;
 		
+		// Set receive/send timeouts
+		
+		setsockopt(newsock_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout, optlen);
+		setsockopt(newsock_fd, SOL_SOCKET, SO_SNDTIMEO, &timeout, optlen);
+		
 		// Create a new ProducerTask and add in the ThreadPool
 		
 		unique_ptr<ProducerTask> producer_task(new ProducerTask(newsock_fd));
@@ -202,44 +212,53 @@ CryptoServer::ProducerTask::ProducerTask(int newsock_fd) :
 
 unique_ptr<ThreadPool::ConsumerTask> CryptoServer::ProducerTask::produce(size_t thread_pool_size)
 {
-	ssize_t ret;
-	uint32_t req_size;
-	
-	// Receive the size of the request
-	
-	ret = recv_all_w(newsock_fd, &req_size, sizeof(uint32_t), 0);
-	req_size = ntohl(req_size);
-	
-	if (req_size < 1 || req_size > MAXRECV)
-		throw range_error("req_size out of range");
-	
-	// Receive the request (req_size bytes)
-	
-	unique_ptr<char[]> buffer(new char[req_size]);
-	
-	ret = recv_all_w(newsock_fd, buffer.get(), req_size, 0);
-	string data(buffer.get(), ret);
-	
-	// Parse the received request
-		
-	unique_ptr<CryptoRequest> req(new CryptoRequest());
-	req->ParseFromString(data);
-	
-	// Check if the task can be parallelized
-	
-	size_t data_len = 1;
-	size_t total_workers = 1;
-	
-	if (req->command() == CryptoRequest_CMD_GenBallot)
+	try
 	{
-		data_len = req->gb().number();
-		total_workers = thread_pool_size > data_len ? data_len : thread_pool_size;
+		ssize_t ret;
+		uint32_t req_size;
+		
+		// Receive the size of the request
+		
+		ret = recv_all_w(newsock_fd, &req_size, sizeof(uint32_t), 0);
+		req_size = ntohl(req_size);
+		
+		if (req_size < 1 || req_size > MAXRECV)
+			throw range_error("req_size out of range");
+		
+		// Receive the request (req_size bytes)
+		
+		unique_ptr<char[]> buffer(new char[req_size]);
+		
+		ret = recv_all_w(newsock_fd, buffer.get(), req_size, 0);
+		string data(buffer.get(), ret);
+		
+		// Parse the received request
+		
+		unique_ptr<CryptoRequest> req(new CryptoRequest());
+		req->ParseFromString(data);
+		
+		// Check if the task can be parallelized
+		
+		size_t data_len = 1;
+		size_t total_workers = 1;
+		
+		if (req->command() == CryptoRequest_CMD_GenBallot)
+		{
+			data_len = req->gb().number();
+			total_workers = thread_pool_size > data_len ? data_len : thread_pool_size;
+		}
+		
+		// Return a ConsumerTask
+		
+		unique_ptr<ConsumerTask> consumer_task(new ConsumerTask(newsock_fd, data_len, move(req), total_workers));
+		return move(consumer_task);
 	}
-	
-	// Return a ConsumerTask
-	
-	unique_ptr<ConsumerTask> consumer_task(new ConsumerTask(newsock_fd, data_len, move(req), total_workers));
-	return move(consumer_task);
+	catch (...)
+	{
+		shutdown(newsock_fd, SHUT_RDWR);
+		close(newsock_fd);
+		throw;
+	}
 }
 
 
