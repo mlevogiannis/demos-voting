@@ -26,6 +26,7 @@
 #define BACKLOG 128
 #define MAXRECV 16777216	// bytes
 #define TIMEOUT 300			// seconds
+#define MAXGENB 512
 
 using namespace std;
 
@@ -237,15 +238,18 @@ unique_ptr<ThreadPool::ConsumerTask> CryptoServer::ProducerTask::produce(size_t 
 		unique_ptr<CryptoRequest> req(new CryptoRequest());
 		req->ParseFromString(data);
 		
-		// Check if the task can be parallelized
-		
 		size_t data_len = 1;
 		size_t total_workers = 1;
+		
+		// Special case: GenBallot
 		
 		if (req->command() == CryptoRequest_CMD_GenBallot)
 		{
 			data_len = req->gb().number();
 			total_workers = thread_pool_size > data_len ? data_len : thread_pool_size;
+			
+			if (data_len > MAXGENB)
+				throw range_error("More than " + to_string(MAXGENB) + " ballots requested");
 		}
 		
 		// Return a ConsumerTask
