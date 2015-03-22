@@ -27,4 +27,10 @@ ssize_t recv_all(int sockfd, void *buf, size_t len, int flags);
 ssize_t send_all(int sockfd, const void *buf, size_t len, int flags);
 
 
+/* Wrappers around recv_all and send_all that throw exceptions */
+
+ssize_t recv_all_w(int sockfd, void *buf, size_t len, int flags);
+ssize_t send_all_w(int sockfd, const void *buf, size_t len, int flags);
+
+
 #endif // SOCKET_IO_HPP

@@ -207,9 +207,7 @@ unique_ptr<ThreadPool::ConsumerTask> CryptoServer::ProducerTask::produce(size_t 
 	
 	// Receive the size of the request
 	
-	if ((ret = recv_all(newsock_fd, &req_size, sizeof(uint32_t), 0)) < 1)
-		throw system_error(errno, system_category(), "recv_all");
-	
+	ret = recv_all_w(newsock_fd, &req_size, sizeof(uint32_t), 0);
 	req_size = ntohl(req_size);
 	
 	if (req_size < 1 || req_size > MAXRECV)
@@ -219,9 +217,7 @@ unique_ptr<ThreadPool::ConsumerTask> CryptoServer::ProducerTask::produce(size_t 
 	
 	unique_ptr<char[]> buffer(new char[req_size]);
 	
-	if ((ret = recv_all(newsock_fd, buffer.get(), req_size, 0)) < 1)
-		throw system_error(errno, system_category(), "recv_all");
-	
+	ret = recv_all_w(newsock_fd, buffer.get(), req_size, 0);
 	string data(buffer.get(), ret);
 	
 	// Parse the received request
@@ -361,11 +357,8 @@ void CryptoServer::ConsumerTask::consume(size_t curr_worker, size_t total_worker
 		
 		res_size = htonl(data.size());
 		
-		if (send_all(newsock_fd, &res_size, sizeof(uint32_t), 0) < 1)
-			throw system_error(errno, system_category(), "send_all");
-		
-		if (send_all(newsock_fd, buffer.get(), data.size(), 0) < 1)
-			throw system_error(errno, system_category(), "send_all");
+		send_all_w(newsock_fd, &res_size, sizeof(uint32_t), 0);
+		send_all_w(newsock_fd, buffer.get(), data.size(), 0);
 	}
 }
 
