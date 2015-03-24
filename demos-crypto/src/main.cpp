@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include <iostream>
+#include <algorithm>
 #include <stdexcept>
 
 #include <unistd.h>

@@ -25,7 +25,7 @@
 
 #define BACKLOG 128
 #define MAXRECV 16777216	// bytes
-#define TIMEOUT 300			// seconds
+#define TIMEOUT 120			// seconds
 #define MAXGENB 512
 
 using namespace std;
@@ -243,13 +243,13 @@ unique_ptr<ThreadPool::ConsumerTask> CryptoServer::ProducerTask::produce(size_t 
 		
 		// Special case: GenBallot
 		
-		if (req->command() == CryptoRequest_CMD_GenBallot)
+		if (req->request_case() == CryptoRequest::kGb)
 		{
 			data_len = req->gb().number();
 			total_workers = thread_pool_size > data_len ? data_len : thread_pool_size;
 			
-			if (data_len > MAXGENB)
-				throw range_error("More than " + to_string(MAXGENB) + " ballots requested");
+			if (req->gb().number() < 1 || req->gb().number() > MAXGENB)
+				throw range_error("gen_ballot number out of range");
 		}
 		
 		// Return a ConsumerTask
@@ -302,32 +302,32 @@ void CryptoServer::ConsumerTask::consume(size_t curr_worker, size_t total_worker
 	
 	// Execute command
 	
-	if (req->command() == CryptoRequest_CMD_KeyGen && req->has_kg())
+	CryptoRequest::RequestCase request_case = req->request_case();
+	
+	if (request_case == CryptoRequest::kKg)
 	{
-		CryptoRequest_KeyGenData keydata = req->kg();
-		Key key = KeyGen(keydata.n(), keydata.m());
-		res->mutable_key()->CopyFrom(key);
+		KeyGen(req->kg(), res->mutable_key());
 		send = true;
 	}
-	else if (req->command() == CryptoRequest_CMD_GenBallot && req->has_gb())
+	else if (request_case == CryptoRequest::kGb)
 	{
-		CryptoRequest_GenBallotData genballotdata = req->gb();
-		CryptoResponse_Ballots ballots = GenBallot(genballotdata.key(), genballotdata.n(), genballotdata.m(), worker_data);
+		CryptoResponse_BallotData ballot_data;
+		GenBallot(req->gb(), &ballot_data, worker_data);
 		
 		// Acquire the lock
 		
 		mutex_lock();
 		
-		CryptoResponse_Ballots *res_ballots = res->mutable_ballots();
+		CryptoResponse_BallotData *res_ballot_data = res->mutable_ballot_data();
 		
 		// Insert results in the response
 		
-		for(int i = 0; i < ballots.eachballot_size(); i++)
+		for(int i = 0; i < ballot_data.ballot_size(); i++)
 		{
-			const CryptoResponse_Ballots_SetB &eachballot = ballots.eachballot(i);
-			CryptoResponse_Ballots_SetB *res_eachballot = res_ballots->add_eachballot();
+			const CryptoResponse_BallotData_Ballot& ballot = ballot_data.ballot(i);
+			CryptoResponse_BallotData_Ballot *res_ballot = res_ballot_data->add_ballot();
 			
-			res_eachballot->CopyFrom(eachballot);
+			res_ballot->CopyFrom(ballot);
 		}
 		
 		// Only the last worker sends the response
@@ -337,32 +337,24 @@ void CryptoServer::ConsumerTask::consume(size_t curr_worker, size_t total_worker
 		
 		mutex_unlock();
 	}
-	else if (req->command() == CryptoRequest_CMD_AddCom && req->has_ab())
+	else if (request_case == CryptoRequest::kAc)
 	{
-		CryptoRequest_AddComData addcomdata = req->ab();
-		Com sum = AddCom(addcomdata);
-		res->mutable_gcombined()->CopyFrom(sum);
+		AddCom(req->ac(), res->mutable_added_com());
 		send = true;
 	}
-	else if (req->command() == CryptoRequest_CMD_AddDecom && req->has_ad())
+	else if (request_case == CryptoRequest::kAd)
 	{
-		CryptoRequest_AddDecomData adddecomdata = req->ad();
-		Decom sum = AddDecom(adddecomdata);
-		res->mutable_zcombined()->CopyFrom(sum);
+		AddDecom(req->ad(), res->mutable_added_decom());
 		send = true;
 	}
-	else if (req->command() == CryptoRequest_CMD_VerifyCom && req->has_vc())
+	else if (request_case == CryptoRequest::kCz)
 	{
-		CryptoRequest_VerifyComData verifydata = req->vc();
-		bool check = VerifyCom(verifydata);
-		res->set_check(check);
+		CompleteZK(req->cz(), res->mutable_zk_set());
 		send = true;
 	}
-	else if (req->command() == CryptoRequest_CMD_CompleteZK && req->has_cz())
+	else if (request_case == CryptoRequest::kVc)
 	{
-		CryptoRequest_CompleteZKData zkdata = req->cz();
-		CryptoResponse_ZK_set zk2 = CompleteZK(zkdata);
-		res->mutable_zk_set()->CopyFrom(zk2);
+		res->set_check(VerifyCom(req->vc()));
 		send = true;
 	}
 	

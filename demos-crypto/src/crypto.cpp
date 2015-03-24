@@ -6,12 +6,12 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#include <math.h>       /* log2 */
+#include <math.h>
 #include <stdint.h>
 
 #include "miracl/ecn.h"
 #include "miracl/big.h"
-#include "miracl/miracl.h" //sha-2
+#include "miracl/miracl.h"
 
 #include "crypto.hpp"
 #include "protobuf/crypto.pb.h"
@@ -88,8 +88,8 @@ const string ecy[] = {
 const int RandLen[] ={191,223,255,383,520};
 
 //Key Generation
-Key KeyGen(int N, int m){
-		
+void KeyGen(const CryptoRequest_KeyGenData& data, Key* key)
+{
 		#ifndef MR_NOFULLWIDTH
 		Miracl precision(50,0);
 		#else 
@@ -103,9 +103,9 @@ Key KeyGen(int N, int m){
 		ECn g,h;
 		miracl *mip=&precision;
 		
-		//cout << "KeyGen  N = " << N <<"  m = "<< m << endl;
+		//cout << "KeyGen  N = " << data.ballots() <<"  m = "<< data.options() << endl;
 		//determine the curve NB: insecure, length may be out of bound
-		double maxlen = m * log2(1.0+N);
+		double maxlen = data.options() * log2(1.0+data.ballots());
 		//cout<<"Max length: "<< maxlen<<endl;
 		if(maxlen < 191) curve = 0;
 		else if (maxlen < 223) curve = 1;
@@ -126,50 +126,48 @@ Key KeyGen(int N, int m){
 		y=(char *)(ecy[curve].c_str());
 		g=ECn(x,y);
 		//Generate and output pk and sk
-		Key key;
-		key.set_curve(curve);
+		key->set_curve(curve);
 		sk=rand(RandLen[curve],2);
 		mip->IOBASE=64;
 		c<<sk;
-		key.set_sk(string(c));
+		key->set_sk(string(c));
 		h = sk*g;
-		GG *pk = key.mutable_pk();
+		GG *pk = key->mutable_pk();
 		if(h.get(x) == 1) pk->set_y(true);
 		else pk->set_y(false);//<x,y> is compressed form of public key
 		c<<x;
 		pk->set_x(string(c));
-		
-		return key;
 }
 
 
 //Generate Ballots
-CryptoResponse_Ballots GenBallot(Key key, int N, int m, int copies){
-		
+void GenBallot(const CryptoRequest_GenBallotData& data, CryptoResponse_BallotData* ballot_data, unsigned int copies)
+{		
 		#ifndef MR_NOFULLWIDTH
 		Miracl precision(50,0);
 		#else 
 		Miracl precision(50,MAXBASE);
 		#endif
 		
+		const Key& key = data.key();
+		
 	    int iy,logm, curve = key.curve();
 		unsigned long randseed;
 		char c[100];
-		Big tempB,a,b,p,q,x,y,r,temp1,temp2,temp3,temp4,Num = N+1;
+		Big tempB,a,b,p,q,x,y,r,temp1,temp2,temp3,temp4,Num = data.ballots()+1;
 		ECn g,h,c1,c2,tempE;
 		miracl *mip=&precision;
-		CryptoResponse_Ballots ballots;
 		
 		/////////////////////////////////
 		//ZK stuff
 		//compute log m
-		logm = (int) (log2(m) + 0.9999);
+		logm = (int) (log2(data.options()) + 0.9999);
 		int ZKb[logm];		
 		Big ZKt[logm], ZKz[logm],ZKy[logm],ZKr[logm],ZKw[logm],ZKf[logm],ZKa[logm],ZKrp[logm],ZKbeta[logm+1],ZKgamma[logm+1];	
 		ECn ZKB1[logm],ZKY1[logm],ZKT1[logm],ZKW1[logm],ZKB2[logm],ZKY2[logm],ZKT2[logm],ZKW2[logm], ZKD1[logm],ZKD2[logm];	
 		////////////////////////////////
 		
-		//cout << "GenBallot  N = " << N <<"  m = "<< m <<"  Number of copies:  "<<copies<< endl;
+		//cout << "GenBallot  N = " << data.ballots() <<"  m = "<< options <<"  Number of copies:  "<<copies<< endl;
 		//cout<< "PK: "<<key.pk().x()<<" "<<key.pk().y()<<endl;
 		//cout<<"Curve: "<<curve<<endl;
 		
@@ -194,11 +192,11 @@ CryptoResponse_Ballots GenBallot(Key key, int N, int m, int copies){
 		h = ECn(x,iy); //decompress pk
 		
 		//generate ballots
-		for(int i = 0; i < copies*2; i++){//part A and part B
-			CryptoResponse_Ballots_SetB *eachB = ballots.add_eachballot();
-			for(int j = 0;j<m;j++){
+		for(unsigned int i = 0; i < copies*2; i++){//part A and part B
+			CryptoResponse_BallotData_Ballot *eachB = ballot_data->add_ballot();
+			for(unsigned int j = 0;j<data.options();j++){
 				//each Enc
-				CryptoResponse_Ballots_SetB_Enc *enc = eachB->add_enc();
+				CryptoResponse_BallotData_Ballot_Enc *enc = eachB->add_enc();
 				//commitment
 				tempB = pow(Num,j);
 				//r=rand(RandLen[curve],2);
@@ -383,7 +381,7 @@ CryptoResponse_Ballots GenBallot(Key key, int N, int m, int copies){
 				}				
 				
 				//write ZK state t z y r b w f [a, rp]
-				ZK_state *zk_state = enc->mutable_zk_state();
+				ZKState *zk_state = enc->mutable_zk_state();
 				for (int ctr = 0; ctr<logm;ctr++){
 						//t
 						tempB = ZKt[ctr];
@@ -423,23 +421,20 @@ CryptoResponse_Ballots GenBallot(Key key, int N, int m, int copies){
 				}				
         
 			}
-			
 		}
-		
-		return ballots;
 }
 
 
 // Add Ballots
-Com AddCom(CryptoRequest_AddComData data){
-		
+void AddCom(const CryptoRequest_AddComData& data, Com* added_com)
+{
 		#ifndef MR_NOFULLWIDTH
 		Miracl precision(50,0);
 		#else 
 		Miracl precision(50,MAXBASE);
 		#endif
 		
-		Key key = data.key();
+		const Key& key = data.key();
 	    int iy,curve = key.curve();
 		char c[100];
 		Big a,b,p,x,y;
@@ -452,14 +447,14 @@ Com AddCom(CryptoRequest_AddComData data){
 		p=(char *)(ecp[curve].c_str());
 		ecurve(a,b,p,MR_BEST);  // means use PROJECTIVE if possible, else AFFINE coordinates
 		mip->IOBASE=64;
-		Com sum;
+		
 		//cout<<"Add commitments:"<<endl;
 		//cout<< "PK: "<<key.pk().x()<<" "<<key.pk().y()<<endl;
 		//cout<<"Curve: "<<curve<<endl;
 		
 		//Add commitments
-		for(int i = 0; i < data.env_size(); i++){
-			Com com = data.env(i);
+		for(int i = 0; i < data.com_size(); i++){
+			const Com& com = data.com(i);
 			x = (char *)com.c1().x().c_str();
 			iy = com.c1().y();
 			c1 = ECn(x,iy); //decompress
@@ -478,37 +473,35 @@ Com AddCom(CryptoRequest_AddComData data){
 		}
 
 		//write com
-		GG *G1 = sum.mutable_c1();
+		GG *G1 = added_com->mutable_c1();
 		if(s1.get(x) == 1) G1->set_y(true);
 		else G1->set_y(false);
 		c<<x;
 		G1->set_x(string(c));
-		GG *G2 = sum.mutable_c2();
+		GG *G2 = added_com->mutable_c2();
 		if(s2.get(x) == 1) G2->set_y(true);
 		else G2->set_y(false);
 		c<<x;
 		G2->set_x(string(c)); 
-		
-		return sum;
 }
 
 
 
 // Add decommitment
-Decom AddDecom(CryptoRequest_AddDecomData data){
-		
+void AddDecom(const CryptoRequest_AddDecomData& data, Decom* added_decom)
+{
 		#ifndef MR_NOFULLWIDTH
 		Miracl precision(50,0);
 		#else 
 		Miracl precision(50,MAXBASE);
 		#endif
 		
-		Key key = data.key();
+		const Key& key = data.key();
 	    int curve = key.curve();
 		char c[100];
 		Big a,b,q,x,y,s1,s2;
 		miracl *mip=&precision;
-		Decom sum;
+		
 		//cout<<"Add decommitments:"<<endl;
 		//cout<< "PK: "<<key.pk().x()<<" "<<key.pk().y()<<endl;
 		//cout<<"Curve: "<<curve<<endl;
@@ -518,7 +511,7 @@ Decom AddDecom(CryptoRequest_AddDecomData data){
 		mip->IOBASE=64;	
 		//Add decommitments
 		for(int i = 0; i < data.decom_size(); i++){
-			Decom decom = data.decom(i);
+			const Decom& decom = data.decom(i);
 			x = (char *)decom.msg().c_str();
 			y = (char *)decom.randomness().c_str();
 			if(i==0){
@@ -538,35 +531,32 @@ Decom AddDecom(CryptoRequest_AddDecomData data){
 		s2 = modmult(s2,x,q);
 		mip->IOBASE=64;
 		c<<s1;
-		sum.set_msg(c);
+		added_decom->set_msg(c);
 		c<<s2;
-		sum.set_randomness(c);
-		
-		return sum;
+		added_decom->set_randomness(c);
 }
 
 
 // Complete ZK
-CryptoResponse_ZK_set CompleteZK(CryptoRequest_CompleteZKData data){
-		
+void CompleteZK(const CryptoRequest_CompleteZKData& data, CryptoResponse_ZKSet* zk_set)
+{
 		#ifndef MR_NOFULLWIDTH
 		Miracl precision(50,0);
 		#else 
 		Miracl precision(50,MAXBASE);
 		#endif
 		
-		Key key = data.key();
+		const Key& key = data.key();
 	    int iy,k,logm,curve = key.curve();
 		char c[100];//,hash[32];
 		//char *coins;
 		Big tempB,a,b,p,q,x,y,r,s1,s2,ch;
 		ECn g,h,c1,c2,tempE;
 		miracl *mip=&precision;
-		CryptoResponse_ZK_set zk2;
 		/////////////////////////////////
 		//ZK stuff
 		//compute log m
-		logm = (int) (log2(data.m()) + 0.9999);
+		logm = (int) (log2(data.options()) + 0.9999);
 		int ZKb[logm];		
 		Big ZKt[logm], ZKz[logm],ZKy[logm],ZKr[logm],ZKw[logm],ZKf[logm],ZKa[logm],ZKrp[logm];
 		Big ZKtp[logm],	ZKzp[logm],ZKyp[logm],ZKwp[logm],ZKfp[logm];	
@@ -578,19 +568,7 @@ CryptoResponse_ZK_set CompleteZK(CryptoRequest_CompleteZKData data){
 		//cout<< "PK: "<<key.pk().x()<<" "<<key.pk().y()<<endl;
 		//cout<<"Curve: " << curve << endl;
 		//cout<<"log m: " << logm << endl;
-		/*//Hash the coins SHA256
-		coins = (char *) data.coins().c_str();
 		//cout<<"coins: " << coins<<endl;
-		sha256 sh;
-		shs256_init(&sh);
-		for (int i=0;coins[i]!=0;i++) shs256_process(&sh,coins[i]);
-		shs256_hash(&sh,hash);
-		//convert char to hex string for big
-		stringstream ss; 
-		//only take the first 27 bytes for now to fit p224
-		for (int i=0;i<27;i++) ss << std::hex << (unsigned int)hash[i];
-		mip->IOBASE=16;
-		ch = (char *)ss.str().c_str();	*/	
 		mip->IOBASE=16;
 		//only take the first 27 bytes for now to fit p224
 		string coins(data.coins(), 2*27);
@@ -612,13 +590,13 @@ CryptoResponse_ZK_set CompleteZK(CryptoRequest_CompleteZKData data){
 		
 		//finish ZK
 		for(int i = 0; i< data.zk_set_size();i++){
-				CryptoRequest_CompleteZKData_ZK_set zkset = data.zk_set(i);
+				const CryptoRequest_CompleteZKData_ZKSet& zkset = data.zk_set(i);
 				/////////////////////////////////////
 				/*
 				//read ZK1 in order  B T Y W D
 				//In fact no need ZK1!!!!! Only read for verification
 				
-				ZK1 zk1 = zkset.zk1();
+				const ZK1& zk1 = zkset.zk1();
 				k = 0;	   
 				//////////////////////////////////////////////////
 				//read com E statement for verification test only
@@ -692,7 +670,7 @@ CryptoResponse_ZK_set CompleteZK(CryptoRequest_CompleteZKData data){
 				////////////////////////////////////////////////////////////
 				
 				//read ZK state  t z y r b w f [a, rp]
-				ZK_state zk_state = zkset.zk_state();
+				const ZKState& zk_state = zkset.zk_state();
 				k = 0;		
 				for (int ctr = 0; ctr<logm;ctr++){
 						if(k >= zk_state.zp_size()) break;//in case out of bound
@@ -741,7 +719,7 @@ CryptoResponse_ZK_set CompleteZK(CryptoRequest_CompleteZKData data){
 				}
 				
 				//write ZK2   t'  z'  y'  w'  f'
-				ZK2 *eachzk2 = zk2.add_zk2();
+				ZK2 *eachzk2 = zk_set->add_zk2();
 				for (int ctr = 0; ctr<logm;ctr++){
 						//t
 						tempB = ZKtp[ctr];
@@ -848,13 +826,10 @@ CryptoResponse_ZK_set CompleteZK(CryptoRequest_CompleteZKData data){
 				//////////////////////////////////////////////////////
 
 		}
-
-		
-		return zk2;
 }
 
 // Verify commitment - decommitment
-bool VerifyCom(CryptoRequest_VerifyComData data){
+bool VerifyCom(const CryptoRequest_VerifyComData& data){
 		
 		#ifndef MR_NOFULLWIDTH
 		Miracl precision(50,0);
