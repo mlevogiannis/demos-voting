@@ -192,7 +192,7 @@ void GenBallot(const CryptoRequest_GenBallotData& data, CryptoResponse_BallotDat
 		h = ECn(x,iy); //decompress pk
 		
 		//generate ballots
-		for(unsigned int i = 0; i < copies*2; i++){//part A and part B
+		for(unsigned int i = 0; i < copies; i++){
 			CryptoResponse_BallotData_Ballot *eachB = ballot_data->add_ballot();
 			for(unsigned int j = 0;j<data.options();j++){
 				//each Enc
