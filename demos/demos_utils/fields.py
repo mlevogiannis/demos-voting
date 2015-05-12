@@ -79,6 +79,7 @@ class JsonField(models.BinaryField):
 		
 		name, path, args, kwargs = super().deconstruct()
 		
+		kwargs['compressed'] = self.compressed
 		kwargs['dump_kwargs'] = self.dump_kwargs
 		kwargs['load_kwargs'] = self.load_kwargs
 		
