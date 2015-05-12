@@ -1,0 +1,245 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-04-30 18:26+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: demos_ea/forms.py:31
+msgid "Title"
+msgstr "Τίτλος"
+
+#: demos_ea/forms.py:34
+msgid "Start at"
+msgstr "Έναρξη"
+
+#: demos_ea/forms.py:37
+msgid "End at"
+msgstr "Λήξη"
+
+#: demos_ea/forms.py:40
+msgid "Ballots"
+msgstr "Ψηφοδέλτια"
+
+#: demos_ea/forms.py:43
+msgid "Trustee e-mails"
+msgstr "Ε-mail επιτρόπων"
+
+#: demos_ea/forms.py:46
+msgid "Language"
+msgstr "Γλώσσα"
+
+#: demos_ea/forms.py:60
+msgid "Ensure start time is not in the past."
+msgstr "Βεβαιωθείτε ότι η ώρα έναρξης δεν είναι στο παρελθόν."
+
+#: demos_ea/forms.py:72
+msgid "Ensure end time is not in the past."
+msgstr "Βεβαιωθείτε ότι η ώρα λήξης δεν είναι στο παρελθόν."
+
+#: demos_ea/forms.py:88
+msgid "Ensure start time is before end time."
+msgstr "Βεβαιωθείτε ότι η ώρα έναρξης είναι πριν την ώρα λήξης."
+
+#: demos_ea/forms.py:93 demos_ea/pdf.py:242
+#: demos_ea/templates/demos_ea/define.html:140
+#: demos_ea/templates/demos_ea/define.html:180
+#: demos_ea/templates/demos_ea/define.html:186
+msgid "Question"
+msgstr "Ερώτηση"
+
+#: demos_ea/forms.py:96
+msgid "Two columns"
+msgstr ""
+
+#: demos_ea/forms.py:132
+msgid "Question already exists."
+msgstr "Η ερώτηση υπάρχει ήδη"
+
+#: demos_ea/forms.py:144 demos_ea/pdf.py:236
+#: demos_ea/templates/demos_ea/define.html:233
+#: demos_ea/templates/demos_ea/define.html:246
+#: demos_ea/templates/demos_ea/define.html:248
+msgid "Option"
+msgstr "Επιλογή"
+
+#: demos_ea/forms.py:173
+msgid "Option already exists."
+msgstr "Η επιλογή υπάρχει ήδη"
+
+#: demos_ea/pdf.py:234
+msgid "Serial number"
+msgstr "Σειριακός αριθμός"
+
+#: demos_ea/pdf.py:235
+msgid "Security code"
+msgstr "Κωδικός ασφαλείας"
+
+#: demos_ea/pdf.py:237
+msgid "Votecode"
+msgstr "Κωδικός"
+
+#: demos_ea/pdf.py:238
+msgid "Receipt"
+msgstr "Απόδειξη"
+
+#: demos_ea/pdf.py:239
+msgid "Audit and Results"
+msgstr "Επαλήθευση και Αποτελέσματα"
+
+#: demos_ea/pdf.py:240
+msgid "Digital Ballot Box"
+msgstr "Ψηφιακή Κάλπη"
+
+#: demos_ea/pdf.py:241
+msgid "Ballot"
+msgstr "Ψηφοδέλτιο"
+
+#: demos_ea/pdf.py:244
+msgid ""
+"Please use one of the two sides to vote and the other one to audit your vote "
+"(%(0)s or %(1)s)"
+msgid_plural ""
+"Please use one of the sides to vote and the rest to audit your vote"
+msgstr[0] ""
+"Χρησιμοποιήστε τη μία από τις δύο όψεις για να ψηφίσετε και την άλλη για να "
+"επαληθεύσετε την ψήφο σας (%(0)s ή %(1)s)"
+msgstr[1] ""
+"Χρησιμοποιήστε μία από τις όψεις για να ψηφίσετε και τις υπόλοιπες για να "
+"επαληθεύσετε την ψήφο σας"
+
+#: demos_ea/templates/demos_ea/base.html:5
+#: demos_ea/templates/demos_ea/base.html:7
+msgid "Election Authority"
+msgstr "Εκλογική Αρχή"
+
+#: demos_ea/templates/demos_ea/base.html:14
+#: demos_ea/templates/demos_ea/define.html:25
+#: demos_ea/templates/demos_ea/define.html:166
+msgid "Create Election"
+msgstr "Δημιουργία Ψηφοφορίας"
+
+#: demos_ea/templates/demos_ea/base.html:15
+#: demos_ea/templates/demos_ea/manage.html:11
+msgid "Manage Election"
+msgstr "Διαχείριση Ψηφοφορίας"
+
+#: demos_ea/templates/demos_ea/define.html:32
+#: demos_ea/templates/demos_ea/define.html:38
+msgid "Election"
+msgstr "Ψηφοφορία"
+
+#: demos_ea/templates/demos_ea/define.html:33
+#: demos_ea/templates/demos_ea/define.html:181
+msgid "all fields are required"
+msgstr "όλα τα πεδία είναι απαραίτητα"
+
+#: demos_ea/templates/demos_ea/define.html:42
+#: demos_ea/templates/demos_ea/define.html:130
+#: demos_ea/templates/demos_ea/define.html:190
+#: demos_ea/templates/demos_ea/define.html:223
+#, python-format
+msgid "The form contains 1 error (marked in red)."
+msgid_plural "The form contains %(number)s errors (marked in red)."
+msgstr[0] "Η φόρμα περιέχει 1 σφάλμα (σημειωμένο με κόκκινο)."
+msgstr[1] "Η φόρμα περιέχει %(number)s σφάλματα (σημειωμένα με κόκκινο)."
+
+#: demos_ea/templates/demos_ea/define.html:50
+#: demos_ea/templates/demos_ea/define.html:61
+#: demos_ea/templates/demos_ea/define.html:71
+#: demos_ea/templates/demos_ea/define.html:85
+#: demos_ea/templates/demos_ea/define.html:94
+#: demos_ea/templates/demos_ea/define.html:111
+#: demos_ea/templates/demos_ea/define.html:198
+#: demos_ea/templates/demos_ea/define.html:207
+#: demos_ea/templates/demos_ea/define.html:247
+msgid "Error"
+msgid_plural "Errors"
+msgstr[0] "Σφάλμα"
+msgstr[1] "Σφάλματα"
+
+#: demos_ea/templates/demos_ea/define.html:52
+msgid "Type the election title here"
+msgstr "Πληκτρολογήστε τον τίτλο της ψηφοφορίας εδώ"
+
+#: demos_ea/templates/demos_ea/define.html:63
+msgid "Start date and time"
+msgstr "Ημερομηνία και ώρα έναρξης"
+
+#: demos_ea/templates/demos_ea/define.html:73
+msgid "End date and time"
+msgstr "Ημερομηνία και ώρα λήξης"
+
+#: demos_ea/templates/demos_ea/define.html:87
+msgid "How many?"
+msgstr "Πόσα;"
+
+#: demos_ea/templates/demos_ea/define.html:97
+msgid "Choose language"
+msgstr "Επιλέξτε γλώσσα"
+
+#: demos_ea/templates/demos_ea/define.html:113
+msgid "e.g."
+msgstr "π.χ."
+
+#: demos_ea/templates/demos_ea/define.html:120
+#: demos_ea/templates/demos_ea/define.html:126
+msgid "Questions"
+msgstr "Ερωτήσεις"
+
+#: demos_ea/templates/demos_ea/define.html:121
+msgid "drag and drop to reorder questions"
+msgstr "σύρτε και εναποθέστε για να αναδιατάξετε τις ερωτήσεις"
+
+#: demos_ea/templates/demos_ea/define.html:141
+msgid "Actions"
+msgstr "Ενέργεια"
+
+#: demos_ea/templates/demos_ea/define.html:158
+msgid "Click here to add a new question"
+msgstr "Κάντε κλικ εδώ για να προσθέσετε μία νέα ερώτηση"
+
+#: demos_ea/templates/demos_ea/define.html:200
+msgid "Type the question here"
+msgstr "Πληκτρολογήστε την ερώτηση εδώ"
+
+#: demos_ea/templates/demos_ea/define.html:213
+#: demos_ea/templates/demos_ea/define.html:219
+msgid "Options"
+msgstr "Επιλογές"
+
+#: demos_ea/templates/demos_ea/define.html:214
+msgid "drag and drop to reorder options"
+msgstr "σύρτε και εναποθέστε για να αναδιατάξετε τις επιλογές"
+
+#: demos_ea/templates/demos_ea/define.html:249
+msgid "Type option here"
+msgstr "Πληκτρολογήστε την επιλογή εδώ"
+
+#: demos_ea/templates/demos_ea/define.html:263
+msgid "Delete"
+msgstr "Διαγραφή"
+
+#: demos_ea/templates/demos_ea/define.html:266
+msgid "Cancel"
+msgstr "Ακύρωση"
+
+#: demos_ea/templates/demos_ea/define.html:269
+msgid "Save"
+msgstr "Αποθήκευση"
+
+#: demos_ea/templates/demos_ea/home.html:14
+msgid "Learn more"
+msgstr "Μάθετε περισσότερα"

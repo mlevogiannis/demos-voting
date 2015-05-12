@@ -1,0 +1,66 @@
+{% extends "demos_ea/base.html" %}
+
+{% load i18n %}
+{% load staticfiles %}
+
+
+{% block body %}
+
+<div class="row">
+	<div class="col-xs-12">
+		<h1>{% trans "Manage Election" %}</h1>
+		<div class="progress">
+			<div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+				<span class="sr-only">0% Complete</span>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock body %}
+
+
+{% block script %}
+
+<script>
+
+$(window).load(updateProgress);
+var intervalId = setInterval(updateProgress, 2500);
+
+function updateProgress() {
+	
+	var request = {
+		type: "POST",
+		url: "",
+		data: {
+			election_id: "{{ election_id }}",
+			csrfmiddlewaretoken: "{{ csrf_token }}"
+		},
+		success: function(data, textStatus, jqXHR) {
+			
+			var value = 0;
+			
+			if (data.state == {{ state.WORKING }}) {
+				value = Math.round((data.current/data.total)*100);
+			}
+			else if (data.state > {{ state.WORKING }} && data.state < {{ state.INVALID }}) {
+				clearInterval(intervalId);
+				$('.progress-bar').removeClass('active');
+				value = 100;
+			}
+			else if (data.state == {{ state.INVALID }}) {
+				clearInterval(intervalId);
+				$('.progress-bar').removeClass('active');
+				alert('Invalid election');
+			}
+			
+			$('.progress-bar').css('width', value+'%').attr('aria-valuenow', value);
+		}
+	};
+	
+	$.ajax(request);
+}
+
+</script>
+
+{% endblock script %}

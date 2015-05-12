@@ -1,0 +1,121 @@
+// File: crypto.proto
+
+syntax = "proto2";
+
+message GG {
+	required string x = 1;
+	required bool y = 2;
+}
+
+message Com {
+	required GG c1 = 1;
+	required GG c2 = 2;
+}
+
+message Decom {
+	required string randomness = 1;
+	required string msg = 2;
+}
+
+message Key {
+	required GG pk = 1;
+	optional string sk = 2;
+	required uint32 curve = 3;
+}
+
+message ZK1 {
+	repeated GG element = 1;
+}
+
+message ZKState {
+	repeated string zp = 1;
+}
+
+message ZK2 {
+	repeated string zp = 1;
+}
+
+message CryptoRequest {
+	
+	message KeyGenData {
+		required uint32 ballots = 1;
+		required uint32 options = 2;
+	}
+	
+	message GenBallotData {
+		required Key key = 1;
+		required uint32 ballots = 2;
+		required uint32 options = 3;
+		required uint32 number = 4;
+	}
+	
+	message AddComData {
+		required Key key = 1;
+		repeated Com com = 2;
+	}
+	
+	message AddDecomData {
+		required Key key = 1;
+		repeated Decom decom = 2;
+	}
+	
+	message CompleteZKData {
+		
+		message ZKSet {
+			required ZK1 zk1 = 1;
+			required ZKState zk_state = 2;
+		}
+		
+		required Key key = 1;
+		required uint32 options = 2;
+		required string coins = 3;
+		repeated ZKSet zk_set = 4;
+	}
+	
+	message VerifyComData {
+		required Key key = 1;
+		required Com com = 2;
+		required Decom decom = 3;
+	}
+ 	
+ 	oneof request {
+		KeyGenData kg = 1;
+		GenBallotData gb = 2;
+		AddComData ac = 3;
+		AddDecomData ad = 4;
+		CompleteZKData cz = 5;
+		VerifyComData vc = 6;
+	}
+}
+
+message CryptoResponse {
+	
+	message BallotData {
+		
+		message Ballot {
+			
+			message Enc {
+				required Com com = 1;
+				required Decom decom = 2;
+				required ZK1 zk1 = 3;
+				required ZKState zk_state = 4;
+			}
+			repeated Enc enc = 1;
+		}
+		repeated Ballot ballot = 1;
+	}
+	
+	message ZKSet {
+		repeated ZK2 zk2 = 1;
+	}
+	
+ 	oneof response {
+		Key key = 1;
+		BallotData ballot_data = 2;
+		Com added_com = 3;
+		Decom added_decom = 4;
+		bool check = 5;
+		ZKSet zk_set = 6;
+	}
+}
+

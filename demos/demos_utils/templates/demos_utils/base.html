@@ -1,0 +1,102 @@
+{% load i18n %}
+{% load staticfiles %}
+
+{% get_current_language as current_language %}
+
+<!DOCTYPE html>
+<html lang="{{ current_language }}">
+	
+	<head>
+		
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		<title>{% block title %}{% endblock title %} | DemosVoting</title>
+		
+		<!-- bootstrap.css -->
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"
+			onerror="this.onerror=null; this.href={% static 'demos_utils/libs/bootstrap/3.3.4/css/bootstrap.min.css' %};">
+		
+		<!-- base.css -->
+		<link rel="stylesheet" href={% static "demos_utils/css/base.css" %}>
+		
+		{% block css %}
+		{% endblock css %}
+		
+	</head>
+	
+	<body>
+		
+		<header>
+			<div class="container">
+				<div class="row">
+					<div class="col-xs-12 col-sm-4 vcenter">
+						<a href="{% block logo-link %}{% endblock logo-link %}">
+							<img src={% static "demos_utils/images/LOGO_FINAL_1.png" %}>
+							<p>{ {% block logo-title %}{% endblock logo-title %} }</p>
+						</a>
+					</div><!-- do not remove comment
+					--><div class="col-xs-12 col-sm-8 vcenter">
+						<nav class="navbar navbar-default">
+							<ul class="nav navbar-nav navbar-right">
+								{% block navbar-links %}{% endblock navbar-links %}
+							</ul>
+						</nav>
+					</div>
+				</div>
+			</div>
+		</header>
+		
+		<main>
+			<div class="container">
+				{% block body %}
+				{% endblock body %}
+			</div>
+		</main>
+		
+		<footer>
+			<div class="container">
+				<div>
+					DemosVoting
+					<span class="hidden-xs">·</span><br class="hidden-sm hidden-md hidden-lg">
+					{% trans "Created by" %} <a target="_blank" href="http://di.uoa.gr/~sdi1100058">{% trans "Marios Levogiannis" %}</a>
+				</div>
+				<div class="vertical-seperator"></div>
+				<div>
+					{% blocktrans with license='<a target="_blank" href="https://www.apache.org/licenses/LICENSE-2.0">Apache License v2.0</a>' %}Code licensed under {{ license }}{% endblocktrans %}
+					<span class="hidden-xs">·</span><br class="hidden-sm hidden-md hidden-lg">
+					{% blocktrans with license='<a target="_blank" href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>' %}Documentation licensed under {{ license }}{% endblocktrans %}
+				</div>
+				<div class="vertical-seperator hidden-sm hidden-md hidden-lg"></div>
+				<div>
+					<a target="_blank" href="http://www.demos-voting.org/">{% trans "Learn More" %}</a> ·
+					<a target="_blank" href="https://github.com/levmarios/demos">GitHub Project</a>
+				</div>
+				<div class="vertical-seperator"></div>
+				<div>
+					<a target="_blank" href="http://di.uoa.gr/">{% trans "Department of Informatics and Telecommunications" %}</a>
+					<span class="hidden-xs">·</span><br class="hidden-sm hidden-md hidden-lg">
+					<a target="_blank" href="http://www.uoa.gr/">{% trans "National and Kapodistrian University of Athens" %}</a>
+				</div>
+			</div>
+		</footer>
+		
+		<!-- jquery.js -->
+		<script src="//code.jquery.com/jquery-2.1.3.min.js"></script>
+		<script> window.jQuery || document.write("<script src={% static 'demos_utils/libs/jquery/2.1.3/jquery.min.js' %}><\/script>") </script>
+		
+		<!-- bootstrap.js -->
+		<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+		<script> window.jQuery.fn.modal || document.write("<script src={% static 'demos_utils/libs/bootstrap/3.3.4/js/bootstrap.min.js' %}><\/script>") </script>
+		
+		<!-- base.js -->
+		<script src={% static "demos_utils/js/base.js" %}></script>
+		
+		{% block script %}
+		{% endblock script %}
+		
+	</body>
+	
+</html>
+

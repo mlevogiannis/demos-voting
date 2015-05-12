@@ -1,0 +1,307 @@
+{% extends "demos_ea/base.html" %}
+
+{% load i18n %}
+{% load staticfiles %}
+
+{% get_current_language as current_language %}
+
+{% block css %}
+
+<!-- bootstrap-datetimepicker.css -->
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.7.14/css/bootstrap-datetimepicker.min.css"
+	onerror="this.onerror=null; this.href={% static 'demos_utils/libs/bootstrap-datetimepicker/4.7.14/css/bootstrap-datetimepicker.min.css' %};">
+
+<!-- define.css -->
+<link rel="stylesheet" href={% static "demos_ea/css/define.css" %}>
+
+{% endblock css %}
+
+
+{% block body %}
+
+<div class="row">
+	<div class="col-xs-12">
+		
+		<h1>{% trans "Create Election" %}</h1>
+		
+		<form action="{% url 'demos_ea:define' %}" method="post">
+			{% csrf_token %}
+			
+			<div id="election">
+				
+				<h3>{% trans "Election" %}</h3>
+				<h5 class="text-muted">({% trans "all fields are required" %})</h5>
+				
+				{% if election_form.has_errors %}
+					<div class="alert alert-danger alert-dismissible" role="alert">
+						<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<strong>{% trans "Election" %}:</strong>
+						{% if election_form.non_field_errors %}
+							{{ election_form.non_field_errors.as_text }}
+						{% else %}
+							 * {% blocktrans count number=election_form.errors|length %}The form contains 1 error (marked in red).{% plural %}The form contains {{ number }} errors (marked in red).{% endblocktrans %}
+						{% endif %}
+					</div>
+				{% endif %}
+				
+				<!-- Title input -->
+				<div class="form-group {% if election_form.title.errors %} has-error {% endif %}">
+					<label class="sr-only" for="{{ election_form.title.id_for_label }}">{{ election_form.title.label }}</label>
+					<div class="input-group" {% if election_form.title.errors %} data-toggle="popover" data-container="body" data-placement="right" data-title="<strong>{% blocktrans count number=election_form.title.errors|length %}Error{% plural %}Errors{% endblocktrans %}:</strong>" data-content="<ul class='list-unstyled'>{% for error in election_form.title.errors %}<li>{% if election_form.title.errors|length > 1 %}- {% endif %}{{ error }}</li>{% endfor %}</ul>" {% endif %}>
+						<div class="input-group-addon">{{ election_form.title.label }}:</div>
+						<input type="text" class="form-control" id="{{ election_form.title.auto_id }}" placeholder="{% trans "Type the election title here" %}" value="{{ election_form.title.value|default_if_none:"" }}" name="{{ election_form.title.html_name }}" maxlength="{{ election_form.title.field.max_length }}">
+					</div>
+				</div>
+				
+				<!-- Start/end datetime input -->
+				<div class="row">
+					<div class="col-xs-12 col-sm-6">
+						<div class="form-group {% if election_form.start_datetime.errors %} has-error {% endif %}">
+							<label class="sr-only" for="{{ election_form.start_datetime.id_for_label }}">{{ election_form.start_datetime.label }}</label>
+							<div class="input-group date" id="start-datetimepicker" {% if election_form.start_datetime.errors %} data-toggle="popover" data-container="body" data-placement="left" data-title="<strong>{% blocktrans count number=election_form.start_datetime.errors|length %}Error{% plural %}Errors{% endblocktrans %}:</strong>" data-content="<ul class='list-unstyled'>{% for error in election_form.start_datetime.errors %}<li>{% if election_form.title.errors|length > 1 %}- {% endif %}{{ error }}</li>{% endfor %}</ul>"{% endif %}>
+								<div class="input-group-addon">{{ election_form.start_datetime.label }}:</div>
+								<input type="text" class="form-control" id="{{ election_form.start_datetime.auto_id }}" placeholder="{% trans "Start date and time" %}" value="{{ election_form.start_datetime.value|default_if_none:"" }}" name="{{ election_form.start_datetime.html_name }}">
+								<div class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></div>
+							</div>
+						</div>
+					</div>
+					<div class="col-xs-12 col-sm-6">
+						<div class="form-group {% if election_form.end_datetime.errors %} has-error {% endif %}">
+							<label class="sr-only" for="{{ election_form.end_datetime.id_for_label }}">{{ election_form.end_datetime.label }}</label>
+							<div class="input-group date" id="end-datetimepicker" {% if election_form.end_datetime.errors %} data-toggle="popover" data-container="body" data-placement="right" data-title="<strong>{% blocktrans count number=election_form.end_datetime.errors|length %}Error{% plural %}Errors{% endblocktrans %}:</strong>" data-content="<ul class='list-unstyled'>{% for error in election_form.end_datetime.errors %}<li>{% if election_form.title.errors|length > 1 %}- {% endif %}{{ error }}</li>{% endfor %}</ul>"{% endif %}>
+								<div class="input-group-addon">{{ election_form.end_datetime.label }}:</div>
+								<input type="text" class="form-control" id="{{ election_form.end_datetime.auto_id }}" placeholder="{% trans "End date and time" %}" value="{{ election_form.end_datetime.value|default_if_none:"" }}" name="{{ election_form.end_datetime.html_name }}">
+								<div class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<!-- Ballots and language input -->
+				<div class="row">
+					<div class="col-xs-12 col-sm-6">
+						<div class="form-group {% if election_form.ballots.errors %} has-error {% endif %}">
+							<label class="sr-only" for="{{ election_form.ballots.id_for_label }}">{{ election_form.ballots.label }}</label>
+							<div class="input-group" {% if election_form.ballots.errors %} data-toggle="popover" data-container="body" data-placement="left" data-title="<strong>{% blocktrans count number=election_form.ballots.errors|length %}Error{% plural %}Errors{% endblocktrans %}:</strong>" data-content="<ul class='list-unstyled'>{% for error in election_form.ballots.errors %}<li>{% if election_form.title.errors|length > 1 %}- {% endif %}{{ error }}</li>{% endfor %}</ul>"{% endif %}>
+								<div class="input-group-addon">{{ election_form.ballots.label }}:</div>
+								<input type="text" class="form-control number-input" id="{{ election_form.ballots.auto_id }}" placeholder="{% trans "How many?" %}" value="{{ election_form.ballots.value|default_if_none:"" }}" name="{{ election_form.ballots.html_name }}" min="{{ election_form.ballots.field.min_value }}" max="{{ election_form.ballots.field.max_value }}">
+							</div>
+						</div>
+					</div>
+					<div class="col-xs-12 col-sm-6">
+						<div class="form-group has-feedback {% if election_form.language.errors %} has-error {% endif %}">
+							<label class="sr-only" for="{{ election_form.language.id_for_label }}">{{ election_form.language.label }}</label>
+							<div class="input-group" {% if election_form.language.errors %} data-toggle="popover" data-container="body" data-placement="right" data-title="<strong>{% blocktrans count number=election_form.language.errors|length %}Error{% plural %}Errors{% endblocktrans %}:</strong>" data-content="<ul class='list-unstyled'>{% for error in election_form.language.errors %}<li>{% if election_form.title.errors|length > 1 %}- {% endif %}{{ error }}</li>{% endfor %}</ul>"{% endif %}>
+								<div class="input-group-addon">{{ election_form.language.label }}:</div>
+								<select class="form-control select-placeholder select-dropdown" id="{{ election_form.language.auto_id }}" name="{{ election_form.language.html_name }}">
+									<option {% if not election_form.language.data %} selected {% endif %} disabled>{% trans "Choose language" %}</option>
+									{% for choice_value, choice_name in election_form.language.field.choices %}
+									<option {% if election_form.language.data == choice_value %} selected {% endif %} value="{{ choice_value }}">{{ choice_name }}</option>
+									{% endfor %}
+								</select>
+							</div>
+							<span class="glyphicon glyphicon-menu-down form-control-feedback select-dropdown-arrow" aria-hidden="true"></span>
+						</div>
+					</div>
+				</div>
+				
+				<!-- Trustee input -->
+				<div class="form-group {% if election_form.trustees.errors %} has-error {% endif %}">
+					<label class="sr-only" for="{{ election_form.trustees.id_for_label }}">{{ election_form.trustees.label }}</label>
+					<div class="input-group" {% if election_form.trustees.errors %} data-toggle="popover" data-container="body" data-placement="right" data-title="<strong>{% blocktrans count number=election_form.trustees.errors|length %}Error{% plural %}Errors{% endblocktrans %}:</strong>" data-content="<ul class='list-unstyled'>{% for error in election_form.trustees.errors %}<li>{% if election_form.title.errors|length > 1 %}- {% endif %}{{ error }}</li>{% endfor %}</ul>"{% endif %}>
+						<div class="input-group-addon">{{ election_form.trustees.label }}:</div>
+						<input type="text" class="form-control" id="{{ election_form.trustees.auto_id }}" placeholder="{% trans "e.g." %}: alice@demos-voting.org, bob@demos-voting.org" value="{{ election_form.trustees.value|default_if_none:"" }}" name="{{ election_form.trustees.html_name }}" maxlength="{{ election_form.trustees.field.max_length }}">
+					</div>
+				</div>
+			</div>
+			
+			<div id="question-table">
+				
+				<h3>{% trans "Questions" %}</h3>
+				<h5 class="text-muted">({% trans "drag and drop to reorder questions" %})</h5>
+				
+				{% if question_formset.total_error_count %}
+					<div class="alert alert-danger alert-dismissible" role="alert">
+						<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<strong>{% trans "Questions" %}:</strong>
+						{% if question_formset.non_form_errors %}
+							{{ question_formset.non_form_errors.as_text }}
+						{% else %}
+							 * {% blocktrans count number=question_formset.total_error_count %}The form contains 1 error (marked in red).{% plural %}The form contains {{ number }} errors (marked in red).{% endblocktrans %}
+						{% endif %}
+					</div>
+				{% endif %}
+				
+				<table class="table table-hover">
+					
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>{% trans "Question" %}</th>
+							<th>{% trans "Actions" %}</th>
+						</tr>
+					</thead>
+					
+					<tbody>
+						{% for question_form, option_formset in question_formset_incl_options %}
+						<tr class="question-entry {% if question_form.has_errors or option_formset.total_error_count %} danger {% endif %} {% if forloop.last %} hidden {% endif %}" data-index="{% if not forloop.last %}{{ forloop.counter0 }}{% else %}__prefix__{% endif %}">
+							<th scope="row">{% if not forloop.last %}{{ forloop.counter }}{% endif %}</th>
+							<td>{% if not forloop.last %}{{ question_form.question.value }}{% endif %}</td>
+							<td><button type="button" class="btn btn-default btn-sm question-edit"><span class="glyphicon glyphicon-pencil"></span></button>
+						</tr>
+						{% endfor %}
+					</tbody>
+					
+					<tfoot>
+						<tr>
+							<th></th>
+							<td><span class="text-muted"><em>{% trans "Click here to add a new question" %}</em></span></td>
+							<td><button type="button" id="question-add" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-plus"></span></button></td>
+						</tr>
+					</tfoot>
+					
+				</table>
+				
+				<div class="text-center">
+					<button type="submit" class="btn btn-success" id="form-submit">{% trans "Create Election" %}</button>
+				</div>
+			</div>
+			
+			{{ question_formset.management_form }}
+			
+			{% for question_form, option_formset in question_formset_incl_options %}
+			
+			{% if forloop.last %}
+		</form> {# <!-- exclude formset's empty_form from the actual form --> #}
+			{% endif %}
+			
+			<div class="question" data-index="{% if not forloop.last %}{{ forloop.counter0 }}{% else %}__prefix__{% endif %}">
+				
+				<h3>{% trans "Question" %}</h3>
+				<h5 class="text-muted">({% trans "all fields are required" %})</h5>
+				
+				{% if question_form.has_errors %}
+					<div class="alert alert-danger alert-dismissible" role="alert">
+						<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<strong>{% trans "Question" %}:</strong>
+						{% if question_form.non_field_errors %}
+							{{ question_form.non_field.as_text }}
+						{% else %}
+							 * {% blocktrans count number=question_form.errors|length %}The form contains 1 error (marked in red).{% plural %}The form contains {{ number }} errors (marked in red).{% endblocktrans %}
+						{% endif %}
+					</div>
+				{% endif %}
+				
+				<!-- Question input -->
+				<div class="form-group {% if question_form.question.errors %} has-error {% endif %}">
+					<label class="sr-only" for="{{ question_form.question.id_for_label }}">{{ question_form.question.label }}</label>
+					<div class="input-group" {% if question_form.question.errors %} data-toggle="popover" data-container="body" data-placement="right" data-title="<strong>{% blocktrans count number=question_form.question.errors|length %}Error{% plural %}Errors{% endblocktrans %}:</strong>" data-content="<ul class='list-unstyled'>{% for error in question_form.question.errors %}<li>{% if question_form.question.errors|length > 1 %}- {% endif %}{{ error }}</li>{% endfor %}</ul>" {% endif %}>
+						<div class="input-group-addon">{{ question_form.question.label }}:</div>
+						<input type="text" class="form-control" id="{{ question_form.question.auto_id }}" placeholder="{% trans "Type the question here" %}" value="{{ question_form.question.value|default_if_none:"" }}" name="{{ question_form.question.html_name }}" maxlength="{{ question_form.question.field.max_length }}">
+					</div>
+				</div>
+				
+				<!-- Two columns input -->
+				<div class="form-group {% if question_form.two_columns.errors %} has-error {% endif %} hidden">
+					<label class="sr-only" for="{{ question_form.two_columns.id_for_label }}">{{ question_form.two_columns.label }}</label>
+					<div class="input-group" {% if question_form.two_columns.errors %} data-toggle="popover" data-container="body" data-placement="right" data-title="<strong>{% blocktrans count number=question_form.two_columns.errors|length %}Error{% plural %}Errors{% endblocktrans %}:</strong>" data-content="<ul class='list-unstyled'>{% for error in question_form.two_columns.errors %}<li>{% if question_form.two_columns.errors|length > 1 %}- {% endif %}{{ error }}</li>{% endfor %}</ul>" {% endif %}>
+						<div class="input-group-addon">{{ question_form.two_columns.label }}:</div>
+						<input type="checkbox" class="form-control" id="{{ question_form.two_columns.auto_id }}" name="{{ question_form.two_columns.html_name }}" {% if question_form.two_columns.value %} checked {% endif %}>
+					</div>
+				</div>
+				
+				<h3>{% trans "Options" %}</h3>
+				<h5 class="text-muted">({% trans "drag and drop to reorder options" %})</h5>
+				
+				{% if option_formset.total_error_count %}
+					<div class="alert alert-danger alert-dismissible" role="alert">
+						<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						<strong>{% trans "Options" %}:</strong>
+						{% if option_formset.non_form_errors %}
+							{{ option_formset.non_form_errors.as_text }}
+						{% else %}
+							 * {% blocktrans count number=option_formset.total_error_count %}The form contains 1 error (marked in red).{% plural %}The form contains {{ number }} errors (marked in red).{% endblocktrans %}
+						{% endif %}
+					</div>
+				{% endif %}
+				
+				{% for option_form in option_formset %}
+					{% if option_form.non_field_errors %}
+						<!-- Option form errors -->
+						<div class="alert alert-danger alert-dismissible" role="alert">
+							<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+							<strong>{% trans "Option" %} {{ forloop.counter }}:</strong> {{ option_form.non_field_errors.as_text }}
+						</div>
+					{% endif %}
+				{% endfor %}
+				
+				{{ option_formset.management_form }}
+				
+				<ul class="list-unstyled">
+				{% for option_form in option_formset %}
+					<li class="option">
+						
+						<!-- Option input -->
+						<div class="form-group {% if option_form.option.errors %} has-error {% endif %}">
+							<label class="sr-only" for="{{ option_form.option.id_for_label }}">{% trans "Option" %} {{ forloop.counter }}</label>
+							<div class="input-group" {% if option_form.option.errors %} data-toggle="popover" data-container="body" data-placement="right" data-title="<strong>{% blocktrans count number=option_form.option.errors|length %}Error{% plural %}Errors{% endblocktrans %}:</strong>" data-content="<ul class='list-unstyled'>{% for error in option_form.option.errors %}<li>{% if option_form.option.errors|length > 1 %}- {% endif %}{{ error }}</li>{% endfor %}</ul>" {% endif %}>
+								<div class="input-group-addon option-handle">{% trans "Option" %} {{ forloop.counter }}:</div>
+								<input type="text" class="form-control" id="{{ option_form.option.auto_id }}" placeholder="{% trans "Type option here" %}" value="{{ option_form.option.value|default_if_none:"" }}" name="{{ option_form.option.html_name }}" maxlength="{{ option_form.option.field.max_length }}">
+								<div class="input-group-addon option-delete"><span class="glyphicon glyphicon-minus"></span></div>
+								<div class="input-group-addon option-handle"><span class="glyphicon glyphicon-hand-up"></span></div>
+								<div class="input-group-addon option-add"><span class="glyphicon glyphicon-plus"></span></div>
+							</div>
+						</div>
+						
+					</li>
+				{% endfor %}
+				</ul>
+				
+				<!-- Control buttons -->
+				<div class="btn-group btn-group-justified" role="group" aria-label="Question control buttons">
+					<div class="btn-group" role="group">
+						<button type="button" class="btn btn-default question-delete">{% trans "Delete" %}</button>
+					</div>
+					<div class="btn-group" role="group">
+						<button type="button" class="btn btn-default question-cancel">{% trans "Cancel" %}</button>
+					</div>
+					<div class="btn-group" role="group">
+						<button type="button" class="btn btn-default question-save">{% trans "Save" %}</button>
+					</div>
+				</div>
+				
+			</div>
+			{% endfor %}
+	</div>
+</div>
+ 
+{% endblock body %}
+
+
+{% block script %}
+
+<!-- jquery-ui.js -->
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+<script> window.jQuery.ui || document.write("<script src={% static 'demos_utils/libs/jquery-ui/1.11.4/jquery-ui.min.js' %}><\/script>") </script>
+
+<!-- jquery-ui-touch-punch.js -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
+<!--script> || document.write("<script src={% static 'demos_utils/libs/jquery-ui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js' %}><\/script>") </script-->
+
+<!-- moment.js -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.min.js"></script>
+<script> window.moment || document.write("<script src={% static 'demos_utils/libs/moment/2.9.0/moment-with-locales.min.js' %}><\/script>") </script>
+
+<!-- bootstrap-datetimepicker.js -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.7.14/js/bootstrap-datetimepicker.min.js"></script>
+<script> $(".date").datetimepicker || document.write("<script src={% static 'demos_utils/libs/bootstrap-datetimepicker/4.7.14/js/bootstrap-datetimepicker.min.js' %}><\/script>") </script>
+
+<!-- variables for define.js -->
+<script>
+	var time_format = "{{ datetime_format }}";
+</script>
+
+<!-- define.js -->
+<script src={% static "demos_ea/js/define.js" %}></script>
+
+{% endblock script %}
