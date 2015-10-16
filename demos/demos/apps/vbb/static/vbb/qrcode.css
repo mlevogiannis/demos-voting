@@ -1,0 +1,45 @@
+#qr-video, #qr-canvas {
+	width: 320px;
+	height: auto;
+}
+
+@media (max-width: 479px) {
+	
+	#qr-video, #qr-canvas {
+		width: 100%;
+		height: auto;
+	}
+}
+
+#qr-video {
+	-webkit-box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 2px 0px;
+	-moz-box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 2px 0px;
+	box-shadow: rgba(0, 0, 0, 0.5) 0px 1px 2px 0px;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	position: relative;
+	z-index: 0;
+}
+
+#qrcode-frame > div + div {
+	margin-top: 24px;
+}
+
+#qrcode-modal code {
+	color: black;
+	background-color: transparent;
+	word-wrap: break-word;
+}
+
+#qrcode-modal .panel a {
+	color: black;
+	text-decoration: none;
+}
+
+@media (max-width: 479px) {
+	#qrcode-modal .modal-body p {
+		text-align: center;
+	}
+}
+

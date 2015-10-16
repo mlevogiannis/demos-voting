@@ -1,0 +1,23 @@
+{% extends "common/base.html" %}
+
+{% load i18n %}
+{% load custom %}
+
+{% block title %}
+	{% trans "Ballot Distribution Center" as title %}
+	{{ block.super }}
+{% endblock title %}
+
+{% block header %}
+	{% trans "Ballot Distribution Center" as title %}
+	{% url "bds:home" as url %}
+	{{ block.super }}
+{% endblock header %}
+
+{% block navbar %}
+	{% tuple "bds:home" _("Home") False as home %}
+	{% tuple "bds:manage" _("Ballot Management") True as manage %}
+	{% tuple home manage as links %}
+	{{ block.super }}
+{% endblock navbar %}
+

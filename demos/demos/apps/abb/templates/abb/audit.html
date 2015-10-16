@@ -1,0 +1,120 @@
+{% extends "abb/base.html" %}
+
+{% load i18n %}
+{% load custom %}
+{% load staticfiles %}
+
+{% block css %}
+
+<!-- audit.css -->
+<link rel="stylesheet" href="{% static 'abb/audit.css' %}">
+
+{% endblock css %}
+
+
+{% block main %}
+
+<div class="row">
+	<div class="col-xs-12">
+		
+		{% tuple _("Election") election.id as t1 %}
+		{% tuple _("Participants") participants as t2 %}
+		{% tuple t1 t2 as panels %}
+		{% include "common/election_box.html" with object=election panels=panels %}
+		
+		<div class="panel panel-default panel-input">
+			<div class="panel-body">
+				<div class="input-group">
+					<input id="audit-input" type="text" class="form-control" placeholder="{% trans 'Serial number' %}">
+					<span class="input-group-btn">
+						<button id="audit-button" class="btn btn-default btn-circle">{% trans "Check" %}</button>
+					</span>
+				</div>
+			</div>
+		</div>
+		
+		<div id="audit-panel" class="panel with-nav-tabs panel-default">
+			<div class="panel-heading">
+				<ul class="nav nav-tabs nav-justified">
+					{% for part in "ab" %}
+					<li role="presentation" class="{% if forloop.first %}active{% endif %}">
+						<a role="tab" data-toggle="tab" href="#part-{{ part }}">{% trans "Side" %} {{ part|upper }}</a>
+					</li>
+					{% endfor %}
+				</ul>
+			</div>
+			<div class="panel-body">
+				<div class="tab-content">
+					{% for part in "ab" %}
+					<div role="tabpanel" class="tab-pane fade {% if forloop.first %}active in{% endif %}" id="part-{{ part }}">
+						{% for question in questions %}
+						<div class="panel panel-default hidden">
+							<div class="panel-heading">{% trans "Question" %}{% if questions|length > 1 %} {{ question.index|add:"1" }}{% endif %}: {{ question.text }}</div>
+							<div class="panel-table">
+								<table class="table table-hover">
+									<thead>
+										<tr>
+											<th>{% trans "Vote-code" %}</th>
+											<th><span>{% trans "Vote" %}</span><span>{% trans "Option" %}</span></th>
+											<th>{% trans "Pre-vote Audit" %}</th>
+											<th>{% trans "Candidate" %}</th>
+											<th>{% trans "Post-vote Audit" %}</th>
+										</tr>
+									</thead>
+									<tbody>
+										{% for option in question.optionc_set.values %}
+										<tr data-text="{{ option.text }}">
+											<td><button type="button" class="btn btn-info votecode"><span class="glyphicon glyphicon-lock" aria-hidden="true"></span></button></td>
+											<td><button type="button" class="btn btn-primary voted hidden"><span></span></button></d>
+											<td><button type="button" class="btn btn-warning zk1"><span class="glyphicon glyphicon-folder-close" aria-hidden="true"></span></button></td>
+											<td><button type="button" class="btn btn-danger com"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span></button></td>
+											<td><button type="button" class="btn btn-success zk2"><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span></button></td>
+										</tr>
+										{% endfor %}
+									</tbody>
+								</table>
+							</div>
+						</div>
+						{% endfor %}
+					</div>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="json-viewer" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="json-viewer-label">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="json-viewer-label">{% trans "JSON Viewer" %}</h4>
+			</div>
+			<div class="modal-body">
+				<div class="spinner hidden">
+					<p class="text-center">{% trans "Please wait..." %}</p>
+				</div>
+				<div class="error hidden">
+					<p class="text-center">{% trans "An error occurred while processing your request" %}.</p>
+				</div>
+				<pre class="hidden">
+				</pre>
+			</div>
+			<div class="modal-footer">
+				<a class="btn btn-default" role="button"><span class="glyphicon glyphicon-save" aria-hidden="true"></span> {% trans "Download" %}</a>
+				<button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock main %}
+
+
+{% block script %}
+
+<!-- audit.js -->
+<script src="{% static 'abb/audit.js' %}"></script>
+
+{% endblock script %}

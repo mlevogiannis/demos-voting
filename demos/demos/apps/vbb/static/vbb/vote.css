@@ -1,0 +1,301 @@
+#carousel  {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	padding: 0px;
+	margin-bottom: 20px;
+	border-radius: 4px;
+	background-color: white;
+	border: 1px solid #e2e2e2;
+}
+
+#carousel.disabled {
+	-webkit-transition: all 0.3s ease 0s;
+	-moz-transition: all 0.3s ease 0s;
+	-o-transition: all 0.3s ease 0s;
+	transition: all 0.3s ease 0s;
+	cursor: not-allowed;
+	opacity: 0.75;
+}
+
+#carousel.disabled:hover,
+#carousel.disabled:focus {
+	opacity: 1.0;
+}
+
+#carousel .item {
+	padding-left: 110px;
+	padding-right: 110px;
+	padding-bottom: 80px;
+}
+
+#carousel .btn-toolbar {
+	margin-left: -5px;
+	margin-right: 5px;
+}
+
+#carousel .option > div {
+	display: -webkit-flex;
+	display: -ms-flexbox;
+	display: flex;
+}
+
+#carousel .option > div > div:first-child {
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+	-webkit-flex: 1;
+	-moz-flex: 1;
+	-ms-flex: 1;
+	flex: 1;
+	padding-left: 24px;
+	padding-right: 10px;
+}
+
+#carousel .option > div > div:last-child {
+	width: 14px;
+	vertical-align: middle;
+}
+
+#carousel .option-separator {
+	margin-top: 2.5px;
+	margin-bottom: 2.5px;
+}
+
+#carousel .carousel-control > .glyphicon {
+	-webkit-transition: all 0.3s ease 0s;
+	-moz-transition: all 0.3s ease 0s;
+	-o-transition: all 0.3s ease 0s;
+	transition: all 0.3s ease 0s;
+}
+
+#carousel .carousel-control.left,
+#carousel .carousel-control.right {
+	background-image: none;
+	color: black;
+}
+
+#carousel .carousel-control.transform {
+	opacity: 1.0 !important;
+}
+
+#carousel .carousel-control.transform > .glyphicon {
+	-webkit-transform: scale(1.5);
+	-moz-transform: scale(1.5);
+	-ms-transform: scale(1.5);
+	-o-transform: scale(1.5);
+	transform: scale(1.25);
+}
+
+@media (min-width: 768px) {
+	#carousel .carousel-control {
+		width: 100px;
+	}
+	
+	#carousel .item {
+		padding-left: 100px;
+		padding-right: 100px;
+	}
+}
+
+@media (min-width: 480px) and (max-width: 767px) {
+	#carousel .carousel-control {
+		width: 45px;
+	}
+	
+	#carousel .item {
+		padding-left: 45px;
+		padding-right: 45px;
+	}
+	
+	#carousel .page-header {
+		padding-left: 60px;
+		padding-right: 60px;
+	}
+	
+	#carousel .carousel-control > .glyphicon {
+		font-size: 30px;
+		margin-top: 0px;
+	}
+	
+	#carousel .carousel-control > .glyphicon {
+		top: 64px;
+		bottom: auto;
+	}
+	
+	#carousel .carousel-control.left > .glyphicon {
+		left: 55px;
+		right: auto;
+	}
+	
+	#carousel .carousel-control.right > .glyphicon {
+		left: auto;
+		right: 55px;
+	}
+}
+
+@media (max-width: 479px) {
+	#carousel .carousel-control {
+		width: 16px;
+	}
+	
+	#carousel .item {
+		padding-left: 16px;
+		padding-right: 16px;
+	}
+	
+	#carousel .page-header {
+		padding-left: 40px;
+		padding-right: 40px;
+	}
+	
+	#carousel .carousel-control > .glyphicon {
+		font-size: 25px;
+		margin-top: 0px;
+	}
+	
+	#carousel .carousel-control > .glyphicon {
+		top: 64px;
+		bottom: auto;
+	}
+	
+	#carousel .carousel-control.left > .glyphicon {
+		left: 28px;
+		right: auto;
+	}
+	
+	#carousel .carousel-control.right > .glyphicon {
+		left: auto;
+		right: 28px;
+	}
+}
+
+@media (max-width: 767px) {
+	#carousel .page-header > h3 {
+		display: -webkit-flex;
+		display: -ms-flexbox;
+		display: flex;
+		-webkit-align-items: center;
+		-ms-flex-align: center;
+		align-items: center;
+		-webkit-justify-content: center;
+		-moz-justify-content: center;
+		-ms-flex-pack: center;
+		justify-content: center;
+	}
+}
+
+#carousel .carousel-control.disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+#carousel .carousel-indicators li {
+	background-color: #999999;
+	background-color: rgba(70,70,70,.25);
+}
+
+#carousel .carousel-indicators .active {
+	background-color: #444444;
+}
+
+.tooltip-inner {
+	max-width: none;
+}
+
+#confirm-modal .modal-footer button,
+#security-code-modal .modal-footer button {
+	width: 116px;
+  	margin: 0 auto;
+}
+
+.modal-body table {
+	width: 100%;
+	table-layout: fixed;
+}
+
+.modal-body table th,
+.modal-body table td {
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.modal-body table td:nth-child(n+2) {
+	font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+.modal-body .panel-heading {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.alert-danger > p > strong {
+	padding-right: 4px;
+}
+
+.alert-success > span {
+	display: -webkit-flex;
+	display: -ms-flexbox;
+	display: flex;
+}
+
+.alert-success > span > span:first-child {
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+	-webkit-flex: 1;
+	-moz-flex: 1;
+	-ms-flex: 1;
+	flex: 1;
+	padding-right: 6px;
+}
+
+.alert-success > span > span:last-child {
+	top: 3px;
+}
+
+.xs-sm-align {
+	text-align: right;
+}
+
+@media (max-width: 479px) {
+	.xs-sm-align {
+		text-align: center;
+	}
+}
+
+.glyphicon-spin {
+	-webkit-animation: spin 1s infinite linear;
+	-moz-animation: spin 1s infinite linear;
+	-o-animation: spin 1s infinite linear;
+	animation: spin 1s infinite linear;
+	
+	-webkit-transform-origin: 51% 47%;
+	-moz-transform-origin: 51% 47%;
+	-ms-transform-origin: 51% 47%;
+	-o-transform-origin: 51% 47%;
+	transform-origin: 51% 47%;
+}
+
+@-webkit-keyframes spin {
+	from { -webkit-transform: rotate(0deg); }
+	to { -webkit-transform: rotate(360deg); }
+}
+
+@-moz-keyframes spin {
+	from { -moz-transform: rotate(0deg); }
+	to { -moz-transform: rotate(360deg); }
+}
+
+@-o-keyframes spin {
+	from { -o-transform: rotate(0deg); }
+	to { -o-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+	from { transform: rotate(0deg); }
+	to { transform: rotate(360deg); }
+}

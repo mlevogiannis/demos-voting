@@ -1,0 +1,299 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-10-20 15:08+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: demos/apps/vbb/apps.py:9 demos/apps/vbb/templates/vbb/base.html:7
+#: demos/apps/vbb/templates/vbb/base.html:12
+msgid "Digital Ballot Box"
+msgstr "Ψηφιακή Κάλπη"
+
+#: demos/apps/vbb/templates/vbb/base.html:18
+msgid "Home"
+msgstr "Αρχική"
+
+#: demos/apps/vbb/templates/vbb/base.html:19
+msgid "Vote"
+msgstr "Ψηφίστε"
+
+#: demos/apps/vbb/templates/vbb/base.html:20
+#: demos/apps/vbb/templates/vbb/qrcode.html:16
+msgid "Read QR Code"
+msgstr "Ανάγνωση QR Code"
+
+#: demos/apps/vbb/templates/vbb/qrcode.html:21
+#: demos/apps/vbb/templates/vbb/vote.html:40
+msgid "Please wait..."
+msgstr "Παρακαλούμε περιμένετε..."
+
+#: demos/apps/vbb/templates/vbb/qrcode.html:24
+msgid "allow"
+msgstr "να επιτρέπεται"
+
+#: demos/apps/vbb/templates/vbb/qrcode.html:24
+msgid "share"
+msgstr "κοινή χρήση"
+
+#: demos/apps/vbb/templates/vbb/qrcode.html:25
+#, python-format
+msgid ""
+"To use the camera of your device, click %(allow)s or %(share)s on the "
+"browser's permissions dialog."
+msgstr ""
+"Για να χρησιμοποιήσετε την κάμερα της συσκευής σας, επιλέξτε %(allow)s ή "
+"%(share)s στο πλαίσιο διαλόγου δικαιωμάτων του προγράμματος περιήγησης."
+
+#: demos/apps/vbb/templates/vbb/qrcode.html:29
+msgid "Now, point the camera at your ballot's QR code"
+msgstr "Τώρα, στρέψτε την κάμερα στο QR code του ψηφοδελτίου σας"
+
+#: demos/apps/vbb/templates/vbb/qrcode.html:38
+#: demos/apps/vbb/templates/vbb/qrcode.html:41
+#: demos/apps/vbb/templates/vbb/qrcode.html:48
+msgid "An error occurred"
+msgstr "Προέκυψε ένα σφάλμα"
+
+#: demos/apps/vbb/templates/vbb/qrcode.html:38
+msgid "Permission denied"
+msgstr "Άρνηση πρόσβασης"
+
+#: demos/apps/vbb/templates/vbb/qrcode.html:41
+msgid "No capture devices found"
+msgstr "Δεν βρέθηκαν συσκευές καταγραφής"
+
+#: demos/apps/vbb/templates/vbb/qrcode.html:44
+#, python-format
+msgid ""
+"Sorry, camera streaming (%(getUserMedia)s) is not supported in this browser."
+msgstr ""
+"Λυπούμαστε, η χρήση της κάμερας (%(getUserMedia)s) δεν υποστηρίζεται από "
+"αυτό το πρόγραμμα περιήγησης."
+
+#: demos/apps/vbb/templates/vbb/qrcode.html:45
+msgid ""
+"Use a dedicated QR Code reader or type your ballot's link in the browser's "
+"address bar."
+msgstr ""
+"Χρησιμοποιήστε ένα ειδικό πρόγραμμα ανάγνωσης QR Code ή πληκτρολογήστε το "
+"σύνδεσμο του ψηφοδελτίου σας στη γραμμή διευθύνσεων του προγράμματος "
+"περιήγησης."
+
+#: demos/apps/vbb/templates/vbb/qrcode.html:57
+msgid "You are being redirected, please wait..."
+msgstr "Γίνεται ανακατεύθυνση, παρακαλώ περιμένετε..."
+
+#: demos/apps/vbb/templates/vbb/qrcode.html:62
+msgid "Link to Digital Ballot Box"
+msgstr "Σύνδεσμος προς Ψηφιακή Κάλπη"
+
+#: demos/apps/vbb/templates/vbb/qrcode.html:68
+msgid "here"
+msgstr "εδώ"
+
+#: demos/apps/vbb/templates/vbb/qrcode.html:69
+#, python-format
+msgid "If you are not automatically redirected, click %(here)s."
+msgstr "Αν δεν μεταφερθείτε αυτόματα, κάντε κλικ %(here)s."
+
+#: demos/apps/vbb/templates/vbb/vote.html:20
+msgid "Election"
+msgstr "Ψηφοφορία"
+
+#: demos/apps/vbb/templates/vbb/vote.html:21
+msgid "Ballot"
+msgstr "Ψηφοδέλτιο"
+
+#: demos/apps/vbb/templates/vbb/vote.html:22
+msgid "Questions"
+msgstr "Ερωτήματα"
+
+#: demos/apps/vbb/templates/vbb/vote.html:26
+msgid "The election ID you specified is not valid."
+msgstr "Το αναγνωριστικό ψηφοφορίας που καθορίσατε δεν είναι έγκυρο."
+
+#: demos/apps/vbb/templates/vbb/vote.html:27
+msgid "The vote token you specified is not valid."
+msgstr "Το τεκμήριο ψήφου που καθορίσατε δεν είναι έγκυρο."
+
+#: demos/apps/vbb/templates/vbb/vote.html:28
+msgid "The election starts on"
+msgstr "Η ψηφοφορία αρχίζει την"
+
+#: demos/apps/vbb/templates/vbb/vote.html:29
+msgid "The election has been temporarily paused."
+msgstr "Η ψηφοφορία έχει παύσει προσωρινά."
+
+#: demos/apps/vbb/templates/vbb/vote.html:30
+msgid "The election ended on"
+msgstr "Η ψηφοφορία ολοκληρώθηκε την"
+
+#: demos/apps/vbb/templates/vbb/vote.html:31
+msgid "This ballot has already been used."
+msgstr "Το ψηφοδέλτιο αυτό έχει ήδη χρησιμοποιηθεί."
+
+#: demos/apps/vbb/templates/vbb/vote.html:32
+msgid "Could connect to server."
+msgstr "Δεν ήταν δυνατή η σύνδεση με τον εξυπηρετητή."
+
+#: demos/apps/vbb/templates/vbb/vote.html:33
+msgid "Please try again."
+msgstr "Παρακαλούμε προσπαθήστε ξανά."
+
+#: demos/apps/vbb/templates/vbb/vote.html:34
+msgid "Please try again later."
+msgstr "Παρακαλούμε προσπαθήστε ξανά αργότερα."
+
+#: demos/apps/vbb/templates/vbb/vote.html:35
+msgid "An unexpected error occurred."
+msgstr "Παρουσιάστηκε ένα μη αναμενόμενο σφάλμα."
+
+#: demos/apps/vbb/templates/vbb/vote.html:36
+msgid "Please make sure that the web address matches the link in your ballot."
+msgstr ""
+"Παρακαλούμε βεβαιωθείτε ότι η τρέχουσα διεύθυνση ιστού ταιριάζει με το "
+"σύνδεσμο του ψηφοδελτίου σας."
+
+#: demos/apps/vbb/templates/vbb/vote.html:37
+msgid "Your vote has been accepted"
+msgstr "Η ψήφος σας έγινε δεκτή"
+
+#: demos/apps/vbb/templates/vbb/vote.html:45
+msgid "Success"
+msgstr "Επιτυχία"
+
+#: demos/apps/vbb/templates/vbb/vote.html:52
+msgid "Error"
+msgstr "Σφάλμα"
+
+#: demos/apps/vbb/templates/vbb/vote.html:83
+#: demos/apps/vbb/templates/vbb/vote.html:189
+#: demos/apps/vbb/templates/vbb/vote.html:225
+msgid "Question"
+msgstr "Ερώτημα"
+
+#: demos/apps/vbb/templates/vbb/vote.html:85
+#, python-format
+msgid "Select one option"
+msgid_plural "Select up to %(choices)s options"
+msgstr[0] "Έχετε μία επιλογή"
+msgstr[1] "Έχετε μέχρι %(choices)s επιλογές"
+
+#: demos/apps/vbb/templates/vbb/vote.html:120
+msgid "Previous Question"
+msgstr "Προηγούμενο Ερώτημα"
+
+#: demos/apps/vbb/templates/vbb/vote.html:124
+msgid "Next Question"
+msgstr "Επόμενο Ερώτημα"
+
+#: demos/apps/vbb/templates/vbb/vote.html:130
+msgid "Please fill in all questions"
+msgstr "Παρακαλούμε συμπληρώστε όλα τα ερωτήματα"
+
+#: demos/apps/vbb/templates/vbb/vote.html:130
+msgid "Submit vote"
+msgstr "Υποβολή ψήφου"
+
+#: demos/apps/vbb/templates/vbb/vote.html:140
+#: demos/apps/vbb/templates/vbb/vote.html:152
+msgid "Security Code"
+msgstr "Κωδικός Ασφαλείας"
+
+#: demos/apps/vbb/templates/vbb/vote.html:145
+msgid "Please enter your ballot's security code"
+msgstr "Παρακαλούμε εισαγάγετε τον κωδικό ασφαλείας του ψηφοδελτίου"
+
+#: demos/apps/vbb/templates/vbb/vote.html:150
+#, python-format
+msgid "Ballot %(serial)s - Side %(tag)s"
+msgstr "Ψηφοδέλτιο %(serial)s - Όψη %(tag)s"
+
+#: demos/apps/vbb/templates/vbb/vote.html:159
+msgid ""
+"The security code enables the voter's web interface. Alternatively, press "
+"\"Cancel\" to vote by typing the vote-codes."
+msgstr ""
+"Ο κωδικός ασφαλείας ενεργοποιεί το γραφικό περιβάλλον ψηφοφόρου. "
+"Εναλλακτικά, πατήστε \"Ακύρωση\" για να ψηφίσετε πληκτρολογώντας τους "
+"κωδικούς επιλογών."
+
+#: demos/apps/vbb/templates/vbb/vote.html:164
+#: demos/apps/vbb/templates/vbb/vote.html:199
+msgid "Important"
+msgstr "Σημαντικό"
+
+#: demos/apps/vbb/templates/vbb/vote.html:164
+msgid ""
+"To protect your privacy, the security code is neither saved nor sent to the "
+"server."
+msgstr ""
+"Για την προστασία της ιδιωτικότητάς σας, ο κωδικός ασφαλείας δεν "
+"αποθηκεύεται και δεν αποστέλλεται στον εξυπηρετητή."
+
+#: demos/apps/vbb/templates/vbb/vote.html:170
+#: demos/apps/vbb/templates/vbb/vote.html:205
+msgid "Cancel"
+msgstr "Ακύρωση"
+
+#: demos/apps/vbb/templates/vbb/vote.html:171
+msgid "OK"
+msgstr "Εντάξει"
+
+#: demos/apps/vbb/templates/vbb/vote.html:183
+msgid "Please confirm your selections"
+msgstr "Παρακαλούμε επιβεβαιώστε τις επιλογές σας"
+
+#: demos/apps/vbb/templates/vbb/vote.html:191
+#: demos/apps/vbb/templates/vbb/vote.html:227
+msgid "Option"
+msgstr "Επιλογή"
+
+#: demos/apps/vbb/templates/vbb/vote.html:191
+#: demos/apps/vbb/templates/vbb/vote.html:227
+msgid "Votecode"
+msgstr "Κωδικός"
+
+#: demos/apps/vbb/templates/vbb/vote.html:199
+msgid ""
+"After clicking \"Confirm\", your vote will be submitted to the server and "
+"you will not be able to make any further changes."
+msgstr ""
+"Αφού κάνετε κλικ στο \"Επιβεβαίωση\", η ψήφος σας θα αποσταλεί στον "
+"εξυπηρετητή και δεν θα μπορείτε να προβείτε σε περαιτέρω αλλαγές."
+
+#: demos/apps/vbb/templates/vbb/vote.html:206
+msgid "Confirm"
+msgstr "Επιβεβαίωση"
+
+#: demos/apps/vbb/templates/vbb/vote.html:218
+msgid "Close"
+msgstr "Κλείσιμο"
+
+#: demos/apps/vbb/templates/vbb/vote.html:227
+msgid "Receipt"
+msgstr "Απόδειξη"
+
+#: demos/apps/vbb/templates/vbb/vote.html:235
+msgid "The results will be announced after the election has ended."
+msgstr "Τα αποτελέσματα θα ανακοινωθούν μετά την ολοκλήρωση της ψηφοφορίας."
+
+#: demos/apps/vbb/templates/vbb/vote.html:236
+msgid "Thank you for your participation!"
+msgstr "Σας ευχαριστούμε για τη συμμετοχή σας!"
+
+#: demos/apps/vbb/templates/vbb/vote.html:242
+msgid "Audit and Results"
+msgstr "Επαλήθευση και Αποτελέσματα"

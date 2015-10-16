@@ -1,0 +1,33 @@
+{% load i18n %}
+{% load custom %}
+
+{% if not now_datetime %} {% now as now_datetime %} {% endif %}
+
+<div class="election-box">
+	<div class="header">
+		<h3>{{ object.title }}</h3>
+		<span class="time">
+			<span class="glyphicon glyphicon-time" aria-hidden="true"></span>
+			<span class="message"
+				data-start-datetime="{{ object.start_datetime|date:'c' }}"
+				data-end-datetime="{{ object.end_datetime|date:'c' }}"
+				data-now-datetime="{{ now_datetime|date:'c' }}"
+				data-starts-msg="{% blocktrans with timediff='%s' %}starts in {{ timediff }}{% endblocktrans %}"
+				data-ended-msg="{% blocktrans with timediff='%s' %}ended {{ timediff }} ago{% endblocktrans %}"
+				data-remaining-s-msg="{% blocktrans with timediff='%s' count counter=1 %}{{ timediff }} remaining{% plural %}{{ timediff }} remaining{% endblocktrans %}"
+				data-remaining-p-msg="{% blocktrans with timediff='%s' count counter=2 %}{{ timediff }} remaining{% plural %}{{ timediff }} remaining{% endblocktrans %}"
+			>&hellip;</span>
+			<span class="datetime hidden">
+				<span class="datetime-iso8601" data-format="dddd D MMMM YYYY, hh:mm a">{{ object.start_datetime|date:'c' }}</span>
+				<span class="datetime-iso8601" data-format="dddd D MMMM YYYY, hh:mm a">{{ object.end_datetime|date:'c' }}</span>
+			</span>
+		</span>
+	</div>
+	<div class="body clearfix">
+		{% with size=panels|length %}
+		{% for panel in panels %}
+			<div style="width:{{ 100|div:size|stringformat:'f' }}%;"><div><span>{{ panel.0 }}</span><br><span>{{ panel.1|default:"-" }}</span></div></div>
+		{% endfor %}
+		{% endwith %}
+	</div>
+</div>

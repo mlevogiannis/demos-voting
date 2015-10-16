@@ -1,0 +1,32 @@
+.election-box > .body > div {
+	width: 50%;
+}
+
+.list-group-item > .progress {
+	margin-top: 15px;
+	margin-bottom: 15px;
+}
+
+.list-group-item {
+	-webkit-transition: all 0.2s ease 0s;
+	-moz-transition: all 0.2s ease 0s;
+	-o-transition: all 0.2s ease 0s;
+	transition: all 0.2s ease 0s;
+}
+
+.main-header-small {
+	margin-top: 30px;
+	margin-bottom: 20px;
+}
+
+pre > a,
+pre > a:hover,
+pre > a:focus {
+	color: black;
+}
+
+pre {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
