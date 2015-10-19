@@ -18,12 +18,11 @@ from django.conf import settings
 
 _config = sys.modules[__name__]
 
-for iapp in settings.DEMOS_APPS
+for iapp in settings.DEMOS_APPS:
     for key, value in settings.DEMOS_CONFIG[iapp].items():
 	setattr(_config, key, value)
 
 URL = settings.DEMOS_URL
-MAIN = settings.DEMOS_MAIN
 
 LANGUAGES = settings.LANGUAGES
 

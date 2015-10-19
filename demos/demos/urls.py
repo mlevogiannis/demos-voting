@@ -23,13 +23,17 @@ from django.conf.urls import include, url
 from django.conf.urls.i18n import i18n_patterns
 from django.contrib import admin
 
-app_name = '%s' % settings.DEMOS_MAIN
-urlconfig = import_module('demos.apps.%s.urls' % settings.DEMOS_MAIN)
+urlpatterns = []
 
-urlpatterns = i18n_patterns(
-    url(r'^', include(urlconfig, namespace=app_name, app_name=app_name)),
-)
+for iapp in settings.DEMOS_APPS:
+    urlconfig = import_module('demos.apps.%s.urls' % iapp)
+    durl = settings.DEMOS_URL[iapp]
+    if durl:
+        durl = '^' + durl + '/'
+    else:
+        durl = '^'
+    urlpatterns += i18n_patterns(url(durl, include(urlconfig, namespace=iapp, app_name=iapp)),
+                    url(durl + 'api/', include(urlconfig.apipatterns, namespace='api', app_name=iapp))
+                    )
 
-urlpatterns += [
-	url(r'^api/', include(urlconfig.apipatterns, namespace='api', app_name=app_name)),
-]
+#eof
