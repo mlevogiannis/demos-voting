@@ -414,7 +414,7 @@ class VoteView(View):
 				
 				# Send vote data to the abb server
 				
-				abb_session = api.Session('abb', app_config)
+				abb_session = api.Session('vbb', 'abb', app_config)
 				
 				data = {
 					'votedata': json.dumps({

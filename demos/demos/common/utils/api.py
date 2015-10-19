@@ -14,11 +14,11 @@ from demos.common.utils import config
 
 class Session:
 	
-	def __init__(self, server, app_config):
+	def __init__(self, usr_from, server, app_config):
 		
 		self.s = requests.Session()
 		
-		self.username = config.MAIN
+		self.username = usr_from
 		self.password = app_config.get_model('RemoteUser').\
 			objects.get(username=server).password
 		self.url = urljoin(config.URL[server], 'api/')

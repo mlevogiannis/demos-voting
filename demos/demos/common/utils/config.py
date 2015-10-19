@@ -18,7 +18,8 @@ from django.conf import settings
 
 _config = sys.modules[__name__]
 
-for key, value in settings.DEMOS_CONFIG[settings.DEMOS_MAIN].items():
+for iapp in settings.DEMOS_APPS
+    for key, value in settings.DEMOS_CONFIG[iapp].items():
 	setattr(_config, key, value)
 
 URL = settings.DEMOS_URL
