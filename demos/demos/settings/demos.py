@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 # File: demos.py
 
 DEMOS_MAIN = ''   # ea, bds, abb, vbb

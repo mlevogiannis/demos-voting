@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 # File: celery.py
 
 import os
