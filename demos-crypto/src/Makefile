@@ -14,16 +14,14 @@ demos-crypto: main.o crypto.o CryptoServer.o socket_io.o ThreadPool.o \
  miracl/miracl.a protobuf/crypto.pb.o
 	$(CXX) $(LDFLAGS) $(LDLIBS) $^ -o $@
 
-main.o: main.cpp ThreadPool.hpp CryptoServer.hpp protobuf/crypto.pb.h \
- miracl/miracl.h miracl/mirdef.h
+main.o: main.cpp ThreadPool.hpp CryptoServer.hpp protobuf miracl
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-crypto.o: crypto.cpp miracl/ecn.h miracl/big.h miracl/mirdef.h \
- miracl/miracl.h miracl/big.h miracl/miracl.h protobuf/crypto.pb.h \
+crypto.o: crypto.cpp miracl/ecn.h miracl/big.h miracl protobuf \
  crypto.hpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-CryptoServer.o: CryptoServer.cpp crypto.hpp protobuf/crypto.pb.h \
+CryptoServer.o: CryptoServer.cpp crypto.hpp protobuf \
  socket_io.hpp ThreadPool.hpp CryptoServer.hpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
@@ -38,6 +36,10 @@ miracl:
 
 protobuf:
 	$(MAKE) -C ./protobuf/
+
+miracl/miracl.a: miracl
+
+protobuf/crypto.pb.o: protobuf
 
 clean:
 	$(MAKE) -C ./miracl/ clean
