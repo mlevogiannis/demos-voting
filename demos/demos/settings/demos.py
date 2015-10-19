@@ -50,7 +50,7 @@ DEMOS_CONFIG = {
 		
 		'TARSTORAGE_URL': None,
 		
-		# The numeric mode (i.e. 0o644) to set root tar files to. If this is
+		# The numeric mode (i.e. 0x644) to set root tar files to. If this is
 		# None, you’ll get operating-system dependent behavior.
 		
 		'TARSTORAGE_PERMISSIONS': None,
