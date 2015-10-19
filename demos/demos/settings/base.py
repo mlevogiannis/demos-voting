@@ -289,6 +289,9 @@ if DEVELOPMENT:
             },
         },
         'loggers': {
+            '': {
+                'handlers': ['console']
+            },
             'demos': {
                 'handlers': ['console'],
                 'level': 'DEBUG',
