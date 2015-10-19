@@ -10,9 +10,11 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.middleware import csrf
 
 from demos.common.utils import config
+import logging
 
 
 class Session:
+        _log = logging.getLogger('demos.remoteSession')
 	
 	def __init__(self, usr_from, server, app_config):
 		
@@ -26,8 +28,10 @@ class Session:
 		self.login()
 	
 	def __del__(self):
-		
-		self.logout()
+		try:
+                    self.logout()
+                except Exception:
+                    self._log.warning("Could not logout:", exc_info=True)
 	
 	def login(self):
 		
@@ -63,12 +67,12 @@ class Session:
 			r = self.s.post(url, data=data, files=files, verify=True)
 			r.raise_for_status()
 		
-		except requests.exceptions.HTTPError:
-			
+		except requests.exceptions.HTTPError, e:
 			if r.status_code == requests.codes.unauthorized and _retry_login:
 				self.login()
 				self.post(path, data, file, False)
 			else:
+                                self._log.warning("Cannot send request: %s", e)
 				raise
 
 
