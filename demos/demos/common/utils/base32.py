@@ -12,7 +12,18 @@ _symbols = '0123456789ABCDEFGHJKMNPQRSTVWXYZ'
 _encode_dict = {i: ch for i, ch in enumerate(_symbols)}
 _decode_dict = {ch: i for i, ch in enumerate(_symbols)}
 
-_normalize_map = str.maketrans('OIL', '011', '-')
+try:
+    _normalize_map = str.maketrans('OIL', '011', '-')
+    def _normalize2(s):
+        return s.translate(_normalize_map)
+
+except AttributeError:
+    # Python 2.7 mode:
+    
+    import string
+    _normalize_map = string.maketrans('OIL', '011')
+    def _normalize2(s):
+        return s.translate(_normalize_map).replace('-', '')
 
 
 def normalize(string):
@@ -24,7 +35,7 @@ def normalize(string):
 	if not isinstance(string, str):
 		raise TypeError("argument should be a string, not '%s'" % type(string))
 	
-	encoded = string.upper().translate(_normalize_map)
+	encoded = _normalize2(string.upper())
 	
 	if not set(encoded).issubset(set(_symbols)):
 		raise ValueError("argument is not a valid base32cf value")
