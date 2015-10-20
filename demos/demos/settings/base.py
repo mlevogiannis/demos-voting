@@ -175,12 +175,12 @@ LOGGING = {
         }
     },
     'loggers': {
-        '': {
+        'root': {
             'handlers': ['syslog',]
             },
-        'demos': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
+        'django': {
+            'handlers': ['mail_admins', 'syslog'],
+            'level': 'INFO',
         }
     },
 }
@@ -277,7 +277,6 @@ if DEVELOPMENT:
     TEMPLATES[0]['APP_DIRS'] = True
     del TEMPLATES[0]['OPTIONS']['loaders']
 
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
     LOGGING = {
         'version': 1,
@@ -289,10 +288,10 @@ if DEVELOPMENT:
             },
         },
         'loggers': {
-            '': {
+            'root': {
                 'handlers': ['console']
             },
-            'demos': {
+            'django': {
                 'handlers': ['console'],
                 'level': 'DEBUG',
             },
