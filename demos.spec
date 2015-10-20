@@ -25,6 +25,7 @@ Group:          Applications/Web
 BuildArch:      noarch
 Requires:       python-django >= 1.8
 Requires:       python-psycopg2
+Requires:       python-requests
 Requires:       python-six
 
 
