@@ -14,7 +14,7 @@ from django.middleware import csrf
 
 from demos.common.utils import config
 import logging
-
+from six import string_types
 
 class Session:
         _log = logging.getLogger('demos.remoteSession')
@@ -110,7 +110,7 @@ def user_required(username):
 	"""
 	
 	# Ensure that username is always an iterable
-	if isinstance(username, str):
+	if isinstance(username, string_types):
 		username = [username]
 	
 	def decorator(view_func):

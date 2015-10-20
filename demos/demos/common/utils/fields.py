@@ -6,6 +6,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 
 from demos.common.utils import base32cf
+from six import string_types
 
 
 class IntEnumField(models.SmallIntegerField):
@@ -157,7 +158,7 @@ class ProtoField(models.BinaryField):
 			return value
 		
 		try:
-			if isinstance(value, str):
+			if isinstance(value, string_types):
 				value = b64decode(value.encode('ascii'))
 			elif isinstance(value, self.cls):
 				value = value.SerializeToString()
