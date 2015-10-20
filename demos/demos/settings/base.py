@@ -139,9 +139,9 @@ STATICFILES_DIRS = [
 ]
 
 STATIC_URL = '/static/'
-STATIC_ROOT = ''
+STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static')
 
-MEDIA_ROOT = ''
+MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'media')
 
 
 # Sending email
