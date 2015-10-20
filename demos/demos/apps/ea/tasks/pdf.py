@@ -53,6 +53,8 @@ class BallotBuilder:
 			cmd = ["fc-list", "-f", "%{file}",
 				":style={0}:family={1}".format(ttf_style, ttf_family)]
 			ttf_path = check_output(cmd, universal_newlines=True)
+			if not ttf_path:
+                            raise EnvironmentError("Missing font for: %s-%s" % (ttf_family, ttf_style))
 			
 			registerFont(TTFont(ttf_name, ttf_path))
 			ttf_dict[ttf_style] = ttf_name
