@@ -61,7 +61,7 @@ Requires:       fontconfig
 Requires:       python-protobuf >= 3.0
 Requires:       python-qrcode
 Requires:       python-reportlab
-Requires:       liberation-sans-fonts, liberation-serif-fonts
+Requires:       liberation-sans-fonts, liberation-serif-fonts, liberation-mono-fonts
 
 %package bds
 Summary:        Ballot Distribution Server for Secure Voting
