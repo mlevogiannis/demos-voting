@@ -38,6 +38,7 @@ from demos.apps.vbb.models import Election, Question, Ballot, Part, \
 	OptionV, OptionC
 
 from demos.common.utils import api, base32cf, config, dbsetup, enums, hashers
+from demos.settings import DEMOS_URL
 
 logger = logging.getLogger(__name__)
 app_config = apps.get_app_config('vbb')
@@ -265,7 +266,7 @@ class VoteView(View):
 			status = 200
 			max_options = question_qs.\
 				annotate(Count('optionc')).aggregate(Max('optionc__count'))
-			abb_url = urljoin(config.URL['abb'], quote('%s/' % election_id))
+			abb_url = urljoin(DEMOS_URL['abb'], quote('%s/' % election_id))
 			security_code_hash2_split = part1.security_code_hash2.split('$', 3)
 			
 			context = {

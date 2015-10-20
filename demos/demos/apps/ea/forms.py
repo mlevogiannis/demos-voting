@@ -9,6 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from demos.apps.ea import fields
 from demos.common.utils import config
+from django.conf import settings as django_settings
 
 
 # DefineView Forms -------------------------------------------------------------
@@ -24,7 +25,7 @@ class ElectionForm(forms.Form):
 	ballots = forms.IntegerField(label=_('Ballots'),
 		min_value=1, max_value=config.MAX_BALLOTS)
 	
-	language = forms.ChoiceField(label=_('Language'), choices=config.LANGUAGES)
+	language = forms.ChoiceField(label=_('Language'), choices=django_settings.LANGUAGES)
 	
 	trustee_list = fields.MultiEmailField(label=_('Trustee e-mails'),
 		min_length=1, max_length=config.MAX_TRUSTEES)

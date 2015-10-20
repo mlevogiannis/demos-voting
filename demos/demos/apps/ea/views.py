@@ -26,6 +26,7 @@ from demos.apps.ea.models import Config, Election, Task
 
 from demos.common.utils import base32cf, config, enums
 from demos.common.utils.dbsetup import _prep_kwargs
+from demos.settings import DEMOS_URL
 
 
 class HomeView(View):
@@ -274,8 +275,8 @@ class StatusView(View):
                 if not election:
                         return redirect(reverse('ea:home') + '?error=id')
 		
-		abb_url = urljoin(config.URL['abb'], quote("results/%s/" % election_id))
-		bds_url = urljoin(config.URL['bds'], quote("manage/%s/" % election_id))
+		abb_url = urljoin(DEMOS_URL['abb'], quote("results/%s/" % election_id))
+		bds_url = urljoin(DEMOS_URL['bds'], quote("manage/%s/" % election_id))
 		
 		context = {
 			'abb_url': abb_url,

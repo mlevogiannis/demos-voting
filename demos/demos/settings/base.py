@@ -258,10 +258,10 @@ DEMOS_CONFIG = {
 
 DEMOS_APPS = NO_APP_CHOSEN # one or more of: ea, bds, abb, vbb
 
-if len(DEMOS_APPS) == 1:
-    DEMOS_URL = { 'ea': '', 'bds': '', 'abb': '', 'vbb': '', }
-else:
-    DEMOS_URL = { 'ea': 'ea', 'bds': 'bds', 'abb': 'abb', 'vbb': 'vbb', }
+DEMOS_URL = { 'ea': 'https://demos-ea.our-domain.com',
+             'bds': 'https://demos-bds.our-domain.com',
+             'abb': 'https://demos-abb.our-domain.com',
+             'vbb': 'https://demos-vbb.our-domain.com', }
 
 INSTALLED_APPS += tuple([ 'demos.apps.%s' % iapp for iapp in DEMOS_APPS ])
 LOCALE_PATHS += tuple([ os.path.join(BASE_DIR, 'apps/%s/locale' % iapp) for iapp in DEMOS_APPS])

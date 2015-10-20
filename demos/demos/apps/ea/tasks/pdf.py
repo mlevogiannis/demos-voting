@@ -22,6 +22,7 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, \
 	Paragraph, Image, Spacer, PageBreak
 
 from demos.common.utils import base32cf, config
+from demos.settings import DEMOS_URL
 
 
 class BallotBuilder:
@@ -446,11 +447,11 @@ class BallotBuilder:
 		
 		for part_obj in ballot_obj['__list_Part__']:
 			
-			abb_url = urljoin(config.URL['abb'], \
-				quote("{0}/".format(self.election_id)))
+			abb_url = urljoin(DEMOS_URL['abb'], \
+				quote("%s/" % self.election_id))
 			
-			vbb_url = urljoin(config.URL['vbb'], quote("{0}/{1}/".\
-				format(self.election_id, part_obj['vote_token'])))
+			vbb_url = urljoin(DEMOS_URL['vbb'], quote("%s/%s/" \
+				 % (self.election_id, part_obj['vote_token'])))
 			
 			# Generate QRCode
 			
