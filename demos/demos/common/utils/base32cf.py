@@ -10,7 +10,12 @@ from random import getrandbits
 
 _chars = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 
-_translation = str.maketrans('OIL', '011')
+try:
+    _translation = str.maketrans('OIL', '011')
+except AttributeError:
+    import string
+    _translation = string.maketrans('OIL', '011')
+
 _validation = re.compile('^[' + _chars + '-' + ']*$')
 
 
