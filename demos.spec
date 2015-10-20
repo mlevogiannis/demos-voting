@@ -5,6 +5,10 @@
 %global    app_dir      %{_datadir}/%{name}
 %global    app_bindir   %{_libdir}/%{name}
 
+%global    with_apache 1
+
+%{!?_webappconfdir: %global _webappconfdir %{_sysconfdir}/httpd/conf.d/ }
+
 Summary:	Secure voting platform
 Name:		demos-voting
 Version:	%git_get_ver
@@ -27,6 +31,16 @@ Requires:       python-django >= 1.8
 Requires:       python-psycopg2
 Requires:       python-requests
 Requires:       python-six
+%if %{with_apache}
+%if %{_target_vendor} == mageia
+Requires:       apache-mod_wsgi
+%else
+# RedHat variants:
+Requires:       mod_wsgi
+%endif
+# else
+#     TODO: nginx etc. support
+%endif
 
 
 %package abb
@@ -116,6 +130,49 @@ rm -f %{buildroot}%{app_dir}/settings/base.py?
 mv %{buildroot}%{app_dir}/settings/base.py %{buildroot}%{_sysconfdir}/%{name}/settings.py
 ln -s %{_sysconfdir}/%{name}/settings.py %{buildroot}%{app_dir}/settings/base.py
 
+%if %{with_apache}
+# Configuration for Apache and its mod_wsgi
+install -d %{buildroot}%{_webappconfdir}
+
+cat '-' <<EOF > %{buildroot}%{_webappconfdir}/30-%{name}.conf
+# Note: installing %{name} as main application of this site
+<VirtualHost *:80>
+    # ServerName our.voting.com
+    # Redirect permanent / https://our.voting.com/
+</VirtualHost>
+
+<VirtualHost *:443>
+    # ServerName our.voting.com
+
+    Alias /robots.txt %{app_dir}/static/robots.txt
+    Alias /favicon.ico %{app_dir}/static/favicon.ico
+
+    Alias /media/ %{app_dir}/media/
+    Alias /static/ %{app_dir}/static/
+
+    WSGIScriptAlias / %{app_dir}/wsgi.py
+    WSGIPythonPath %{app_dir}
+
+    <Directory %{app_dir}/static>
+        Require all granted
+    </Directory>
+
+    <Directory %{app_dir}/media>
+        Require all granted
+    </Directory>
+
+    WSGIScriptAlias / %{app_dir}/wsgi.py
+
+    <Directory %{app_dir}/>
+    <Files wsgi.py>
+        Require all granted
+    </Files>
+    </Directory>
+
+</VirtualHost>
+
+EOF
+%endif
 
 %files common
 %doc demos/LICENSE demos/README
@@ -130,7 +187,9 @@ ln -s %{_sysconfdir}/%{name}/settings.py %{buildroot}%{app_dir}/settings/base.py
 %{app_dir}/manage.py*
 %{app_dir}/common/
 %{app_dir}/settings
-
+%if %{with_apache}
+%config(noreplace) %{_webappconfdir}/30-%{name}.conf
+%endif
 
 %files abb
 %{app_dir}/apps/abb/
