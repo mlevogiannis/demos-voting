@@ -187,6 +187,44 @@ WSGIPythonPath %{app_dir}/
 EOF
 %endif
 
+%post ea
+NEW_SECRET_KEY=$(python -c 'import os; import base64; print base64.b64encode(os.urandom(60))')
+sed -i "s|NO_SECRET_KEY_DEFINED|$NEW_SECRET_KEY|" %{_sysconfdir}/%{name}/settings.py
+sed -i "s|NO_APP_CHOSEN|('ea',)|" %{_sysconfdir}/%{name}/settings.py
+
+cd %{app_dir}
+./manage.py collectstatic
+./manage.py compilemessages
+
+
+%post bds
+NEW_SECRET_KEY=$(python -c 'import os; import base64; print base64.b64encode(os.urandom(60))')
+sed -i "s|NO_SECRET_KEY_DEFINED|$NEW_SECRET_KEY|" %{_sysconfdir}/%{name}/settings.py
+sed -i "s|NO_APP_CHOSEN|('bds',)|" %{_sysconfdir}/%{name}/settings.py
+
+cd %{app_dir}
+./manage.py collectstatic
+./manage.py compilemessages
+
+%post abb
+NEW_SECRET_KEY=$(python -c 'import os; import base64; print base64.b64encode(os.urandom(60))')
+sed -i "s|NO_SECRET_KEY_DEFINED|$NEW_SECRET_KEY|" %{_sysconfdir}/%{name}/settings.py
+sed -i "s|NO_APP_CHOSEN|('abb',)|" %{_sysconfdir}/%{name}/settings.py
+
+cd %{app_dir}
+./manage.py collectstatic
+./manage.py compilemessages
+
+%post vbb
+NEW_SECRET_KEY=$(python -c 'import os; import base64; print base64.b64encode(os.urandom(60))')
+sed -i "s|NO_SECRET_KEY_DEFINED|$NEW_SECRET_KEY|" %{_sysconfdir}/%{name}/settings.py
+sed -i "s|NO_APP_CHOSEN|('vbb',)|" %{_sysconfdir}/%{name}/settings.py
+
+cd %{app_dir}
+./manage.py collectstatic
+./manage.py compilemessages
+
+
 %files common
 %doc demos/LICENSE demos/README
 %dir %{app_dir}/demos
