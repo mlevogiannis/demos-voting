@@ -5,8 +5,12 @@ import math
 import logging
 import requests
 
-from enum import IntEnum, unique
 from base64 import b64encode
+    from enum import IntEnum, unique
+    class IntEnum:
+        pass
+    def unique(fn):
+        return fn
 try:
     from urllib.parse import urljoin, quote
 except ImportError:

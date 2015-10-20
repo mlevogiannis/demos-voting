@@ -1,6 +1,13 @@
 # File: enums.py
 
-from enum import IntEnum, unique
+try:
+    from enum import IntEnum, unique
+except ImportError:
+    class IntEnum:
+        pass
+    
+    def unique(fn):
+        return fn
 
 @unique
 class State(IntEnum):
