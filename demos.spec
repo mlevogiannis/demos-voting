@@ -136,7 +136,7 @@ ln -s %{_sysconfdir}/%{name}/settings.py %{buildroot}%{app_dir}/demos/settings/b
 # Configuration for Apache and its mod_wsgi
 install -d %{buildroot}%{_webappconfdir}
 
-cat '-' <<EOF > %{buildroot}%{_webappconfdir}/z30-%{name}.conf
+cat '-' <<EOF > %{buildroot}%{_webappconfdir}/30-%{name}.conf
 # Note: installing %{name} as main application of this site
 
 <VirtualHost *:80>
@@ -145,8 +145,20 @@ cat '-' <<EOF > %{buildroot}%{_webappconfdir}/z30-%{name}.conf
 </VirtualHost>
 
 WSGIPythonPath %{app_dir}/
+
 <VirtualHost *:443>
     # ServerName our.voting.com
+    
+    ErrorLog logs/ssl_error_log
+    TransferLog logs/ssl_access_log
+    LogLevel warn
+
+    SSLEngine on
+    SSLProtocol all -SSLv2
+    SSLCipherSuite HIGH:MEDIUM:!aNULL:!MD5
+
+    SSLCertificateFile /etc/pki/tls/certs/localhost.crt
+    SSLCertificateKeyFile /etc/pki/tls/private/localhost.key
 
     Alias /robots.txt %{app_dir}/static/robots.txt
     Alias /favicon.ico %{app_dir}/static/favicon.ico
@@ -189,7 +201,7 @@ EOF
 %{app_dir}/demos/common/
 %{app_dir}/demos/settings
 %if %{with_apache}
-%config(noreplace) %{_webappconfdir}/z30-%{name}.conf
+%config(noreplace) %{_webappconfdir}/30-%{name}.conf
 %endif
 
 %files abb
