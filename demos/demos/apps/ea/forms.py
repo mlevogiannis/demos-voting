@@ -64,7 +64,7 @@ class ElectionForm(forms.Form):
 	
 	def clean(self):
 		
-		cleaned_data = super().clean()
+		cleaned_data = super(ElectionForm, self).clean()
 		
 		start_datetime = cleaned_data.get('start_datetime')
 		end_datetime = cleaned_data.get('end_datetime')
@@ -88,7 +88,7 @@ class QuestionForm(forms.Form):
 		option_formset = kwargs.pop('option_formset', None)
 		choices = option_formset.total_form_count() if option_formset else 2
 		
-		super().__init__(*args, **kwargs)
+		super(QuestionForm, self).__init__(*args, **kwargs)
 		
 		self.fields['choices'] = forms.IntegerField(label=_('Multiple choices'),
 			initial=1, min_value=1, max_value=choices)
@@ -101,7 +101,7 @@ class BaseQuestionFormSet(BaseFormSet):
 	
 	def __init__(self, *args, **kwargs):
 		
-		super().__init__(*args, **kwargs)
+		super(BaseQuestionFormSet, self).__init__(*args, **kwargs)
 		
 		for form in self.forms:
 			form.empty_permitted = False
@@ -112,7 +112,7 @@ class BaseQuestionFormSet(BaseFormSet):
 		# See https://code.djangoproject.com/ticket/18166
 		
 		kwargs['option_formset'] = self.option_formsets[i]
-		return super()._construct_form(i, **kwargs)
+		return super(BaseQuestionFormSet, self)._construct_form(i, **kwargs)
 	
 	def clean(self):
 		'''Checks that no two questions are the same.'''
@@ -150,7 +150,7 @@ class OptionForm(forms.Form):
 class BaseOptionFormSet(BaseFormSet):
 	
 	def __init__(self, *args, **kwargs):
-		super().__init__(*args, **kwargs)
+		super(BaseOptionFormSet, self).__init__(*args, **kwargs)
 		for form in self.forms:
 			form.empty_permitted = False
 	

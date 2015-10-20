@@ -16,7 +16,7 @@ class UserCommand(BaseCommand):
 		self.local_apps = local_apps
 		self.remote_apps = remote_apps
 		
-		super().__init__(*args, **kwargs)
+		super(UserCommand, self).__init__(*args, **kwargs)
 	
 	def add_arguments(self, parser):
 		

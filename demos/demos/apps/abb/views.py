@@ -163,7 +163,7 @@ class SetupView(View):
 	
 	@method_decorator(api.user_required('ea'))
 	def dispatch(self, *args, **kwargs):
-		return super().dispatch(*args, **kwargs)
+		return super(SetupView, self).dispatch(*args, **kwargs)
 	
 	def get(self, request):
 		csrf.get_token(request)
@@ -192,7 +192,7 @@ class UpdateView(View):
 	
 	@method_decorator(api.user_required('ea'))
 	def dispatch(self, *args, **kwargs):
-		return super().dispatch(*args, **kwargs)
+		return super(UpdateView, self).dispatch(*args, **kwargs)
 	
 	def get(self, request):
 		csrf.get_token(request)
@@ -225,7 +225,7 @@ class VoteView(View):
 	
 	@method_decorator(api.user_required('vbb'))
 	def dispatch(self, *args, **kwargs):
-		return super().dispatch(*args, **kwargs)
+		return super(VoteView, self).dispatch( *args, **kwargs)
 	
 	def get(self, request):
 		csrf.get_token(request)
@@ -522,5 +522,5 @@ class JSONEncoder(DjangoJSONEncoder):
 		if isinstance(o, message.Message):
 			return protobuf.to_dict(o, ordered=True)
 		
-		return super().default(o)
+		return super(JSONEncoder, self).default(o)
 

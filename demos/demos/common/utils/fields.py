@@ -15,11 +15,11 @@ class IntEnumField(models.SmallIntegerField):
 	def __init__(self, *args, **kwargs):
 		
 		self.cls = kwargs.pop('cls')
-		super().__init__(*args, **kwargs)
+		super(IntEnumField, self).__init__(*args, **kwargs)
 	
 	def deconstruct(self):
 		
-		name, path, args, kwargs = super().deconstruct()
+		name, path, args, kwargs = super(IntEnumField, self).deconstruct()
 		kwargs['cls'] = self.cls
 		return name, path, args, kwargs
 	
@@ -114,11 +114,11 @@ class ProtoField(models.BinaryField):
 	def __init__(self, *args, **kwargs):
 		
 		self.cls = kwargs.pop('cls')
-		super().__init__(*args, **kwargs)
+		super(ProtoField, self).__init__(*args, **kwargs)
 	
 	def deconstruct(self):
 		
-		name, path, args, kwargs = super().deconstruct()
+		name, path, args, kwargs = super(ProtoField, self).deconstruct()
 		kwargs['cls'] = self.cls
 		return name, path, args, kwargs
 	

@@ -12,7 +12,7 @@ class MultiEmailField(forms.Field):
 	def __init__(self, min_length=None, max_length=None, *args, **kwargs):
 		
 		self.min_length, self.max_length = min_length, max_length * 254
-		super().__init__(*args, **kwargs)
+		super(MultiEmailField, self).__init__(*args, **kwargs)
 		
 		if min_length is not None:
 			min_validator = validators.MinLengthValidator(int(min_length))
@@ -36,7 +36,7 @@ class MultiEmailField(forms.Field):
 	def validate(self, value):
 		"""Check if value consists only of valid emails."""
 		
-		super().validate(value)
+		super(MultiEmailField, self).validate(value)
 
 		for email in value:
 			validators.validate_email(email)
@@ -44,7 +44,7 @@ class MultiEmailField(forms.Field):
 	def widget_attrs(self, widget):
 		"""Set the HTML attribute maxlength"""
 		
-		attrs = super().widget_attrs(widget)
+		attrs = super(MultiEmailField, self).widget_attrs(widget)
 		
 		if self.max_length is not None:
 			attrs.update({'maxlength': str(self.max_length)})
@@ -66,5 +66,5 @@ class DateTimeField(forms.DateTimeField):
 				if parsed_value is not None:
 					value = parsed_value
 		
-		return super().to_python(value)
+		return super(DateTimeField, self).to_python(value)
 

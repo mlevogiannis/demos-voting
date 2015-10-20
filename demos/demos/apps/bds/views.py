@@ -43,7 +43,7 @@ class SetupView(View):
 	
 	@method_decorator(api.user_required('ea'))
 	def dispatch(self, *args, **kwargs):
-		return super().dispatch(*args, **kwargs)
+		return super(SetupView, self).dispatch(*args, **kwargs)
 	
 	def get(self, request):
 		csrf.get_token(request)
@@ -93,7 +93,7 @@ class UpdateView(View):
 	
 	@method_decorator(api.user_required('ea'))
 	def dispatch(self, *args, **kwargs):
-		return super().dispatch(*args, **kwargs)
+		return super(UpdateView, self).dispatch(*args, **kwargs)
 	
 	def get(self, request):
 		csrf.get_token(request)

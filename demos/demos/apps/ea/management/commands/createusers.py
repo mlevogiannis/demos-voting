@@ -8,7 +8,7 @@ class Command(UserCommand):
 	
 	def __init__(self, *args, **kwargs):
 		
-		super().__init__(
+		super(Command, self).__init__(
 			local_apps=['abb'],
 			remote_apps=['bds', 'abb', 'vbb'],
 			app_config=apps.get_app_config('ea'),
