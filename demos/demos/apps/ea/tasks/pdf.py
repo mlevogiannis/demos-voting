@@ -438,7 +438,7 @@ class BallotBuilder:
 		doc = SimpleDocTemplate(pdf_buffer, pagesize=self.pagesize,
 			topMargin=self.h_margin, bottomMargin=self.h_margin,
 			leftMargin=self.w_margin, rightMargin=self.w_margin,
-			title="{0} {1}".format(self.ballot_text, str(serial)),
+			title="%s %s" % (self.ballot_text, serial),
 			author="DemosVoting")
 		
 		# Prepare common part elements
@@ -468,7 +468,7 @@ class BallotBuilder:
 			
 			# Create top, abb, vbb, img and hlp tables
 			
-			table_top = Table([[self.serial_text, str(serial),
+			table_top = Table([[self.serial_text, "%s" % serial,
 				"", self.security_text, part_obj['security_code']]],
 				colWidths=[self.top_text_width, self.top_value_width,
 				self.table_top_gap, self.top_text_width,
