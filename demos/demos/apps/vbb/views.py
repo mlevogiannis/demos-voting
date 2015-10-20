@@ -6,11 +6,14 @@ import logging
 import requests
 
 from base64 import b64encode
+try:
     from enum import IntEnum, unique
+except ImportError:
     class IntEnum:
         pass
     def unique(fn):
         return fn
+
 try:
     from urllib.parse import urljoin, quote
 except ImportError:
