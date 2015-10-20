@@ -136,8 +136,9 @@ ln -s %{_sysconfdir}/%{name}/settings.py %{buildroot}%{app_dir}/demos/settings/b
 # Configuration for Apache and its mod_wsgi
 install -d %{buildroot}%{_webappconfdir}
 
-cat '-' <<EOF > %{buildroot}%{_webappconfdir}/30-%{name}.conf
+cat '-' <<EOF > %{buildroot}%{_webappconfdir}/z30-%{name}.conf
 # Note: installing %{name} as main application of this site
+
 <VirtualHost *:80>
     # ServerName our.voting.com
     # Redirect permanent / https://our.voting.com/
@@ -188,7 +189,7 @@ EOF
 %{app_dir}/common/
 %{app_dir}/settings
 %if %{with_apache}
-%config(noreplace) %{_webappconfdir}/30-%{name}.conf
+%config(noreplace) %{_webappconfdir}/z30-%{name}.conf
 %endif
 
 %files abb
