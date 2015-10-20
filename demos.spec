@@ -35,9 +35,11 @@ Requires:       python-celery
 %if %{with_apache}
 %if %{_target_vendor} == mageia
 Requires:       apache-mod_wsgi
+Requires:       apache-mod_ssl
 %else
 # RedHat variants:
 Requires:       mod_wsgi
+Requires:       mod_ssl
 %endif
 # else
 #     TODO: nginx etc. support
@@ -142,6 +144,7 @@ cat '-' <<EOF > %{buildroot}%{_webappconfdir}/30-%{name}.conf
     # Redirect permanent / https://our.voting.com/
 </VirtualHost>
 
+WSGIPythonPath %{app_dir}/
 <VirtualHost *:443>
     # ServerName our.voting.com
 
@@ -151,8 +154,7 @@ cat '-' <<EOF > %{buildroot}%{_webappconfdir}/30-%{name}.conf
     Alias /media/ %{app_dir}/media/
     Alias /static/ %{app_dir}/static/
 
-    WSGIScriptAlias / %{app_dir}/wsgi.py
-    WSGIPythonPath %{app_dir}
+    WSGIScriptAlias / %{app_dir}/demos/wsgi.py
 
     <Directory %{app_dir}/static>
         Require all granted
@@ -162,7 +164,6 @@ cat '-' <<EOF > %{buildroot}%{_webappconfdir}/30-%{name}.conf
         Require all granted
     </Directory>
 
-    WSGIScriptAlias / %{app_dir}/wsgi.py
 
     <Directory %{app_dir}/>
     <Files wsgi.py>
