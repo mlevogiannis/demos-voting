@@ -262,14 +262,17 @@ class StatusView(View):
 		try:
 			normalized = base32cf.normalize(election_id)
 		except (TypeError, ValueError):
-			pass
+			election = None
 		else:
 			if normalized != election_id:
 				return redirect('ea:status', election_id=normalized)
 			try:
 				election = Election.objects.get(id=election_id)
 			except Election.DoesNotExist:
-				return redirect(reverse('ea:home') + '?error=id')
+                                election = None
+                
+                if not election:
+                        return redirect(reverse('ea:home') + '?error=id')
 		
 		abb_url = urljoin(config.URL['abb'], quote("results/%s/" % election_id))
 		bds_url = urljoin(config.URL['bds'], quote("manage/%s/" % election_id))
