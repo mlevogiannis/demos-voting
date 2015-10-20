@@ -24,6 +24,8 @@ Summary:        Common files for Secure Voting platform
 Group:          Applications/Web
 BuildArch:      noarch
 Requires:       python-django >= 1.8
+Requires:       python-psycopg2
+Requires:       python-six
 
 
 %package abb
@@ -38,6 +40,10 @@ Group:          Applications/Web
 BuildArch:      noarch
 Requires:       %{name}-common == %{version}
 Requires:       fontconfig
+Requires:       python-protobuf >= 3.0
+Requires:       python-qrcode
+Requires:       python-reportlab
+Requires:       liberation-sans-fonts, liberation-serif-fonts
 
 %package bds
 Summary:        Ballot Distribution Server for Secure Voting
