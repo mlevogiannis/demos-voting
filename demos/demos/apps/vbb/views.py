@@ -4,6 +4,7 @@ import json
 import math
 import logging
 import requests
+from six import string_types
 
 from base64 import b64encode
 try:
@@ -123,7 +124,7 @@ class VoteView(View):
 		
 		# Verify vote token's length
 		
-		if not isinstance(vote_token, str):
+		if not isinstance(vote_token, string_types):
 			raise VoteView.Error(VoteView.State.INVALID_VOTE_TOKEN, *retval)
 		
 		if len(vote_token) != math.ceil(token_bits / 5):
@@ -328,7 +329,7 @@ class VoteView(View):
 			
 			hash = json_obj.get('hash')
 			
-			if not isinstance(hash, str):
+			if not isinstance(hash, string_types):
 				return http.JsonResponse(error, status=422)
 			
 			if not check_password(hash, part1.security_code_hash2):
@@ -360,7 +361,7 @@ class VoteView(View):
 			
 			if not (isinstance(vote_obj, dict)
 				and len(vote_obj) == len(q_options)
-				and all(isinstance(q_index, str)
+				and all(isinstance(q_index, string_types)
 				and isinstance(vc_list, list)
 				and 1 <= len(vc_list) <= q_options.get(int(q_index), -1)
 				and all(isinstance(vc, vc_type) for vc in vc_list)
