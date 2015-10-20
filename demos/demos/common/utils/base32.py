@@ -23,19 +23,16 @@ except AttributeError:
     import string
     _normalize_map = string.maketrans('OIL', '011')
     def _normalize2(s):
-        return s.translate(_normalize_map).replace('-', '')
+        return str(s).translate(_normalize_map).replace('-', '')
 
 
-def normalize(string):
+def normalize(stri):
 	"""Normalize a Crockford's Base32 encoded string by replacing 'I' and 'L'
 	with '1', replacing 'O' with '0' and convert all characters to uppercase.
 	'string' is the string to normalize. ValueError is raised if there are
 	non-alphabet characters present in the input."""
-	
-	if not isinstance(string, str):
-		raise TypeError("argument should be a string, not '%s'" % type(string))
-	
-	encoded = _normalize2(string.upper())
+
+	encoded = _normalize2(stri.upper())
 	
 	if not set(encoded).issubset(set(_symbols)):
 		raise ValueError("argument is not a valid base32cf value")
