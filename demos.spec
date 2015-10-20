@@ -52,7 +52,7 @@ Requires:       %{name}-common == %{version}
 %package ea
 Summary:        Election Authority for Secure Voting
 Group:          Applications/Web
-BuildArch:      noarch
+# no BuildArch, this one is platform-dependant!
 Requires:       %{name}-common == %{version}
 Requires:       fontconfig
 Requires:       python-protobuf >= 3.0
