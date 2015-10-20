@@ -117,21 +117,20 @@ pushd demos-crypto/src
     %make
 popd
 
-
 %install
 %__rm -rf %{buildroot}
 install -d %{buildroot}%{app_bindir}/
 install demos-crypto/src/demos-crypto %{buildroot}%{app_bindir}/
 
 install -d %{buildroot}%{app_dir}
-cp -r demos/demos/* %{buildroot}%{app_dir}
+cp -r demos/demos %{buildroot}%{app_dir}
 cp demos/manage.py %{buildroot}%{app_dir}
 
 # But, since the settings file is to be edited, move it to /etc
 install -d %{buildroot}%{_sysconfdir}/%{name}/
 rm -f %{buildroot}%{app_dir}/settings/base.py?
 mv %{buildroot}%{app_dir}/settings/base.py %{buildroot}%{_sysconfdir}/%{name}/settings.py
-ln -s %{_sysconfdir}/%{name}/settings.py %{buildroot}%{app_dir}/settings/base.py
+ln -s %{_sysconfdir}/%{name}/settings.py %{buildroot}%{app_dir}/demos/settings/base.py
 
 %if %{with_apache}
 # Configuration for Apache and its mod_wsgi
@@ -164,8 +163,7 @@ WSGIPythonPath %{app_dir}/
         Require all granted
     </Directory>
 
-
-    <Directory %{app_dir}/>
+    <Directory %{app_dir}/demos/>
     <Files wsgi.py>
         Require all granted
     </Files>
@@ -185,7 +183,7 @@ EOF
 %{app_dir}/__init__.py*
 %{app_dir}/apps/__init__.py*
 %{app_dir}/urls.py*
-%{app_dir}/wsgi.py*
+%attr(0755,root,apache) %{app_dir}/wsgi.py*
 %{app_dir}/manage.py*
 %{app_dir}/common/
 %{app_dir}/settings
