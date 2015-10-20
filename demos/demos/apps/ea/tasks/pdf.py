@@ -4,7 +4,11 @@ from os import path
 from io import BytesIO
 from math import ceil
 from subprocess import check_output
-from urllib.parse import urljoin, quote
+try:
+    from urllib.parse import urljoin, quote
+except ImportError:
+    from urllib import quote
+    from urlparse import urljoin
 
 from qrcode import QRCode, constants
 from django.utils.translation import ugettext as _

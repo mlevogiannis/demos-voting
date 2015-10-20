@@ -2,7 +2,10 @@
 
 import requests
 
-from urllib.parse import urljoin
+try:
+    from urllib.parse import urljoin
+except ImportError:
+    from urlparse import urljoin
 
 from django.http import HttpResponse, HttpResponseForbidden
 from django.contrib.auth import login as auth_login, logout as auth_logout

@@ -6,7 +6,11 @@ import hashlib
 import logging
 
 from base64 import b64decode
-from itertools import zip_longest
+try:
+    from itertools import zip_longest
+except ImportError:
+    from itertools import izip_longest as zip_longest
+
 from collections import OrderedDict
 
 from google.protobuf import message

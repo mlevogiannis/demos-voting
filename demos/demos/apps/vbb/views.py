@@ -7,7 +7,11 @@ import requests
 
 from enum import IntEnum, unique
 from base64 import b64encode
-from urllib.parse import urljoin, quote
+try:
+    from urllib.parse import urljoin, quote
+except ImportError:
+    from urllib import quote
+    from urlparse import urljoin
 
 from django import http
 from django.db import transaction

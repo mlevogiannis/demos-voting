@@ -5,7 +5,10 @@ import time
 import tarfile
 
 from io import BytesIO
-from urllib.parse import urljoin
+try:
+    from urllib.parse import urljoin
+except ImportError:
+    from urlparse import urljoin
 
 from django.core.files import File
 from django.utils.encoding import filepath_to_uri
