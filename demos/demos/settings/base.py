@@ -176,7 +176,7 @@ LOGGING = {
     },
     'loggers': {
         '': {
-            'handlers': 'syslog'
+            'handlers': ['syslog',]
             },
         'demos': {
             'handlers': ['mail_admins'],
