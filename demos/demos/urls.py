@@ -27,13 +27,9 @@ urlpatterns = []
 
 for iapp in settings.DEMOS_APPS:
     urlconfig = import_module('demos.apps.%s.urls' % iapp)
-    durl = settings.DEMOS_URL[iapp]
-    if durl:
-        durl = '^' + durl + '/'
-    else:
-        durl = '^'
-    urlpatterns += i18n_patterns(url(durl, include(urlconfig, namespace=iapp, app_name=iapp)),
-                    url(durl + 'api/', include(urlconfig.apipatterns, namespace='api', app_name=iapp))
-                    )
+    durl = '^' + (iapp if len(settings.DEMOS_APPS) > 1 else '') + '/'
+    urlpatterns += i18n_patterns(url(durl, include(urlconfig, namespace=iapp, app_name=iapp))) + \
+        [url(durl + 'api/', include(urlconfig.apipatterns, namespace='api', app_name=iapp))]
 
 #eof
+
