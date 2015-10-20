@@ -131,7 +131,7 @@ class AuditView(View):
 						vote = 'A' if p.tag != 'A' else 'B'
 						
 						int_ = base32cf.decode(p.security_code) + q.index
-						bytes_ = math.ceil(int_.bit_length() / 8)
+						bytes_ = math.ceil(int_.bit_length() / 8.0)
 						value = hashlib.sha256(int_.to_bytes(bytes_, 'big'))
 						index = int.from_bytes(value.digest(), 'big')
 						

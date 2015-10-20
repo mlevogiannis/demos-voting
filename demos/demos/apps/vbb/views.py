@@ -127,7 +127,7 @@ class VoteView(View):
 		if not isinstance(vote_token, string_types):
 			raise VoteView.Error(VoteView.State.INVALID_VOTE_TOKEN, *retval)
 		
-		if len(vote_token) != math.ceil(token_bits / 5):
+		if len(vote_token) != int(math.ceil(token_bits / 5.0)):
 			raise VoteView.Error(VoteView.State.INVALID_VOTE_TOKEN, *retval)
 		
 		# The vote token consists of two parts. The first part is the

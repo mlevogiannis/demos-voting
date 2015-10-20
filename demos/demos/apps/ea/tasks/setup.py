@@ -49,7 +49,7 @@ def election_setup(election, election_obj, language):
 	credential_bits = config.CREDENTIAL_LEN * 8
 	security_code_bits = config.SECURITY_CODE_LEN * 5
 	token_bits = serial_bits + credential_bits + tag_bits + security_code_bits
-	pad_bits = math.ceil(token_bits / 5) * 5 - token_bits
+	pad_bits = int(math.ceil(token_bits / 5.0) * 5 - token_bits)
 	
 	rand = random.SystemRandom()
 	builder = pdf.BallotBuilder(election_obj)
@@ -193,11 +193,11 @@ def election_setup(election, election_obj, language):
 						for votecode in votecode_list:
 							
 							key = base32cf.decode(security_code)
-							bytes = math.ceil(key.bit_length() / 8)
+							bytes = math.ceil(key.bit_length() / 8.0)
 							key = key.to_bytes(bytes, 'big')
 							
 							msg = credential_int+(q_index*max_options)+votecode
-							bytes = math.ceil(msg.bit_length() / 8)
+							bytes = math.ceil(msg.bit_length() / 8.0)
 							msg = msg.to_bytes(bytes, 'big')
 							
 							hmac_obj = hmac.new(key, msg, digestmod='sha256')
@@ -335,7 +335,7 @@ def election_setup(election, election_obj, language):
 					# the question's index, converted back to an integer.
 					
 					int_ = base32cf.decode(security_code) + i
-					bytes_ = math.ceil(int_.bit_length() / 8)
+					bytes_ = math.ceil(int_.bit_length() / 8.0)
 					value = hashlib.sha256(int_.to_bytes(bytes_, 'big'))
 					p_index = int.from_bytes(value.digest(), 'big')
 					

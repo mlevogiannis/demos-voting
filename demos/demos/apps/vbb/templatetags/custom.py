@@ -27,7 +27,7 @@ def chunks(lst, n):
 	r = []
 	
 	for _ in range(n):
-		d = math.ceil(l / n)
+		d = int(math.ceil(float(l) / n))
 		c = lst[i: i+d]
 		r.append(c)
 		n -= 1

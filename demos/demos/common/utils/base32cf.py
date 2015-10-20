@@ -59,7 +59,7 @@ def random(length, hyphens=-1, crypto=True):
 	final encoded string."""
 	
 	bits = length * 5
-	bytes = math.ceil(bits / 8)
+	bytes = int(math.ceil(bits / 8.0))
 	shift_bits = (8 * bytes) - bits
 	
 	if crypto:
