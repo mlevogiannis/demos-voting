@@ -188,8 +188,8 @@ EOF
 %endif
 
 %post ea
-NEW_SECRET_KEY=$(python -c 'import os; import base64; print base64.b64encode(os.urandom(60))')
-sed -i "s|NO_SECRET_KEY_DEFINED|$NEW_SECRET_KEY|" %{_sysconfdir}/%{name}/settings.py
+NEW_SECRET_KEY=$(python -c 'import os; import base64; print(base64.b64encode(os.urandom(60)))')
+sed -i "s|NO_SECRET_KEY_DEFINED|'$NEW_SECRET_KEY'|" %{_sysconfdir}/%{name}/settings.py
 sed -i "s|NO_APP_CHOSEN|('ea',)|" %{_sysconfdir}/%{name}/settings.py
 
 cd %{app_dir}
@@ -198,8 +198,8 @@ cd %{app_dir}
 
 
 %post bds
-NEW_SECRET_KEY=$(python -c 'import os; import base64; print base64.b64encode(os.urandom(60))')
-sed -i "s|NO_SECRET_KEY_DEFINED|$NEW_SECRET_KEY|" %{_sysconfdir}/%{name}/settings.py
+NEW_SECRET_KEY=$(python -c 'import os; import base64; print(base64.b64encode(os.urandom(60)))')
+sed -i "s|NO_SECRET_KEY_DEFINED|'$NEW_SECRET_KEY'|" %{_sysconfdir}/%{name}/settings.py
 sed -i "s|NO_APP_CHOSEN|('bds',)|" %{_sysconfdir}/%{name}/settings.py
 
 cd %{app_dir}
@@ -207,8 +207,8 @@ cd %{app_dir}
 ./manage.py compilemessages --no-color
 
 %post abb
-NEW_SECRET_KEY=$(python -c 'import os; import base64; print base64.b64encode(os.urandom(60))')
-sed -i "s|NO_SECRET_KEY_DEFINED|$NEW_SECRET_KEY|" %{_sysconfdir}/%{name}/settings.py
+NEW_SECRET_KEY=$(python -c 'import os; import base64; print(base64.b64encode(os.urandom(60)))')
+sed -i "s|NO_SECRET_KEY_DEFINED|'$NEW_SECRET_KEY'|" %{_sysconfdir}/%{name}/settings.py
 sed -i "s|NO_APP_CHOSEN|('abb',)|" %{_sysconfdir}/%{name}/settings.py
 
 cd %{app_dir}
@@ -216,8 +216,8 @@ cd %{app_dir}
 ./manage.py compilemessages --no-color
 
 %post vbb
-NEW_SECRET_KEY=$(python -c 'import os; import base64; print base64.b64encode(os.urandom(60))')
-sed -i "s|NO_SECRET_KEY_DEFINED|$NEW_SECRET_KEY|" %{_sysconfdir}/%{name}/settings.py
+NEW_SECRET_KEY=$(python -c 'import os; import base64; print(base64.b64encode(os.urandom(60)))')
+sed -i "s|NO_SECRET_KEY_DEFINED|'$NEW_SECRET_KEY'|" %{_sysconfdir}/%{name}/settings.py
 sed -i "s|NO_APP_CHOSEN|('vbb',)|" %{_sysconfdir}/%{name}/settings.py
 
 cd %{app_dir}
