@@ -328,5 +328,7 @@ class CenterView(View):
 	template_name = 'ea/center.html'
 	
 	def get(self, request):
-		pass
+                # FIXME!
+                return http.HttpResponse(status=404)
 
+#eof
