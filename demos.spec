@@ -129,7 +129,7 @@ cp demos/manage.py %{buildroot}%{app_dir}
 # But, since the settings file is to be edited, move it to /etc
 install -d %{buildroot}%{_sysconfdir}/%{name}/
 rm -f %{buildroot}%{app_dir}/settings/base.py?
-mv %{buildroot}%{app_dir}/settings/base.py %{buildroot}%{_sysconfdir}/%{name}/settings.py
+mv %{buildroot}%{app_dir}/demos/settings/base.py %{buildroot}%{_sysconfdir}/%{name}/settings.py
 ln -s %{_sysconfdir}/%{name}/settings.py %{buildroot}%{app_dir}/demos/settings/base.py
 
 %if %{with_apache}
@@ -177,33 +177,33 @@ EOF
 
 %files common
 %doc demos/LICENSE demos/README
-%dir %{app_dir}/
+%dir %{app_dir}/demos
 %dir %attr(0755,root,root) %{_sysconfdir}/%{name}/
 %config(noreplace) %attr(0755,root,root) %{_sysconfdir}/%{name}/settings.py
 %exclude %{_sysconfdir}/%{name}/settings.py?
-%{app_dir}/__init__.py*
-%{app_dir}/apps/__init__.py*
-%{app_dir}/urls.py*
-%attr(0755,root,apache) %{app_dir}/wsgi.py*
+%{app_dir}/demos/__init__.py*
+%{app_dir}/demos/apps/__init__.py*
+%{app_dir}/demos/urls.py*
+%attr(0755,root,apache) %{app_dir}/demos/wsgi.py*
 %{app_dir}/manage.py*
-%{app_dir}/common/
-%{app_dir}/settings
+%{app_dir}/demos/common/
+%{app_dir}/demos/settings
 %if %{with_apache}
 %config(noreplace) %{_webappconfdir}/z30-%{name}.conf
 %endif
 
 %files abb
-%{app_dir}/apps/abb/
+%{app_dir}/demos/apps/abb/
 
 %files ea
 %{app_bindir}/demos-crypto
-%{app_dir}/apps/ea/
+%{app_dir}/demos/apps/ea/
 
 %files bds
-%{app_dir}/apps/bds/
+%{app_dir}/demos/apps/bds/
 
 %files vbb
-%{app_dir}/apps/vbb/
+%{app_dir}/demos/apps/vbb/
 
 
 %changelog -f %{_sourcedir}/%{name}-changelog.gitrpm.txt
