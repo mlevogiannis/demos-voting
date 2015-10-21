@@ -39,7 +39,7 @@ def election(*args):
 			trustee_buf.append(trustee)
 		
 		Trustee.objects.bulk_create(trustee_buf)
-		trustee_buf.clear()
+		del trustee_buf
 	
 	# Insert questions into the database
 	
@@ -58,7 +58,7 @@ def election(*args):
 			question_buf.append(question)
 		
 		Question.objects.bulk_create(question_buf)
-		question_buf.clear()
+		del question_buf
 		
 		question_qs = Question.objects.filter(election=election)
 	
@@ -82,7 +82,7 @@ def election(*args):
 				optionc_buf.append(optionc)
 		
 		OptionC.objects.bulk_create(optionc_buf)
-		optionc_buf.clear()
+		del optionc_buf
 
 
 @transaction.atomic
@@ -114,7 +114,7 @@ def ballot(election_obj, app_config):
 		ballot_buf.append(ballot)
 	
 	Ballot.objects.bulk_create(ballot_buf)
-	ballot_buf.clear()
+	del ballot_buf
 	
 	ballot_qs = Ballot.objects.filter(election=election,
 		serial__range=(lo, hi-1))
@@ -133,7 +133,7 @@ def ballot(election_obj, app_config):
 			part_buf.append(part)
 	
 	Part.objects.bulk_create(part_buf)
-	part_buf.clear()
+	del part_buf
 	
 	part_qs = Part.objects.filter(ballot__election=election,
 		ballot__serial__range=(lo, hi-1))
@@ -177,7 +177,7 @@ def ballot(election_obj, app_config):
 					optionv_buf.append(optionv)
 		
 			OptionV.objects.bulk_create(optionv_buf)
-			optionv_buf.clear()
+			del optionv_buf
 
 
 def _prep_kwargs(model_obj, Model):
