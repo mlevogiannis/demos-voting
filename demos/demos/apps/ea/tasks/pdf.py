@@ -1,8 +1,9 @@
 # File: pdf.py
 
+import math
+
 from os import path
 from io import BytesIO
-from math import ceil
 from subprocess import check_output
 try:
     from urllib.parse import urljoin, quote
@@ -75,7 +76,7 @@ class BallotBuilder:
 		
 		img = ImageReader(filename)
 		w, h = img.getSize()
-		return h / w
+		return float(h) / float(w)
 	
 	@staticmethod
 	def _ellipsize(text, font_name, font_size, width):
@@ -161,15 +162,15 @@ class BallotBuilder:
 	page_width -= w_margin * 2
 	page_height -= h_margin * 2
 	
-	img_size = page_width // 4.5
+	img_size = int(page_width // 4.5)
 	font_size_tag = int(img_size)
 	
-	url_indent = page_width // 20
-	table_top_gap = page_width // 15
-	table_opt_gap = page_width // 50
+	url_indent = int(page_width // 20)
+	table_top_gap = int(page_width // 15)
+	table_opt_gap = int(page_width // 50)
 	
 	long_vc_split = 4
-	long_vc_hyphens = ceil(config.VOTECODE_LEN / long_vc_split) - 1
+	long_vc_hyphens = int(math.ceil(config.VOTECODE_LEN / long_vc_split)) - 1
 	
 	# TrueType fonts
 	
@@ -616,10 +617,10 @@ class BallotBuilder:
 						opt_rows = min(2*(avail_rows-1), data_len-row)
 						incl_ftr = (row + opt_rows == data_len)
 						
-						frst = row // 2
-						last = 2*frst+opt_rows - (2*frst+opt_rows)//2
+						frst = int(row // 2)
+						last = int(2*frst+opt_rows - (2*frst+opt_rows)//2)
 						
-						t = ceil(data_len/2)
+						t = int(math.ceil(data_len/2))
 						
 						optionv1 = data_list[frst: last]
 						
