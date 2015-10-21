@@ -189,7 +189,8 @@ WSGIPythonPath %{app_dir}/
 EOF
 %endif
 
-cat '-' << EOF > %{buildroot}%{_unitdir}/demos-voting-crypto.service
+install -d %{buildroot}%{_unitdir}/
+cat '-' <<EOF > %{buildroot}%{_unitdir}/demos-voting-crypto.service
 [Unit]
 Description=Demos-Voting Crypto
 After=network.service
