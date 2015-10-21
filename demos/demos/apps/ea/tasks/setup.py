@@ -35,7 +35,7 @@ from demos.apps.ea.tasks import crypto, pdf
 from demos.apps.ea.tasks.masks import apply_mask
 from demos.apps.ea.models import Election, Task, RemoteUser
 
-from demos.common.utils import api, base32cf, config, dbsetup, enums
+from demos.common.utils import api, base32cf, config, dbsetup, enums, intc
 from demos.common.utils.permutation import permute
 
 
@@ -131,7 +131,7 @@ def election_setup(election, election_obj, language):
 			# Generate a random credential and compute its hash value
 			
 			credential = os.urandom(config.CREDENTIAL_LEN)
-			credential_int = int.from_bytes(credential, 'big')
+			credential_int = intc.from_bytes(credential, 'big')
 			credential_hash = make_password(credential, hasher='_pbkdf2')
 			
 			ballot_obj = {
@@ -194,14 +194,14 @@ def election_setup(election, election_obj, language):
 							
 							key = base32cf.decode(security_code)
 							bytes = math.ceil(key.bit_length() / 8.0)
-							key = key.to_bytes(bytes, 'big')
+							key = intc.to_bytes(key, bytes, 'big')
 							
 							msg = credential_int+(q_index*max_options)+votecode
 							bytes = math.ceil(msg.bit_length() / 8.0)
-							msg = msg.to_bytes(bytes, 'big')
+							msg = intc.to_bytes(msg, bytes, 'big')
 							
 							hmac_obj = hmac.new(key, msg, digestmod='sha256')
-							digest = int.from_bytes(hmac_obj.digest(), 'big')
+							digest = intc.from_bytes(hmac_obj.digest(), 'big')
 							
 							l_votecode = base32cf.\
 								encode(digest)[-config.VOTECODE_LEN:]
@@ -259,7 +259,7 @@ def election_setup(election, election_obj, language):
 				# tokens of the two parts appear to be completely different.
 				
 				p1 = (serial << (tag_bits + credential_bits)) | \
-					(int.from_bytes(credential, 'big') << tag_bits) | i
+					(intc.from_bytes(credential, 'big') << tag_bits) | i
 				
 				p2 = (~security_code) & ((1 << security_code_bits) - 1)
 				
@@ -336,8 +336,8 @@ def election_setup(election, election_obj, language):
 					
 					int_ = base32cf.decode(security_code) + i
 					bytes_ = math.ceil(int_.bit_length() / 8.0)
-					value = hashlib.sha256(int_.to_bytes(bytes_, 'big'))
-					p_index = int.from_bytes(value.digest(), 'big')
+					value = hashlib.sha256(intc.to_bytes(int_, bytes_, 'big'))
+					p_index = intc.from_bytes(value.digest(), 'big')
 					
 					optionv_list = permute(optionv_list, p_index);
 					

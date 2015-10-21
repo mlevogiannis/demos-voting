@@ -1,7 +1,7 @@
 # File: crypto.py
 
 import socket
-from demos.common.utils import crypto, config
+from demos.common.utils import crypto, config, intc
 
 
 def gen_key(ballots, options):
@@ -84,7 +84,7 @@ def verify_com(key, com, decom):
 def _request_to_response(request, response_oneof):
 	
 	data = request.SerializeToString()
-	size = len(data).to_bytes(4, 'big')
+	size = intc.to_bytes(len(data), 4, 'big')
 	
 	af = getattr(socket, config.CRYPTO_AF)
 	sock = socket.socket(af)
@@ -96,7 +96,7 @@ def _request_to_response(request, response_oneof):
 	sock.shutdown(socket.SHUT_WR)
 	
 	size = _recvall(sock, 4)
-	size = int.from_bytes(size, 'big')
+	size = intc.from_bytes(size, 'big')
 	
 	if size < 1 or size > config.RECV_MAX:
 		raise RuntimeError("demos-crypto: response size out of range")

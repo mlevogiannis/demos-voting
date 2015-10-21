@@ -37,7 +37,7 @@ from django.contrib.auth.hashers import check_password, make_password
 from demos.apps.vbb.models import Election, Question, Ballot, Part, \
 	OptionV, OptionC
 
-from demos.common.utils import api, base32cf, config, dbsetup, enums, hashers
+from demos.common.utils import api, base32cf, config, dbsetup, enums, hashers, intc
 from demos.settings import DEMOS_URL
 
 logger = logging.getLogger(__name__)
@@ -159,7 +159,7 @@ class VoteView(View):
 		serial = (p1 >> credential_bits + tag_bits) & ((1 << serial_bits) - 1)
 		
 		credential = ((p1 >> tag_bits) & ((1 << credential_bits) - 1))
-		credential = credential.to_bytes(config.CREDENTIAL_LEN, 'big')
+		credential = intc.to_bytes(credential, config.CREDENTIAL_LEN, 'big')
 			
 		tag = 'A' if p1 & ((1 << tag_bits) - 1) == 0 else 'B'
 		

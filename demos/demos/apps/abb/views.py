@@ -33,8 +33,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from demos.apps.abb.models import Election, Question, Ballot, Part, \
 	OptionV, OptionC
 
-from demos.common.utils import api, base32cf, config, dbsetup, enums, hashers, \
-	protobuf
+from demos.common.utils import api, base32cf, config, dbsetup, enums, intc, hashers, protobuf
 from demos.common.utils.permutation import permute_ori
 
 logger = logging.getLogger(__name__)
@@ -132,8 +131,8 @@ class AuditView(View):
 						
 						int_ = base32cf.decode(p.security_code) + q.index
 						bytes_ = math.ceil(int_.bit_length() / 8.0)
-						value = hashlib.sha256(int_.to_bytes(bytes_, 'big'))
-						index = int.from_bytes(value.digest(), 'big')
+						value = hashlib.sha256(intc.to_bytes(int_, bytes_, 'big'))
+						index = intc.from_bytes(value.digest(), 'big')
 						
 						options = permute_ori(options, index)
 					

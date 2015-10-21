@@ -4,6 +4,7 @@ import re
 import math
 from os import urandom
 from random import getrandbits
+from demos.common.utils import intc
 
 # Reference: http://www.crockford.com/wrmg/base32.html
 
@@ -65,7 +66,7 @@ def random(length, hyphens=-1, crypto=True):
 	shift_bits = (8 * bytes) - bits
 	
 	if crypto:
-		number = int.from_bytes(urandom(bytes), 'big')
+		number = intc.from_bytes(urandom(bytes), 'big')
 	else:
 		number = getrandbits(bytes * 8)
 	
