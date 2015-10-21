@@ -12,9 +12,11 @@ _chars = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 
 try:
     _translation = str.maketrans('OIL', '011')
+    _str_translate = str.translate
 except AttributeError:
     import string
     _translation = string.maketrans('OIL', '011')
+    _str_translate = string.translate
 
 _validation = re.compile('^[' + _chars + '-' + ']*$')
 
@@ -82,7 +84,7 @@ def normalize(encoded, hyphens=-1):
 	'string' is the string to normalize. ValuefError is raised if there are
 	non-alphabet characters present in the input."""
 	
-	encoded = encoded.upper().translate(_translation)
+	encoded = _str_translate(str(encoded).upper(), _translation)
 	
 	if not _validation.match(encoded):
 		raise ValueError("Non-base32cf digit found")

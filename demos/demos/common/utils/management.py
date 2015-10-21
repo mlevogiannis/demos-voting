@@ -7,6 +7,14 @@ from django.contrib.auth.models import User as LocalUser
 from django.core.management.base import BaseCommand, CommandError
 
 
+# https://docs.python.org/3/library/functions.html#input
+# https://docs.python.org/2/library/functions.html#raw_input
+try:
+    input = raw_input
+except NameError:
+    pass
+
+
 class UserCommand(BaseCommand):
 	help = 'Used to create demos users.'
 	
