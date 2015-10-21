@@ -51,6 +51,7 @@ Summary:        Audit Bulletin Board for Secure Voting
 Group:          Applications/Web
 BuildArch:      noarch
 Requires:       %{name}-common == %{version}
+Requires:       python-protobuf >= 3.0
 
 %package ea
 Summary:        Election Authority for Secure Voting
