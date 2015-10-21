@@ -88,7 +88,7 @@ MUST be installed on separate servers, that do NOT share their storage.
 
 %description common
 
-sdafadsf
+Common files needed for all demos-voting servers
 
 
 %description abb
