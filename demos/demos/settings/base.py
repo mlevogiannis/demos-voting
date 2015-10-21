@@ -210,7 +210,7 @@ DEMOS_CONFIG = {
                 # https://docs.python.org/3/library/socket.html
                 'CRYPTO_AF': 'AF_UNIX',
                                             # e.g.: 'AF_UNIX' or 'AF_INET' or 'AF_INET6'
-                'CRYPTO_ADDR': os.path.expanduser('~/tmp/demos-ea-crypto.sock'),
+                'CRYPTO_ADDR': os.path.expanduser('/tmp/demos-ea-crypto.sock'),
                                             # e.g.: '/tmp/demos.sock' or ('127.0.0.1', 8999)
 
                 # Performance settings, they affect CPU and RAM usage, etc

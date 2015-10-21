@@ -22,6 +22,7 @@ Group:		Applications/Web
 BuildRequires:	python-setuptools
 BuildRequires:  python-devel
 BuildRequires: protobuf-devel, protobuf-compiler
+BuildRequires: systemd-units
 
 %package common
 Summary:        Common files for Secure Voting platform
@@ -188,6 +189,25 @@ WSGIPythonPath %{app_dir}/
 EOF
 %endif
 
+cat '-' << EOF > %{buildroot}%{_unitdir}/demos-voting-crypto.service
+[Unit]
+Description=Demos-Voting Crypto
+After=network.service
+Requisite=network.service
+
+[Service]
+Type=simple
+User=apache
+RestartSec=10
+TimeoutStartSec=1min
+ExecStart=%{app_bindir}/demos-crypto -s unix /tmp/demos-ea-crypto.sock
+
+[Install]
+WantedBy=default.target
+
+EOF
+
+
 %post ea
 NEW_SECRET_KEY=$(python -c 'import os; import base64; print(base64.b64encode(os.urandom(60)))')
 sed -i "s|NO_SECRET_KEY_DEFINED|'$NEW_SECRET_KEY'|" %{_sysconfdir}/%{name}/settings.py
@@ -249,6 +269,7 @@ cd %{app_dir}
 %files ea
 %{app_bindir}/demos-crypto
 %{app_dir}/demos/apps/ea/
+%config %{_unitdir}/demos-voting-crypto.service
 
 %files bds
 %{app_dir}/demos/apps/bds/
