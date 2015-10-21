@@ -3,7 +3,7 @@
 from django.db import models
 from django.core import urlresolvers
 
-from demos.common.utils import config, crypto, enums, fields
+from demos.common.utils import config, enums, fields
 
 
 class Config(models.Model):
@@ -156,7 +156,7 @@ class OptionV(models.Model):
 	long_votecode_hash = models.CharField(max_length=config.HASH_LEN,
 		blank=True, default='')
 	
-	receipt = models.CharField(max_length=config.RECEIPT_LEN)
+	receipt = models.CharField(max_length=config.HASH_LEN)
 	index = models.PositiveSmallIntegerField()
 	
 	# Other model methods and meta options
