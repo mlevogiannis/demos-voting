@@ -1,7 +1,4 @@
 {% load i18n %}
-{% load custom %}
-
-{% if not now_datetime %} {% now as now_datetime %} {% endif %}
 
 <div class="election-box">
     <div class="header">
@@ -11,7 +8,7 @@
             <span class="message"
                 data-start-datetime="{{ object.start_datetime|date:'c' }}"
                 data-end-datetime="{{ object.end_datetime|date:'c' }}"
-                data-now-datetime="{{ now_datetime|date:'c' }}"
+                data-now-datetime="{% if now_datetime %}{{ now_datetime|date:'c' }}{% else %}{% now 'c' %}{% endif %}"
                 data-starts-msg="{% blocktrans with timediff='%s' %}starts in {{ timediff }}{% endblocktrans %}"
                 data-ended-msg="{% blocktrans with timediff='%s' %}ended {{ timediff }} ago{% endblocktrans %}"
                 data-remaining-s-msg="{% blocktrans with timediff='%s' count counter=1 %}{{ timediff }} remaining{% plural %}{{ timediff }} remaining{% endblocktrans %}"
@@ -24,10 +21,9 @@
         </span>
     </div>
     <div class="body clearfix">
-        {% with size=panels|length %}
+        {% widthratio 100 panels|length 10 as width %}
         {% for panel in panels %}
-            <div style="width:{{ 100|div:size|stringformat:'f' }}%;"><div><span>{{ panel.0 }}</span><br><span>{{ panel.1|default:"-" }}</span></div></div>
+            <div style="width:{{ width|slice:':-1' }}.{{ width|slice:'-1:' }}%;"><div><span>{{ panel.0 }}</span><br><span>{{ panel.1|default:"-" }}</span></div></div>
         {% endfor %}
-        {% endwith %}
     </div>
 </div>
