@@ -24,6 +24,7 @@ class Session:
         
         self.s = requests.Session()
         
+        assert app_config.label == usr_from
         self.username = usr_from
         self.password = app_config.get_model('RemoteUser').\
             objects.get(username=server).password
@@ -40,7 +41,7 @@ class Session:
     def login(self):
         
         url = urljoin(self.url, 'auth/login/')
-        r = self.s.get(url)
+        r = self.s.get(url) # won't authenticate, only get the CSRF token
         r.raise_for_status()
         
         payload = {
