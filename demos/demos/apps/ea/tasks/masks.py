@@ -35,6 +35,8 @@ _masks = {
      },
 }
 
+_mask_list_re = re.compile('^__list_(.+)__$')
+
 
 def _apply_mask(obj, app_mask, model_mask):
     
@@ -46,7 +48,7 @@ def _apply_mask(obj, app_mask, model_mask):
             result[key] = value
         
         else:
-            match = re.search('^__list_(.+)__$', key)
+            match = _mask_list_re.search(key)
             if match:
                 model = match.group(1)
                 if model in app_mask:
