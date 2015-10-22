@@ -1,13 +1,19 @@
 # File: enums.py
 
-try:
-    from enum import IntEnum, unique
-except ImportError:
-    class IntEnum:
-        pass
-    
-    def unique(fn):
-        return fn
+from enum import IntEnum, unique
+
+
+# workaround for python2
+
+import six
+
+if six.PY2:
+    class IntEnum(IntEnum):
+        def __str__(self):
+            return str(int(self))
+
+# end of workaround
+
 
 @unique
 class State(IntEnum):
