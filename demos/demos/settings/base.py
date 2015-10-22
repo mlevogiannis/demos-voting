@@ -181,6 +181,10 @@ LOGGING = {
         'django': {
             'handlers': ['mail_admins', 'syslog'],
             'level': 'INFO',
+        },
+        'demos': {
+            'handlers': ['mail_admins', 'syslog'],
+            'level': 'INFO',
         }
     },
 }
@@ -281,6 +285,10 @@ if DEVELOPMENT:
                 'level': 'DEBUG',
             },
             'django.request': {
+                'handlers': ['console'],
+                'level': 'DEBUG',
+            },
+            'demos': {
                 'handlers': ['console'],
                 'level': 'DEBUG',
             },
