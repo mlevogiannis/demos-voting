@@ -284,6 +284,11 @@ if DEVELOPMENT:
                 'handlers': ['console'],
                 'level': 'DEBUG',
             },
+            'django.db.backends': {
+                'handlers': ['console'],
+                'level': 'INFO', # Only change that if you are in deep SQL trouble!
+                'propagate': False,
+            },
         }
     }
 
