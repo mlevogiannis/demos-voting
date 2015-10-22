@@ -358,7 +358,7 @@ class VoteView(View):
             q_options = dict(question_qs.annotate(\
                 Count('optionc')).values_list('index', 'optionc__count'))
             
-            vc_type = int if not election.long_votecodes else str
+            vc_type = int if not election.long_votecodes else string_types
             
             if not (isinstance(vote_obj, dict)
                 and len(vote_obj) == len(q_options)
