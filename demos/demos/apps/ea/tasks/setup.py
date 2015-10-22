@@ -340,7 +340,7 @@ def election_setup(election, election_obj, language):
                     value = hashlib.sha256(intc.to_bytes(int_, bytes_, 'big'))
                     p_index = intc.from_bytes(value.digest(), 'big')
                     
-                    optionv_list = permute(optionv_list, p_index);
+                    optionv_list = permute(optionv_list, p_index)
                     
                     # Set the indices in proper order
                     
