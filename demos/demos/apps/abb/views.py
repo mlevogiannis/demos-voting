@@ -293,7 +293,7 @@ class VoteView(View):
                         raise Exception('Not enough votecodes')
                     
                     if len(vc_list) > question.choices:
-                        raise Exception('Too many enough votecodes')
+                        raise Exception('Too many votecodes')
                     
                     if not election.long_votecodes:
                         optionv_qs = optionv_qs.filter(votecode__in=vc_list)
