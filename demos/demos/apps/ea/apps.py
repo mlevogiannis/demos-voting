@@ -5,5 +5,5 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class AppConfig(_AppConfig):
-	name = 'demos.apps.ea'
-	verbose_name = _('Election Authority')
+    name = 'demos.apps.ea'
+    verbose_name = _('Election Authority')

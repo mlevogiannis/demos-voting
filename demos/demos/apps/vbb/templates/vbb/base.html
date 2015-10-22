@@ -4,21 +4,21 @@
 {% load custom %}
 
 {% block title %}
-	{% trans "Digital Ballot Box" as title %}
-	{{ block.super }}
+    {% trans "Digital Ballot Box" as title %}
+    {{ block.super }}
 {% endblock title %}
 
 {% block header %}
-	{% trans "Digital Ballot Box" as title %}
-	{% url "vbb:home" as url %}
-	{{ block.super }}
+    {% trans "Digital Ballot Box" as title %}
+    {% url "vbb:home" as url %}
+    {{ block.super }}
 {% endblock header %}
 
 {% block navbar %}
-	{% tuple "vbb:home" _("Home") False as home %}
-	{% tuple "vbb:vote" _("Vote") True as vote %}
-	{% tuple "vbb:qrcode" _("Read QR Code") False as qrcode %}
-	{% tuple home vote qrcode as links %}
-	{{ block.super }}
+    {% tuple "vbb:home" _("Home") False as home %}
+    {% tuple "vbb:vote" _("Vote") True as vote %}
+    {% tuple "vbb:qrcode" _("Read QR Code") False as qrcode %}
+    {% tuple home vote qrcode as links %}
+    {{ block.super }}
 {% endblock navbar %}
 

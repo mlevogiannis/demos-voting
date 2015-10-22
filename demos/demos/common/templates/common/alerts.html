@@ -2,9 +2,9 @@
 
 {% if request.GET.error == "id" %}
 <div class="alert alert-danger alert-dismissible fade in" role="alert">
-	<button type="button" class="close" data-dismiss="alert" aria-label="{% trans 'Close' %}">
-		<span aria-hidden="true">&times;</span>
-	</button>
-	<h5><strong>{% trans "Error" %}</strong>: {% trans "The election ID you entered is invalid." %}</h5>
+    <button type="button" class="close" data-dismiss="alert" aria-label="{% trans 'Close' %}">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    <h5><strong>{% trans "Error" %}</strong>: {% trans "The election ID you entered is invalid." %}</h5>
 </div>
 {% endif%}

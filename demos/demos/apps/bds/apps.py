@@ -5,5 +5,5 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class AppConfig(_AppConfig):
-	name = 'demos.apps.bds'
-	verbose_name = _('Ballot Distribution Center')
+    name = 'demos.apps.bds'
+    verbose_name = _('Ballot Distribution Center')

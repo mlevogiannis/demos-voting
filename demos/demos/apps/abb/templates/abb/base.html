@@ -4,21 +4,21 @@
 {% load custom %}
 
 {% block title %}
-	{% trans "Audit and Results" as title %}
-	{{ block.super }}
+    {% trans "Audit and Results" as title %}
+    {{ block.super }}
 {% endblock title %}
 
 {% block header %}
-	{% trans "Audit and Results" as title %}
-	{% url "abb:home" as url %}
-	{{ block.super }}
+    {% trans "Audit and Results" as title %}
+    {% url "abb:home" as url %}
+    {{ block.super }}
 {% endblock header %}
 
 {% block navbar %}
-	{% tuple "abb:home" _("Home") False as home %}
-	{% tuple "abb:audit" _("Audit") True as audit %}
-	{% tuple "abb:results" _("Results") True as results %}
-	{% tuple home audit results as links %}
-	{{ block.super }}
+    {% tuple "abb:home" _("Home") False as home %}
+    {% tuple "abb:audit" _("Audit") True as audit %}
+    {% tuple "abb:results" _("Results") True as results %}
+    {% tuple home audit results as links %}
+    {{ block.super }}
 {% endblock navbar %}
 

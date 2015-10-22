@@ -1,161 +1,161 @@
 .question li .input-group {
-	cursor: pointer;
+    cursor: pointer;
 }
 
 .question > div:last-child {
-	padding-top: 12px;
+    padding-top: 12px;
 }
 
 #question-table tr > td:last-child button,
 .question .option .input-group-addon:last-child {
-	width: 56px;
+    width: 56px;
 }
 
 .question-entry > td:hover,
 .question-entry > th:hover {
-	cursor: pointer;
+    cursor: pointer;
 }
 
 .main-header-small {
-	margin-top: 40px;
-	margin-bottom: 20px;
+    margin-top: 40px;
+    margin-bottom: 20px;
 }
 
 .modal-header-small {
-	margin-top: 10px;
-	margin-bottom: 20px;
+    margin-top: 10px;
+    margin-bottom: 20px;
 }
 
 .alert > ul > li {
-	margin-left: 20px;
-	margin-bottom: 5px;
+    margin-left: 20px;
+    margin-bottom: 5px;
 }
 
 .option-add-wrapper {
-	text-align: right;
+    text-align: right;
 }
 
 @media (max-width: 479px) {
-	
-	.modal-footer,
-	.option-add-wrapper {
-		text-align: center;
-	}
-	
-	.option-add-wrapper {
-		margin-top: 24px;
-	}
+    
+    .modal-footer,
+    .option-add-wrapper {
+        text-align: center;
+    }
+    
+    .option-add-wrapper {
+        margin-top: 24px;
+    }
 }
 
 .option-sortable-placeholder {
-	height: 34px;
-	margin-top: 15px;
-	margin-bottom: 15px;
-	border-radius: 4px;
-	border: 1px dashed #cccccc;
+    height: 34px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    border: 1px dashed #cccccc;
 }
 
 .question-sortable-placeholder {
-	height: 47px;
+    height: 47px;
 }
 
 .modal-pdf > .modal-content {
-	height: 100%;
+    height: 100%;
 }
 
 .modal-pdf > .modal-content > .modal-body {
-	padding: 0px;
-	height: calc(100% - 130px);
+    padding: 0px;
+    height: calc(100% - 130px);
 }
 
 @media (max-width: 767px) {
-	#pdf-modal .modal-dialog {
-		height: calc(100% - 20px);
-	}
+    #pdf-modal .modal-dialog {
+        height: calc(100% - 20px);
+    }
 }
 
 @media (min-width: 768px) {
-	#pdf-modal .modal-dialog {
-		height: calc(100% - 60px);
-	}
+    #pdf-modal .modal-dialog {
+        height: calc(100% - 60px);
+    }
 }
 
 #pdf-modal .modal-body p {
-	margin: 0px;
+    margin: 0px;
 }
 
 #pdf-modal .modal-body > .pdf-error,
 #pdf-modal .modal-body > .pdf-form-error {
-	margin-top: 16px;
-	margin-bottom: 16px;
+    margin-top: 16px;
+    margin-bottom: 16px;
 }
 
 #pdf-modal .modal-body > .pdf-spinner {
-	position: relative;
+    position: relative;
 }
 
 #pdf-modal .modal-body > .pdf-spinner > p {
-	padding-top: 50px;
+    padding-top: 50px;
 }
 
 #form-buttons {
-	padding-top: 8px;
+    padding-top: 8px;
 }
 
 #form-buttons button {
-	overflow: hidden;
-	white-space: nowrap;
-	text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 /* -------------------------------------------------------------------------- */
 
 .input-group-checkbox {
-	width: 100%;
+    width: 100%;
 }
 
 .input-group-checkbox > .input-group-btn,
 .input-group-checkbox > .input-group-addon {
-	width: 50%;
+    width: 50%;
 }
 
 .input-group-checkbox > .input-group-addon {
-	text-align: left;
+    text-align: left;
 }
 
 .input-group-checkbox > .input-group-btn > .btn {
-	width: 50%;
-	text-align: center;
+    width: 50%;
+    text-align: center;
 }
 
 .input-group-spinner > input {
-	z-index: 10 !important;
+    z-index: 10 !important;
 }
 
 .input-group-spinner > input:focus {
-	z-index: 10!important;
+    z-index: 10!important;
 }
 
 .input-group-spinner > .input-group-btn > .btn {
-	padding: 8px;
-	display: block;
-	border-radius: 0;
+    padding: 8px;
+    display: block;
+    border-radius: 0;
 }
 
 .input-group-spinner > .input-group-btn > .btn:first-child {
-	border-top-right-radius: 4px !important;
+    border-top-right-radius: 4px !important;
 }
 
 .input-group-spinner > .input-group-btn > .btn:last-child {
-	margin-top: -2px;
-	border-bottom-right-radius: 4px !important;
+    margin-top: -2px;
+    border-bottom-right-radius: 4px !important;
 }
 
 .input-group-spinner > .input-group-btn .glyphicon {
-	top: 4px;
-	left: 4px;
-	font-size: 8px;
-	position: absolute;
+    top: 4px;
+    left: 4px;
+    font-size: 8px;
+    position: absolute;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -163,83 +163,83 @@
 /* http://bootsnipp.com/snippets/featured/material-design-switch */
 
 .input-group-addon.material-switch {
-	width: 100%;
-	height: 34px;
-	border-left: 1px solid #ccc ;
+    width: 100%;
+    height: 34px;
+    border-left: 1px solid #ccc ;
 }
 
 .material-switch > div {
-	width: 100%;
+    width: 100%;
 }
 
 .material-switch > div > input[type="checkbox"] {
-	display: none;   
+    display: none;   
 }
 
 .material-switch > div > label {
-	cursor: pointer;
-	height: 0px;
-	position: relative;
-	display: block;
-	width: 100%;
+    cursor: pointer;
+    height: 0px;
+    position: relative;
+    display: block;
+    width: 100%;
 }
 
 .material-switch > div > label::before {
-	background: rgb(0, 0, 0);
-	border-radius: 8px;
-	-webkit-bbox-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
-	-moz-box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
-	box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
-	content: '';
-	height: 16px;
-	width: 40px;
-	margin-top: -5.5px;
-	position: absolute;
-	opacity: 0.3;
-	-webkit-transition: all 0.4s ease-in-out;
-	-moz-transition: all 0.4s ease-in-out;
-	-o-transition: all 0.4s ease-in-out;
-	transition: all 0.4s ease-in-out;
-	top: -5px;
-	right: calc(50% - 20px);
+    background: rgb(0, 0, 0);
+    border-radius: 8px;
+    -webkit-bbox-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+    box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+    content: '';
+    height: 16px;
+    width: 40px;
+    margin-top: -5.5px;
+    position: absolute;
+    opacity: 0.3;
+    -webkit-transition: all 0.4s ease-in-out;
+    -moz-transition: all 0.4s ease-in-out;
+    -o-transition: all 0.4s ease-in-out;
+    transition: all 0.4s ease-in-out;
+    top: -5px;
+    right: calc(50% - 20px);
 }
 
 .material-switch > div > label::after {
-	background: rgb(255, 255, 255);
-	border-radius: 16px;
-	-webkit-box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
-	-moz-box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
-	box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
-	content: '';
-	height: 12px;
-	width: 12px;
-	position: absolute;
-	-webkit-transition: all 0.3s ease-in-out;
-	-moz-transition: all 0.3s ease-in-out;
-	-o-transition: all 0.3s ease-in-out;
-	transition: all 0.3s ease-in-out;
-	top: -8.5px;
-	right: calc(50% + 6px);
+    background: rgb(255, 255, 255);
+    border-radius: 16px;
+    -webkit-box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+    -moz-box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+    content: '';
+    height: 12px;
+    width: 12px;
+    position: absolute;
+    -webkit-transition: all 0.3s ease-in-out;
+    -moz-transition: all 0.3s ease-in-out;
+    -o-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+    top: -8.5px;
+    right: calc(50% + 6px);
 }
 
 .material-switch > div > input[type="checkbox"]:checked + label::before {
-	background: inherit;
-	opacity: 0.5;
+    background: inherit;
+    opacity: 0.5;
 }
 
 .material-switch > div > input[type="checkbox"]:checked + label::after {
-	background: inherit;
-	right: calc(50% - 18px);
+    background: inherit;
+    right: calc(50% - 18px);
 }
 
 /* -------------------------------------------------------------------------- */
 
 @media (min-width: 768px) and (max-width: 991px) {
 
-	.form-group > label[for="id_election-long_votecodes"] + .input-group > .input-group-addon:first-child {
-		max-width: 155px;
-		overflow: hidden;
-		white-space: nowrap;
-		text-overflow: ellipsis;
-	}
+    .form-group > label[for="id_election-long_votecodes"] + .input-group > .input-group-addon:first-child {
+        max-width: 155px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
 }
