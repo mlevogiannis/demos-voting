@@ -193,11 +193,11 @@ def election_setup(election, election_obj, language):
                         for votecode in votecode_list:
                             
                             key = base32cf.decode(security_code)
-                            bytes = math.ceil(key.bit_length() / 8.0)
+                            bytes = int(math.ceil(key.bit_length() / 8.0))
                             key = intc.to_bytes(key, bytes, 'big')
                             
                             msg = credential_int+(q_index*max_options)+votecode
-                            bytes = math.ceil(msg.bit_length() / 8.0)
+                            bytes = int(math.ceil(msg.bit_length() / 8.0))
                             msg = intc.to_bytes(msg, bytes, 'big')
                             
                             hmac_obj = hmac.new(key, msg, digestmod='sha256')
@@ -335,7 +335,7 @@ def election_setup(election, election_obj, language):
                     # the question's index, converted back to an integer.
                     
                     int_ = base32cf.decode(security_code) + i
-                    bytes_ = math.ceil(int_.bit_length() / 8.0)
+                    bytes_ = int(math.ceil(int_.bit_length() / 8.0))
                     value = hashlib.sha256(intc.to_bytes(int_, bytes_, 'big'))
                     p_index = intc.from_bytes(value.digest(), 'big')
                     
