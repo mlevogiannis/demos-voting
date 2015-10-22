@@ -153,7 +153,7 @@ class OptionV(models.Model):
     
     votecode = models.PositiveSmallIntegerField()
     
-    long_votecode_hash = models.CharField(max_length=config.HASH_LEN,
+    l_votecode_hash = models.CharField(max_length=config.HASH_LEN,
         blank=True, default='')
     
     receipt = models.CharField(max_length=config.HASH_LEN)

@@ -19,7 +19,7 @@ _masks = {
         'OptionC': ['text', 'index'],
         'Ballot': ['serial', 'credential_hash'],
         'Part': ['tag', 'security_code_hash2'],
-        'OptionV' : ['votecode', 'long_votecode_hash', 'com', 'zk1', 'index',
+        'OptionV' : ['votecode', 'l_votecode_hash', 'com', 'zk1', 'index',
             'question'],
      },
     
@@ -30,7 +30,7 @@ _masks = {
         'OptionC': ['text', 'index'],
         'Ballot': ['serial', 'credential_hash'],
         'Part': ['tag', 'security_code_hash2'],
-        'OptionV' : ['votecode', 'long_votecode_hash', 'receipt', 'index',
+        'OptionV' : ['votecode', 'l_votecode_hash', 'receipt', 'index',
             'question'],
      },
 }

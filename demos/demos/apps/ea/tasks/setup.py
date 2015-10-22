@@ -228,8 +228,8 @@ def election_setup(election, election_obj, language):
                         
                         optionv_obj = {
                             'votecode': votecode,
-                            'long_votecode': l_votecode,
-                            'long_votecode_hash': l_votecode_hash,
+                            'l_votecode': l_votecode,
+                            'l_votecode_hash': l_votecode_hash,
                             'receipt': receipt,
                             'com': com,
                             'decom': decom,

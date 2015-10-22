@@ -399,7 +399,7 @@ class VoteView(View):
                         # Get all long votecode hashes and receipts
                         
                         optionvs = list(optionv_qs.\
-                            values_list('long_votecode_hash', 'receipt'))
+                            values_list('l_votecode_hash', 'receipt'))
                         
                         vc_hashes, receipts = [list(o) for o in zip(*optionvs)]
                         

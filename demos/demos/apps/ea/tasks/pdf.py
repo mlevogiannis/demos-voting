@@ -510,7 +510,7 @@ class BallotBuilder:
             
             table_s_list.append((table_hdr, table_ftr))
             
-        vc_type = 'votecode' if not self.long_votecodes else 'long_votecode'
+        vc_type = 'votecode' if not self.long_votecodes else 'l_votecode'
         
         # Iterate over all parts and fill element_list
         

@@ -135,6 +135,9 @@ class CreateView(View):
                 q_options_list = [len(question_obj['__list_OptionC__'])
                     for _question_obj in election_obj['__list_Question__']]
                 
+                vc_type = 'votecode' \
+                    if not election_obj['long_votecodes'] else 'l_votecode'
+                
                 # Create a sample ballot. Since this is not a real ballot,
                 # pseudo-random number generators are used instead of urandom.
                 
@@ -163,11 +166,9 @@ class CreateView(View):
                         if not election_obj['long_votecodes']:
                             votecode_list = list(range(options))
                             random.shuffle(votecode_list)
-                            vc_type = 'votecode'
                         else:
                             votecode_list=[base32cf.random(config.VOTECODE_LEN,
                                 crypto=False) for _ in range(options)]
-                            vc_type = 'long_votecode'
                         
                         for votecode in votecode_list:
                             

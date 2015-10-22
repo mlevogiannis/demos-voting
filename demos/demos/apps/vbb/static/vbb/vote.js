@@ -363,9 +363,9 @@ $("#vote-submit").click(function(e) {
         // long votecode version: check if option already has a long votecode
         // (e.g.: the user may have clicked cancel before), if not, generate it
         
-        var long_votecode = option.data("long_votecode");
+        var l_votecode = option.data("l_votecode");
         
-        if (typeof long_votecode === "undefined") {
+        if (typeof l_votecode === "undefined") {
             
             var q_index = parseInt(question.data("index"));
             var msg_extra = (q_index * max_options) + votecode;
@@ -373,13 +373,13 @@ $("#vote-submit").click(function(e) {
             var hmac = new sjcl.misc.hmac(security_code, sjcl.hash.sha256);
             hmac.update(sjcl.bn.fromBits(credential).add(msg_extra).toBits());
             
-            long_votecode = sjcl.codec.base32cf.fromBits(hmac.digest());
-            long_votecode = long_votecode.slice(-votecode_len);
+            l_votecode = sjcl.codec.base32cf.fromBits(hmac.digest());
+            l_votecode = l_votecode.slice(-votecode_len);
             
-            option.data("long_votecode", long_votecode);
+            option.data("l_votecode", l_votecode);
         }
         
-        return [sjcl.codec.base32cf.hyphen(long_votecode, 4)];
+        return [sjcl.codec.base32cf.hyphen(l_votecode, 4)];
     }
     
     prep_modal_with_q(votecode_calc, "#confirm-modal");
@@ -407,7 +407,7 @@ $("#vote-confirm").click(function(e) {
             
             var votecode = (!long_votecodes) ? 
                 parseInt($(this).data("votecode")) :
-                String($(this).data("long_votecode"));
+                String($(this).data("l_votecode"));
             
             vc_list.push(votecode);
         });
@@ -433,7 +433,7 @@ $("#vote-confirm").click(function(e) {
                 
                 var votecode = (!long_votecodes) ? 
                     parseInt(option.data("votecode")) :
-                    String(option.data("long_votecode"));
+                    String(option.data("l_votecode"));
                 
                 var receipt = data[q_index].shift();
                 

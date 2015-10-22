@@ -164,10 +164,10 @@ class OptionV(models.Model):
     
     votecode = models.PositiveSmallIntegerField()
     
-    long_votecode = models.CharField(max_length=config.VOTECODE_LEN,
+    l_votecode = models.CharField(max_length=config.VOTECODE_LEN,
         blank=True, default='')
     
-    long_votecode_hash = models.CharField(max_length=config.HASH_LEN,
+    l_votecode_hash = models.CharField(max_length=config.HASH_LEN,
         blank=True, default='')
     
     com = fields.ProtoField(cls=crypto.Com)
