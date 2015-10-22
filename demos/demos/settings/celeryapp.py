@@ -9,7 +9,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'demos.settings')
 
 from django.conf import settings
 
-app = Celery('demos', backend='amqp', broker='amqp://')
+app = Celery('demos')
 
 # Using a string here means the worker will not have to
 # pickle the object when using Windows.

@@ -105,6 +105,19 @@ DATABASES = {
     }
 }
 
+BROKER_URL = 'amqp://'
+CELERY_RESULT_BACKEND = 'amqp'
+# CELERY_TASK_SERIALIZER = 'json'
+# CELERY_ACCEPT_CONTENT = ['json', 'msgpack']
+
+if DEVELOPMENT:
+    # Alternative config, only using Django + existing db
+    # Note: introduces dependency on python-SQLAlchemy
+    BROKER_URL = 'django://'
+    INSTALLED_APPS.append('kombu.transport.django')
+    CELERY_RESULT_BACKEND='db+postgresql://%(USER)s:%(PASSWORD)s@%(HOST)s:%(PORT)s/%(NAME)s' \
+                                % DATABASES['default']
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
