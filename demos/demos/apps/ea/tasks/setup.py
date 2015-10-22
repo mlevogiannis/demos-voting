@@ -200,7 +200,7 @@ def election_setup(election, election_obj, language):
                             bytes = int(math.ceil(msg.bit_length() / 8.0))
                             msg = intc.to_bytes(msg, bytes, 'big')
                             
-                            hmac_obj = hmac.new(key, msg, digestmod='sha256')
+                            hmac_obj = hmac.new(key, msg, hashlib.sha256)
                             digest = intc.from_bytes(hmac_obj.digest(), 'big')
                             
                             l_votecode = base32cf.\
