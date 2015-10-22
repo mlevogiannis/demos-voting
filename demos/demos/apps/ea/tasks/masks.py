@@ -18,8 +18,9 @@ _masks = {
         'Question': ['text', 'key', 'index', 'choices'],
         'OptionC': ['text', 'index'],
         'Ballot': ['serial', 'credential_hash'],
-        'Part': ['tag', 'security_code_hash2'],
-        'OptionV' : ['votecode', 'l_votecode_hash', 'com', 'zk1', 'index',
+        'Part': ['tag', 'security_code_hash2', 'l_votecode_salt', \
+            'l_votecode_iterations'],
+        'OptionV' : ['votecode', 'l_votecode_hash', 'com', 'zk1', 'index', \
             'question'],
      },
     
@@ -29,8 +30,9 @@ _masks = {
         'Question': ['text', 'index', 'columns', 'choices'],
         'OptionC': ['text', 'index'],
         'Ballot': ['serial', 'credential_hash'],
-        'Part': ['tag', 'security_code_hash2'],
-        'OptionV' : ['votecode', 'l_votecode_hash', 'receipt', 'index',
+        'Part': ['tag', 'security_code_hash2', 'l_votecode_salt', \
+            'l_votecode_iterations'],
+        'OptionV' : ['votecode', 'l_votecode_hash', 'receipt', 'index', \
             'question'],
      },
 }

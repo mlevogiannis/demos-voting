@@ -32,7 +32,6 @@ from django.views.generic import View
 from django.core.exceptions import ValidationError
 from django.utils.decorators import method_decorator
 from django.core.urlresolvers import reverse
-from django.contrib.auth.hashers import check_password, make_password
 
 from demos.apps.vbb.models import Election, Question, Ballot, Part, \
     OptionV, OptionC
@@ -40,6 +39,8 @@ from demos.apps.vbb.models import Election, Question, Ballot, Part, \
 from demos.common.utils import api, base32cf, config, dbsetup, enums, hashers, intc
 from demos.settings import DEMOS_URL
 
+
+hasher = hashers.PBKDF2Hasher()
 logger = logging.getLogger(__name__)
 app_config = apps.get_app_config('vbb')
 
@@ -175,7 +176,7 @@ class VoteView(View):
         
         retval.append(ballot)
         
-        if not check_password(credential, ballot.credential_hash):
+        if not hasher.verify(credential, ballot.credential_hash):
             raise VoteView.Error(VoteView.State.INVALID_VOTE_TOKEN, *retval)
         
         # Get both part objects and verify the given security code. The first
@@ -190,15 +191,14 @@ class VoteView(View):
             raise VoteView.Error(VoteView.State.SERVER_ERROR, *retval)
         
         retval.append(part_qs)
-        part2 = part_qs.last()
-        
-        salt = part2.security_code_hash2.split('$', 3)[2][::-1]
-        password = make_password(security_code, salt, hasher='_pbkdf2')
-        hash = password.split('$', 3)[3]
-        
         retval.append(b64encode(credential).decode())
         
-        if not check_password(hash, part2.security_code_hash2):
+        part2 = part_qs.last()
+        
+        _, salt, iterations = part2.security_code_hash2.split('$')
+        hash, _, _ = hasher.encode(security_code, salt[::-1], iterations, True)
+        
+        if not hasher.verify(hash, part2.security_code_hash2):
             raise VoteView.Error(VoteView.State.INVALID_VOTE_TOKEN, *retval)
         
         retval.append(security_code)
@@ -267,7 +267,7 @@ class VoteView(View):
             max_options = question_qs.\
                 annotate(Count('optionc')).aggregate(Max('optionc__count'))
             abb_url = urljoin(DEMOS_URL['abb'], quote('%s/' % election_id))
-            security_code_hash2_split = part1.security_code_hash2.split('$', 3)
+            security_code_hash2_split = part1.security_code_hash2.split('$')
             
             context = {
                 'state': VoteView.State.NO_ERROR.value,
@@ -279,8 +279,8 @@ class VoteView(View):
                 'credential': credential,
                 'votecode_len': config.VOTECODE_LEN,
                 'max_options': max_options['optionc__count__max'],
-                'sc_iterations': security_code_hash2_split[1],
-                'sc_salt': security_code_hash2_split[2][::-1],
+                'sc_iterations': security_code_hash2_split[2],
+                'sc_salt': security_code_hash2_split[1][::-1],
                 'sc_length': config.SECURITY_CODE_LEN,
             }
         
@@ -333,7 +333,7 @@ class VoteView(View):
             if not isinstance(hash, string_types):
                 return http.JsonResponse(error, status=422)
             
-            if not check_password(hash, part1.security_code_hash2):
+            if not hasher.verify(hash, part1.security_code_hash2):
                 return http.HttpResponseForbidden()
             
             # Return a list of questions, where each question's element is a
@@ -373,7 +373,6 @@ class VoteView(View):
             # Verify votecodes, save vote and respond with the receipts
             
             response_obj = {}
-            hasher = hashers.CustomPBKDF2PasswordHasher()
             
             try:
                 for question in question_qs.iterator():
@@ -381,46 +380,33 @@ class VoteView(View):
                     optionv_qs = OptionV.objects.\
                         filter(part=part1, question=question)
                     
-                    votecode_list = vote_obj[str(question.index)]
+                    vc_type = 'votecode'
+                    vc_list = vote_obj[str(question.index)]
                     
-                    if not election.long_votecodes:
+                    # Long votecode version: use hashes instead of votecodes
+                    
+                    if election.long_votecodes:
                         
-                        # Get only the requested short votecodes and receipts
+                        vc_list = [hasher.encode(vc, part1.l_votecode_salt, \
+                            part1.l_votecode_iterations, True)[0] \
+                            for vc in vc_list]
                         
-                        optionvs = dict(optionv_qs.filter(votecode__in=\
-                            votecode_list).values_list('votecode', 'receipt'))
-                        
-                        # Return receipt list in the correct order
-                        
-                        receipt_list = [optionvs[vc] for vc in votecode_list]
-                        
-                    else:
-                        
-                        # Get all long votecode hashes and receipts
-                        
-                        optionvs = list(optionv_qs.\
-                            values_list('l_votecode_hash', 'receipt'))
-                        
-                        vc_hashes, receipts = [list(o) for o in zip(*optionvs)]
-                        
-                        # Hash and compare all input votecodes with the ones in
-                        # the list of hashes. Return the corresponding receipts.
-                        
-                        receipt_list = []
-                        
-                        for votecode in votecode_list:
-                        
-                            i = hasher.verify_list(votecode, vc_hashes)
-                            if i == -1: break
-                            
-                            del vc_hashes[i]
-                            receipt = receipts.pop(i)
-                            
-                            receipt_list.append(receipt)
+                        vc_type = 'l_' + vc_type + '_hash'
+                    
+                    # Get options for the requested votecodes
+                    
+                    vc_filter = {vc_type + '__in': vc_list}
+                    
+                    optionvs = dict(optionv_qs.filter(**vc_filter).\
+                        values_list(vc_type, 'receipt'))
+                    
+                    # Return receipt list in the correct order
+                    
+                    receipt_list = [optionvs[vc] for vc in vc_list]
                     
                     # If lengths do not match, at least one votecode was invalid
                     
-                    if len(receipt_list) != len(votecode_list):
+                    if len(receipt_list) != len(vc_list):
                         raise VoteView.Error(VoteView.State.REQUEST_ERROR)
                     
                     response_obj[str(question.index)] = receipt_list

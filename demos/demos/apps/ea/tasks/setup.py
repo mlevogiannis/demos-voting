@@ -23,7 +23,6 @@ from google.protobuf import message
 
 from django.apps import apps
 from django.utils import translation
-from django.contrib.auth.hashers import make_password
 from django.core.serializers.json import DjangoJSONEncoder
 
 from billiard.pool import Pool
@@ -37,6 +36,7 @@ from demos.apps.ea.models import Election, Task, RemoteUser
 
 from demos.common.utils import api, base32cf, config, dbsetup, enums, intc
 from demos.common.utils.permutation import permute
+from demos.common.utils.hashers import PBKDF2Hasher
 
 
 @shared_task(ignore_result=True)
@@ -51,7 +51,9 @@ def election_setup(election, election_obj, language):
     token_bits = serial_bits + credential_bits + tag_bits + security_code_bits
     pad_bits = int(math.ceil(token_bits / 5.0) * 5 - token_bits)
     
+    hasher = PBKDF2Hasher()
     rand = random.SystemRandom()
+    
     builder = pdf.BallotBuilder(election_obj)
     
     process_pool = Pool()
@@ -132,7 +134,7 @@ def election_setup(election, election_obj, language):
             
             credential = os.urandom(config.CREDENTIAL_LEN)
             credential_int = intc.from_bytes(credential, 'big')
-            credential_hash = make_password(credential, hasher='_pbkdf2')
+            credential_hash = hasher.encode(credential)
             
             ballot_obj = {
                 'serial': serial,
@@ -150,16 +152,18 @@ def election_setup(election, election_obj, language):
                 
                 security_code = base32cf.random(config.SECURITY_CODE_LEN)
                 
-                temp = make_password(security_code, hasher='_pbkdf2')
-                salt, hash = temp.split('$')[2:]
-                salt = salt[::-1]
+                hash, salt, _ = hasher.encode(security_code, split=True)
+                security_code_hash2 = hasher.encode(hash, salt[::-1])
                 
-                security_code_hash2 = make_password(hash,salt,hasher='_pbkdf2')
+                l_votecode_salt = hasher.salt()
+                l_votecode_iterations = hasher.iterations
                 
                 part_obj = {
                     'tag': tag,
                     'security_code': security_code,
                     'security_code_hash2': security_code_hash2,
+                    'l_votecode_salt': l_votecode_salt,
+                    'l_votecode_iterations': l_votecode_iterations,
                     '__list_Question__': [],
                 }
                 
@@ -188,8 +192,6 @@ def election_setup(election, election_obj, language):
                         # votecodes across all questions. All votecode hashes
                         # of a question in a ballot's part share the same salt.
                         
-                        salt = None
-                        
                         for votecode in votecode_list:
                             
                             key = base32cf.decode(security_code)
@@ -206,11 +208,8 @@ def election_setup(election, election_obj, language):
                             l_votecode = base32cf.\
                                 encode(digest)[-config.VOTECODE_LEN:]
                             
-                            l_votecode_hash = make_password(l_votecode,
-                                salt=salt, hasher='_pbkdf2')
-                            
-                            if salt is None:
-                                salt = l_votecode_hash.split('$', 3)[2]
+                            l_votecode_hash, _, _ = hasher.encode(l_votecode, \
+                                l_votecode_salt, l_votecode_iterations, True)
                             
                             l_votecode_list.append((l_votecode,l_votecode_hash))
                     

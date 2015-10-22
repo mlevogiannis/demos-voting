@@ -96,6 +96,14 @@ class Part(models.Model):
     tag = models.CharField(max_length=1, choices=(('A', 'A'), ('B', 'B')))
     security_code_hash2 = models.CharField(max_length=config.HASH_LEN)
     
+    # OptionV common data
+    
+    l_votecode_salt = models.CharField(max_length=config.HASH_LEN,
+        blank=True, default='')
+    
+    l_votecode_iterations = models.PositiveIntegerField(null=True,
+        blank=True, default=None)
+    
     # Other model methods and meta options
     
     def __str__(self):

@@ -27,7 +27,6 @@ from django.db.models.query import QuerySet
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.utils.decorators import method_decorator
 from django.core.urlresolvers import reverse
-from django.contrib.auth.hashers import check_password, make_password
 from django.core.serializers.json import DjangoJSONEncoder
 
 from demos.apps.abb.models import Election, Question, Ballot, Part, \
@@ -36,6 +35,8 @@ from demos.apps.abb.models import Election, Question, Ballot, Part, \
 from demos.common.utils import api, base32cf, config, dbsetup, enums, intc, hashers, protobuf
 from demos.common.utils.permutation import permute_ori
 
+
+hasher = hashers.PBKDF2Hasher()
 logger = logging.getLogger(__name__)
 app_config = apps.get_app_config('abb')
 
@@ -264,22 +265,19 @@ class VoteView(View):
             
             # Verify ballot's credential
             
-            if not check_password(b_credential, ballot.credential_hash):
+            if not hasher.verify(b_credential, ballot.credential_hash):
                 raise Exception('Invalid ballot credential')
             
             # Verify part2's security code
             
-            salt = part2.security_code_hash2.split('$', 3)[2][::-1]
-            password = make_password(p2_security_code, salt, hasher='_pbkdf2')
-            hash = password.split('$', 3)[3]
+            _, salt, iterations = part2.security_code_hash2.split('$')
+            hash,_,_=hasher.encode(p2_security_code,salt[::-1],iterations,True)
             
-            if not check_password(hash, part2.security_code_hash2):
+            if not hasher.verify(hash, part2.security_code_hash2):
                 raise Exception('Invalid part security code')
             
             # Verify vote's correctness and save it to the db in an atomic
             # transaction. If anything fails, rollback and return the error.
-            
-            hasher = hashers.CustomPBKDF2PasswordHasher()
             
             with transaction.atomic():
                 for question in question_qs.iterator():
@@ -287,6 +285,7 @@ class VoteView(View):
                     optionv_qs = OptionV.objects.\
                         filter(part=part1, question=question)
                     
+                    vc_type = 'votecode'
                     vc_list = p1_votecodes[str(question.index)]
                     
                     if len(vc_list) < 1:
@@ -295,33 +294,20 @@ class VoteView(View):
                     if len(vc_list) > question.choices:
                         raise Exception('Too many votecodes')
                     
-                    if not election.long_votecodes:
-                        optionv_qs = optionv_qs.filter(votecode__in=vc_list)
+                    # Long votecode version: use hashes instead of votecodes
+                    
+                    if election.long_votecodes:
                         
-                    else:
-                        # Get all long votecode hashes and receipts
+                        vc_list = [hasher.encode(vc, part1.l_votecode_salt, \
+                            part1.l_votecode_iterations, True)[0] \
+                            for vc in vc_list]
                         
-                        optionvs = list(optionv_qs.\
-                            values_list('index', 'long_votecode_hash'))
-                        
-                        indices, vc_hashes = [list(o) for o in zip(*optionvs)]
-                        
-                        # Hash and compare all input votecodes with the ones in
-                        # the list of hashes. Return the corresponding indices.
-                        
-                        index_list = []
-                        
-                        for votecode in vc_list:
-                        
-                            i = hasher.verify_list(votecode, vc_hashes)
-                            if i == -1: break
-                            
-                            del vc_hashes[i]
-                            index = indices.pop(i)
-                            
-                            index_list.append(index)
-                        
-                        optionv_qs = optionv_qs.filter(index__in=index_list)
+                        vc_type = 'l_' + vc_type + '_hash'
+                    
+                    # Get options for the requested votecodes
+                    
+                    vc_filter = {vc_type + '__in': vc_list}
+                    optionv_qs = optionv_qs.filter(**vc_filter)
                     
                     # If lengths do not match, at least one votecode was invalid
                     
