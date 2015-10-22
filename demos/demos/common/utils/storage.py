@@ -38,7 +38,7 @@ class TarFileStorage(Storage):
         self.tar_permissions_mode = tar_permissions_mode
     
     def _name_split(self, name):
-        tarname, filename = name.split('/', maxsplit=1)
+        tarname, filename = name.split('/', 1)
         tarname = os.path.join(self.location, tarname) + '.tar'
         return tarname, filename
     

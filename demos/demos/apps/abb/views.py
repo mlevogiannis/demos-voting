@@ -413,7 +413,7 @@ class ExportView(View):
         for key, value in kwargs.items():
             
             try:
-                model, field = key.split('__', maxsplit=1)
+                model, field = key.split('__', 1)
             except ValueError:
                 continue
             else:
