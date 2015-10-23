@@ -1,6 +1,7 @@
 # File: views.py
 
 import json
+import hmac
 import math
 import hashlib
 import logging
@@ -20,6 +21,7 @@ from django.db import transaction
 from django.apps import apps
 from django.utils import timezone
 from django.conf.urls import include, url
+from django.db.models import Count, Max
 from django.shortcuts import get_object_or_404, redirect, render
 from django.middleware import csrf
 from django.views.generic import View
@@ -250,6 +252,9 @@ class VoteView(View):
             election = Election.objects.get(id=e_id)
             ballot = Ballot.objects.get(election=election, serial=b_serial)
             
+            # part1 is always the part that the client used to vote, part2 is
+            # the other part.
+            
             order = ('' if p1_tag == 'A' else '-') + 'tag'
             part1, part2 = Part.objects.filter(ballot=ballot).order_by(order)
             
@@ -276,6 +281,25 @@ class VoteView(View):
             if not hasher.verify(hash, part2.security_code_hash2):
                 raise Exception('Invalid part security code')
             
+            # Check if the ballot is already used
+            
+            part_qs = [part1, part2]
+            if OptionV.objects.filter(part__in=part_qs, voted=True).exists():
+                raise Exception('Ballot already used')
+            
+            # Common long votecode values
+            
+            if election.long_votecodes:
+                
+                max_options = question_qs.annotate(Count('optionc')).\
+                    aggregate(Max('optionc__count'))['optionc__count__max']
+                
+                credential_int = intc.from_bytes(b_credential, 'big')
+                
+                key = base32cf.decode(p2_security_code)
+                bytes = int(math.ceil(key.bit_length() / 8.0))
+                key = intc.to_bytes(key, bytes, 'big')
+            
             # Verify vote's correctness and save it to the db in an atomic
             # transaction. If anything fails, rollback and return the error.
             
@@ -298,6 +322,8 @@ class VoteView(View):
                     
                     if election.long_votecodes:
                         
+                        l_votecodes = vc_list
+                        
                         vc_list = [hasher.encode(vc, part1.l_votecode_salt, \
                             part1.l_votecode_iterations, True)[0] \
                             for vc in vc_list]
@@ -314,7 +340,41 @@ class VoteView(View):
                     if optionv_qs.count() != len(vc_list):
                         raise Exception('Invalid votecode')
                     
-                    optionv_qs.update(voted=True)
+                    # Mark the voted options
+                    
+                    if not election.long_votecodes:
+                        
+                        optionv_qs.update(voted=True)
+                        
+                    else:
+                        
+                        # Save the given long votecodes
+                        
+                        for optionv, l_votecode in zip(optionv_qs, l_votecodes):
+                            optionv.voted = True
+                            optionv.l_votecode = l_votecode
+                            optionv.save(update_fields=['voted', 'l_votecode'])
+                        
+                        # Compute the other ballot part's long votecodes
+                        
+                        optionv2_qs = OptionV.objects.\
+                            filter(part=part2, question=question)
+                        
+                        for optionv2 in optionv2_qs:
+                            
+                            msg = credential_int + (question.index * \
+                                max_options) + optionv2.votecode
+                            bytes = int(math.ceil(msg.bit_length() / 8.0))
+                            msg = intc.to_bytes(msg, bytes, 'big')
+                            
+                            hmac_obj = hmac.new(key, msg, hashlib.sha256)
+                            digest = intc.from_bytes(hmac_obj.digest(), 'big')
+                            
+                            l_votecode = base32cf.\
+                                encode(digest)[-config.VOTECODE_LEN:]
+                            
+                            optionv2.l_votecode = l_votecode
+                            optionv2.save(update_fields=['l_votecode'])
                 
                 part2.security_code = p2_security_code
                 part2.save(update_fields=['security_code'])
