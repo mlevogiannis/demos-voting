@@ -134,7 +134,7 @@ class CreateView(View):
             if request.is_ajax():
                 
                 q_options_list = [len(question_obj['__list_OptionC__'])
-                    for _question_obj in election_obj['__list_Question__']]
+                    for question_obj in election_obj['__list_Question__']]
                 
                 vc_type = 'votecode' \
                     if not election_obj['long_votecodes'] else 'l_votecode'
@@ -165,7 +165,7 @@ class CreateView(View):
                         }
                         
                         if not election_obj['long_votecodes']:
-                            votecode_list = list(range(options))
+                            votecode_list = list(range(1, options + 1))
                             random.shuffle(votecode_list)
                         else:
                             votecode_list=[base32cf.random(config.VOTECODE_LEN,
