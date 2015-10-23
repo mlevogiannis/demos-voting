@@ -13,6 +13,7 @@ from django.db import transaction
 from django.core import urlresolvers
 from django.utils import translation, timezone
 from django.shortcuts import render, redirect
+from django.middleware import csrf
 from django.views.generic import View
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
@@ -288,6 +289,7 @@ class StatusView(View):
             'State': {state.name: state.value for state in enums.State},
         }
         
+        csrf.get_token(request)
         return render(request, self.template_name, context)
     
     def post(self, request, *args, **kwargs):
