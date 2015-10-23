@@ -70,6 +70,8 @@ class Session:
             
             r = self.s.post(url, data=data, files=files, verify=True)
             r.raise_for_status()
+            
+            return r
         
         except requests.exceptions.HTTPError as e:
             if r.status_code == requests.codes.unauthorized and _retry_login:
