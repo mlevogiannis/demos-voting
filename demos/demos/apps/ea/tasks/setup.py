@@ -187,7 +187,7 @@ def election_setup(election, election_obj, language):
                     
                     options = len(crypto_o_list)
                     
-                    votecode_list = list(range(options))
+                    votecode_list = list(range(1, options + 1))
                     rand.shuffle(votecode_list)
                     
                     l_votecode_list = []
