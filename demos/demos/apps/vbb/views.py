@@ -7,13 +7,7 @@ import requests
 from six import string_types
 
 from base64 import b64encode
-try:
-    from enum import IntEnum, unique
-except ImportError:
-    class IntEnum:
-        pass
-    def unique(fn):
-        return fn
+from enum import IntEnum, unique
 
 try:
     from urllib.parse import urljoin, quote
