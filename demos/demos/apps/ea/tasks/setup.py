@@ -167,6 +167,14 @@ def election_setup(election, election_obj, language):
                     '__list_Question__': [],
                 }
                 
+                # Compute long votecodes' key only once per ballot part
+                
+                if election.long_votecodes:
+                    
+                    key = base32cf.decode(security_code)
+                    bytes = int(math.ceil(key.bit_length() / 8.0))
+                    key = intc.to_bytes(key, bytes, 'big')
+                
                 for q_index, crypto_o_list in enumerate(crypto_qo_list):
                     
                     # Each ballot part's votecodes are grouped by question
@@ -193,10 +201,6 @@ def election_setup(election, election_obj, language):
                         # of a question in a ballot's part share the same salt.
                         
                         for votecode in votecode_list:
-                            
-                            key = base32cf.decode(security_code)
-                            bytes = int(math.ceil(key.bit_length() / 8.0))
-                            key = intc.to_bytes(key, bytes, 'big')
                             
                             msg = credential_int+(q_index*max_options)+votecode
                             bytes = int(math.ceil(msg.bit_length() / 8.0))
