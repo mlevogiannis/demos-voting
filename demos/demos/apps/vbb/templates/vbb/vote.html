@@ -215,7 +215,7 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" aria-label="{% trans 'Close' %}"><span aria-hidden="true">&times;</span></button>
+                        <button type="button" class="close" aria-label="{% trans 'Close' %}" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
                         <h4 class="modal-title" id="receipt-label">{{ vote_accepted }}</h4>
                     </div>
                     <div class="modal-body">
@@ -239,6 +239,7 @@
                     </div>
                     <div class="modal-footer">
                         <div class="xs-sm-align">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
                             <a class="btn btn-default" href="{{ abb_url }}" target="_blank" role="button">{% trans "Audit and Results" %}</a>
                         </div>
                     </div>

@@ -499,7 +499,7 @@ function prep_modal_with_q(callback, modal, old_modal) {
     } else modal.modal("show");
 }
 
-$("#receipt-modal .modal-header .close").click(function(e) {
+$("#receipt-modal [data-dismiss='modal']").click(function(e) {
     
     $("#receipt-modal").modal("hide");
     $(".alert-success").removeClass("hidden");
