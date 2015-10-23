@@ -31,6 +31,11 @@ $("#audit-button").click(function(e) {
                 var p_questions = b_parts[p][1];
                 var p_url = b_url + "parts/" + p_tag + "/";
                 
+                if (long_votecodes) {
+                    var p_votecode_salt = b_parts[p][2];
+                    var p_votecode_iterations = b_parts[p][3];
+                }
+                
                 var tabpane = $("#part-" + p_tag.toLowerCase() + ".tab-pane");
                 var panels = tabpane.find(".panel.hidden").clone(true).appendTo(tabpane);
                 
@@ -49,7 +54,9 @@ $("#audit-button").click(function(e) {
                     var q_url = p_url + "questions/" + q_index + "/";
                     
                     var trs = panels.eq(q_index).find("table > tbody > tr");
-                    var vc_chars = ((q_options.length - 1) + "").length;
+                    
+                    if (!long_votecodes)
+                        var vc_chars = ((q_options.length - 1) + "").length;
                     
                     for (var o = 0, olen = q_options.length; o < olen; o++) {
                         
@@ -59,8 +66,33 @@ $("#audit-button").click(function(e) {
                         var o_url = q_url + "options/" + o_index + "/";
                         
                         var tr = trs.eq(o);
+                        var tr_votecode = tr.find(".votecode > span");
                         
-                        tr.find(".votecode > span").text(zfill(o_votecode, vc_chars));
+                        if (!long_votecodes) {
+                            
+                            tr_votecode.removeClass();
+                            tr_votecode.prop("aria-hidden", false);
+                            tr_votecode.text(zfill(o_votecode, vc_chars));
+                            
+                        } else {
+                            
+                            var o_votecode_hash = q_options[o][3];
+                            
+                            if (o_votecode != "" || o_votecode == 0) {
+                                tr_votecode.removeClass();
+                                tr_votecode.prop("aria-hidden", false);
+                                tr_votecode.text(sjcl.codec.base32cf.hyphen(o_votecode, 4));
+                            }
+                            
+                            var data = {
+                                l_votecode: o_votecode,
+                                l_votecode_hash: o_votecode_hash,
+                                l_votecode_salt: p_votecode_salt,
+                                l_votecode_iterations: p_votecode_iterations,
+                            }
+                            
+                            tr_votecode.click(data, json_viewer);
+                        }
                         
                         if (b_vote != null) {
                             
@@ -138,21 +170,63 @@ function option_tooltip_out(e) {
 
 function json_viewer(e) {
     
+    function json_out(data) {
+        
+        var json = JSON.stringify(data, undefined, '    ');
+        
+        // JSON syntax highlight
+        // Source: http://stackoverflow.com/a/7220510
+        
+        json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        json = json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+        var cls = 'number';
+            if (/^"/.test(match)) {
+                if (/:$/.test(match)) {
+                    cls = 'key';
+                } else {
+                    cls = 'string';
+                }
+            } else if (/true|false/.test(match)) {
+                cls = 'boolean';
+            } else if (/null/.test(match)) {
+                cls = 'null';
+            }
+            return '<span class="' + cls + '">' + match + '</span>';
+        });
+        
+        modal.find("pre").html(json);
+        
+        mbody.children(":not(pre)").addClass("hidden");
+        mbody.children("pre").removeClass("hidden");
+    }
+    
     var modal = $("#json-viewer");
     var mbody = modal.find(".modal-body");
     var mcontent = modal.find(".modal-content");
     
     // Check if we already have the requested data
     
-    var url = $(this).data("url");
-    var cached_url = modal.data("cached-url");
-    
-    if (url == cached_url) {
-        modal.modal("show");
-        return;
+    if (e.data) {
+        
+        json_out(e.data);
+        
+        modal.find("a").addClass("disabled");
+        modal.find("a").attr("href", "");
+        
+        modal.data("cached-url", null);
+        
+    } else {
+        
+        var url = $(this).data("url");
+        var cached_url = modal.data("cached-url");
+        
+        if (url == cached_url) {
+            modal.modal("show");
+            return;
+        }
+        
+        modal.data("cached-url", url);
     }
-    
-    modal.data("cached-url", url);
     
     // Set modal title
     
@@ -163,77 +237,58 @@ function json_viewer(e) {
     
     // Initialize loading spinner
     
-    var spinner = mcontent.data("spinner");
-    
-    if (!spinner) {
+    if (!e.data) {
         
-        var spinner_opts = def_spinner_opts;
+        var spinner = mcontent.data("spinner");
         
-        spinner_opts.scale = 0.25;
-        spinner_opts.top = "25%";
+        if (!spinner) {
+            
+            var spinner_opts = def_spinner_opts;
+            
+            spinner_opts.scale = 0.25;
+            spinner_opts.top = "25%";
 
-        spinner = new Spinner(spinner_opts);
-        mcontent.data("spinner", spinner);
+            spinner = new Spinner(spinner_opts);
+            mcontent.data("spinner", spinner);
+        }
+        
+        spinner = spinner.spin();
+        
+        mbody.children(":not(.spinner)").addClass("hidden");
+        mbody.children(".spinner").removeClass("hidden").prepend(spinner.el);
     }
     
-    spinner = spinner.spin();
-    
-    mbody.children(":not(.spinner)").addClass("hidden");
-    mbody.children(".spinner").removeClass("hidden").prepend(spinner.el);
-    
-    // Show the modal and request the dta from the server
+    // Show the modal and request the data from the server
     
     modal.find("a").addClass("disabled");
     modal.modal("show");
     
-    var xhr = $.ajax({
-        url: url,
-        type: "GET",
-        success: function(data, textStatus, jqXHR) {
-            
-            var json = JSON.stringify(data, undefined, '    ');
-            
-            // JSON syntax highlight
-            // Source: http://stackoverflow.com/a/7220510
-            
-            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            json = json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
-                var cls = 'number';
-                if (/^"/.test(match)) {
-                    if (/:$/.test(match)) {
-                        cls = 'key';
-                    } else {
-                        cls = 'string';
-                    }
-                } else if (/true|false/.test(match)) {
-                    cls = 'boolean';
-                } else if (/null/.test(match)) {
-                    cls = 'null';
-                }
-                return '<span class="' + cls + '">' + match + '</span>';
-            });
-            
-            modal.find("pre").html(json);
-            modal.find("a").attr("href", url + "&file=true");
-            
-            mbody.children(":not(pre)").addClass("hidden");
-            mbody.children("pre").removeClass("hidden");
-            
-            modal.find("a").removeClass("disabled");
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-            
-            mbody.children(":not(.error)").addClass("hidden");
-            mbody.children(".error").removeClass("hidden");
-        },
-        complete: function(jqXHR, textStatus) {
-            
-            spinner.stop();
-            mcontent.removeData("xhr spinner");
-        },
-    });
-    
-    mcontent.data("xhr", xhr);
+    if (!e.data) {
+        
+        var xhr = $.ajax({
+            url: url,
+            type: "GET",
+            success: function(data, textStatus, jqXHR) {
+                
+                json_out(data);
+                
+                modal.find("a").removeClass("disabled");
+                modal.find("a").attr("href", url + "&file=true");
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                
+                mbody.children(":not(.error)").addClass("hidden");
+                mbody.children(".error").removeClass("hidden");
+            },
+            complete: function(jqXHR, textStatus) {
+                
+                spinner.stop();
+                mcontent.removeData("xhr spinner");
+            },
+        });
+        
+        mcontent.data("xhr", xhr);
+    }
 }
 
 $("#json-viewer").on("hidden.bs.modal", function(e) {

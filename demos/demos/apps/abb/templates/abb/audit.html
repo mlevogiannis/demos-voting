@@ -114,6 +114,11 @@
 
 {% block script %}
 
+
+<script>
+    var long_votecodes = {{ election.long_votecodes|yesno:'true,false' }};
+</script>
+
 <!-- audit.js -->
 <script src="{% static 'abb/audit.js' %}"></script>
 
