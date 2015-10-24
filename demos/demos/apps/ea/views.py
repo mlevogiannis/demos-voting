@@ -14,6 +14,7 @@ except ImportError:
 
 from django import http
 from django.db import transaction
+from django.apps import apps
 from django.core import urlresolvers
 from django.utils import translation, timezone
 from django.shortcuts import render, redirect
@@ -27,7 +28,7 @@ from celery.result import AsyncResult
 
 from demos.apps.ea.forms import ElectionForm, OptionFormSet, \
     PartialQuestionFormSet, BaseQuestionFormSet
-from demos.apps.ea.tasks import cryptotools, election_setup, pdf
+from demos.apps.ea.tasks import api_update, cryptotools, election_setup, pdf
 from demos.apps.ea.models import Config, Election, Question, OptionV, Task
 
 from demos.common.utils import api, base32cf, config, crypto, enums
@@ -37,6 +38,7 @@ from demos.common.utils.json import CustomJSONEncoder
 from demos.settings import DEMOS_URL
 
 logger = logging.getLogger(__name__)
+app_config = apps.get_app_config('ea')
 
 
 class HomeView(View):
@@ -456,6 +458,68 @@ class CryptoToolsView(View):
             return http.HttpResponse(status=422)
         
         return http.JsonResponse(response,safe=False, encoder=CustomJSONEncoder)
+
+
+class UpdateStateView(View):
+    
+    @method_decorator(api.user_required(['abb', 'vbb', 'bds']))
+    def dispatch(self, *args, **kwargs):
+        return super(UpdateStateView, self).dispatch(*args, **kwargs)
+    
+    def get(self, request):
+        csrf.get_token(request)
+        return http.HttpResponse()
+    
+    def post(self, request, *args, **kwargs):
+        
+        try:
+            data = json.loads(request.POST['data'])
+            
+            e_id = data['e_id']
+            election = Election.objects.get(id=e_id)
+            
+            state = enums.State(int(data['state']))
+            
+            # All servers can set state to ERROR, except for abb which can
+            # also set it to COMPLETED, only if the election has ended.
+            
+            username = request.user.get_username()
+            
+            if not (state == enums.State.ERROR or (username == 'abb' \
+                and state == enums.State.COMPLETED \
+                and election.state == enums.State.RUNNING \
+                and timezone.now() > election.end_datetime)):
+                
+                raise Exception('User <%s> tried to set state to %s, current '
+                    'state is %s' % (username, state, election.state))
+            
+            # Update election state
+            
+            election.state = state
+            election.save(update_fields=['state'])
+            
+            data = {
+                'model': 'Election',
+                'natural_key': {
+                    'e_id': e_id
+                },
+                'fields': {
+                    'state': state
+                },
+            }
+            
+            api_session = {app_name: api.Session('ea', app_name, app_config)
+                for app_name in ['abb','vbb','bds'] if not app_name == username}
+            
+            for app_name in api_session.keys():
+                api_update(app_name, data=data, api_session=api_session, \
+                    url_path='manage/update/');
+            
+        except Exception:
+            logger.exception('UpdateStateView: API error')
+            return http.HttpResponse(status=422)
+        
+        return http.HttpResponse()
 
 
 class CenterView(View):
