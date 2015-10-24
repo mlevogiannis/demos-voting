@@ -1,7 +1,11 @@
 # File: views.py
 
+import json
 import random
-from base64 import b64encode
+import logging
+
+from base64 import b64encode, b64decode
+
 try:
     from urllib.parse import urljoin, quote
 except ImportError:
@@ -16,18 +20,23 @@ from django.shortcuts import render, redirect
 from django.middleware import csrf
 from django.views.generic import View
 from django.core.exceptions import ValidationError
+from django.utils.decorators import method_decorator
 from django.core.urlresolvers import reverse
 
 from celery.result import AsyncResult
 
 from demos.apps.ea.forms import ElectionForm, OptionFormSet, \
     PartialQuestionFormSet, BaseQuestionFormSet
-from demos.apps.ea.tasks import election_setup, pdf
-from demos.apps.ea.models import Config, Election, Task
+from demos.apps.ea.tasks import cryptotools, election_setup, pdf
+from demos.apps.ea.models import Config, Election, Question, OptionV, Task
 
-from demos.common.utils import base32cf, config, enums
+from demos.common.utils import api, base32cf, config, crypto, enums
 from demos.common.utils.dbsetup import _prep_kwargs
+from demos.common.utils.json import CustomJSONEncoder
+
 from demos.settings import DEMOS_URL
+
+logger = logging.getLogger(__name__)
 
 
 class HomeView(View):
@@ -327,6 +336,126 @@ class StatusView(View):
                 return http.HttpResponse(status=422)
         
         return http.JsonResponse(response)
+
+
+class CryptoToolsView(View):
+    
+    @method_decorator(api.user_required('abb'))
+    def dispatch(self, *args, **kwargs):
+        return super(CryptoToolsView, self).dispatch(*args, **kwargs)
+    
+    def get(self, request, *args, **kwargs):
+        csrf.get_token(request)
+        return http.HttpResponse()
+    
+    @staticmethod
+    def _deserialize(field, cls):
+        
+        # Deserialize base64-encoded pb message
+        
+        field = field.encode('ascii')
+        field = b64decode(field)
+        
+        pb_field = cls()
+        pb_field.ParseFromString(field)
+        
+        return pb_field
+    
+    def post(self, request, *args, **kwargs):
+        
+        try:
+            command = kwargs.pop('command')
+            request_obj = json.loads(request.POST['data'])
+            
+            # Get common request data
+            
+            e_id = request_obj['e_id']
+            q_index = request_obj['q_index']
+            
+            key = self._deserialize(request_obj['key'], crypto.Key)
+            question = Question.objects.get(election__id=e_id, index=q_index)
+            
+            # Perform the requested action
+            
+            if command == 'add_com':
+                
+                # Input is a list of base64-encoded 'com' fields, returns 'com'.
+                
+                com_list = [self._deserialize(com, crypto.Com) \
+                    for com in request_obj['com_list']]
+                
+                response = cryptotools.add_com(key, com_list)
+            
+            elif command == 'add_decom':
+                
+                # Input is a list of 3-tuples: (b_serial, p_tag, index_list),
+                # returns 'decom'.
+                
+                ballots = request_obj['ballots']
+                
+                decom = None
+                
+                for lo in range(0, len(ballots), config.BATCH_SIZE):
+                    hi = lo + min(config.BATCH_SIZE, len(ballots) - lo)
+                    
+                    decom_list = [] if decom is None else [decom]
+                    
+                    for b_serial, p_tag, index_list in ballots[lo: hi]:
+                        
+                        _decom_list = OptionV.objects.filter(
+                            part__ballot__election__id=e_id,
+                            part__ballot__serial=b_serial,
+                            part__tag=p_tag, index__in=index_list,
+                        ).values_list('decom', flat=True)
+                        
+                        decom_list.extend(_decom_list)
+                    
+                    decom = cryptotools.add_decom(key, decom_list)
+                
+                response = decom
+                
+            elif command == 'complete_zk':
+                
+                # Input is a list of 3-tuples: (b_serial, p_tag, zk1_list),
+                # where zk1_list is the list of all zk1 fields of this ballot
+                # part, in ascending index order. Returns a list of zk2 lists,
+                # in the same order.
+                
+                response = []
+                
+                coins = request_obj['coins']
+                ballots = request_obj['ballots']
+                
+                options = question.optionc_set.count()
+                
+                for b_serial, p_tag, zk1_list in ballots:
+                    
+                    zk1_list = [self._deserialize(zk1, crypto.ZK1) \
+                        for zk1 in zk1_list]
+                    
+                    zk_state_list = OptionV.objects.filter(part__tag=p_tag, \
+                        part__ballot__serial=b_serial).\
+                        values_list('zk_state', flat=True)
+                    
+                    zk_list = list(zip(zk1_list, zk_state_list))
+                    zk2_list=cryptotools.complete_zk(key,options,coins,zk_list)
+                    
+                    response.append(zk2_list)
+                
+            elif command == 'verify_com':
+                
+                # Input is a 'com' and a 'decom' field, returns true or false
+                
+                com = self._deserialize(request_obj['com'], crypto.Com)
+                decom = self._deserialize(request_obj['decom'], crypto.Decom)
+                
+                response = bool(cryptotools.verify_com(key, com, decom))
+            
+        except Exception:
+            logger.exception('CryptoToolsView: API error')
+            return http.HttpResponse(status=422)
+        
+        return http.JsonResponse(response,safe=False, encoder=CustomJSONEncoder)
 
 
 class CenterView(View):
