@@ -40,6 +40,10 @@ class Election(models.Model):
     
     ballots = models.PositiveIntegerField()
     
+    # Post-vote data
+    
+    coins = models.CharField(max_length=config.HASH_LEN, blank=True, default='')
+    
     # Other model methods and meta options
     
     def __str__(self):
@@ -139,11 +143,9 @@ class Question(models.Model):
     # Post-vote data
     
     com = fields.ProtoField(cls=crypto.Com, null=True, blank=True, default=None)
+    decom=fields.ProtoField(cls=crypto.Decom,null=True,blank=True, default=None)
     
-    decom = fields.ProtoField(cls=crypto.Decom, null=True, blank=True,
-        default=None)
-    
-    coins = models.CharField(max_length=config.HASH_LEN, blank=True, default='')
+    verified = models.BooleanField(default=False)
     
     # Other model methods and meta options
     
@@ -212,6 +214,10 @@ class OptionC(models.Model):
     
     text = models.CharField(max_length=config.OPTION_MAXLEN)
     index = models.PositiveSmallIntegerField()
+    
+    # Post-vote data
+    
+    votes = models.PositiveIntegerField(null=True, blank=True, default=None)
     
     # Other model methods and meta options
     
