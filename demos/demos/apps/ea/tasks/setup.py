@@ -27,7 +27,7 @@ from billiard.pool import Pool
 from celery import shared_task, current_task
 from celery.signals import worker_process_init, task_failure
 
-from demos.apps.ea.tasks import crypto, pdf
+from demos.apps.ea.tasks import cryptotools, pdf
 from demos.apps.ea.tasks.masks import apply_mask
 from demos.apps.ea.models import Election, Task, RemoteUser
 
@@ -82,7 +82,7 @@ def election_setup(election, election_obj, language):
         if options > max_options:
             max_options = options
             
-        question_obj['key'] = crypto.gen_key(election.ballots, options)
+        question_obj['key'] = cryptotools.gen_key(election.ballots, options)
     
     # Populate local and remote databases
     
@@ -451,7 +451,7 @@ def crypto_gen(ballots, q_list, number):
     # ballots of parts of crypto elements to a list of ballots of parts of
     # questions of crypto elements!
     
-    crypto_list = [crypto.gen_ballot(key, ballots, options, number) \
+    crypto_list = [cryptotools.gen_ballot(key, ballots, options, number) \
         for key, options in q_list]
     
     return zip(*[iter([j for i in zip(*crypto_list) for j in zip(*i)])] * 2)
