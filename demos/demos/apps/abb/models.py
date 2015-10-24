@@ -138,10 +138,9 @@ class Question(models.Model):
     
     # Post-vote data
     
-    added_com = fields.ProtoField(cls=crypto.Com, null=True, blank=True,	
-        default=None)
+    com = fields.ProtoField(cls=crypto.Com, null=True, blank=True, default=None)
     
-    added_decom = fields.ProtoField(cls=crypto.Decom, null=True, blank=True,
+    decom = fields.ProtoField(cls=crypto.Decom, null=True, blank=True,
         default=None)
     
     coins = models.CharField(max_length=config.HASH_LEN, blank=True, default='')
