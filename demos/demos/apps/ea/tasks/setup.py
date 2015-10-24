@@ -10,8 +10,8 @@ import random
 import hashlib
 import tarfile
 
-from base64 import b64encode
 from functools import partial
+
 try:
     from itertools import zip_longest
 except ImportError:
@@ -19,11 +19,8 @@ except ImportError:
 
 from multiprocessing.pool import ThreadPool
 
-from google.protobuf import message
-
 from django.apps import apps
 from django.utils import translation
-from django.core.serializers.json import DjangoJSONEncoder
 
 from billiard.pool import Pool
 
@@ -37,6 +34,7 @@ from demos.apps.ea.models import Election, Task, RemoteUser
 from demos.common.utils import api, base32cf, config, dbsetup, enums, intc
 from demos.common.utils.permutation import permute
 from demos.common.utils.hashers import PBKDF2Hasher
+from demos.common.utils.json import CustomJSONEncoder
 
 
 @shared_task(ignore_result=True)
@@ -467,17 +465,4 @@ def ballot_gen(ballot_obj, builder):
     pdfbuf = builder.pdfgen(ballot_obj)
     
     return (serial, pdfbuf)
-
-
-class CustomJSONEncoder(DjangoJSONEncoder):
-    """JSONEncoder subclass that supports date/time and protobuf types."""
-    
-    def default(self, o):
-        
-        if isinstance(o, message.Message):
-            r = o.SerializeToString()
-            r = b64encode(r).decode('ascii')
-            return r
-        
-        return super(CustomJSONEncoder, self).default(o)
 
