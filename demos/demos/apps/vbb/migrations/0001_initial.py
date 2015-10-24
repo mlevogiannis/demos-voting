@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Ballot',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, verbose_name='ID', serialize=False, primary_key=True)),
                 ('serial', models.PositiveIntegerField()),
                 ('credential_hash', models.CharField(max_length=128)),
                 ('used', models.BooleanField(default=False)),
@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Config',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, verbose_name='ID', serialize=False, primary_key=True)),
                 ('key', models.CharField(unique=True, max_length=128)),
                 ('value', models.CharField(max_length=128)),
             ],
@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='OptionC',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, verbose_name='ID', serialize=False, primary_key=True)),
                 ('text', models.CharField(max_length=128)),
                 ('index', models.PositiveSmallIntegerField()),
             ],
@@ -61,10 +61,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='OptionV',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, verbose_name='ID', serialize=False, primary_key=True)),
                 ('votecode', models.PositiveSmallIntegerField()),
-                ('long_votecode_hash', models.CharField(blank=True, default='', max_length=128)),
-                ('receipt', models.CharField(max_length=10)),
+                ('l_votecode_hash', models.CharField(default='', max_length=128, blank=True)),
+                ('receipt', models.CharField(max_length=128)),
                 ('index', models.PositiveSmallIntegerField()),
             ],
             options={
@@ -74,9 +74,11 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Part',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, verbose_name='ID', serialize=False, primary_key=True)),
                 ('tag', models.CharField(choices=[('A', 'A'), ('B', 'B')], max_length=1)),
                 ('security_code_hash2', models.CharField(max_length=128)),
+                ('l_votecode_salt', models.CharField(default='', max_length=128, blank=True)),
+                ('l_votecode_iterations', models.PositiveIntegerField(default=None, blank=True, null=True)),
                 ('ballot', models.ForeignKey(to='vbb.Ballot')),
             ],
             options={
@@ -86,7 +88,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Question',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, verbose_name='ID', serialize=False, primary_key=True)),
                 ('text', models.CharField(max_length=128)),
                 ('choices', models.PositiveSmallIntegerField()),
                 ('index', models.PositiveSmallIntegerField()),
@@ -101,7 +103,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='RemoteUser',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, verbose_name='ID', serialize=False, primary_key=True)),
                 ('username', models.CharField(unique=True, max_length=128)),
                 ('password', models.CharField(max_length=128)),
             ],
@@ -109,7 +111,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Task',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True, verbose_name='ID', serialize=False, primary_key=True)),
                 ('task_id', models.UUIDField()),
                 ('election_id', demos.common.utils.fields.Base32Field(unique=True)),
             ],
