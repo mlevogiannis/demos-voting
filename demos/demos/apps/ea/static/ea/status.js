@@ -51,7 +51,7 @@ function updateProgress() {
             glyphicon_lt.removeClass("hidden").addClass("glyphicon-ok");
             glyphicon_gt.addClass("hidden");
             
-            glyphicon.removeClass("hidden").addClass("glyphicon-option-horizontal");
+            glyphicon.removeClass("hidden").addClass("glyphicon-" + (data.state != state_list.COMPLETED ? "option-horizontal" : "ok"));
             
             // Show a progress bar if ballots are being generated
             
@@ -79,7 +79,8 @@ function updateProgress() {
             else if (data.state > state_list.WORKING)
                 timeout = 15000;
             
-            window.setTimeout(updateProgress, timeout);
+            if (data.state != state_list.COMPLETED)
+                window.setTimeout(updateProgress, timeout);
         },
         error: function(jqXHR, textStatus, errorThrown) {
             
