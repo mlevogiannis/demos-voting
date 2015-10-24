@@ -118,8 +118,6 @@ class Question(models.Model):
     m2m_parts = models.ManyToManyField(Part)
     
     text = models.CharField(max_length=config.QUESTION_MAXLEN)
-    
-    key = fields.ProtoField(cls=crypto.Key)
     index = models.PositiveSmallIntegerField()
     
     # Other model methods and meta options
@@ -146,11 +144,8 @@ class OptionV(models.Model):
     part = models.ForeignKey(Part)
     question = models.ForeignKey(Question)
     
-    com = fields.ProtoField(cls=crypto.Com)
     decom = fields.ProtoField(cls=crypto.Decom)
-    zk1 = fields.ProtoField(cls=crypto.ZK1)
     zk_state = fields.ProtoField(cls=crypto.ZKState)
-    zk2 = fields.ProtoField(cls=crypto.ZK2, null=True, blank=True, default=None)
     
     index = models.PositiveSmallIntegerField()
     
