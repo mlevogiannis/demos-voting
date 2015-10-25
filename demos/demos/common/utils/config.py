@@ -44,7 +44,7 @@ def api_connectivity_check(app_configs, **kwargs):
             try:
                  api.Session(local_app, remote, app_config)
                  ok_apps.append(remote)
-            except Exception, e:
+            except Exception as e:
                 messages.append(_checks.Error("Could not connect from %s to %s: %s" % \
                                                 (local_app, remote, e),
                                               hint="Try running ./manage.py createusers_%s" % local_app))
@@ -74,7 +74,7 @@ def crypto_connectivity_check(app_configs, **kwargs):
         sock.close()
         return [ _checks.Info("Checking connectivity with crypto: \"%s\" OK" % \
                                 _config.CRYPTO_ADDR) ]
-    except Exception, e:
+    except Exception as e:
         return [_checks.Error("Connectivity with crypto \"%s\" failed: %s" % \
                                 ( _config.CRYPTO_ADDR, e),
                               hint="Check that crypto service is running, properly configured")
