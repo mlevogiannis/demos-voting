@@ -395,12 +395,14 @@ class CryptoToolsView(View):
                 
                 ballots = request_obj['ballots']
                 
-                decom = None
+                decom = crypto.Decom()
+                decom.randomness = ''
+                decom.msg = ''
                 
                 for lo in range(0, len(ballots), config.BATCH_SIZE):
                     hi = lo + min(config.BATCH_SIZE, len(ballots) - lo)
                     
-                    decom_list = [] if decom is None else [decom]
+                    decom_list = [] if lo == 0 else [decom]
                     
                     for b_serial, p_tag, index_list in ballots[lo: hi]:
                         
