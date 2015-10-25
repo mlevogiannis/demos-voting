@@ -22,7 +22,7 @@ from django.db import transaction
 from django.apps import apps
 from django.utils import timezone
 from django.conf.urls import include, url
-from django.db.models import Count, Max
+from django.db.models import Count, Max, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.middleware import csrf
 from django.views.generic import View
@@ -165,7 +165,37 @@ class ResultsView(View):
     template_name = 'abb/results.html'
     
     def get(self, request, *args, **kwargs):
-        return render(request, self.template_name, {})
+        
+        election_id = kwargs.get('election_id')
+        
+        try:
+            normalized = base32cf.normalize(election_id)
+        except (AttributeError, TypeError, ValueError):
+            pass
+        else:
+            if normalized != election_id:
+                return redirect('abb:results', election_id=normalized)
+            try:
+                election = Election.objects.get(id=election_id)
+            except Election.DoesNotExist:
+                return redirect(reverse('abb:home') + '?error=id')
+            else:
+                questions = Question.objects.filter(election=election)
+        
+        participants = Ballot.objects.filter(election=election, \
+            part__optionv__voted=True).distinct().count() if election else 0
+        
+        questions = questions.annotate(Sum('optionc__votes'))
+        
+        context = {
+            'election': election,
+            'questions': questions,
+            'participants': str(participants),
+            'State': { s.name: s.value for s in enums.State },
+        }
+        
+        csrf.get_token(request)
+        return render(request, self.template_name, context)
 
 
 class SetupView(View):

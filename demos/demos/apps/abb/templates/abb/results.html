@@ -1,6 +1,7 @@
 {% extends "abb/base.html" %}
 
 {% load i18n %}
+{% load abb.custom %}
 {% load staticfiles %}
 
 {% block css %}
@@ -11,9 +12,39 @@
 {% endblock css %}
 
 
-{% block content %}
+{% block main %}
 
-{% endblock content %}
+<div class="row">
+    <div class="col-xs-12">
+        
+        {% tuple _("Election") election.id as t1 %}
+        {% tuple _("Participants") participants as t2 %}
+        {% tuple t1 t2 as panels %}
+        {% include "common/election_box.html" with object=election panels=panels %}
+        
+        {% if election.state != State.COMPLETED %}
+        <div class="alert alert-warning text-center" role="alert">
+            {% trans "The results will be announced after the election has ended." %}
+        </div>
+        
+        {% else %}
+        
+        {% for question in questions %}
+        <div class="panel panel-default">
+            <div class="panel-heading">{% trans "Question" %}{% if questions|length > 1 %} {{ question.index|add:"1" }}{% endif %}: {{ question.text }}</div>
+            <div class="list-group">
+                {% for optionc in question.optionc_set.all %}
+                <a class="list-group-item">{{ optionc.text }}<span class="badge">{{ optionc.votes|floatdiv:question.optionc__votes__sum|floatmul:'100'|floatformat:1 }} %</span></a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+        
+        {% endif %}
+    </div>
+</div>
+
+{% endblock main %}
 
 
 {% block script %}
