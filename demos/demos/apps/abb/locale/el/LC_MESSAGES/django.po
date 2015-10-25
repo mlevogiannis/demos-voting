@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-20 15:08+0000\n"
+"POT-Creation-Date: 2015-10-25 09:53+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,10 +22,12 @@ msgid "Audit and Results"
 msgstr "Επαλήθευση και Αποτελέσματα"
 
 #: demos/apps/abb/templates/abb/audit.html:20
+#: demos/apps/abb/templates/abb/results.html:20
 msgid "Election"
 msgstr "Ψηφοφορία"
 
 #: demos/apps/abb/templates/abb/audit.html:21
+#: demos/apps/abb/templates/abb/results.html:21
 msgid "Participants"
 msgstr "Συμμετέχοντες"
 
@@ -42,6 +44,7 @@ msgid "Side"
 msgstr "Όψη"
 
 #: demos/apps/abb/templates/abb/audit.html:52
+#: demos/apps/abb/templates/abb/results.html:34
 msgid "Question"
 msgstr "Ερώτημα"
 
@@ -100,3 +103,7 @@ msgstr "Επαλήθευση"
 #: demos/apps/abb/templates/abb/base.html:20
 msgid "Results"
 msgstr "Αποτελέσματα"
+
+#: demos/apps/abb/templates/abb/results.html:27
+msgid "The results will be announced after the election has ended."
+msgstr "Τα αποτελέσματα θα ανακοινωθούν μετά την ολοκλήρωση της ψηφοφορίας."

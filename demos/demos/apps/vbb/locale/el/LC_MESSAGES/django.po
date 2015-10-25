@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-20 15:08+0000\n"
+"POT-Creation-Date: 2015-10-25 09:53+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -279,6 +279,7 @@ msgid "Confirm"
 msgstr "Επιβεβαίωση"
 
 #: demos/apps/vbb/templates/vbb/vote.html:218
+#: demos/apps/vbb/templates/vbb/vote.html:242
 msgid "Close"
 msgstr "Κλείσιμο"
 
@@ -294,6 +295,6 @@ msgstr "Τα αποτελέσματα θα ανακοινωθούν μετά τ�
 msgid "Thank you for your participation!"
 msgstr "Σας ευχαριστούμε για τη συμμετοχή σας!"
 
-#: demos/apps/vbb/templates/vbb/vote.html:242
+#: demos/apps/vbb/templates/vbb/vote.html:243
 msgid "Audit and Results"
 msgstr "Επαλήθευση και Αποτελέσματα"

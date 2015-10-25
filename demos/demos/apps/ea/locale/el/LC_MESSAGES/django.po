@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-20 15:08+0000\n"
+"POT-Creation-Date: 2015-10-25 09:53+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,100 +22,108 @@ msgstr ""
 msgid "Election Authority"
 msgstr "Εκλογική Αρχή"
 
-#: demos/apps/ea/forms.py:18
+#: demos/apps/ea/forms.py:19
 msgid "Title"
 msgstr "Τίτλος"
 
-#: demos/apps/ea/forms.py:21
+#: demos/apps/ea/forms.py:22
 msgid "Start at"
 msgstr "Έναρξη"
 
-#: demos/apps/ea/forms.py:22
+#: demos/apps/ea/forms.py:23
 msgid "End at"
 msgstr "Λήξη"
 
-#: demos/apps/ea/forms.py:24 demos/apps/ea/templates/ea/status.html:22
+#: demos/apps/ea/forms.py:25 demos/apps/ea/templates/ea/status.html:22
 msgid "Ballots"
 msgstr "Ψηφοδέλτια"
 
-#: demos/apps/ea/forms.py:27
+#: demos/apps/ea/forms.py:28
 msgid "Language"
 msgstr "Γλώσσα"
 
-#: demos/apps/ea/forms.py:29
+#: demos/apps/ea/forms.py:30
 msgid "Trustee e-mails"
 msgstr "Ε-mail επιτρόπων"
 
-#: demos/apps/ea/forms.py:32
-msgid "Enhanced privacy"
-msgstr "Ενισχυμένη ιδιωτικότητα"
+#: demos/apps/ea/forms.py:33
+msgid "Vote-codes"
+msgstr "Κωδικοί επιλογών"
 
-#: demos/apps/ea/forms.py:36
+#: demos/apps/ea/forms.py:34
+msgid "Short"
+msgstr "Βραχείς"
+
+#: demos/apps/ea/forms.py:34
+msgid "Long"
+msgstr "Μακριοί"
+
+#: demos/apps/ea/forms.py:37
 msgid "The date and time you selected have passed."
 msgstr "Η ημερομηνία και η ώρα που επιλέξατε έχουν παρέλθει."
 
-#: demos/apps/ea/forms.py:37
+#: demos/apps/ea/forms.py:38
 msgid "Start and end dates and times are not in logical order."
 msgstr "Οι ημερομηνίες και ώρες έναρξης και λήξης δεν είναι σε λογική σειρά."
 
-#: demos/apps/ea/forms.py:81 demos/apps/ea/tasks/pdf.py:316
+#: demos/apps/ea/forms.py:89 demos/apps/ea/tasks/pdf.py:320
 #: demos/apps/ea/templates/ea/create.html:183
 #: demos/apps/ea/templates/ea/create.html:231
 msgid "Question"
 msgstr "Ερώτημα"
 
-#: demos/apps/ea/forms.py:84
+#: demos/apps/ea/forms.py:92
 msgid "Display in columns"
 msgstr "Εμφάνιση σε στήλες"
 
-#: demos/apps/ea/forms.py:93
+#: demos/apps/ea/forms.py:101
 msgid "Multiple choices"
 msgstr "Πολλαπλές επιλογές"
 
-#: demos/apps/ea/forms.py:136
+#: demos/apps/ea/forms.py:144
 msgid "Question already exists."
 msgstr "Το ερώτημα υπάρχει ήδη."
 
-#: demos/apps/ea/forms.py:143 demos/apps/ea/tasks/pdf.py:309
+#: demos/apps/ea/forms.py:151 demos/apps/ea/tasks/pdf.py:313
 #: demos/apps/ea/templates/ea/create.html:314
 #: demos/apps/ea/templates/ea/create.html:341
 #: demos/apps/ea/templates/ea/create.html:343
 msgid "Option"
 msgstr "Επιλογή"
 
-#: demos/apps/ea/forms.py:177
+#: demos/apps/ea/forms.py:185
 msgid "Option already exists."
 msgstr "Η επιλογή υπάρχει ήδη."
 
-#: demos/apps/ea/tasks/pdf.py:307
+#: demos/apps/ea/tasks/pdf.py:311
 msgid "Serial number"
 msgstr "Σειριακός αριθμός"
 
-#: demos/apps/ea/tasks/pdf.py:308
+#: demos/apps/ea/tasks/pdf.py:312
 msgid "Security code"
 msgstr "Κωδικός ασφαλείας"
 
-#: demos/apps/ea/tasks/pdf.py:310
+#: demos/apps/ea/tasks/pdf.py:314
 msgid "Vote-code"
 msgstr "Κωδικός"
 
-#: demos/apps/ea/tasks/pdf.py:311
+#: demos/apps/ea/tasks/pdf.py:315
 msgid "Receipt"
 msgstr "Απόδειξη"
 
-#: demos/apps/ea/tasks/pdf.py:312
+#: demos/apps/ea/tasks/pdf.py:316
 msgid "Audit and Results"
 msgstr "Επαλήθευση και Αποτελέσματα"
 
-#: demos/apps/ea/tasks/pdf.py:313
+#: demos/apps/ea/tasks/pdf.py:317
 msgid "Digital Ballot Box"
 msgstr "Ψηφιακή Κάλπη"
 
-#: demos/apps/ea/tasks/pdf.py:314
+#: demos/apps/ea/tasks/pdf.py:318
 msgid "Ballot"
 msgstr "Ψηφοδέλτιο"
 
-#: demos/apps/ea/tasks/pdf.py:319
+#: demos/apps/ea/tasks/pdf.py:323
 msgid ""
 "Please use one of the two sides to vote and the other one to audit your vote"
 msgstr ""
@@ -176,6 +184,7 @@ msgid "How many?"
 msgstr "Πόσα;"
 
 #: demos/apps/ea/templates/ea/create.html:115
+#: demos/apps/ea/templates/ea/create.html:129
 msgid "Select"
 msgstr "Επιλέξτε"
 
@@ -290,6 +299,19 @@ msgstr "Κάντε κλικ εδώ για να κατεβάσετε το ψηφ�
 #: demos/apps/ea/templates/ea/create.html:404
 msgid "Open in new tab"
 msgstr "Άνοιγμα σε νέα καρτέλα"
+
+#: demos/apps/ea/templates/ea/home.html:14
+msgid "Welcome to the DEMOS e-voting system"
+msgstr "Καλώς ήρθατε στο σύστημα ηλεκτρονικής ψηφοφορίας DEMOS"
+
+#: demos/apps/ea/templates/ea/home.html:18
+msgid ""
+"You can create a new election, check the status of an existing one or move "
+"to the election center to see the elections you are involved in."
+msgstr ""
+"Μπορείτε να δημιουργήσετε μια νέα εκλογική διαδικασία, να ελέγξετε την "
+"κατάσταση μιας υπάρχουσας ή να μεταφερθείτε στο κέντρο ψηφοφοριών για να "
+"δείτε τις εκλογικές διαδικασίες στις οποίες είστε ενεργός. "
 
 #: demos/apps/ea/templates/ea/status.html:29
 msgid "Unable to fetch election state, retrying..."
