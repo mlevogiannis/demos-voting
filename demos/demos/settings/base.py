@@ -252,6 +252,11 @@ DEMOS_URL = { 'ea': 'https://demos-ea.our-domain.com',
              'abb': 'https://demos-abb.our-domain.com',
              'vbb': 'https://demos-vbb.our-domain.com', }
 
+DEMOS_API_URL = { 'ea': 'https://api.demos-ea.our-domain.com',
+                 'bds': 'https://api.demos-bds.our-domain.com',
+                 'abb': 'https://api.demos-abb.our-domain.com',
+                 'vbb': 'https://api.demos-vbb.our-domain.com', }
+
 INSTALLED_APPS += tuple([ 'demos.apps.%s' % iapp for iapp in DEMOS_APPS ])
 LOCALE_PATHS += tuple([ os.path.join(BASE_DIR, 'apps/%s/locale' % iapp) for iapp in DEMOS_APPS])
 
