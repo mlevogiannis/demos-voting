@@ -409,7 +409,9 @@ class CryptoToolsView(View):
                         _decom_list = OptionV.objects.filter(
                             part__ballot__election__id=e_id,
                             part__ballot__serial=b_serial,
-                            part__tag=p_tag, index__in=index_list,
+                            part__tag=p_tag,
+                            question__index=q_index,
+                            index__in=index_list,
                         ).values_list('decom', flat=True)
                         
                         decom_list.extend(_decom_list)
