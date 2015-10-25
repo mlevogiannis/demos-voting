@@ -492,8 +492,9 @@ class UpdateStateView(View):
                 and election.state == enums.State.RUNNING \
                 and timezone.now() > election.end_datetime)):
                 
-                raise Exception('User <%s> tried to set state to %s, current '
-                    'state is %s' % (username, state, election.state))
+                raise Exception('User \'%s\' tried to set election state to '
+                    '\'%s\', but current state is \'%s\'.' \
+                    % (username, state.name, election.state.name))
             
             # Update election state
             
