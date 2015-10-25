@@ -158,7 +158,7 @@ class OptionV(models.Model):
     # Other model methods and meta options
     
     def __str__(self):
-        return "%s - %s" % (self.index + 1, self.votecode)
+        return "%s" % (self.index + 1)
     
     class Meta:
         ordering = ['part', 'question', 'index']
