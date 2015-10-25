@@ -236,8 +236,8 @@
 
 @media (min-width: 768px) and (max-width: 991px) {
 
-    .form-group > label[for="id_election-long_votecodes"] + .input-group > .input-group-addon:first-child {
-        max-width: 155px;
+    .form-group > label[for="id_election-votecodes"] + .input-group > .input-group-addon:first-child {
+        max-width: 100px;
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;

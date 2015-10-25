@@ -30,8 +30,8 @@ class ElectionForm(forms.Form):
     trustee_list = fields.MultiEmailField(label=_('Trustee e-mails'),
         min_length=1, max_length=config.MAX_TRUSTEES)
     
-    long_votecodes = forms.BooleanField(label=_('Enhanced privacy'),
-        required=False)
+    votecodes = forms.ChoiceField(label=_('Vote-codes'), \
+        choices=(('short', _('Short')), ('long', _('Long'))))
     
     error_msg = {
         'passed': _("The date and time you selected have passed."),
@@ -75,6 +75,13 @@ class ElectionForm(forms.Form):
         if start_datetime and end_datetime and end_datetime <= start_datetime:
             self.add_error(None, forms.ValidationError(
                 self.error_msg['order'], code='invalid'))
+        
+        # Set long_votecodes boolean variable
+        
+        votecodes = cleaned_data.get('votecodes')
+        
+        if votecodes is not None:
+            cleaned_data['long_votecodes'] = (votecodes == 'long')
 
 
 class QuestionForm(forms.Form):
