@@ -63,6 +63,9 @@ def api_connectivity_check(app_configs, **kwargs):
 def crypto_connectivity_check(app_configs, **kwargs):
     """Tests basic socket connectivity with crypto service
     """
+    if 'ea' not in settings.DEMOS_APPS:
+        return []
+
     import socket
     from demos.common.utils import crypto
 
