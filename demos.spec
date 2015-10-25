@@ -201,10 +201,10 @@ Type=simple
 User=apache
 RestartSec=10
 TimeoutStartSec=1min
-ExecStart=%{app_bindir}/demos-crypto -s unix /tmp/demos-crypto.sock
+ExecStart=%{app_bindir}/demos-crypto -s unix /tmp/demos-crypto.sock -t 8
 
 [Install]
-WantedBy=default.target
+WantedBy=multi-user.target
 
 EOF
 
