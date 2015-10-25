@@ -29,7 +29,7 @@ from celery.result import AsyncResult
 from demos.apps.ea.forms import ElectionForm, OptionFormSet, \
     PartialQuestionFormSet, BaseQuestionFormSet
 from demos.apps.ea.tasks import api_update, cryptotools, election_setup, pdf
-from demos.apps.ea.models import Config, Election, Question, OptionV, Task
+from demos.apps.ea.models import Config, Election, OptionC, OptionV, Task
 
 from demos.common.utils import api, base32cf, config, crypto, enums
 from demos.common.utils.dbsetup import _prep_kwargs
@@ -375,7 +375,6 @@ class CryptoToolsView(View):
             q_index = request_obj['q_index']
             
             key = self._deserialize(request_obj['key'], crypto.Key)
-            question = Question.objects.get(election__id=e_id, index=q_index)
             
             # Perform the requested action
             
@@ -432,7 +431,8 @@ class CryptoToolsView(View):
                 coins = request_obj['coins']
                 ballots = request_obj['ballots']
                 
-                options = question.optionc_set.count()
+                options = OptionC.objects.filter(question__election__id=e_id, \
+                    question__index=q_index).count()
                 
                 for b_serial, p_tag, zk1_list in ballots:
                     
