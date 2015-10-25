@@ -68,7 +68,7 @@ def election_setup(election, election_obj, language):
     
     # Establish sessions with the other servers
     
-    api_session = {app_name: api.Session('ea', app_name, app_config)
+    api_session = {app_name: api.Session(app_name, app_config)
         for app_name in ['abb', 'vbb', 'bds']}
     
     # Generate question keys and calculate max_options

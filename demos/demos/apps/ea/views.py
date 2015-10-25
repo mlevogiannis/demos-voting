@@ -513,7 +513,7 @@ class UpdateStateView(View):
                 },
             }
             
-            api_session = {app_name: api.Session('ea', app_name, app_config)
+            api_session = {app_name: api.Session(app_name, app_config)
                 for app_name in ['abb','vbb','bds'] if not app_name == username}
             
             for app_name in api_session.keys():

@@ -26,7 +26,7 @@ def tally_protocol(election_id):
     ballot_qs = Ballot.objects.filter(election=election)
     question_qs = Question.objects.filter(election=election)
     
-    ea_session = api.Session('abb', 'ea', app_config)
+    ea_session = api.Session('ea', app_config)
     
     # Get election coins
     

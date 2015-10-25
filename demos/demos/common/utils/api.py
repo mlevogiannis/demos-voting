@@ -20,12 +20,11 @@ from six import string_types
 class Session:
     _log = logging.getLogger('demos.remoteSession')
     
-    def __init__(self, usr_from, server, app_config):
+    def __init__(self, server, app_config):
         
         self.s = requests.Session()
         
-        assert app_config.label == usr_from
-        self.username = usr_from
+        self.username = app_config.label
         self.password = app_config.get_model('RemoteUser').\
             objects.get(username=server).password
         self.url = urljoin(DEMOS_API_URL[server], 'api/')
