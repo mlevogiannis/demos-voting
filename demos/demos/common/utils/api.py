@@ -40,7 +40,7 @@ class Session:
     def login(self):
         
         url = urljoin(self.url, 'auth/login/')
-        r = self.s.get(url) # won't authenticate, only get the CSRF token
+        r = self.s.get(url, verify=True) # won't authenticate, only get the CSRF token
         r.raise_for_status()
         
         payload = {
@@ -55,7 +55,7 @@ class Session:
     def logout(self):
         
         url = urljoin(self.url, 'auth/logout/')
-        r = self.s.get(url)
+        r = self.s.get(url, verify=True)
         r.raise_for_status()
     
     def post(self, path, data={}, files=None, _retry_login=True):
@@ -63,7 +63,7 @@ class Session:
         try:
             url = urljoin(self.url, path)
             
-            r = self.s.get(url)
+            r = self.s.get(url, verify=True)
             r.raise_for_status()
             
             data['csrfmiddlewaretoken'] = self.s.cookies['csrftoken']
