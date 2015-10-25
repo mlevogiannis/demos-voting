@@ -144,8 +144,8 @@ class CreateView(View):
             
             if request.is_ajax():
                 
-                q_options_list = [len(question_obj['__list_OptionC__'])
-                    for question_obj in election_obj['__list_Question__']]
+                q_options_list = [len(q_obj['__list_OptionC__'])
+                    for q_obj in election_obj['__list_Question__']]
                 
                 vc_type = 'votecode' \
                     if not election_obj['long_votecodes'] else 'l_votecode'
