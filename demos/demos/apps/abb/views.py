@@ -7,12 +7,13 @@ import hashlib
 import logging
 
 from base64 import b64decode
+from datetime import timedelta
+from collections import OrderedDict
+
 try:
     from itertools import zip_longest
 except ImportError:
     from itertools import izip_longest as zip_longest
-
-from collections import OrderedDict
 
 from google.protobuf import message
 
@@ -28,13 +29,15 @@ from django.views.generic import View
 from django.db.models.query import QuerySet
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.utils.decorators import method_decorator
+from django.utils.dateparse import parse_datetime
 from django.core.urlresolvers import reverse
 from django.core.serializers.json import DjangoJSONEncoder
 
-from demos.apps.abb.models import Election, Question, Ballot, Part, \
-    OptionV, OptionC
-
-from demos.common.utils import api, base32cf, config, dbsetup, enums, intc, hashers, protobuf
+from demos.apps.abb.tasks import tally_protocol
+from demos.apps.abb.models import Election, Question, Ballot, Part, OptionV, \
+    Task
+from demos.common.utils import api, base32cf, config, dbsetup, enums, intc, \
+    hashers, protobuf
 from demos.common.utils.permutation import permute_ori
 
 
@@ -183,6 +186,18 @@ class SetupView(View):
             
             if task == 'election':
                 dbsetup.election(election_obj, app_config)
+                
+                election_id = election_obj['id']
+                end_datetime = parse_datetime(election_obj['end_datetime'])
+                
+                scheduled_time = end_datetime + timedelta(seconds=5)
+                
+                task = tally_protocol.s(election_id)
+                task.freeze()
+                
+                Task.objects.create(election_id=election_id, task_id=task.id)
+                task.apply_async(eta=scheduled_time)
+                
             elif task == 'ballot':
                 dbsetup.ballot(election_obj, app_config)
             else:
