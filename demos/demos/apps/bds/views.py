@@ -35,8 +35,10 @@ class ManageView(View):
     
     template_name = 'bds/manage.html'
     
-    def get(self, request):
-        return render(request, self.template_name, {})
+    def get(self, request, election_id):
+        f = http.FileResponse(open(config.TARSTORAGE_ROOT + '/' + election_id + '.tar', 'rb'), content_type='application/force-download')
+        f['Content-Disposition'] = 'attachment; filename=%s' % election_id+'.tar'
+        return f
 
 
 class SetupView(View):

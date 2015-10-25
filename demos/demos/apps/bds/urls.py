@@ -7,7 +7,7 @@ from demos.common.utils import api
 urlpatterns = patterns('',
     
     url(r'^$', views.HomeView.as_view(), name='home'),
-    url(r'^manage/$', views.ManageView.as_view(), name='manage'),
+    url(r'^manage/(?P<election_id>[A-Za-z0-9])/$', views.ManageView.as_view(), name='manage'),
 )
 
 apipatterns = [
