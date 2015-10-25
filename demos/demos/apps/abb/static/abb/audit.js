@@ -78,7 +78,7 @@ $("#audit-button").click(function(e) {
                             
                             var o_votecode_hash = q_options[o][3];
                             
-                            if (o_votecode != "" || o_votecode == 0) {
+                            if (o_votecode != "" && o_votecode != null) {
                                 tr_votecode.removeClass();
                                 tr_votecode.prop("aria-hidden", false);
                                 tr_votecode.text(sjcl.codec.base32cf.hyphen(o_votecode, 4));

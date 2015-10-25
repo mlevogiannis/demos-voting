@@ -85,6 +85,7 @@ class AuditView(View):
             'participants': str(participants),
         }
         
+        csrf.get_token(request)
         return render(request, self.template_name, context)
     
     def post(self, request, *args, **kwargs):
@@ -105,48 +106,58 @@ class AuditView(View):
             part_qs = Part.objects.filter(ballot=ballot);
             question_qs = Question.objects.filter(election=election);
             
-            # 
+            # Get ballot's api export url
             
-            url_kwargs = {
+            url_args = {
                 'Election__id': election.id,
                 'Ballot__serial': ballot.serial,
             }
             
-            url = reverse('api:export:election:ballot:get', kwargs=url_kwargs)
+            url = reverse('abb-api:export:election:ballot:get', kwargs=url_args)
             
-            # 
+            # Common values
             
             vote = None
+            args = ['index','votecode','voted'] if not election.long_votecodes \
+                else ['index','l_votecode','voted','l_votecode_hash']
             
-            # 
+            # Iterate over parts, questions and options to build the response
             
             parts = []
             
             for p in part_qs:
+                
+                extra_args = tuple() if not election.long_votecodes \
+                    else (p.l_votecode_salt, p.l_votecode_iterations)
                 
                 questions = []
                 
                 for q in question_qs:
                     
                     optionv_qs = OptionV.objects.filter(part=p, question=q)
-                    options = list(optionv_qs.values_list('index','votecode','voted'))
+                    options = list(optionv_qs.values_list(*args))
                     
                     if p.security_code:
                         
+                        # If a ballot part has a security code, the other ballot
+                        # part was used by the client to vote
+                        
                         vote = 'A' if p.tag != 'A' else 'B'
                         
+                        # Restore options' correct order
+                        
                         int_ = base32cf.decode(p.security_code) + q.index
-                        bytes_ = math.ceil(int_.bit_length() / 8.0)
-                        value = hashlib.sha256(intc.to_bytes(int_, bytes_, 'big'))
+                        bytes_ = int(math.ceil(int_.bit_length() / 8.0))
+                        value = hashlib.sha256(intc.to_bytes(int_,bytes_,'big'))
                         index = intc.from_bytes(value.digest(), 'big')
                         
                         options = permute_ori(options, index)
                     
                     questions.append((q.index, options))
                 
-                parts.append((p.tag, questions))
+                parts.append((p.tag, questions) + extra_args)
             
-            # 
+            # Return response
             
             response = {
                 'url': url,
