@@ -208,6 +208,29 @@ WantedBy=multi-user.target
 
 EOF
 
+cat '-' <<EOF > %{buildroot}%{_unitdir}/demos-voting-celery-ea.service
+
+[Unit]
+Description=Celery workers for Demos voting
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=apache
+Group=apache
+WorkingDirectory=%{app_dir}
+ExecStart=%{_bindir}/celery worker -A demos --loglevel=INFO -C -q
+
+[Install]
+WantedBy=multi-user.target
+
+EOF
+
+pushd %{buildroot}%{_unitdir}
+        cp demos-voting-celery-ea.service demos-voting-celery-abb.service
+        cp demos-voting-celery-ea.service demos-voting-celery-bds.service
+popd
+
 
 %post ea
 NEW_SECRET_KEY=$(python -c 'import os; import base64; print(base64.b64encode(os.urandom(60)))')
@@ -266,14 +289,17 @@ cd %{app_dir}
 
 %files abb
 %{app_dir}/demos/apps/abb/
+%config %{_unitdir}/demos-voting-celery-abb.service
 
 %files ea
 %{app_bindir}/demos-crypto
 %{app_dir}/demos/apps/ea/
 %config %{_unitdir}/demos-voting-crypto.service
+%config %{_unitdir}/demos-voting-celery-ea.service
 
 %files bds
 %{app_dir}/demos/apps/bds/
+%config %{_unitdir}/demos-voting-celery-bds.service
 
 %files vbb
 %{app_dir}/demos/apps/vbb/
