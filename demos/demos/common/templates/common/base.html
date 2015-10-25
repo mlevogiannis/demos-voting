@@ -91,9 +91,7 @@
                 <div class="text-center">
                     DemosVoting
                     <span class="hidden-xs">&middot;</span><br class="hidden-sm hidden-md hidden-lg">
-                    {# Translators: see dev_name below #}
-                    {% trans "Marios Levogiannis" as dev_name %}
-                    {% blocktrans with dev_name='<a target="_blank" href="http://di.uoa.gr/~sdi1100058">'|add:dev_name|add:'</a>'%}Created by {{ dev_name }}{% endblocktrans %}
+                    {% blocktrans with creator="Demos Voting" %}Created by the {{ creator }}{% endblocktrans %}
                 </div>
                 <div class="vertical-separator"></div>
                 <div class="text-center">
@@ -103,7 +101,7 @@
                 </div>
                 <div class="vertical-separator hidden-sm hidden-md hidden-lg"></div>
                 <div class="text-center">
-                    <a target="_blank" href="http://www.demos-voting.org/">{% trans "Learn More" %}</a> &middot;
+                    <a target="_blank" href="http://www{% if current_language != 'el' %}-en{% endif %}.demos-voting.org/">{% trans "Learn More" %}</a> &middot;
                     <a target="_blank" href="https://github.com/levmarios/demos">GitHub Project</a>
                 </div>
                 <div class="vertical-separator"></div>
