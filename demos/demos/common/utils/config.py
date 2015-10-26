@@ -48,7 +48,7 @@ def api_connectivity_check(app_configs, **kwargs):
         ok_apps = []
         for remote in connectivity_list.get(local_app, []):
             try:
-                 api.Session(local_app, remote, app_config)
+                 api.Session(remote, app_config)
                  ok_apps.append(remote)
             except Exception as e:
                 messages.append(_checks.Error("Could not connect from %s to %s: %s" % \
