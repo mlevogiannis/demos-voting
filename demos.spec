@@ -33,6 +33,7 @@ Requires:       python-psycopg2
 Requires:       python-requests
 Requires:       python-six >= 1.9.0
 Requires:       python-celery
+Requires:       gettext
 %if %{with_apache}
 %if %{_target_vendor} == mageia
 Requires:       apache-mod_wsgi
