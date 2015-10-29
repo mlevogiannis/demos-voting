@@ -89,9 +89,7 @@
         <footer>
             <div class="container">
                 <div class="text-center">
-                    DemosVoting
-                    <span class="hidden-xs">&middot;</span><br class="hidden-sm hidden-md hidden-lg">
-                    {% blocktrans with creator="Demos Voting" %}Created by the {{ creator }}{% endblocktrans %}
+                    {% trans "Developed by the" %} <a target="_blank" href="http://www{% if current_language != 'el' %}-en{% endif %}.demos-voting.org/research-team">{% blocktrans with demosvoting="DemosVoting" %}{{ demosvoting }} Research Team{% endblocktrans %}</a>
                 </div>
                 <div class="vertical-separator"></div>
                 <div class="text-center">
