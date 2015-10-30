@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-25 09:53+0000\n"
+"POT-Creation-Date: 2015-10-29 16:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: demos/common/templates/common/alerts.html:5
-#: demos/common/templates/common/base.html:120
+#: demos/common/templates/common/base.html:118
 msgid "Close"
 msgstr "Κλείσιμο"
 
@@ -34,46 +34,50 @@ msgstr "Το αναγνωριστικό ψηφοφορίας που εισαγά
 msgid "current"
 msgstr "τρέχων"
 
-#: demos/common/templates/common/base.html:94
-#, python-format
-msgid "Created by the %(creator)s"
-msgstr "Δημιουργήθηκε από το %(creator)s"
+#: demos/common/templates/common/base.html:92
+msgid "Developed by the"
+msgstr "Δημιουργήθηκε από την"
 
-#: demos/common/templates/common/base.html:98
+#: demos/common/templates/common/base.html:92
+#, python-format
+msgid "%(demosvoting)s Research Team"
+msgstr "Ερευνητική Ομάδα του %(demosvoting)s"
+
+#: demos/common/templates/common/base.html:96
 #, python-format
 msgid "Code licensed under %(license)s"
 msgstr "Κώδικας υπό την άδεια %(license)s"
 
-#: demos/common/templates/common/base.html:100
+#: demos/common/templates/common/base.html:98
 #, python-format
 msgid "Documentation licensed under %(license)s"
 msgstr "Τεκμηρίωση υπό την άδεια %(license)s"
 
-#: demos/common/templates/common/base.html:104
+#: demos/common/templates/common/base.html:102
 msgid "Learn More"
 msgstr "Μάθετε περισσότερα"
 
-#: demos/common/templates/common/base.html:109
+#: demos/common/templates/common/base.html:107
 msgid "Department of Informatics and Telecommunications"
 msgstr "Τμήμα Πληροφορικής και Τηλεπικοινωνιών"
 
-#: demos/common/templates/common/base.html:111
+#: demos/common/templates/common/base.html:109
 msgid "National and Kapodistrian University of Athens"
 msgstr "Εθνικό και Καποδιστριακό Πανεπιστήμιο Αθηνών"
 
-#: demos/common/templates/common/base.html:126
+#: demos/common/templates/common/base.html:124
 msgid "Please enter the Election ID"
 msgstr "Παρακαλούμε εισαγάγετε το αναγνωριστικό ψηφοφορίας"
 
-#: demos/common/templates/common/base.html:140
+#: demos/common/templates/common/base.html:138
 msgid "Redirecting..."
 msgstr "Γίνεται ανακατεύθυνση..."
 
-#: demos/common/templates/common/base.html:147
+#: demos/common/templates/common/base.html:145
 msgid "Cancel"
 msgstr "Ακύρωση"
 
-#: demos/common/templates/common/base.html:148
+#: demos/common/templates/common/base.html:146
 msgid "Submit"
 msgstr "Υποβολή"
 
