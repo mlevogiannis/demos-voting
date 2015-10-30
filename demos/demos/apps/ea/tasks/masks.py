@@ -14,14 +14,14 @@ _masks = {
     
     'abb' : {
         'Election': ['id', 'title', 'start_datetime', 'end_datetime', \
-            'long_votecodes', 'state', 'ballots'],
+            'long_votecodes', 'state', 'ballots', 'x509_cert'],
         'Question': ['text', 'key', 'index', 'choices'],
         'OptionC': ['text', 'index'],
         'Ballot': ['serial', 'credential_hash'],
         'Part': ['tag', 'security_code_hash2', 'l_votecode_salt', \
             'l_votecode_iterations'],
         'OptionV' : ['votecode', 'l_votecode_hash', 'com', 'zk1', 'index', \
-            'question'],
+            'question', 'receipt_full'],
      },
     
     'vbb' : {

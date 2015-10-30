@@ -6,6 +6,7 @@ import math
 import hashlib
 import logging
 
+from io import BytesIO
 from base64 import b64decode
 from datetime import timedelta
 from collections import OrderedDict
@@ -24,6 +25,7 @@ from django.utils import timezone
 from django.conf.urls import include, url
 from django.db.models import Count, Max, Sum
 from django.shortcuts import get_object_or_404, redirect, render
+from django.core.files import File
 from django.middleware import csrf
 from django.views.generic import View
 from django.db.models.query import QuerySet
@@ -226,6 +228,11 @@ class SetupView(View):
             election_obj = json.loads(request.POST['payload'])
             
             if task == 'election':
+                
+                cert_dump = election_obj['x509_cert'].encode()
+                cert_file = File(BytesIO(cert_dump), name='cert.pem')
+                election_obj['x509_cert'] = cert_file
+                
                 dbsetup.election(election_obj, app_config)
                 
                 election_id = election_obj['id']

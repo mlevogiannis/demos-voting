@@ -10,6 +10,8 @@ import random
 import hashlib
 import tarfile
 
+from base64 import b64encode
+from OpenSSL import crypto
 from functools import partial
 
 try:
@@ -21,6 +23,8 @@ from multiprocessing.pool import ThreadPool
 
 from django.apps import apps
 from django.utils import translation
+from django.core.files import File
+from django.utils.encoding import force_bytes
 
 from billiard.pool import Pool
 
@@ -76,6 +80,47 @@ def election_setup(election_obj, language):
     
     api_session = {app_name: api.Session(app_name, app_config)
         for app_name in ['abb', 'vbb', 'bds']}
+    
+    # Load CA's X.509 certificate and private key
+    
+    with open(config.CA_CERT_PEM, 'r') as ca_file:
+        ca_cert = crypto.load_certificate(crypto.FILETYPE_PEM, ca_file.read())
+    
+    with open(config.CA_PKEY_PEM, 'r') as ca_file:
+        ca_pkey = crypto.load_privatekey(crypto.FILETYPE_PEM, ca_file.read(), \
+            force_bytes(config.CA_PKEY_PASSPHRASE))
+    
+    # Generate a new RSA key pair
+    
+    pkey = crypto.PKey()
+    pkey.generate_key(crypto.TYPE_RSA, config.PKEY_BIT_LEN)
+    
+    pkey_passphrase = os.urandom(int(3 * config.PKEY_PASSPHRASE_LEN // 4))
+    pkey_passphrase = b64encode(pkey_passphrase)
+    
+    pkey_dump = crypto.dump_privatekey(crypto.FILETYPE_PEM, pkey, \
+        config.PKEY_PASSPHRASE_CIPHER, pkey_passphrase)
+    pkey_file = File(io.BytesIO(pkey_dump), name='pkey.pem')
+    
+    election.pkey_file = pkey_file
+    election.pkey_passphrase = pkey_passphrase
+    election.save(update_fields=['pkey_file', 'pkey_passphrase'])
+    
+    # Generate a new X.509 certificate
+    
+    cert = crypto.X509()
+    cert.set_version(3)
+    cert.set_serial_number(base32cf.decode(election.id))
+    cert.set_notBefore(election.start_datetime.strftime('%Y%m%d%H%M%S%z'))
+    cert.set_notAfter(election.end_datetime.strftime('%Y%m%d%H%M%S%z'))
+    cert.set_issuer(ca_cert.get_subject())
+    cert.set_subject(ca_cert.get_subject())
+    cert.get_subject().CN = election.title[:64]
+    cert.set_pubkey(pkey)
+    cert.sign(ca_pkey, 'sha256')
+    
+    election_obj['x509_cert'] = \
+        crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode()
     
     # Generate question keys and calculate max_options
     
@@ -194,19 +239,33 @@ def election_setup(election_obj, language):
                     votecode_list = list(range(1, options + 1))
                     rand.shuffle(votecode_list)
                     
-                    l_votecode_list = []
+                    # Prepare options
                     
-                    if election.long_votecodes:
+                    for votecode, (com, decom, zk1, zk_state) \
+                        in zip_longest(votecode_list, crypto_o_list):
                         
-                        # Long votecodes: each votecode is constructed as
-                        # follows: hmac(security_code, credential + (q_index *
-                        # max_options) + short_votecode), so that we get inique
-                        # votecodes across all questions. All votecode hashes
-                        # of a question in a ballot's part share the same salt.
+                        # Each part's option can be uniquely identified by:
                         
-                        for votecode in votecode_list:
+                        optionv_id = (q_index * max_options) + votecode
+                        
+                        # Prepare long votecodes (if enabled) and receipt data
+                        
+                        if not election.long_votecodes:
                             
-                            msg = credential_int+(q_index*max_options)+votecode
+                            l_votecode = ''
+                            l_votecode_hash = ''
+                            
+                            receipt_data = optionv_id
+                            
+                        else:
+                            
+                            # Each long votecode is constructed as follows:
+                            # hmac(security_code, credential + (question_index
+                            # * max_options) + short_votecode), so that we get
+                            # a unique votecode for each option in a ballot's
+                            # part. All votecode hashes share the same salt.
+                            
+                            msg = credential_int + optionv_id
                             bytes = int(math.ceil(msg.bit_length() / 8.0))
                             msg = intc.to_bytes(msg, bytes, 'big')
                             
@@ -219,25 +278,27 @@ def election_setup(election_obj, language):
                             l_votecode_hash, _, _ = hasher.encode(l_votecode, \
                                 l_votecode_salt, l_votecode_iterations, True)
                             
-                            l_votecode_list.append((l_votecode,l_votecode_hash))
-                    
-                    for votecode, l_votecode, crypto_list in zip_longest(\
-                        votecode_list, l_votecode_list, crypto_o_list):
+                            receipt_data = base32cf.decode(l_votecode)
                         
-                        com, decom, zk1, zk_state = crypto_list
-                        l_votecode, l_votecode_hash = l_votecode or (None, None)
+                        # Generate receipt (receipt_data is an integer)
                         
-                        # Generate receipt
+                        bytes = int(math.ceil(receipt_data.bit_length() / 8.0))
+                        receipt_data = intc.to_bytes(receipt_data, bytes, 'big')
                         
-                        receipt = base32cf.random(config.RECEIPT_LEN)
+                        receipt_data = crypto.sign(pkey, receipt_data, 'sha256')
+                        receipt_data = intc.from_bytes(receipt_data, 'big')
                         
-                        # 
+                        receipt_full = base32cf.encode(receipt_data)
+                        receipt = receipt_full[-config.RECEIPT_LEN:]
+                        
+                        # Pack optionv's data
                         
                         optionv_obj = {
                             'votecode': votecode,
                             'l_votecode': l_votecode,
                             'l_votecode_hash': l_votecode_hash,
                             'receipt': receipt,
+                            'receipt_full': receipt_full,
                             'com': com,
                             'decom': decom,
                             'zk1': zk1,

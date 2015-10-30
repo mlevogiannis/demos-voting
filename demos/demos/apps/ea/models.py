@@ -40,6 +40,12 @@ class Election(models.Model):
     
     ballots = models.PositiveIntegerField()
     
+    def get_upload_file_path(self, filename):
+        return "private/%s/%s" % (self.id, filename)
+    
+    pkey_file = models.FileField(upload_to=get_upload_file_path)
+    pkey_passphrase = models.CharField(max_length=config.PKEY_PASSPHRASE_LEN)
+    
     # Other model methods and meta options
     
     def __str__(self):

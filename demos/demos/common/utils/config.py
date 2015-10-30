@@ -11,6 +11,10 @@ SECURITY_CODE_LEN = 8   # base32
 
 HASH_LEN = 128   # chars
 
+PKEY_BIT_LEN = 2048   # bits
+PKEY_PASSPHRASE_LEN = 32   # base64
+PKEY_PASSPHRASE_CIPHER = 'AES-128-CBC'  # openssl list-cipher-algorithms
+
 # ------------------------------------------------------------------------------
 
 import sys
