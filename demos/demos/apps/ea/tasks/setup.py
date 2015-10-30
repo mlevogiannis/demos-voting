@@ -38,9 +38,20 @@ from demos.common.utils.json import CustomJSONEncoder
 
 
 @shared_task(ignore_result=True)
-def election_setup(election, election_obj, language):
+def election_setup(election_obj, language):
     
     translation.activate(language)
+    
+    # Get election's model instance and update its state to WORKING
+    
+    election = Election.objects.get(id=election_obj['id'])
+    
+    election.state = enums.State.WORKING
+    election.save(update_fields=['state'])
+    
+    election_obj['state'] = enums.State.WORKING
+    
+    # Election-specific vote-token bit lengths
     
     tag_bits = 1
     serial_bits = (election.ballots + 100).bit_length()
@@ -48,6 +59,8 @@ def election_setup(election, election_obj, language):
     security_code_bits = config.SECURITY_CODE_LEN * 5
     token_bits = serial_bits + credential_bits + tag_bits + security_code_bits
     pad_bits = int(math.ceil(token_bits / 5.0) * 5 - token_bits)
+    
+    # Initialize common utilities
     
     hasher = PBKDF2Hasher()
     rand = random.SystemRandom()
@@ -58,13 +71,6 @@ def election_setup(election, election_obj, language):
     thread_pool = ThreadPool(processes=4)
     
     app_config = apps.get_app_config('ea')
-    
-    # Update election state to WORKING
-    
-    election.state = enums.State.WORKING
-    election.save(update_fields=['state'])
-    
-    election_obj['state'] = enums.State.WORKING
     
     # Establish sessions with the other servers
     

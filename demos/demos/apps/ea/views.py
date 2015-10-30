@@ -235,7 +235,7 @@ class CreateView(View):
                 
                 # Prepare and start the election_setup task
                 
-                task = election_setup.s(election, election_obj, language)
+                task = election_setup.s(election_obj, language)
                 task.freeze()
                 
                 Task.objects.create(election_id=election_id, task_id=task.id)
