@@ -5,6 +5,7 @@ import math
 from os import path
 from io import BytesIO
 from subprocess import check_output
+
 try:
     from urllib.parse import urljoin, quote
 except ImportError:
@@ -55,8 +56,10 @@ class BallotBuilder:
             cmd = ["fc-list", "-f", "%{file}",
                 ":style={0}:family={1}".format(ttf_style, ttf_family)]
             ttf_path = check_output(cmd, universal_newlines=True)
+            
             if not ttf_path:
-                            raise EnvironmentError("Missing font for: %s-%s" % (ttf_family, ttf_style))
+                raise EnvironmentError("Missing font for: %s-%s" % \
+                    (ttf_family, ttf_style))
             
             registerFont(TTFont(ttf_name, ttf_path))
             ttf_dict[ttf_style] = ttf_name
@@ -174,8 +177,11 @@ class BallotBuilder:
     
     # TrueType fonts
     
-    sans_font_dict = _load_ttf_family.__func__('Liberation Sans', ['Regular','Bold'])
-    mono_font_dict = _load_ttf_family.__func__('Liberation Mono', ['Regular','Bold'])
+    sans_font_dict = _load_ttf_family.__func__('Liberation Sans', \
+        ['Regular', 'Bold'])
+    
+    mono_font_dict = _load_ttf_family.__func__('Liberation Mono', \
+        ['Regular', 'Bold'])
     
     sans_regular = sans_font_dict['Regular']
     sans_bold = sans_font_dict['Bold']
@@ -548,7 +554,8 @@ class BallotBuilder:
                 if not self.long_votecodes:
                     vc_list = [str(vc).zfill(vc_chars) for vc in vc_list]
                 else:
-                    vc_list = [base32cf.hyphen(vc, self.long_vc_split) for vc in vc_list]
+                    vc_list = [base32cf.hyphen(vc, self.long_vc_split) \
+                        for vc in vc_list]
                 
                 data_list = list(zip(opt_list, vc_list, rec_list))
                 data_len = len(data_list)
