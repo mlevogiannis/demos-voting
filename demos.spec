@@ -65,6 +65,11 @@ Requires:       python-protobuf >= 3.0
 Requires:       python-qrcode
 Requires:       python-reportlab
 Requires:       liberation-sans-fonts, liberation-serif-fonts, liberation-mono-fonts
+%if %{_target_vendor} == mageia
+Requires:       python-openssl
+%else
+Requires:       pyOpenSSL
+%endif
 
 %package bds
 Summary:        Ballot Distribution Server for Secure Voting
