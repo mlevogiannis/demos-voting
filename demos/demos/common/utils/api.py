@@ -48,7 +48,7 @@ class Session:
         payload = {
             'username': self.username,
             'password': self.password,
-            'csrfmiddlewaretoken': self.s.cookies['csrftoken'],
+            'csrfmiddlewaretoken': self.s.cookies.get('csrftoken', False),
         }
         
         r = self.s.post(url, data=payload, verify=True)
@@ -68,7 +68,7 @@ class Session:
             r = self.s.get(url, verify=True)
             r.raise_for_status()
             
-            data['csrfmiddlewaretoken'] = self.s.cookies['csrftoken']
+            data['csrfmiddlewaretoken'] = self.s.cookies.get('csrftoken', False)
             
             r = self.s.post(url, data=data, files=files, verify=True)
             r.raise_for_status()
