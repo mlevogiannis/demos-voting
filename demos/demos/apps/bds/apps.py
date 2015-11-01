@@ -21,7 +21,6 @@ def tar_storage_check(app_configs, **kwargs):
 
     try:
         fd, path = tempfile.mkstemp(dir=config.TARSTORAGE_ROOT)
-        print "created tmp at:", path
         os.close(fd)
         os.unlink(path)
         
