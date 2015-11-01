@@ -95,7 +95,7 @@ def election_setup(election_obj, language):
             ca_pkey=crypto.load_privatekey(crypto.FILETYPE_PEM, \
                 ca_file.read(), force_bytes(config.CA_PKEY_PASSPHRASE))
         
-    except (IOError, OSError) as e:
+    except (AttributeError, TypeError, IOError, OSError) as e:
         
         self_signed = True
         
