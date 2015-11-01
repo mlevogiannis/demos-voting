@@ -60,34 +60,3 @@ def api_connectivity_check(app_configs, **kwargs):
                                         hint=None))
 
     return messages
-
-@_checks.register(deploy=True)
-def crypto_connectivity_check(app_configs, **kwargs):
-    """Tests basic socket connectivity with crypto service
-    """
-    if 'ea' not in settings.DEMOS_APPS:
-        return []
-
-    import socket
-    from demos.common.utils import crypto
-
-    try:
-        af = getattr(socket, _config.CRYPTO_AF)
-        sock = socket.socket(af)
-        
-        sock.settimeout(_config.RECV_TIMEOUT)
-        sock.connect(_config.CRYPTO_ADDR)
-        
-        sock.sendall('') # write something, will test +w flag on sockets
-        sock.shutdown(socket.SHUT_RDWR)
-        sock.close()
-        return [ _checks.Info("Checking connectivity with crypto: \"%s\" OK" % \
-                                _config.CRYPTO_ADDR) ]
-    except Exception as e:
-        return [_checks.Error("Connectivity with crypto \"%s\" failed: %s" % \
-                                ( _config.CRYPTO_ADDR, e),
-                              hint="Check that crypto service is running, properly configured")
-                ]
-
-
-# eof
