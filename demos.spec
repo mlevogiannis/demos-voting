@@ -129,6 +129,9 @@ popd
 %__rm -rf %{buildroot}
 install -d %{buildroot}%{app_bindir}/
 install demos-crypto/src/demos-crypto %{buildroot}%{app_bindir}/
+install -d %{buildroot}%{_tmpfilesdir}/
+cp demos-crypto/tmpfiles.conf %{buildroot}%{_tmpfilesdir}/demos-voting-crypto.conf
+mkdir -p %{buildroot}/run/demos-voting/
 
 install -d %{buildroot}%{app_dir}
 cp -r demos/demos %{buildroot}%{app_dir}
@@ -207,7 +210,7 @@ Type=simple
 User=apache
 RestartSec=10
 TimeoutStartSec=1min
-ExecStart=%{app_bindir}/demos-crypto -s unix /tmp/demos-crypto.sock -t 8
+ExecStart=%{app_bindir}/demos-crypto -s unix /run/demos-voting/demos-crypto.sock -t 8
 
 [Install]
 WantedBy=multi-user.target
@@ -299,6 +302,8 @@ cd %{app_dir}
 
 %files ea
 %{app_bindir}/demos-crypto
+%dir /run/demos-voting/
+%{_tmpfilesdir}/demos-voting-crypto.conf
 %{app_dir}/demos/apps/ea/
 %config %{_unitdir}/demos-voting-crypto.service
 %config %{_unitdir}/demos-voting-celery-ea.service
