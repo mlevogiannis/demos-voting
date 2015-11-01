@@ -1,5 +1,7 @@
 # File: json.py
 
+from __future__ import division
+
 import json
 
 from base64 import b64encode

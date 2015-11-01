@@ -1,5 +1,8 @@
 # File: intc.py
 
+from __future__ import division
+
+
 if hasattr(int, 'to_bytes'):
     
     def to_bytes(n, length, byteorder='big'):

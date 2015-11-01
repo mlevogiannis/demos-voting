@@ -1,5 +1,7 @@
 # File: tests.py
 
+from __future__ import division
+
 from os import urandom
 from random import randrange
 

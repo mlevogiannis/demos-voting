@@ -1,5 +1,7 @@
 # File: protobuf.py
 
+from __future__ import division
+
 from collections import OrderedDict
 from google.protobuf.descriptor import FieldDescriptor
 

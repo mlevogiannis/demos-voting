@@ -1,5 +1,7 @@
 # File: dbsetup.py
 
+from __future__ import division
+
 import itertools
 from django.db import transaction
 

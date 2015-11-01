@@ -1,5 +1,7 @@
 # File: fields.py
 
+from __future__ import division
+
 from base64 import b64encode, b64decode
 
 from django.db import models

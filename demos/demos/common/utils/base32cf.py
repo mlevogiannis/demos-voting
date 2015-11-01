@@ -1,5 +1,7 @@
 # File: base32cf.py
 
+from __future__ import division
+
 import re
 import math
 from os import urandom
@@ -62,7 +64,7 @@ def random(length, hyphens=-1, crypto=True):
     final encoded string."""
     
     bits = length * 5
-    bytes = int(math.ceil(bits / 8.0))
+    bytes = int(math.ceil(bits / 8))
     shift_bits = (8 * bytes) - bits
     
     if crypto:

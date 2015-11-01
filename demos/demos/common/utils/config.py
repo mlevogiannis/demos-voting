@@ -1,5 +1,7 @@
 # File: config.py
 
+from __future__ import division
+
 TITLE_MAXLEN = 128    # chars
 OPTION_MAXLEN = 128    # chars
 QUESTION_MAXLEN = 128   # chars

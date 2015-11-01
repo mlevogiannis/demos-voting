@@ -1,5 +1,7 @@
 # File: tasks.py
 
+from __future__ import division
+
 import json
 import hashlib
 import logging
@@ -157,7 +159,7 @@ def tally_protocol(election_id):
         for optionc in optionc_qs:
             
             votes = msg % (ballots + 1)
-            msg = int((msg - votes) // (ballots + 1))
+            msg = (msg - votes) // (ballots + 1)
             
             optionc.votes = votes
             optionc.save(update_fields=['votes'])

@@ -1,5 +1,7 @@
 # File: enums.py
 
+from __future__ import division
+
 from enum import IntEnum, unique
 
 

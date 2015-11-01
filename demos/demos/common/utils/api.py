@@ -1,5 +1,7 @@
 # File: api.py
 
+from __future__ import division
+
 import requests
 
 try:

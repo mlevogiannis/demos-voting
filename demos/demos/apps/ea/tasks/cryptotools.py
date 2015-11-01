@@ -1,5 +1,7 @@
 # File: cryptotools.py
 
+from __future__ import division
+
 import socket
 from demos.common.utils import crypto, config, intc
 

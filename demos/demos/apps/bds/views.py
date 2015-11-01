@@ -1,5 +1,7 @@
 # File: views.py
 
+from __future__ import division
+
 import json
 import logging
 import tarfile

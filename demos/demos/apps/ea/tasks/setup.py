@@ -1,5 +1,7 @@
 # File: setup.py
 
+from __future__ import division
+
 import io
 import os
 import hmac
@@ -62,7 +64,7 @@ def election_setup(election_obj, language):
     credential_bits = config.CREDENTIAL_LEN * 8
     security_code_bits = config.SECURITY_CODE_LEN * 5
     token_bits = serial_bits + credential_bits + tag_bits + security_code_bits
-    pad_bits = int(math.ceil(token_bits / 5.0) * 5 - token_bits)
+    pad_bits = int(math.ceil(token_bits / 5)) * 5 - token_bits
     
     # Initialize common utilities
     
@@ -95,7 +97,7 @@ def election_setup(election_obj, language):
     pkey = crypto.PKey()
     pkey.generate_key(crypto.TYPE_RSA, config.PKEY_BIT_LEN)
     
-    pkey_passphrase = os.urandom(int(3 * config.PKEY_PASSPHRASE_LEN // 4))
+    pkey_passphrase = os.urandom(3 * config.PKEY_PASSPHRASE_LEN // 4)
     pkey_passphrase = b64encode(pkey_passphrase)
     
     pkey_dump = crypto.dump_privatekey(crypto.FILETYPE_PEM, pkey, \
@@ -221,7 +223,7 @@ def election_setup(election_obj, language):
                 if election.long_votecodes:
                     
                     key = base32cf.decode(security_code)
-                    bytes = int(math.ceil(key.bit_length() / 8.0))
+                    bytes = int(math.ceil(key.bit_length() / 8))
                     key = intc.to_bytes(key, bytes, 'big')
                 
                 for q_index, crypto_o_list in enumerate(crypto_qo_list):
@@ -266,7 +268,7 @@ def election_setup(election_obj, language):
                             # part. All votecode hashes share the same salt.
                             
                             msg = credential_int + optionv_id
-                            bytes = int(math.ceil(msg.bit_length() / 8.0))
+                            bytes = int(math.ceil(msg.bit_length() / 8))
                             msg = intc.to_bytes(msg, bytes, 'big')
                             
                             hmac_obj = hmac.new(key, msg, hashlib.sha256)
@@ -282,7 +284,7 @@ def election_setup(election_obj, language):
                         
                         # Generate receipt (receipt_data is an integer)
                         
-                        bytes = int(math.ceil(receipt_data.bit_length() / 8.0))
+                        bytes = int(math.ceil(receipt_data.bit_length() / 8))
                         receipt_data = intc.to_bytes(receipt_data, bytes, 'big')
                         
                         receipt_data = crypto.sign(pkey, receipt_data, 'sha256')
@@ -403,7 +405,7 @@ def election_setup(election_obj, language):
                     # the question's index, converted back to an integer.
                     
                     int_ = base32cf.decode(security_code) + i
-                    bytes_ = int(math.ceil(int_.bit_length() / 8.0))
+                    bytes_ = int(math.ceil(int_.bit_length() / 8))
                     value = hashlib.sha256(intc.to_bytes(int_, bytes_, 'big'))
                     p_index = intc.from_bytes(value.digest(), 'big')
                     

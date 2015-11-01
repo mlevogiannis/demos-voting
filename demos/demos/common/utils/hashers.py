@@ -1,6 +1,9 @@
 # File: hashers.py
 
+from __future__ import division
+
 from base64 import b64encode
+
 from django.utils.crypto import constant_time_compare, pbkdf2
 from django.contrib.auth.hashers import PBKDF2PasswordHasher
 

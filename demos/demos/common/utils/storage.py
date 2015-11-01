@@ -1,5 +1,7 @@
 # File: storage.py
 
+from __future__ import division
+
 import os
 import time
 import tarfile

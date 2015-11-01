@@ -1,5 +1,7 @@
 # File: views.py
 
+from __future__ import division
+
 import json
 import hmac
 import math
@@ -149,7 +151,7 @@ class AuditView(View):
                         # Restore options' correct order
                         
                         int_ = base32cf.decode(p.security_code) + q.index
-                        bytes_ = int(math.ceil(int_.bit_length() / 8.0))
+                        bytes_ = int(math.ceil(int_.bit_length() / 8))
                         value = hashlib.sha256(intc.to_bytes(int_,bytes_,'big'))
                         index = intc.from_bytes(value.digest(), 'big')
                         
@@ -360,7 +362,7 @@ class VoteView(View):
                 credential_int = intc.from_bytes(b_credential, 'big')
                 
                 key = base32cf.decode(p2_security_code)
-                bytes = int(math.ceil(key.bit_length() / 8.0))
+                bytes = int(math.ceil(key.bit_length() / 8))
                 key = intc.to_bytes(key, bytes, 'big')
             
             # Verify vote's correctness and save it to the db in an atomic
@@ -427,7 +429,7 @@ class VoteView(View):
                             
                             msg = credential_int + (question.index * \
                                 max_options) + optionv2.votecode
-                            bytes = int(math.ceil(msg.bit_length() / 8.0))
+                            bytes = int(math.ceil(msg.bit_length() / 8))
                             msg = intc.to_bytes(msg, bytes, 'big')
                             
                             hmac_obj = hmac.new(key, msg, hashlib.sha256)

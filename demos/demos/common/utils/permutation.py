@@ -1,5 +1,7 @@
 # File: permutation.py
 
+from __future__ import division
+
 import math
 
 

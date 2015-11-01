@@ -1,5 +1,7 @@
 # File: masks.py
 
+from __future__ import division
+
 import re
 
 _masks = {
