@@ -243,9 +243,9 @@ DEMOS_CONFIG = {
         
         # Certificate Authority (X.509 / RSA)
         
-        'CA_CERT_PEM': os.path.expanduser('~/ca/cacert.pem'),
-        'CA_PKEY_PEM': os.path.expanduser('~/ca/private/cakey.pem'),
-        'CA_PKEY_PASSPHRASE': NO_PASSPHRASE_DEFINED,
+        'CA_CERT_PEM': False,   # e.g.: 'BASE_DIR/ca/cacert.pem',
+        'CA_PKEY_PEM': False,   # e.g.: 'BASE_DIR/ca/private/cakey.pem',
+        'CA_PKEY_PASSPHRASE': 'BAD_PASSPHRASE',
     },
     
     'bds': {

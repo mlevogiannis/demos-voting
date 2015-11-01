@@ -35,4 +35,33 @@ def crypto_connectivity_check(app_configs, **kwargs):
                               hint="Check that crypto service is running, properly configured")
                 ]
 
+
+@_checks.register(deploy=True)
+def crypto_ca_keys_check(app_configs, **kwargs):
+    """Tests CA certificate and key configuration
+    """
+
+    import socket
+    from OpenSSL import crypto
+    from demos.common.utils import config
+    from django.utils.encoding import force_bytes
+
+    if not (config.CA_CERT_PEM and config.CA_PKEY_PEM):
+        return [_checks.Warning("CA certificate and key are not configured, ballots will be unsigned",
+                                hint="Generate a SSL certificate with CA scope and install it in config") ]
+
+    try:
+        with open(config.CA_CERT_PEM, 'r') as ca_file:
+            ca_cert = crypto.load_certificate(crypto.FILETYPE_PEM, ca_file.read())
+        
+        with open(config.CA_PKEY_PEM, 'r') as ca_file:
+            ca_pkey = crypto.load_privatekey(crypto.FILETYPE_PEM, ca_file.read(), \
+                force_bytes(config.CA_PKEY_PASSPHRASE))
+        return []
+    except Exception, e:
+        return [_checks.Error("CA certificate and key \"%s\" \"%s\" fail: %s" % \
+                                (config.CA_CERT_PEM, config.CA_PKEY_PEM, e),
+                              hint="Check that crypto service is running, properly configured")
+                ]
+
 #eof

@@ -11,6 +11,7 @@ import time
 import random
 import hashlib
 import tarfile
+import logging
 
 from base64 import b64encode
 from OpenSSL import crypto
@@ -42,6 +43,8 @@ from demos.common.utils import api, base32cf, config, dbsetup, enums, intc
 from demos.common.utils.permutation import permute
 from demos.common.utils.hashers import PBKDF2Hasher
 from demos.common.utils.json import CustomJSONEncoder
+
+logger = logging.getLogger(__name__)
 
 
 @shared_task(ignore_result=True)
@@ -101,6 +104,8 @@ def election_setup(election_obj, language):
         
         if not settings.DEVELOPMENT:
             raise
+        
+        logger.warning("No CA configured, generating self-signed receipts")
         
     else:
         self_signed = False
