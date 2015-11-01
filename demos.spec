@@ -302,7 +302,7 @@ cd %{app_dir}
 
 %files ea
 %{app_bindir}/demos-crypto
-%dir /run/demos-voting/
+%dir %attr(0700,apache,apache) /run/demos-voting/
 %{_tmpfilesdir}/demos-voting-crypto.conf
 %{app_dir}/demos/apps/ea/
 %config %{_unitdir}/demos-voting-crypto.service
