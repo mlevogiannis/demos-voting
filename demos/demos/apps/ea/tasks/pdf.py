@@ -360,10 +360,10 @@ class BallotBuilder:
         # Calculate table heights
         
         table = Table(data=[[""]], style=self.table_opt_style)
-        self.row_height = int(table.wrap(0,0)[1])
+        self.row_height = int(table.wrap(self.page_width, self.page_height)[1])
         
         table = Table(data=[["",""]], style=self.table_que_style)
-        self.que_height = int(table.wrap(0,0)[1])
+        self.que_height = int(table.wrap(self.page_width, self.page_height)[1])
         
         # Prepare common question data
         
@@ -530,7 +530,8 @@ class BallotBuilder:
             # Calculate available height for options
             
             _avail_height = self.page_height - (self.cell_padding + \
-                table_hdr.wrap(0,0)[1] + table_ftr.wrap(0,0)[1])
+                table_hdr.wrap(self.page_width, self.page_height)[1] + \
+                table_ftr.wrap(self.page_width, self.page_height)[1])
             
             avail_height = _avail_height
             
@@ -676,7 +677,9 @@ class BallotBuilder:
                     
                     element_list.append(table_wrapper)
                     
-                    avail_height -= table_wrapper.wrap(0,0)[1]
+                    avail_height -= \
+                        table_wrapper.wrap(self.page_width, avail_height)[1]
+                    
                     row += opt_rows
             
             # Add page footer
