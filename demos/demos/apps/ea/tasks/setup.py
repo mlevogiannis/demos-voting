@@ -24,6 +24,7 @@ except ImportError:
 from multiprocessing.pool import ThreadPool
 
 from django.apps import apps
+from django.conf import settings
 from django.utils import translation
 from django.core.files import File
 from django.utils.encoding import force_bytes
@@ -85,12 +86,24 @@ def election_setup(election_obj, language):
     
     # Load CA's X.509 certificate and private key
     
-    with open(config.CA_CERT_PEM, 'r') as ca_file:
-        ca_cert = crypto.load_certificate(crypto.FILETYPE_PEM, ca_file.read())
-    
-    with open(config.CA_PKEY_PEM, 'r') as ca_file:
-        ca_pkey = crypto.load_privatekey(crypto.FILETYPE_PEM, ca_file.read(), \
-            force_bytes(config.CA_PKEY_PASSPHRASE))
+    try:
+        with open(config.CA_CERT_PEM, 'r') as ca_file:
+            ca_cert = crypto.load_certificate(crypto.FILETYPE_PEM, \
+                ca_file.read())
+        
+        with open(config.CA_PKEY_PEM, 'r') as ca_file:
+            ca_pkey=crypto.load_privatekey(crypto.FILETYPE_PEM, \
+                ca_file.read(), force_bytes(config.CA_PKEY_PASSPHRASE))
+        
+    except (IOError, OSError) as e:
+        
+        self_signed = True
+        
+        if not settings.DEVELOPMENT:
+            raise
+        
+    else:
+        self_signed = False
     
     # Generate a new RSA key pair
     
@@ -111,15 +124,23 @@ def election_setup(election_obj, language):
     # Generate a new X.509 certificate
     
     cert = crypto.X509()
+    
+    if not self_signed:
+        cert.set_issuer(ca_cert.get_subject())
+        cert.set_subject(ca_cert.get_subject())
+    
+    cert.get_subject().CN = election.title[:64]
+    
+    if self_signed:
+        cert.set_issuer(cert.get_subject())
+    
     cert.set_version(3)
     cert.set_serial_number(base32cf.decode(election.id))
     cert.set_notBefore(election.start_datetime.strftime('%Y%m%d%H%M%S%z'))
     cert.set_notAfter(election.end_datetime.strftime('%Y%m%d%H%M%S%z'))
-    cert.set_issuer(ca_cert.get_subject())
-    cert.set_subject(ca_cert.get_subject())
-    cert.get_subject().CN = election.title[:64]
+    
     cert.set_pubkey(pkey)
-    cert.sign(ca_pkey, 'sha256')
+    cert.sign(ca_pkey if not self_signed else pkey, 'sha256')
     
     election_obj['x509_cert'] = \
         crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode()
