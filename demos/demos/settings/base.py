@@ -21,9 +21,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = NO_SECRET_KEY_DEFINED
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# SECURITY WARNING: don't run with debug or development turned on in production!
 DEBUG = False
-DEVELOPMENT = False      # would turn off security, enable DEBUG
+DEVELOPMENT = False
 
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
@@ -91,6 +91,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'demos.wsgi.application'
 
+
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
@@ -104,19 +105,6 @@ DATABASES = {
         #'PORT': '',
     }
 }
-
-BROKER_URL = 'amqp://'
-CELERY_RESULT_BACKEND = 'amqp'
-# CELERY_TASK_SERIALIZER = 'json'
-# CELERY_ACCEPT_CONTENT = ['json', 'msgpack']
-
-if DEVELOPMENT:
-    # Alternative config, only using Django + existing db
-    # Note: introduces dependency on python-SQLAlchemy
-    BROKER_URL = 'django://'
-    INSTALLED_APPS.append('kombu.transport.django')
-    CELERY_RESULT_BACKEND='db+postgresql://%(USER)s:%(PASSWORD)s@%(HOST)s:%(PORT)s/%(NAME)s' \
-                                % DATABASES['default']
 
 
 # Internationalization
@@ -137,7 +125,7 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
 
-DATETIME_FORMAT = 'l, j F Y, h:i a'
+DATETIME_FORMAT = 'l j F Y, h:i a'
 
 LOCALE_PATHS = [
     os.path.join(BASE_DIR, 'common/locale'),
@@ -214,6 +202,8 @@ SECURE_HSTS_SECONDS = 31536000
 
 # Demos-specific configuration
 
+DEMOS_APPS = NO_APP_CHOSEN   # one or more of: ea, bds, abb, vbb
+
 DEMOS_CONFIG = {
     
     'ea': {
@@ -229,7 +219,7 @@ DEMOS_CONFIG = {
         # https://docs.python.org/3/library/socket.html
         
         # CRYPTO_AF: e.g. 'AF_UNIX' or 'AF_INET' or 'AF_INET6'
-        # CRYPTO_ADDR: e.g. '/tmp/demos-crypto.sock' or ('127.0.0.1', 8999)
+        # CRYPTO_ADDR: e.g. '/run/demos-crypto.sock' or ('127.0.0.1', 8999)
         
         'CRYPTO_AF': 'AF_UNIX',
         'CRYPTO_ADDR': '/run/demos-voting/demos-crypto.sock',
@@ -243,12 +233,18 @@ DEMOS_CONFIG = {
         
         # Certificate Authority (X.509 / RSA)
         
-        'CA_CERT_PEM': False,   # e.g.: 'BASE_DIR/ca/cacert.pem',
-        'CA_PKEY_PEM': False,   # e.g.: 'BASE_DIR/ca/private/cakey.pem',
-        'CA_PKEY_PASSPHRASE': 'BAD_PASSPHRASE',
+        # CA_CERT_PEM: e.g. 'BASE_DIR/ca/cacert.pem',
+        # CA_PKEY_PEM: e.g. 'BASE_DIR/ca/private/cakey.pem',
+        
+        # If DEVELOPMENT is True and pem-file paths are empty or invalid,
+        # self-signed certificates will be generated
+        
+        'CA_CERT_PEM': '',
+        'CA_PKEY_PEM': '',
+        'CA_PKEY_PASSPHRASE': '',
         
         # Absolute filesystem path to the directory that will hold
-        # RSA private-public key pairs (PEM file format)
+        # elections' RSA private-public key pairs (PEM file format)
         
         'PKEY_ROOT': os.path.join(os.path.dirname(BASE_DIR), 'data/pkeys'),
     },
@@ -256,7 +252,7 @@ DEMOS_CONFIG = {
     'bds': {
         
         # Absolute filesystem path to the directory that will hold
-        # ballots (TAR file format)
+        # elections' PDF ballots (TAR file format)
         
         'BALLOT_ROOT': os.path.join(os.path.dirname(BASE_DIR), 'data/ballots'),
     },
@@ -264,7 +260,7 @@ DEMOS_CONFIG = {
     'abb': {
         
         # Absolute filesystem path to the directory that will hold
-        # X.509 certificates (PEM file format)
+        # elections' X.509 certificates (PEM file format)
         
         'CERT_ROOT': os.path.join(os.path.dirname(BASE_DIR), 'data/certs'),
         
@@ -277,28 +273,32 @@ DEMOS_CONFIG = {
     },
 }
 
-DEMOS_APPS = NO_APP_CHOSEN   # one or more of: ea, bds, abb, vbb
-
 DEMOS_URL = {
-    'ea': 'https://demos-ea.our-domain.com',
-    'bds': 'https://demos-bds.our-domain.com',
-    'abb': 'https://demos-abb.our-domain.com',
-    'vbb': 'https://demos-vbb.our-domain.com',
+    'ea' : 'https://demos-ea.domain-name.example/',
+    'bds': 'https://demos-bds.domain-name.example/',
+    'abb': 'https://demos-abb.domain-name.example/',
+    'vbb': 'https://demos-vbb.domain-name.example/',
 }
 
 DEMOS_API_URL = {
-    'ea': 'https://api.demos-ea.our-domain.com',
-    'bds': 'https://api.demos-bds.our-domain.com',
-    'abb': 'https://api.demos-abb.our-domain.com',
-    'vbb': 'https://api.demos-vbb.our-domain.com',
+    'ea' : 'https://api.demos-ea.domain-name.example/',
+    'bds': 'https://api.demos-bds.domain-name.example/',
+    'abb': 'https://api.demos-abb.domain-name.example/',
+    'vbb': 'https://api.demos-vbb.domain-name.example/',
 }
 
-
-# Auto-generated values
-
 DEMOS_APPS = [ DEMOS_APPS ] if not isinstance(DEMOS_APPS, (list, tuple)) else DEMOS_APPS
-INSTALLED_APPS += [ 'demos.apps.%s' % iapp for iapp in DEMOS_APPS ]
-LOCALE_PATHS += [ os.path.join(BASE_DIR, 'apps/%s/locale' % iapp) for iapp in DEMOS_APPS ]
+INSTALLED_APPS += [ 'demos.apps.%s' % app for app in DEMOS_APPS ]
+LOCALE_PATHS += [ os.path.join(BASE_DIR, 'apps/%s/locale' % app) for app in DEMOS_APPS ]
+
+
+# Celery-specific configuration
+# http://docs.celeryproject.org/en/latest/getting-started/brokers/index.html
+
+BROKER_URL = 'amqp://'
+CELERY_RESULT_BACKEND = 'amqp'
+# CELERY_TASK_SERIALIZER = 'json'
+# CELERY_ACCEPT_CONTENT = ['json', 'msgpack']
 
 
 # Development-only settings, not to be used in production
@@ -352,4 +352,14 @@ if DEVELOPMENT:
     SECURE_CONTENT_TYPE_NOSNIFF = False
     SECURE_HSTS_INCLUDE_SUBDOMAINS = False
     SECURE_HSTS_SECONDS = 0
+    
+    # Celery-specific
+    
+    # Alternative config, only using Django + existing db
+    # Note: introduces dependency on python-SQLAlchemy
+    
+    BROKER_URL = 'django://'
+    INSTALLED_APPS.append('kombu.transport.django')
+    CELERY_RESULT_BACKEND = 'db+postgresql://%(USER)s:%(PASSWORD)s@' \
+        '%(HOST)s:%(PORT)s/%(NAME)s' % DATABASES['default']
 
