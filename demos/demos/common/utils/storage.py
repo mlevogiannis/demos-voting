@@ -7,6 +7,8 @@ import os
 import time
 import tarfile
 
+from datetime import datetime
+
 try:
     from urllib.parse import urljoin
 except ImportError:
@@ -180,7 +182,7 @@ class TarFileStorage(Storage):
         tar = tarfile.open(name=tarname, mode='r')
         
         tarinfo = tar.getmember(filename)
-        return tarinfo.mtime
+        return datetime.fromtimestamp(tarinfo.mtime)
 
 
 # ------------------------------------------------------------------------------
