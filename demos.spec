@@ -144,6 +144,8 @@ rm -f %{buildroot}%{app_dir}/settings/base.py?
 mv %{buildroot}%{app_dir}/demos/settings/base.py %{buildroot}%{_sysconfdir}/%{name}/settings.py
 ln -s %{_sysconfdir}/%{name}/settings.py %{buildroot}%{app_dir}/demos/settings/base.py
 
+install -d %{buildroot}%{_var}/spool/demos-voting/
+
 %if %{with_apache}
 # Configuration for Apache and its mod_wsgi
 install -d %{buildroot}%{_webappconfdir}
@@ -284,6 +286,7 @@ cd %{app_dir}
 %doc demos/LICENSE demos/README
 %dir %{app_dir}/demos
 %dir %attr(0755,root,root) %{_sysconfdir}/%{name}/
+%dir %attr(0750,apache,apache) %{_var}/spool/demos-voting/
 %config(noreplace) %attr(0755,root,root) %{_sysconfdir}/%{name}/settings.py
 %exclude %{_sysconfdir}/%{name}/settings.py?
 %{app_dir}/demos/__init__.py*
