@@ -59,17 +59,20 @@ class Election(models.Model):
         return (self.id,)
 
 
+ballot_fs = storage.PrivateTarFileStorage(location=config.BALLOT_ROOT,
+    tar_permissions_mode=0o600, tar_file_permissions_mode=0o600,
+    tar_directory_permissions_mode=0o700)
+
+def get_ballot_file_path(ballot, filename):
+    return "%s/%s" % (ballot.election.id, filename)
+
+
 class Ballot(models.Model):
-    
-    fs = storage.TarFileStorage()
-    
-    def get_upload_file_path(self, filename):
-        return "%s/%s" % (self.election.id, filename)
     
     election = models.ForeignKey(Election)
     
     serial = models.PositiveIntegerField()
-    pdf = models.FileField(upload_to=get_upload_file_path, storage=fs)
+    pdf = models.FileField(upload_to=get_ballot_file_path, storage=ballot_fs)
     
     # Other model methods and meta options
     

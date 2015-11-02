@@ -3,7 +3,7 @@
 from django.db import models
 from django.core import urlresolvers
 
-from demos.common.utils import config, crypto, enums, fields
+from demos.common.utils import config, crypto, enums, fields, storage
 
 
 class Config(models.Model):
@@ -26,6 +26,13 @@ class Config(models.Model):
         return (self.key,)
 
 
+pkey_fs = storage.PrivateFileSystemStorage(location=config.PKEY_ROOT,
+    file_permissions_mode=0o600, directory_permissions_mode=0o700)
+
+def get_pkey_file_path(election, filename):
+    return "%s.%s" % (election.id, filename)
+
+
 class Election(models.Model):
     
     id = fields.Base32Field(primary_key=True)
@@ -40,10 +47,7 @@ class Election(models.Model):
     
     ballots = models.PositiveIntegerField()
     
-    def get_upload_file_path(self, filename):
-        return "private/%s/%s" % (self.id, filename)
-    
-    pkey_file = models.FileField(upload_to=get_upload_file_path)
+    pkey_file = models.FileField(upload_to=get_pkey_file_path, storage=pkey_fs)
     pkey_passphrase = models.CharField(max_length=config.PKEY_PASSPHRASE_LEN)
     
     # Other model methods and meta options
