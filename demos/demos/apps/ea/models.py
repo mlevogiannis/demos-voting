@@ -5,7 +5,10 @@ import os
 from django.db import models
 from django.core import urlresolvers
 
-from demos.common.utils import config, crypto, enums, fields, storage
+from demos.common.utils import crypto, enums, fields, storage
+from demos.common.utils.config import registry
+
+config = registry.get_config('ea')
 
 
 class Config(models.Model):

@@ -25,8 +25,10 @@ from reportlab.pdfbase.pdfmetrics import registerFont, stringWidth
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, \
     Paragraph, Image, Spacer, PageBreak
 
-from demos.common.utils import base32cf, config
-from demos.settings import DEMOS_URL
+from demos.common.utils import base32cf
+from demos.common.utils.config import registry
+
+config = registry.get_config('ea')
 
 
 class BallotBuilder:
@@ -456,10 +458,10 @@ class BallotBuilder:
         
         for part_obj in ballot_obj['__list_Part__']:
             
-            abb_url = urljoin(DEMOS_URL['abb'], \
+            abb_url = urljoin(config.URL['abb'], \
                 quote("%s/" % self.election_id))
             
-            vbb_url = urljoin(DEMOS_URL['vbb'], quote("%s/%s/" \
+            vbb_url = urljoin(config.URL['vbb'], quote("%s/%s/" \
                  % (self.election_id, part_obj['vote_token'])))
             
             # Generate QRCode

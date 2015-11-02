@@ -14,7 +14,7 @@ from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.middleware import csrf
 
-from demos.settings import DEMOS_API_URL
+from django.conf import settings
 
 import logging
 from six import string_types
@@ -29,7 +29,7 @@ class Session:
         self.username = app_config.label
         self.password = app_config.get_model('RemoteUser').\
             objects.get(username=server).password
-        self.url = urljoin(DEMOS_API_URL[server], 'api/')
+        self.url = urljoin(settings.DEMOS_API_URL[server], 'api/')
         
         self.login()
     

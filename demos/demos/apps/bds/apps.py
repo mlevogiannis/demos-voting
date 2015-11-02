@@ -4,6 +4,10 @@ from django.apps import AppConfig as _AppConfig
 from django.utils.translation import ugettext_lazy as _
 from django.core import checks as _checks
 
+from demos.common.utils.config import registry
+config = registry.get_config('bds')
+
+
 class AppConfig(_AppConfig):
     name = 'demos.apps.bds'
     verbose_name = _('Ballot Distribution Center')
@@ -15,7 +19,6 @@ def tar_storage_check(app_configs, **kwargs):
     """Tests basic socket connectivity with crypto service
     """
 
-    from demos.common.utils import config
     import tempfile
     import os
 

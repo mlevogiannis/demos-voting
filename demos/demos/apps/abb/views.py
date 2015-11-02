@@ -40,14 +40,16 @@ from django.core.serializers.json import DjangoJSONEncoder
 from demos.apps.abb.tasks import tally_protocol
 from demos.apps.abb.models import Election, Question, Ballot, Part, OptionV, \
     Task
-from demos.common.utils import api, base32cf, config, dbsetup, enums, intc, \
-    hashers, protobuf
+
+from demos.common.utils import api, base32cf, dbsetup, enums, intc, hashers, \
+    protobuf
+from demos.common.utils.config import registry
 from demos.common.utils.permutation import permute_ori
 
-
-hasher = hashers.PBKDF2Hasher()
 logger = logging.getLogger(__name__)
 app_config = apps.get_app_config('abb')
+config = registry.get_config('abb')
+hasher = hashers.PBKDF2Hasher()
 
 
 class HomeView(View):

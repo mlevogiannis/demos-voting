@@ -3,13 +3,15 @@
 from functools import partial
 
 from django import forms
+from django.conf import settings
 from django.utils import timezone
 from django.forms.formsets import BaseFormSet, formset_factory
 from django.utils.translation import ugettext_lazy as _
 
 from demos.apps.ea import fields
-from demos.common.utils import config
-from django.conf import settings as django_settings
+from demos.common.utils.config import registry
+
+config = registry.get_config('ea')
 
 
 # DefineView Forms -------------------------------------------------------------
@@ -25,7 +27,7 @@ class ElectionForm(forms.Form):
     ballots = forms.IntegerField(label=_('Ballots'),
         min_value=1, max_value=config.MAX_BALLOTS)
     
-    language = forms.ChoiceField(label=_('Language'), choices=django_settings.LANGUAGES)
+    language = forms.ChoiceField(label=_('Language'),choices=settings.LANGUAGES)
     
     trustee_list = fields.MultiEmailField(label=_('Trustee e-mails'),
         min_length=1, max_length=config.MAX_TRUSTEES)

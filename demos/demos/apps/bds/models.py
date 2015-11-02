@@ -3,7 +3,10 @@
 from django.db import models
 from django.core import urlresolvers
 
-from demos.common.utils import config, enums, fields, storage
+from demos.common.utils import enums, fields, storage
+from demos.common.utils.config import registry
+
+config = registry.get_config('bds')
 
 
 class Config(models.Model):

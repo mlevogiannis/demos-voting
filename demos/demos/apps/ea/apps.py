@@ -4,6 +4,11 @@ from django.apps import AppConfig as _AppConfig
 from django.utils.translation import ugettext_lazy as _
 from django.core import checks as _checks
 
+from demos.common.utils.config import registry
+
+config = registry.get_config('ea')
+
+
 class AppConfig(_AppConfig):
     name = 'demos.apps.ea'
     verbose_name = _('Election Authority')
@@ -15,7 +20,6 @@ def crypto_connectivity_check(app_configs, **kwargs):
     """
 
     import socket
-    from demos.common.utils import config
 
     try:
         af = getattr(socket, config.CRYPTO_AF)

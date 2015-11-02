@@ -33,14 +33,14 @@ from demos.apps.ea.forms import ElectionForm, OptionFormSet, \
 from demos.apps.ea.tasks import api_update, cryptotools, election_setup, pdf
 from demos.apps.ea.models import Config, Election, OptionC, OptionV, Task
 
-from demos.common.utils import api, base32cf, config, crypto, enums
-from demos.common.utils.dbsetup import _prep_kwargs
+from demos.common.utils import api, base32cf, crypto, enums
 from demos.common.utils.json import CustomJSONEncoder
-
-from demos.settings import DEMOS_URL
+from demos.common.utils.config import registry
+from demos.common.utils.dbsetup import _prep_kwargs
 
 logger = logging.getLogger(__name__)
 app_config = apps.get_app_config('ea')
+config = registry.get_config('ea')
 
 
 class HomeView(View):
@@ -292,8 +292,8 @@ class StatusView(View):
         if not election:
            return redirect(reverse('ea:home') + '?error=id')
         
-        abb_url = urljoin(DEMOS_URL['abb'], quote("results/%s/" % election_id))
-        bds_url = urljoin(DEMOS_URL['bds'], quote("manage/%s/" % election_id))
+        abb_url = urljoin(config.URL['abb'], quote("results/%s/" % election_id))
+        bds_url = urljoin(config.URL['bds'], quote("manage/%s/" % election_id))
         
         context = {
             'abb_url': abb_url,

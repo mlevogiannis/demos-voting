@@ -13,11 +13,13 @@ from django.apps import apps
 from demos.apps.abb.models import Election, Question, Ballot, Part, OptionV, \
     Task
 
-from demos.common.utils import api, config, crypto, enums, intc
+from demos.common.utils import api, crypto, enums, intc
 from demos.common.utils.json import CustomJSONEncoder
+from demos.common.utils.config import registry
 
 logger = logging.getLogger(__name__)
 app_config = apps.get_app_config('abb')
+config = registry.get_config('abb')
 
 
 @shared_task

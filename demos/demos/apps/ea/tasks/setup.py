@@ -39,12 +39,14 @@ from demos.apps.ea.tasks import cryptotools, pdf
 from demos.apps.ea.tasks.masks import apply_mask
 from demos.apps.ea.models import Election, Task, RemoteUser
 
-from demos.common.utils import api, base32cf, config, dbsetup, enums, intc
+from demos.common.utils import api, base32cf, dbsetup, enums, intc
 from demos.common.utils.permutation import permute
 from demos.common.utils.hashers import PBKDF2Hasher
 from demos.common.utils.json import CustomJSONEncoder
+from demos.common.utils.config import registry
 
 logger = logging.getLogger(__name__)
+config = registry.get_config('ea')
 
 
 @shared_task(ignore_result=True)

@@ -3,7 +3,11 @@
 from __future__ import division
 
 import socket
-from demos.common.utils import crypto, config, intc
+
+from demos.common.utils import crypto, intc
+from demos.common.utils.config import registry
+
+config = registry.get_config('ea')
 
 
 def gen_key(ballots, options):

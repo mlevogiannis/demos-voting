@@ -19,10 +19,13 @@ from django.utils.decorators import method_decorator
 from django.core.urlresolvers import reverse
 
 from demos.apps.bds.models import Election
-from demos.common.utils import api, config, dbsetup
+
+from demos.common.utils import api, dbsetup
+from demos.common.utils.config import registry
 
 logger = logging.getLogger(__name__)
 app_config = apps.get_app_config('bds')
+config = registry.get_config('bds')
 
 
 class HomeView(View):
