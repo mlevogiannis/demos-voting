@@ -1,5 +1,7 @@
 # File: models.py
 
+import os
+
 from django.db import models
 from django.core import urlresolvers
 
@@ -30,7 +32,7 @@ pkey_fs = storage.PrivateFileSystemStorage(location=config.PKEY_ROOT,
     file_permissions_mode=0o600, directory_permissions_mode=0o700)
 
 def get_pkey_file_path(election, filename):
-    return "%s.%s" % (election.id, filename)
+    return "%s%s" % (election.id, os.path.splitext(filename)[-1])
 
 
 class Election(models.Model):
