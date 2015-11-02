@@ -274,18 +274,22 @@ DEMOS_CONFIG = {
 }
 
 DEMOS_URL = {
-    'ea' : 'https://demos-ea.domain-name.example/',
+    'ea': 'https://demos-ea.domain-name.example/',
     'bds': 'https://demos-bds.domain-name.example/',
     'abb': 'https://demos-abb.domain-name.example/',
     'vbb': 'https://demos-vbb.domain-name.example/',
 }
 
 DEMOS_API_URL = {
-    'ea' : 'https://api.demos-ea.domain-name.example/',
+    'ea': 'https://api.demos-ea.domain-name.example/',
     'bds': 'https://api.demos-bds.domain-name.example/',
     'abb': 'https://api.demos-abb.domain-name.example/',
     'vbb': 'https://api.demos-vbb.domain-name.example/',
 }
+
+# In case the above API URLs have SSL, and only self-signed certificates,
+# you can disable the verification below, to allow Requests among servers
+# DEMOS_API_VERIFY = True       # the default
 
 DEMOS_APPS = [ DEMOS_APPS ] if not isinstance(DEMOS_APPS, (list, tuple)) else DEMOS_APPS
 INSTALLED_APPS += [ 'demos.apps.%s' % app for app in DEMOS_APPS ]

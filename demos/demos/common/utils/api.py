@@ -51,7 +51,7 @@ class Session:
             'csrfmiddlewaretoken': self.s.cookies.get('csrftoken', False),
         }
         
-        r = self.s.post(url, data=payload, verify=True)
+        r = self.s.post(url, data=payload, verify=getattr(settings, 'DEMOS_API_VERIFY', True))
         r.raise_for_status()
     
     def logout(self):
@@ -70,7 +70,7 @@ class Session:
             
             data['csrfmiddlewaretoken'] = self.s.cookies.get('csrftoken', False)
             
-            r = self.s.post(url, data=data, files=files, verify=True)
+            r = self.s.post(url, data=data, files=files, verify=getattr(settings, 'DEMOS_API_VERIFY', True))
             r.raise_for_status()
             
             return r
