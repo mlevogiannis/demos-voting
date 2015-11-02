@@ -16,7 +16,7 @@ from django.conf import settings
 from django.core.files import File
 from django.utils.encoding import filepath_to_uri
 from django.utils.deconstruct import deconstructible
-from django.core.files.storage import Storage
+from django.core.files.storage import Storage, FileSystemStorage
 
 
 @deconstructible
@@ -177,4 +177,56 @@ class TarFileStorage(Storage):
         
         tarinfo = tar.getmember(filename)
         return tarinfo.mtime
+
+
+# ------------------------------------------------------------------------------
+
+# Private storage subclasses do not use default values from the project's
+# main configuration file, even when any of their given arguments is None.
+
+
+@deconstructible
+class PrivateFileSystemStorage(FileSystemStorage):
+    
+    def __init__(self, location, base_url=None, file_permissions_mode=None,
+        directory_permissions_mode=None):
+        
+        assert location is not None
+        
+        super(PrivateFileSystemStorage, self).__init__(location, base_url,
+            file_permissions_mode, directory_permissions_mode)
+        
+        if base_url is None:
+            self.base_url = None
+        
+        if file_permissions_mode is None:
+            self.file_permissions_mode = None
+        
+        if directory_permissions_mode is None:
+            self.directory_permissions_mode = None
+
+
+@deconstructible
+class PrivateTarFileStorage(TarFileStorage):
+    
+    def __init__(self, location, base_url=None, tar_permissions_mode=None,
+        tar_directory_permissions_mode=None, tar_file_permissions_mode=None):
+        
+        assert location is not None
+        
+        super(PrivateTarFileStorage, self).__init__(location, base_url,
+            tar_permissions_mode, tar_file_permissions_mode,
+            tar_directory_permissions_mode)
+        
+        if base_url is None:
+            self.base_url = None
+        
+        if tar_permissions_mode is None:
+            self.tar_permissions_mode = None
+        
+        if tar_file_permissions_mode is None:
+            self.tar_file_permissions_mode = None
+        
+        if tar_directory_permissions_mode is None:
+            self.tar_directory_permissions_mode = None
 
