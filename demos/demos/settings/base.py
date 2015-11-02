@@ -14,8 +14,8 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# all writable files may have this as a reference
-SPOOL_DIR = '/var/spool/demos-voting' # or os.path.dirname(BASE_DIR) in development
+# All writable files may have this as a reference
+SPOOL_DIR = '/var/spool/demos-voting'
 
 
 # Quick-start development settings - unsuitable for production
@@ -27,6 +27,9 @@ SECRET_KEY = NO_SECRET_KEY_DEFINED
 # SECURITY WARNING: don't run with debug or development turned on in production!
 DEBUG = False
 DEVELOPMENT = False
+
+if DEVELOPMENT:
+    SPOOL_DIR = os.path.join(os.path.dirname(BASE_DIR), 'data')
 
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
@@ -249,7 +252,7 @@ DEMOS_CONFIG = {
         # Absolute filesystem path to the directory that will hold
         # elections' RSA private-public key pairs (PEM file format)
         
-        'PKEY_ROOT': os.path.join(SPOOL_DIR, 'data/pkeys'),
+        'PKEY_ROOT': os.path.join(SPOOL_DIR, 'pkeys'),
     },
     
     'bds': {
@@ -257,7 +260,7 @@ DEMOS_CONFIG = {
         # Absolute filesystem path to the directory that will hold
         # elections' PDF ballots (TAR file format)
         
-        'BALLOT_ROOT': os.path.join(SPOOL_DIR, 'data/ballots'),
+        'BALLOT_ROOT': os.path.join(SPOOL_DIR, 'ballots'),
     },
     
     'abb': {
@@ -265,7 +268,7 @@ DEMOS_CONFIG = {
         # Absolute filesystem path to the directory that will hold
         # elections' X.509 certificates (PEM file format)
         
-        'CERT_ROOT': os.path.join(SPOOL_DIR, 'data/certs'),
+        'CERT_ROOT': os.path.join(SPOOL_DIR, 'certs'),
         
         # Performance settings, they affect CPU and RAM usage, etc
         
