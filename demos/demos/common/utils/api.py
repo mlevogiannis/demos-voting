@@ -2,6 +2,7 @@
 
 from __future__ import division
 
+import logging
 import requests
 
 try:
@@ -9,18 +10,17 @@ try:
 except ImportError:
     from urlparse import urljoin
 
-from django.http import HttpResponse, HttpResponseForbidden
-from django.contrib.auth import login as auth_login, logout as auth_logout
-from django.contrib.auth.forms import AuthenticationForm
-from django.middleware import csrf
-
-from django.conf import settings
-
-import logging
 from six import string_types
 
+from django.conf import settings
+from django.http import HttpResponse, HttpResponseForbidden
+from django.middleware import csrf
+from django.contrib.auth import login as auth_login, logout as auth_logout
+from django.contrib.auth.forms import AuthenticationForm
+
+
 class Session:
-    _log = logging.getLogger('demos.remoteSession')
+    _log = logging.getLogger(__name__ + '.Session')
     
     def __init__(self, server, app_config):
         
