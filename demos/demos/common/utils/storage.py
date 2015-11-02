@@ -86,6 +86,10 @@ class TarFileStorage(Storage):
         return File(filebuf)
     
     def _save(self, name, content):
+        
+        if not os.path.isdir(self.location):
+            os.makedirs(self.location)
+        
         tarname, filename = self.__parse_name(name)
         tar = tarfile.open(name=tarname, mode='a')
         
