@@ -29,7 +29,7 @@ def crypto_connectivity_check(app_configs, **kwargs):
         sock.close()
         return [ _checks.Info("Checking connectivity with crypto: \"%s\" OK" % \
                                 config.CRYPTO_ADDR) ]
-    except Exception, e:
+    except Exception as e:
         return [_checks.Error("Connectivity with crypto \"%s\" failed: %s" % \
                                 ( config.CRYPTO_ADDR, e),
                               hint="Check that crypto service is running, properly configured")
@@ -58,7 +58,7 @@ def crypto_ca_keys_check(app_configs, **kwargs):
             ca_pkey = crypto.load_privatekey(crypto.FILETYPE_PEM, ca_file.read(), \
                 force_bytes(config.CA_PKEY_PASSPHRASE))
         return []
-    except Exception, e:
+    except Exception as e:
         return [_checks.Error("CA certificate and key \"%s\" \"%s\" fail: %s" % \
                                 (config.CA_CERT_PEM, config.CA_PKEY_PEM, e),
                               hint="Check that crypto service is running, properly configured")

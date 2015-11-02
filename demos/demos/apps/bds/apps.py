@@ -25,7 +25,7 @@ def tar_storage_check(app_configs, **kwargs):
         os.unlink(path)
         
         return []
-    except Exception, e:
+    except Exception as e:
         return [_checks.Error("Tar storage \"%s\" check failed: %s" % \
                                 (config.TARSTORAGE_ROOT, e),
                               hint="Check that directory exists and is writable")
