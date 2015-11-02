@@ -141,8 +141,11 @@ def election_setup(election_obj, language):
     
     cert.set_version(3)
     cert.set_serial_number(base32cf.decode(election.id))
-    cert.set_notBefore(election.start_datetime.strftime('%Y%m%d%H%M%S%z'))
-    cert.set_notAfter(election.end_datetime.strftime('%Y%m%d%H%M%S%z'))
+    
+    time_fmt = '%Y%m%d%H%M%S%z'
+    
+    cert.set_notBefore(force_bytes(election.start_datetime.strftime(time_fmt)))
+    cert.set_notAfter(force_bytes(election.end_datetime.strftime(time_fmt)))
     
     cert.set_pubkey(pkey)
     cert.sign(ca_pkey if not self_signed else pkey, 'sha256')
