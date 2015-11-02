@@ -6,6 +6,8 @@ from django.core import checks as _checks
 def api_connectivity_check(app_configs, **kwargs):
     from django.apps import apps
     from demos.common.utils import api
+    from django.conf import settings # MUST be lazy!
+
     # Dict of applications that connect to remote ones
     connectivity_list = {'ea': ['bds', 'abb', 'vbb'], 'abb': ['ea'],
                          'vbb': ['abb']

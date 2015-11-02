@@ -47,8 +47,10 @@ def crypto_ca_keys_check(app_configs, **kwargs):
 
     import socket
     from OpenSSL import crypto
-    from demos.common.utils import config
+    from demos.common.utils.config import registry
     from django.utils.encoding import force_bytes
+
+    config = registry.get_config('ea')
 
     if not (config.CA_CERT_PEM and config.CA_PKEY_PEM):
         return [_checks.Warning("CA certificate and key are not configured, ballots will be unsigned",
