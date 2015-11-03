@@ -293,9 +293,12 @@ DEMOS_API_URL = {
     'vbb': 'https://api.demos-vbb.domain-name.example/',
 }
 
-# In case the above API URLs have SSL, and only self-signed certificates,
-# you can disable the verification below, to allow Requests among servers
-# DEMOS_API_VERIFY = True       # the default
+# In case the API URLs are SSL-enabled and use self-signed certificates,
+# their verification can be disabled to allow requests among servers
+# http://docs.python-requests.org/en/latest/user/advanced/#ssl-cert-verification
+
+# DEMOS_API_VERIFY = False        # the default is True
+
 
 DEMOS_APPS = [ DEMOS_APPS ] if not isinstance(DEMOS_APPS, (list, tuple)) else DEMOS_APPS
 INSTALLED_APPS += [ 'demos.apps.%s' % app for app in DEMOS_APPS ]

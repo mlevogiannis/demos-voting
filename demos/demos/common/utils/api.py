@@ -29,7 +29,9 @@ class Session:
         self.username = app_config.label
         self.password = app_config.get_model('RemoteUser').\
             objects.get(username=server).password
+        
         self.url = urljoin(settings.DEMOS_API_URL[server], 'api/')
+        self.verify = getattr(settings, 'DEMOS_API_VERIFY', True)
         
         self.login()
     
@@ -42,7 +44,7 @@ class Session:
     def login(self):
         
         url = urljoin(self.url, 'auth/login/')
-        r = self.s.get(url, verify=True) # won't authenticate, only get the CSRF token
+        r = self.s.get(url, verify=self.verify)
         r.raise_for_status()
         
         payload = {
@@ -51,13 +53,13 @@ class Session:
             'csrfmiddlewaretoken': self.s.cookies.get('csrftoken', False),
         }
         
-        r = self.s.post(url, data=payload, verify=getattr(settings, 'DEMOS_API_VERIFY', True))
+        r = self.s.post(url, data=payload, verify=self.verify)
         r.raise_for_status()
     
     def logout(self):
         
         url = urljoin(self.url, 'auth/logout/')
-        r = self.s.get(url, verify=True)
+        r = self.s.get(url, verify=self.verify)
         r.raise_for_status()
     
     def post(self, path, data={}, files=None, _retry_login=True):
@@ -65,12 +67,12 @@ class Session:
         try:
             url = urljoin(self.url, path)
             
-            r = self.s.get(url, verify=True)
+            r = self.s.get(url, verify=self.verify)
             r.raise_for_status()
             
             data['csrfmiddlewaretoken'] = self.s.cookies.get('csrftoken', False)
             
-            r = self.s.post(url, data=data, files=files, verify=getattr(settings, 'DEMOS_API_VERIFY', True))
+            r = self.s.post(url, data=data, files=files, verify=self.verify)
             r.raise_for_status()
             
             return r
