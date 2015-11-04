@@ -70,16 +70,19 @@ class AuditView(View):
         try:
             normalized = base32cf.normalize(election_id)
         except (AttributeError, TypeError, ValueError):
-            pass
+            election = None
         else:
             if normalized != election_id:
                 return redirect('abb:audit', election_id=normalized)
             try:
                 election = Election.objects.get(id=election_id)
             except Election.DoesNotExist:
-                return redirect(reverse('abb:home') + '?error=id')
+                election = None
             else:
                 questions = Question.objects.filter(election=election)
+        
+        if not election:
+            return redirect(reverse('abb:home') + '?error=id')
         
         participants = Ballot.objects.filter(election=election, \
             part__optionv__voted=True).distinct().count() if election else 0
@@ -187,16 +190,19 @@ class ResultsView(View):
         try:
             normalized = base32cf.normalize(election_id)
         except (AttributeError, TypeError, ValueError):
-            pass
+            election = None
         else:
             if normalized != election_id:
                 return redirect('abb:results', election_id=normalized)
             try:
                 election = Election.objects.get(id=election_id)
             except Election.DoesNotExist:
-                return redirect(reverse('abb:home') + '?error=id')
+                election = None
             else:
                 questions = Question.objects.filter(election=election)
+        
+        if not election:
+            return redirect(reverse('abb:home') + '?error=id')
         
         participants = Ballot.objects.filter(election=election, \
             part__optionv__voted=True).distinct().count() if election else 0
