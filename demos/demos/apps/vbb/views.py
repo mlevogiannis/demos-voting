@@ -356,14 +356,23 @@ class VoteView(View):
             
             vc_type = string_types if election.long_votecodes else integer_types
             
-            if not (isinstance(vote_obj, dict)
-                and len(vote_obj) == len(q_options)
-                and all(isinstance(q_index, string_types)
-                and isinstance(vc_list, list)
-                and 1 <= len(vc_list) <= q_options.get(int(q_index), -1)
-                and all(isinstance(vc, vc_type) for vc in vc_list)
-                    for q_index, vc_list in vote_obj.items())):
-                
+            try:
+                if not (isinstance(vote_obj, dict)
+                    and len(vote_obj) == len(q_options)
+                    and all(isinstance(q_index, string_types)
+                    and isinstance(vc_list, list)
+                    and 1 <= len(vc_list) <= q_options.get(int(q_index), -1)
+                    and all(isinstance(vc, vc_type) for vc in vc_list)
+                        for q_index, vc_list in vote_obj.items())):
+                    
+                    raise ValueError()
+            
+            except ValueError:
+                # if q_index is a str but not a valid int, ValueError is raised
+                return http.JsonResponse(error, status=422)
+            
+            except Exception:
+                logger.exception('VoteView: Unexpected exception')
                 return http.JsonResponse(error, status=422)
             
             # Verify votecodes, save vote and respond with the receipts
