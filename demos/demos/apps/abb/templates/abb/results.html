@@ -34,7 +34,7 @@
             <div class="panel-heading">{% trans "Question" %}{% if questions|length > 1 %} {{ question.index|add:"1" }}{% endif %}: {{ question.text }}</div>
             <div class="list-group">
                 {% for optionc in question.optionc_set.all %}
-                <a class="list-group-item">{{ optionc.text }}<span class="badge">{{ optionc.votes|floatdiv:question.optionc__votes__sum|floatmul:'100'|floatformat:1 }} %</span></a>
+                <a class="list-group-item">{{ optionc.text }}<span class="badge">{{ optionc.votes|floatdiv:question.optionc__votes__sum|default:'0'|floatmul:'100'|floatformat:1 }} %</span></a>
                 {% endfor %}
             </div>
         </div>
