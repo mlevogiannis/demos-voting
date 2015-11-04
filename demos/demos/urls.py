@@ -21,15 +21,17 @@ from importlib import import_module
 from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.i18n import i18n_patterns
-from django.contrib import admin
+
 
 urlpatterns = []
 
-for iapp in settings.DEMOS_APPS:
-    urlconfig = import_module('demos.apps.%s.urls' % iapp)
-    durl = '^' + ((iapp + '/') if len(settings.DEMOS_APPS) > 1 else '')
-    urlpatterns += i18n_patterns(url(durl, include(urlconfig, namespace=iapp, app_name=iapp))) + \
-        [url(durl + 'api/', include(urlconfig.apipatterns, namespace=iapp+'-api', app_name=iapp))]
+for app in settings.DEMOS_APPS:
+    
+    urlconfig = import_module('demos.apps.%s.urls' % app)
+    path = '^' + ((app + '/') if len(settings.DEMOS_APPS) > 1 else '')
+    
+    urlpatterns += \
+        i18n_patterns(url(path, include(urlconfig, namespace=app, app_name=app))) + \
+        [url(path + 'api/', include(urlconfig.apipatterns, namespace='%s-api' % app, app_name=app))]
 
-#eof
 
