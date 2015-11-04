@@ -6,10 +6,10 @@ import json
 import math
 import logging
 import requests
-from six import string_types
 
 from base64 import b64encode
 from enum import IntEnum, unique
+from six import integer_types, string_types
 
 try:
     from urllib.parse import urljoin, quote
@@ -354,7 +354,7 @@ class VoteView(View):
             q_options = dict(question_qs.annotate(\
                 Count('optionc')).values_list('index', 'optionc__count'))
             
-            vc_type = int if not election.long_votecodes else string_types
+            vc_type = string_types if election.long_votecodes else integer_types
             
             if not (isinstance(vote_obj, dict)
                 and len(vote_obj) == len(q_options)

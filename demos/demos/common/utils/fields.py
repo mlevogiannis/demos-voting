@@ -3,12 +3,12 @@
 from __future__ import division
 
 from base64 import b64encode, b64decode
+from six import integer_types, string_types
 
 from django.db import models
 from django.core.exceptions import ValidationError
 
 from demos.common.utils import base32cf
-from six import string_types
 
 
 class IntEnumField(models.SmallIntegerField):
@@ -52,7 +52,7 @@ class IntEnumField(models.SmallIntegerField):
     
     def get_prep_value(self, value):
         
-        if value is None or type(value) == int:
+        if value is None or isinstance(value, integer_types):
             return value
         
         return value.value
@@ -88,7 +88,7 @@ class Base32Field(models.PositiveIntegerField):
     
     def get_prep_value(self, value):
         
-        if value is None or isinstance(value, int):
+        if value is None or isinstance(value, integer_types):
             return value
         
         try:
