@@ -37,7 +37,7 @@ from celery.signals import worker_process_init, task_failure
 
 from demos.apps.ea.tasks import cryptotools, pdf
 from demos.apps.ea.tasks.masks import apply_mask
-from demos.apps.ea.models import Election, Task, RemoteUser
+from demos.apps.ea.models import Election, Task
 
 from demos.common.utils import api, base32cf, dbsetup, enums, intc
 from demos.common.utils.permutation import permute
@@ -494,7 +494,7 @@ def election_setup(election_obj, language):
     
     # Delete celery task
     
-    task = Task.objects.get(election_id=election.id)
+    task = Task.objects.get(election=election)
     task.delete()
     
     translation.deactivate()

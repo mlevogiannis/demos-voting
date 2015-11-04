@@ -11,26 +11,6 @@ from demos.common.utils.config import registry
 config = registry.get_config('ea')
 
 
-class Config(models.Model):
-    
-    key = models.CharField(max_length=128, unique=True)
-    value = models.CharField(max_length=128, blank=True)
-    
-    # Other model methods and meta options
-    
-    def __str__(self):
-        return "%s - %s" % (self.key, self.value)
-    
-    class ConfigManager(models.Manager):
-        def get_by_natural_key(self, key):
-            return self.get(key=key)
-    
-    objects = ConfigManager()
-    
-    def natural_key(self):
-        return (self.key,)
-
-
 pkey_fs = storage.PrivateFileSystemStorage(location=config.PKEY_ROOT,
     file_permissions_mode=0o600, directory_permissions_mode=0o700)
 
@@ -259,6 +239,26 @@ class RemoteUser(models.Model):
 
 class Task(models.Model):
     
+    election = models.OneToOneField(Election, primary_key=True)
     task_id = models.UUIDField()
-    election_id = fields.Base32Field(unique=True)
+
+
+class Config(models.Model):
+    
+    key = models.CharField(max_length=128, unique=True)
+    value = models.CharField(max_length=128, blank=True)
+    
+    # Other model methods and meta options
+    
+    def __str__(self):
+        return "%s - %s" % (self.key, self.value)
+    
+    class ConfigManager(models.Manager):
+        def get_by_natural_key(self, key):
+            return self.get(key=key)
+    
+    objects = ConfigManager()
+    
+    def natural_key(self):
+        return (self.key,)
 

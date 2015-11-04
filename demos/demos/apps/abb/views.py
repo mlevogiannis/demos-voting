@@ -33,7 +33,6 @@ from django.views.generic import View
 from django.db.models.query import QuerySet
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.utils.decorators import method_decorator
-from django.utils.dateparse import parse_datetime
 from django.core.urlresolvers import reverse
 from django.core.serializers.json import DjangoJSONEncoder
 
@@ -238,16 +237,14 @@ class SetupView(View):
                 election_obj['x509_cert'] = cert_file
                 
                 dbsetup.election(election_obj, app_config)
+                election = Election.objects.get(id=election_obj['id'])
                 
-                election_id = election_obj['id']
-                end_datetime = parse_datetime(election_obj['end_datetime'])
+                scheduled_time = election.end_datetime + timedelta(seconds=5)
                 
-                scheduled_time = end_datetime + timedelta(seconds=5)
-                
-                task = tally_protocol.s(election_id)
+                task = tally_protocol.s(election.id)
                 task.freeze()
                 
-                Task.objects.create(election_id=election_id, task_id=task.id)
+                Task.objects.create(election=election, task_id=task.id)
                 task.apply_async(eta=scheduled_time)
                 
             elif task == 'ballot':

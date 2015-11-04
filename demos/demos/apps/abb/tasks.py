@@ -238,6 +238,6 @@ def tally_protocol(election_id):
     
     # Delete celery task entry from the db
     
-    task = Task.objects.get(election_id=election.id)
+    task = Task.objects.get(election=election)
     task.delete()
 
