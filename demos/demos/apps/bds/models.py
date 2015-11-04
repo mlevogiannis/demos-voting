@@ -129,48 +129,20 @@ class Trustee(models.Model):
         return (self.email,) + self.election.natural_key()
 
 
-class RemoteUser(models.Model):
-    
-    username = models.CharField(max_length=128, unique=True)
-    password = models.CharField(max_length=128)
-    
-    # Other model methods and meta options
-    
-    def __str__(self):
-        return "%s - %s" % (self.username, self.password)
-    
-    class RemoteUserManager(models.Manager):
-        def get_by_natural_key(self, username):
-            return self.get(username=username)
-    
-    objects = RemoteUserManager()
-    
-    def natural_key(self):
-        return (self.username,)
-
-
 class Task(models.Model):
     
     election = models.OneToOneField(Election, primary_key=True)
     task_id = models.UUIDField()
 
 
-class Config(models.Model):
-    
-    key = models.CharField(max_length=128, unique=True)
-    value = models.CharField(max_length=128)
-    
-    # Other model methods and meta options
-    
-    def __str__(self):
-        return "%s - %s" % (self.key, self.value)
-    
-    class ConfigManager(models.Manager):
-        def get_by_natural_key(self, key):
-            return self.get(key=key)
-    
-    objects = ConfigManager()
-    
-    def natural_key(self):
-        return (self.key,)
+# Common models ----------------------------------------------------------------
+
+from demos.common.utils.api import RemoteUserBase
+from demos.common.utils.config import ConfigBase
+
+class Config(ConfigBase):
+    pass
+
+class RemoteUser(RemoteUserBase):
+    pass
 

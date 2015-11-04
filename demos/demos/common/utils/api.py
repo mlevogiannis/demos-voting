@@ -12,6 +12,7 @@ except ImportError:
 
 from six import string_types
 
+from django.db import models
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseForbidden
 from django.middleware import csrf
@@ -137,4 +138,27 @@ def user_required(username):
         return _wrapped_view
         
     return decorator
+
+
+class RemoteUserBase(models.Model):
+    
+    username = models.CharField(max_length=128, unique=True)
+    password = models.CharField(max_length=128)
+    
+    # Other model methods and meta options
+    
+    def __str__(self):
+        return "%s - %s" % (self.username, self.password)
+    
+    class Meta:
+        abstract = True
+    
+    class RemoteUserManager(models.Manager):
+        def get_by_natural_key(self, username):
+            return self.get(username=username)
+    
+    objects = RemoteUserManager()
+    
+    def natural_key(self):
+        return (self.username,)
 
