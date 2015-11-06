@@ -577,13 +577,15 @@ class ExportView(View):
                     in model._meta.get_fields() if f.is_relation
                     and k == f.related_model.__name__})
                 
-                # Get all namespace objects as dictionaries (possibly empty)
+                # Get all namespace's objects as dictionaries (possibly empty)
                 
-                obj_qs = model.objects.filter(**kwflds)
-                
-                if not obj_qs:
-                    raise http.Http404('No ' + \
-                        model.__name__ + ' matches the given query.')
+                try:
+                    obj_qs = model.objects.filter(**kwflds)
+                    if not obj_qs:
+                        raise ObjectDoesNotExist()
+                except (ValidationError, ObjectDoesNotExist):
+                    raise http.Http404('No "' + model.__name__ + \
+                        '" matches the given query.')
                 
                 values = list(obj_qs.values(*fields)) \
                     if fields else [dict() for _ in range(obj_qs.count())]
