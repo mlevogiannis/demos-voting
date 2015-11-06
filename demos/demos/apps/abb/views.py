@@ -40,8 +40,7 @@ from demos.apps.abb.tasks import tally_protocol
 from demos.apps.abb.models import Election, Question, Ballot, Part, OptionV, \
     Task
 
-from demos.common.utils import api, base32cf, dbsetup, enums, intc, hashers, \
-    protobuf
+from demos.common.utils import api, base32cf, dbsetup, enums, intc, hashers
 from demos.common.utils.config import registry
 from demos.common.utils.permutation import permute_ori
 
@@ -636,10 +635,12 @@ class ExportView(View):
 class JSONEncoder(DjangoJSONEncoder):
     """JSONEncoder subclass that supports date/time and protobuf types."""
     
+    from demos.common.utils import protobuf
+    
     def default(self, o):
         
         if isinstance(o, message.Message):
-            return protobuf.to_dict(o, ordered=True)
+            return self.protobuf.to_dict(o, ordered=True)
         
         return super(JSONEncoder, self).default(o)
 
