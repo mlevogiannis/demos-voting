@@ -11,7 +11,6 @@ import logging
 from io import BytesIO
 from base64 import b64decode
 from datetime import timedelta
-from collections import OrderedDict
 
 try:
     from itertools import zip_longest
@@ -459,190 +458,233 @@ class ExportView(View):
     
     template_name = 'abb/export.html'
     
-    _urlinfo = OrderedDict([
-        ('election', {
-            'fields': [],
-            'args': [('id', '[a-zA-Z0-9]+')],
+    _namespaces = {
+        'election': {
+            'name': 'election',
             'model': Election,
-        }),
-        ('ballot', {
+            'args': [('id', '[a-zA-Z0-9]+')],
             'fields': [],
-            'args': [('serial', '[0-9]+')],
+            'next': ['ballot', 'question_fk'],
+        },
+        'ballot': {
+            'name': 'ballot',
             'model': Ballot,
-        }),
-        ('part', {
+            'args': [('serial', '[0-9]+')],
             'fields': [],
-            'args': [('tag', '[AaBb]')],
+            'next': ['part'],
+        },
+        'part': {
+            'name': 'part',
             'model': Part,
-        }),
-        ('question', {
-            'fields': ['key'],
-            'args': [('index', '[0-9]+')],
+            'args': [('tag', '[AaBb]')],
+            'fields': [],
+            'next': ['question'],
+        },
+        'question': {
+            'name': 'question',
             'model': Question,
-        }),
-        ('option', {
-            'fields': ['com', 'zk1', 'zk2'],
             'args': [('index', '[0-9]+')],
+            'fields': [],
+            'next': ['option'],
+        },
+        'option': {
+            'name': 'option',
             'model': OptionV,
-        }),
-    ])
+            'args': [('index', '[0-9]+')],
+            'fields': ['com', 'zk1', 'zk2'],
+            'next': [],
+        },
+        'question_fk': {
+            'name': 'question',
+            'model': Question,
+            'args': [('index', '[0-9]+')],
+            'fields': ['key'],
+            'next': [],
+        },
+    }
+    
+    _namespace_root = ['election']
+    
     
     @staticmethod
     def urlpatterns():
         
-        urlpatterns = []
-        
-        for ns, data in reversed(list(ExportView._urlinfo.items())):
+        def _build_urlpatterns(ns):
             
-            model = data['model']
+            node = ExportView._namespaces[ns]
             
-            arg_path = '/'.join(['(?P<' + model.__name__ + '__' + \
-                field + '>' + regex + ')' for field, regex in data['args']])
+            urlpatterns = []
+            for next in node['next']:
+                urlpatterns += _build_urlpatterns(next)
             
-            urlpatterns = [url(r'^' + ns + 's/', include([
+            arg_path = '/'.join(['(?P<' + node['model'].__name__ + '__' + \
+                field + '>' + regex + ')' for field, regex in node['args']])
+            
+            urlpatterns = [url(r'^' + node['name'] + 's/', include([
                 url(r'^$', ExportView.as_view(), name='list'),
                 url(r'^' + arg_path + '/', include([
                     url(r'^$', ExportView.as_view(), name='get'),
                 ] + urlpatterns)),
             ], namespace=ns))]
+            
+            return urlpatterns
+        
+        urlpatterns = []
+        for ns in ExportView._namespace_root:
+            urlpatterns += _build_urlpatterns(ns)
         
         return urlpatterns
         
     
     def get(self, request, **kwargs):
         
-        namespace = request.resolver_match.namespaces[-1]
-        
-        ns_list = list(self._urlinfo.items())
-        i = list(self._urlinfo.keys()).index(namespace)
-        
         # Accept case insensitive ballot part tags
         
         if 'Part__tag' in kwargs:
             kwargs['Part__tag'] = kwargs['Part__tag'].upper()
         
-        # Arrange input arguments by namespace
+        # Organize input field arguments by their model
         
         kwkeys = {}
         
         for key, value in kwargs.items():
-            
-            try:
-                model, field = key.split('__', 1)
-            except ValueError:
-                continue
-            else:
-                kwkeys.setdefault(model, {}).update({field: value})
+            model, field = key.split('__', 1)
+            kwkeys.setdefault(model, {}).update({field: value})
         
-        # Parse all namespaces up to the requested one (excluding)
+        # Ignore any namespaces before root
+        
+        namespaces = list(request.resolver_match.namespaces)
+        
+        for ns in list(namespaces):
+            
+            if ns in self._namespace_root:
+                break
+            
+            namespaces.pop(0)
+        
+        # Get the objects of the namespaces up to the requested one (excluding)
         
         objects = {}
         
-        for ns, data in ns_list[:i+1]:
+        for i, ns in enumerate(namespaces, start=1):
             
-            model = data['model']
+            node = self._namespaces[ns]
             
             kwflds = {f.name: objects[k] for k in objects for f
-                in model._meta.get_fields() if f.is_relation
+                in node['model']._meta.get_fields() if f.is_relation
                 and k == f.related_model.__name__}
             
-            kwflds.update(kwkeys.get(model.__name__) or {})
+            kwflds.update(kwkeys.get(node['model'].__name__) or {})
             
-            if ns != namespace:
-                objects[model.__name__] = get_object_or_404(model, **kwflds)
+            if i < len(namespaces):
+                objects[node['model'].__name__] = \
+                    get_object_or_404(node['model'], **kwflds)
         
-        # Perform the requested action
+        # Build and return the requested data
         
-        if request.resolver_match.url_name == 'get':
+        url_name = request.resolver_match.url_name
+        
+        if url_name == 'get':
             
-            def _build_data(i, objects, kwflds):
+            def _build_data(ns, objects, kwflds):
                 
-                ns, data = ns_list[i]
-                objects = objects.copy()
+                node = self._namespaces[ns]
                 
-                model = data['model']
+                # 'fields' is the intersection of the model's fields and the
+                # fields specified in the url query, for the current namespace.
+                # If no fields are specified, all model's fields are returned.
+                # If the url query's value is empty, no fields are returned.
                 
-                # Output fields is the intersection of the url query string's
-                # fields and the namespace's fields
+                f1 = set(node['fields'])
+                f2 = set([s for q in request.GET.getlist(node['name'], ['']) \
+                    for s in q.split(',') if s])
                 
-                f1 = data['fields']
-                f2 = [s for q in request.GET.getlist(ns, ['']) \
-                    for s in q.split(',') if s]
+                if not (f2 <= f1):
+                    raise http.Http404('Unknown field(s): ' + ', '.join(f2-f1))
                 
-                fields = (set(f1) & set(f2)) if f2 else f1
+                fields = list(f1 & f2 if f2 else f1 \
+                    if node['name'] not in request.GET else set())
                 
                 # Update input query's fields with the model's related fields
                 
                 kwflds.update({f.name: objects[k] for k in objects for f
-                    in model._meta.get_fields() if f.is_relation
+                    in node['model']._meta.get_fields() if f.is_relation
                     and k == f.related_model.__name__})
                 
-                # Get all namespace's objects as dictionaries (possibly empty)
+                # Get all model instances as a list of dictionaries
                 
                 try:
-                    obj_qs = model.objects.filter(**kwflds)
+                    obj_qs = node['model'].objects.filter(**kwflds)
                     if not obj_qs:
                         raise ObjectDoesNotExist()
+                
                 except (ValidationError, ObjectDoesNotExist):
-                    raise http.Http404('No "' + model.__name__ + \
+                    raise http.Http404('No "' + node['name'] + \
                         '" matches the given query.')
                 
-                values = list(obj_qs.values(*fields)) \
+                obj_data_l = list(obj_qs.values(*fields)) \
                     if fields else [dict() for _ in range(obj_qs.count())]
                 
-                # Repeat for every sub-namespace (if any)
+                # Traverse the namespace tree and repeat
                 
-                if i+1 < len(ns_list):
-                    for obj, value in zip(obj_qs, values):
-                        
-                        ns_next = ns_list[i+1][0]
-                        objects[model.__name__] = obj
-                        
-                        value[ns_next] = _build_data(i+1, objects, {})
+                objects = objects.copy()
                 
-                return values
+                for next in node['next']:
+                    for obj, obj_data in zip(obj_qs, obj_data_l):
+                        
+                        objects[node['model'].__name__] = obj
+                        name, data = _build_data(next, objects, {})
+                        obj_data[name] = data
+                
+                return (node['name'] + 's', obj_data_l)
             
-            # Return the requested model's dictionary
+            # Return the requested model's data
             
-            data = _build_data(i, objects, kwflds)[0]
+            data = _build_data(ns, objects, kwflds)[1][0]
             
-        elif request.resolver_match.url_name == 'list':
+        elif url_name == 'list':
             
-            # Return the list of available input arguments
+            # Return the list of available input arguments and output fields
             
-            args = [arg[0] for arg in data['args']]
-            flat = len(args) == 1
+            object_qs = node['model'].objects.filter(**kwflds)
             
-            object_qs = model.objects.filter(**kwflds)
-            data = list(object_qs.values_list(*args, flat=flat))
+            args = [arg[0] for arg in node['args']]
+            values = list(object_qs.values_list(*args, flat=(len(args)==1)))
+            
+            data = {
+                'arguments': values,
+                'fields': node['fields'],
+            }
         
-        # Serialize and return the structure
+        # Serialize and return the data
+        
+        encoder = self._CustomJSONEncoder
         
         if 'file' in request.GET:
+            name = node['name'] + ('s' if url_name == 'list' else '') + '.json'
             response = http.HttpResponse(content_type='application/json')
-            fn = ns + ('s' if request.resolver_match.url_name == 'list' else '')
-            response['Content-Disposition']='attachment; filename="'+fn+'.json"'
-            json.dump(data, response, indent=4, sort_keys=True, cls=JSONEncoder)
+            response['Content-Disposition']='attachment; filename="'+ name +'"'
+            json.dump(data, response, indent=4, sort_keys=True, cls=encoder)
         
         elif request.is_ajax():
-            response = http.JsonResponse(data, safe=False, encoder=JSONEncoder)
+            response = http.JsonResponse(data, safe=False, encoder=encoder)
         
         else:
-            text = json.dumps(data, indent=4, sort_keys=True, cls=JSONEncoder)
-            response = render(request, self.template_name, {'text': text})
+            data = json.dumps(data, indent=4, sort_keys=True, cls=encoder)
+            response = render(request, self.template_name, {'data': data})
         
         return response
-
-
-class JSONEncoder(DjangoJSONEncoder):
-    """JSONEncoder subclass that supports date/time and protobuf types."""
     
-    from demos.common.utils import protobuf
     
-    def default(self, o):
+    class _CustomJSONEncoder(DjangoJSONEncoder):
+        """JSONEncoder subclass that supports date/time and protobuf types."""
         
-        if isinstance(o, message.Message):
-            return self.protobuf.to_dict(o, ordered=True)
+        from demos.common.utils import protobuf
         
-        return super(JSONEncoder, self).default(o)
+        def default(self, o):
+            
+            if isinstance(o, message.Message):
+                return self.protobuf.to_dict(o, ordered=True)
+            
+            return super(JSONEncoder, self).default(o)
 
