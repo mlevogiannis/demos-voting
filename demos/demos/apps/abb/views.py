@@ -534,47 +534,24 @@ class ExportView(View):
             urlpatterns += _build_urlpatterns(ns)
         
         return urlpatterns
-        
     
-    def get(self, request, **kwargs):
+    
+    @staticmethod
+    def objdata(namespaces, url_args, query_args, action):
         
-        # Accept case insensitive ballot part tags
-        
-        if 'Part__tag' in kwargs:
-            kwargs['Part__tag'] = kwargs['Part__tag'].upper()
-        
-        # Organize input field arguments by their model
-        
-        kwkeys = {}
-        
-        for key, value in kwargs.items():
-            model, field = key.split('__', 1)
-            kwkeys.setdefault(model, {}).update({field: value})
-        
-        # Ignore any namespaces before root
-        
-        namespaces = list(request.resolver_match.namespaces)
-        
-        for ns in list(namespaces):
-            
-            if ns in self._namespace_root:
-                break
-            
-            namespaces.pop(0)
-        
-        # Get the objects of the namespaces up to the requested one (excluding)
+        # Get each namespace's model instance up to the requested one, excluding
         
         objects = {}
         
         for i, ns in enumerate(namespaces, start=1):
             
-            node = self._namespaces[ns]
+            node = ExportView._namespaces[ns]
             
             kwflds = {f.name: objects[k] for k in objects for f
                 in node['model']._meta.get_fields() if f.is_relation
                 and k == f.related_model.__name__}
             
-            kwflds.update(kwkeys.get(node['model'].__name__) or {})
+            kwflds.update(url_args.get(node['model'].__name__) or {})
             
             if i < len(namespaces):
                 objects[node['model'].__name__] = \
@@ -582,13 +559,11 @@ class ExportView(View):
         
         # Build and return the requested data
         
-        url_name = request.resolver_match.url_name
-        
-        if url_name == 'get':
+        if action == 'get':
             
             def _build_data(ns, objects, kwflds):
                 
-                node = self._namespaces[ns]
+                node = ExportView._namespaces[ns]
                 
                 # 'fields' is the intersection of the model's fields and the
                 # fields specified in the url query, for the current namespace.
@@ -596,14 +571,13 @@ class ExportView(View):
                 # If the url query's value is empty, no fields are returned.
                 
                 f1 = set(node['fields'])
-                f2 = set([s for q in request.GET.getlist(node['name'], ['']) \
-                    for s in q.split(',') if s])
+                f2 = set(query_args.get(node['name'], []))
                 
                 if not (f2 <= f1):
-                    raise http.Http404('Unknown field(s): ' + ', '.join(f2-f1))
+                    raise http.Http404('Invalid field(s): ' + ', '.join(f2-f1))
                 
                 fields = list(f1 & f2 if f2 else f1 \
-                    if node['name'] not in request.GET else set())
+                    if node['name'] not in query_args else set())
                 
                 # Update input query's fields with the model's related fields
                 
@@ -642,26 +616,66 @@ class ExportView(View):
             
             data = _build_data(ns, objects, kwflds)[1][0]
             
-        elif url_name == 'list':
+        elif action == 'list':
             
             # Return the list of available input arguments and output fields
             
             object_qs = node['model'].objects.filter(**kwflds)
             
-            args = [arg[0] for arg in node['args']]
-            values = list(object_qs.values_list(*args, flat=(len(args)==1)))
+            fields = [field for field, _ in node['args']]
+            values = list(object_qs.values_list(*fields, flat=(len(fields)==1)))
             
             data = {
                 'arguments': values,
                 'fields': node['fields'],
             }
         
-        # Serialize and return the data
+        return data
         
-        encoder = self._CustomJSONEncoder
+    
+    def get(self, request, **kwargs):
+        
+        action = request.resolver_match.url_name
+        
+        # Accept case insensitive ballot part tags
+        
+        if 'Part__tag' in kwargs:
+            kwargs['Part__tag'] = kwargs['Part__tag'].upper()
+        
+        # 'url_args' is a dict containing all captured url arguments (dicts),
+        # organized by their model's name
+        
+        url_args = {}
+        
+        for key, value in kwargs.items():
+            model, field = key.split('__', 1)
+            url_args.setdefault(model, {}).update({field: value})
+        
+        # 'query_args' is a dict containing all url query arguments (lists),
+        # organized by their namespace's name
+        
+        query_args = {k: [s for q in v for s in q.split(',') if s]
+            for k, v in request.GET.iterlists()}
+        
+        # Ignore any namespaces before root
+        
+        namespaces = list(request.resolver_match.namespaces)
+        
+        for ns in list(namespaces):
+            
+            if ns in self._namespace_root:
+                break
+            
+            namespaces.pop(0)
+        
+        # Build, serialize and return the requested data
+        
+        data = self.objdata(namespaces, url_args, query_args, action)
+        
+        encoder = self.CustomJSONEncoder
         
         if 'file' in request.GET:
-            name = node['name'] + ('s' if url_name == 'list' else '') + '.json'
+            name = node['name'] + ('s' if action == 'list' else '') + '.json'
             response = http.HttpResponse(content_type='application/json')
             response['Content-Disposition']='attachment; filename="'+ name +'"'
             json.dump(data, response, indent=4, sort_keys=True, cls=encoder)
@@ -676,7 +690,7 @@ class ExportView(View):
         return response
     
     
-    class _CustomJSONEncoder(DjangoJSONEncoder):
+    class CustomJSONEncoder(DjangoJSONEncoder):
         """JSONEncoder subclass that supports date/time and protobuf types."""
         
         from demos.common.utils import protobuf
