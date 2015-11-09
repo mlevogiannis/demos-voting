@@ -113,17 +113,6 @@ def election_setup(election_obj, language):
     pkey = crypto.PKey()
     pkey.generate_key(crypto.TYPE_RSA, config.PKEY_BIT_LEN)
     
-    pkey_passphrase = os.urandom(3 * config.PKEY_PASSPHRASE_LEN // 4)
-    pkey_passphrase = b64encode(pkey_passphrase)
-    
-    pkey_dump = crypto.dump_privatekey(crypto.FILETYPE_PEM, pkey, \
-        config.PKEY_PASSPHRASE_CIPHER, pkey_passphrase)
-    pkey_file = File(io.BytesIO(pkey_dump), name='pkey.pem')
-    
-    election.pkey_file = pkey_file
-    election.pkey_passphrase = pkey_passphrase
-    election.save(update_fields=['pkey_file', 'pkey_passphrase'])
-    
     # Generate a new X.509 certificate
     
     cert = crypto.X509()

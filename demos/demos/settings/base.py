@@ -247,11 +247,6 @@ DEMOS_CONFIG = {
         'CA_CERT_PEM': '',
         'CA_PKEY_PEM': '',
         'CA_PKEY_PASSPHRASE': '',
-        
-        # Absolute filesystem path to the directory that will hold
-        # elections' RSA private-public key pairs (PEM file format)
-        
-        'PKEY_ROOT': os.path.join(SPOOL_DIR, 'ea/pkeys'),
     },
     
     'bds': {

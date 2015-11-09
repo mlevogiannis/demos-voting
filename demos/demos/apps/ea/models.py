@@ -1,7 +1,5 @@
 # File: models.py
 
-import os
-
 from django.db import models
 from django.core import urlresolvers
 
@@ -9,13 +7,6 @@ from demos.common.utils import crypto, enums, fields, storage
 from demos.common.utils.config import registry
 
 config = registry.get_config('ea')
-
-
-pkey_fs = storage.PrivateFileSystemStorage(location=config.PKEY_ROOT,
-    file_permissions_mode=0o600, directory_permissions_mode=0o700)
-
-def get_pkey_file_path(election, filename):
-    return "%s%s" % (election.id, os.path.splitext(filename)[-1])
 
 
 class Election(models.Model):
@@ -31,9 +22,6 @@ class Election(models.Model):
     state = fields.IntEnumField(cls=enums.State)
     
     ballots = models.PositiveIntegerField()
-    
-    pkey_file = models.FileField(upload_to=get_pkey_file_path, storage=pkey_fs)
-    pkey_passphrase = models.CharField(max_length=config.PKEY_PASSPHRASE_LEN)
     
     # Other model methods and meta options
     
