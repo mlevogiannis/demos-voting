@@ -251,22 +251,20 @@ DEMOS_CONFIG = {
     
     'bds': {
         
-        # Absolute filesystem path to the directory that will hold
-        # elections' PDF ballots (TAR file format)
+        # Absolute path to the directory that will hold machine-local files
         
-        'BALLOT_ROOT': os.path.join(SPOOL_DIR, 'bds/ballots'),
+        'FILESYSTEM_ROOT': os.path.join(SPOOL_DIR, 'bds'),
     },
     
     'abb': {
         
-        # Absolute filesystem path to the directory that will hold
-        # elections' X.509 certificates (PEM file format)
-        
-        'CERT_ROOT': os.path.join(SPOOL_DIR, 'abb/certs'),
-        
         # Performance settings, they affect CPU and RAM usage, etc
         
         'BATCH_SIZE': 128,
+        
+        # Absolute path to the directory that will hold machine-local files
+        
+        'FILESYSTEM_ROOT': os.path.join(SPOOL_DIR, 'abb'),
     },
     
     'vbb': {

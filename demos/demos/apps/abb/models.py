@@ -11,8 +11,10 @@ from demos.common.utils.config import registry
 config = registry.get_config('abb')
 
 
-cert_fs = storage.PrivateFileSystemStorage(location=config.CERT_ROOT,
-    file_permissions_mode=0o600, directory_permissions_mode=0o700)
+cert_fs = storage.PrivateFileSystemStorage(
+    location=os.path.join(config.FILESYSTEM_ROOT, 'certs'),
+    file_permissions_mode=0o600, directory_permissions_mode=0o700
+)
 
 def get_cert_file_path(election, filename):
     return "%s%s" % (election.id, os.path.splitext(filename)[-1])

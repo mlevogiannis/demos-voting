@@ -1,5 +1,7 @@
 # File: models.py
 
+import os
+
 from django.db import models
 from django.core import urlresolvers
 
@@ -42,9 +44,11 @@ class Election(models.Model):
         return (self.id,)
 
 
-ballot_fs = storage.PrivateTarFileStorage(location=config.BALLOT_ROOT,
+ballot_fs = storage.PrivateTarFileStorage(
+    location=os.path.join(config.FILESYSTEM_ROOT, 'ballots'),
     tar_permissions_mode=0o600, tar_file_permissions_mode=0o600,
-    tar_directory_permissions_mode=0o700)
+    tar_directory_permissions_mode=0o700
+)
 
 def get_ballot_file_path(ballot, filename):
     return "%s/%s" % (ballot.election.id, filename)
