@@ -34,8 +34,12 @@ def encode(number, hyphens=-1):
     encoded = '' if number else '0'
     
     while number:
-        number, i = divmod(number, 32)
-        encoded = _chars[i] + encoded
+        
+        d = number >> 5
+        m = number - (d << 5)
+        
+        encoded = _chars[m] + encoded
+        number = d
     
     if hyphens > 0:
         encoded = hyphen(encoded, hyphens)
@@ -54,7 +58,7 @@ def decode(encoded):
     encoded = hyphen(encoded, 0)
     
     for c in encoded:
-        number = _chars.index(c) + number * 32
+        number = _chars.index(c) + (number << 5)
     
     return number
 

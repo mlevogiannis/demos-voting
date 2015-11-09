@@ -4,7 +4,6 @@ sjcl.codec.base32cf = {
     
     fromBits: function(arr, hyphens) {
         
-        var i = new sjcl.bn();
         var num = sjcl.bn.fromBits(arr);
         var chars = sjcl.codec.base32cf._chars;
         var out = num ? "" : "0";
@@ -16,8 +15,25 @@ sjcl.codec.base32cf = {
             hyphens = -1;
         
         while (num.greaterEquals(0) && !num.equals(0)) {
-            num = num.divmod(32, i);
-            out = chars[parseInt(i.toString()) || 0] + out;
+            
+            // d = num / 32
+            
+            d = new sjcl.bn(num);
+            
+            for (var s = 0; s < 5; s++)
+                d.halveM();
+            
+            // m = num % 32
+            
+            m = new sjcl.bn(d);
+            
+            for (var s = 0; s < 5; s++)
+                m.doubleM();
+            
+            m = num.sub(m);
+            
+            out = chars[parseInt(m.toString()) || 0] + out;
+            num = d;
         }
         
         if (hyphens > 0)
@@ -36,8 +52,15 @@ sjcl.codec.base32cf = {
         str = sjcl.codec.base32cf.hyphen(str, 0);
         
         for (i = 0, len = str.length; i < len; i++) {
+            
             c = str.charAt(i);
-            out = out.mul(32).add(chars.indexOf(c));
+            
+            // out = out * 32
+            
+            for (var s = 0; s < 5; s++)
+                out.doubleM();
+            
+            out.addM(chars.indexOf(c));
         }
         
         return out.toBits();
