@@ -1,0 +1,14 @@
+pre {
+    max-width: 100%;
+    overflow: auto;
+    font-size: 13px;
+    margin: 0px;
+    word-wrap: normal;
+    white-space: pre;
+}
+
+pre .string { color: #690; }
+pre .number { color: #905; }
+pre .boolean { color: #905; }
+pre .null { color: #905; }
+pre .key { color: #690; }

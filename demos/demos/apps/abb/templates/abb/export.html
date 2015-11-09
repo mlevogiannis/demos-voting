@@ -1,33 +1,34 @@
-<!DOCTYPE html>
-<html lang="en">
-    
-    <head>
-        
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        
-        <title>AbbExport | DemosVoting</title>
-        
-        <link rel="stylesheet" href="/static/common/export.css">
-        
-    </head>
-    
-    <body>
-        
-        <header>
-        </header>
-        
-        <main>
-            <pre>
-{{ text }}
-            </pre>
-        </main>
-        
-        <footer>
-        </footer>
-        
-    </body>
-    
-</html>
+{% extends "abb/base.html" %}
+
+{% load i18n %}
+{% load abb.custom %}
+{% load staticfiles %}
+
+{% block css %}
+
+<!-- export.css -->
+<link rel="stylesheet" href="{% static 'abb/export.css' %}">
+
+{% endblock css %}
+
+
+{% block main %}
+
+<div class="row">
+    <div class="col-xs-12">
+        <pre>
+{{ data }}
+        </pre>
+    </div>
+</div>
+
+{% endblock main %}
+
+
+{% block script %}
+
+<!-- export.js -->
+<script src="{% static 'abb/export.js' %}"></script>
+
+{% endblock script %}
 
