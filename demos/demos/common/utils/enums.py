@@ -5,16 +5,16 @@ from __future__ import division
 from enum import IntEnum, unique
 
 
-# workaround for python2
+# workaround for json encoder bug in python < 3.4
+# reference: https://bugs.python.org/issue18264
 
-import six
+import sys
 
-if six.PY2:
+if sys.version_info[0:2] < (3,4):
+    
     class IntEnum(IntEnum):
         def __str__(self):
             return str(int(self))
-
-# end of workaround
 
 
 @unique
