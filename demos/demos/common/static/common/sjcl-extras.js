@@ -14,7 +14,7 @@ sjcl.codec.base32cf = {
         
         if (typeof hyphens === "undefined")
             hyphens = -1;
-    
+        
         while (num.greaterEquals(0) && !num.equals(0)) {
             num = num.divmod(32, i);
             out = chars[parseInt(i.toString()) || 0] + out;
@@ -49,17 +49,17 @@ sjcl.codec.base32cf = {
         str = str.split("O").join("0");
         str = str.split("I").join("1");
         str = str.split("L").join("1");
-    
-    var regex = new RegExp("^[" + sjcl.codec.base32cf._chars + "-" + "]*$");
-    
-    if (!regex.test(str))
-         throw new sjcl.exception.invalid("Non-base32cf digit found");
         
-    if (typeof hyphens === "undefined")
-        hyphens = -1;
+        var regex = new RegExp("^[" + sjcl.codec.base32cf._chars + "-" + "]*$");
+    
+        if (!regex.test(str))
+            throw new sjcl.exception.invalid("Non-base32cf digit found");
+        
+        if (typeof hyphens === "undefined")
+            hyphens = -1;
         
         if (hyphens > 0)
-        out = sjcl.codec.base32cf.hyphen(out, hyphens);
+            out = sjcl.codec.base32cf.hyphen(out, hyphens);
         
         return str;
     },
