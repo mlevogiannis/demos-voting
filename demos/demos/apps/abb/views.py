@@ -514,15 +514,15 @@ class ExportView(View):
             node = ExportView._namespaces[ns]
             
             urlpatterns = []
-            for next in node['next']:
+            for next in node.get('next', []):
                 urlpatterns += _build_urlpatterns(next)
             
-            arg_path = '/'.join(['(?P<' + node['model'].__name__ + '__' + \
-                field + '>' + regex + ')' for field, regex in node['args']])
+            argpath = '/'.join(['(?P<' + node['model'].__name__ + '__' + field \
+                + '>' + regex + ')' for field, regex in node.get('args', [])])
             
             urlpatterns = [url(r'^' + node['name'] + 's/', include([
                 url(r'^$', ExportView.as_view(), name='list'),
-                url(r'^' + arg_path + '/', include([
+                url(r'^' + argpath + '/', include([
                     url(r'^$', ExportView.as_view(), name='get'),
                 ] + urlpatterns)),
             ], namespace=ns))]
@@ -531,7 +531,7 @@ class ExportView(View):
         
         urlpatterns = []
         for ns in ExportView._namespace_root:
-            urlpatterns += _build_urlpatterns(ns)
+            urlpatterns += _build_urlpatterns(ns['name'])
         
         return urlpatterns
     
@@ -570,7 +570,7 @@ class ExportView(View):
                 # If no fields are specified, all model's fields are returned.
                 # If the url query's value is empty, no fields are returned.
                 
-                f1 = set(node['fields'])
+                f1 = set(node.get('fields', []))
                 f2 = set(query_args.get(node['name'], []))
                 
                 if not (f2 <= f1):
@@ -603,7 +603,7 @@ class ExportView(View):
                 
                 objects = objects.copy()
                 
-                for next in node['next']:
+                for next in node.get('next', []):
                     for obj, obj_data in zip(obj_qs, obj_data_l):
                         
                         objects[node['model'].__name__] = obj
@@ -620,14 +620,18 @@ class ExportView(View):
             
             # Return the list of available input arguments and output fields
             
-            object_qs = node['model'].objects.filter(**kwflds)
+            fields = [field for field, _ in node.get('args', [])]
             
-            fields = [field for field, _ in node['args']]
-            values = list(object_qs.values_list(*fields, flat=(len(fields)==1)))
+            if fields:
+                flat = (len(fields) == 1)
+                object_qs = node['model'].objects.filter(**kwflds)
+                values = list(object_qs.values_list(*fields, flat=flat))
+            else:
+                values = []
             
             data = {
                 'arguments': values,
-                'fields': node['fields'],
+                'fields': node.get('fields', []),
             }
         
         return data
