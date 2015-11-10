@@ -1,6 +1,0 @@
-*.o
-*~
-*.a
-/protobuf/crypto.pb.cc
-/protobuf/crypto.pb.h
-/demos-crypto
