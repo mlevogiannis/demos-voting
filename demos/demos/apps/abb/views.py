@@ -11,6 +11,7 @@ import logging
 from io import BytesIO
 from base64 import b64decode
 from datetime import timedelta
+from itertools import dropwhile
 
 try:
     from itertools import zip_longest
@@ -650,6 +651,11 @@ class ExportView(View):
         if 'Part__tag' in kwargs:
             kwargs['Part__tag'] = kwargs['Part__tag'].upper()
         
+        # Ignore any namespaces before root
+        
+        namespaces = list(dropwhile(lambda ns: \
+            ns not in self._namespace_root, request.resolver_match.namespaces))
+        
         # 'url_args' is a dict containing all captured url arguments (dicts),
         # organized by their model's name
         
@@ -664,17 +670,6 @@ class ExportView(View):
         
         query_args = {k: [s for q in v for s in q.split(',') if s]
             for k, v in request.GET.iterlists()}
-        
-        # Ignore any namespaces before root
-        
-        namespaces = list(request.resolver_match.namespaces)
-        
-        for ns in list(namespaces):
-            
-            if ns in self._namespace_root:
-                break
-            
-            namespaces.pop(0)
         
         name = self._namespaces[namespaces[-1]]['name']
         
