@@ -49,7 +49,7 @@ class Ballot(models.Model):
     election = models.ForeignKey(Election)
     
     serial = models.PositiveIntegerField()
-    credential_hash = models.CharField(max_length=config.HASH_LEN)
+    credential_hash = models.CharField(max_length=config.HASH_FIELD_LEN)
     
     used = models.BooleanField(default=False)
     
@@ -77,11 +77,11 @@ class Part(models.Model):
     ballot = models.ForeignKey(Ballot)
     
     tag = models.CharField(max_length=1, choices=(('A', 'A'), ('B', 'B')))
-    security_code_hash2 = models.CharField(max_length=config.HASH_LEN)
+    security_code_hash2 = models.CharField(max_length=config.HASH_FIELD_LEN)
     
     # OptionV common data
     
-    l_votecode_salt = models.CharField(max_length=config.HASH_LEN,
+    l_votecode_salt = models.CharField(max_length=config.HASH_FIELD_LEN,
         blank=True, default='')
     
     l_votecode_iterations = models.PositiveIntegerField(null=True,
@@ -144,7 +144,7 @@ class OptionV(models.Model):
     
     votecode = models.PositiveSmallIntegerField()
     
-    l_votecode_hash = models.CharField(max_length=config.HASH_LEN,
+    l_votecode_hash = models.CharField(max_length=config.HASH_FIELD_LEN,
         blank=True, default='')
     
     receipt = models.CharField(max_length=config.RECEIPT_LEN)

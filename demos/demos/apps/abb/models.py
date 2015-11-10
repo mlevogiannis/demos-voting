@@ -40,7 +40,8 @@ class Election(models.Model):
     
     # Post-vote data
     
-    coins = models.CharField(max_length=config.HASH_LEN, blank=True, default='')
+    coins = models.CharField(max_length=config.HASH_FIELD_LEN, blank=True,
+        default='')
     
     # Other model methods and meta options
     
@@ -68,7 +69,7 @@ class Ballot(models.Model):
     election = models.ForeignKey(Election)
     
     serial = models.PositiveIntegerField()
-    credential_hash = models.CharField(max_length=config.HASH_LEN)
+    credential_hash = models.CharField(max_length=config.HASH_FIELD_LEN)
     
     # Other model methods and meta options
     
@@ -97,11 +98,12 @@ class Part(models.Model):
     
     security_code = models.CharField(max_length=config.SECURITY_CODE_LEN,
         blank=True, default='')
-    security_code_hash2 = models.CharField(max_length=config.HASH_LEN)
+    
+    security_code_hash2 = models.CharField(max_length=config.HASH_FIELD_LEN)
     
     # OptionV common data
     
-    l_votecode_salt = models.CharField(max_length=config.HASH_LEN,
+    l_votecode_salt = models.CharField(max_length=config.HASH_FIELD_LEN,
         blank=True, default='')
     
     l_votecode_iterations = models.PositiveIntegerField(null=True,
@@ -175,7 +177,7 @@ class OptionV(models.Model):
     l_votecode = models.CharField(max_length=config.VOTECODE_LEN,
         blank=True, default='')
     
-    l_votecode_hash = models.CharField(max_length=config.HASH_LEN,
+    l_votecode_hash = models.CharField(max_length=config.HASH_FIELD_LEN,
         blank=True, default='')
     
     com = fields.ProtoField(cls=crypto.Com)

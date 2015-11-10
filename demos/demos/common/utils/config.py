@@ -11,8 +11,8 @@ _CONFIG = {
     'CREDENTIAL_LEN': 8,                      # bytes
     'SECURITY_CODE_LEN': 8,                   # base32
     
-    'HASH_LEN': 128,                          # chars
     'PKEY_BIT_LEN': 2048,                     # bits
+    'HASH_FIELD_LEN': 128,                    # chars
 }
 
 # ------------------------------------------------------------------------------
