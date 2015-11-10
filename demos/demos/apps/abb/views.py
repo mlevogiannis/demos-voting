@@ -672,6 +672,8 @@ class ExportView(View):
             
             namespaces.pop(0)
         
+        name = self._namespaces[namespaces[-1]]['name']
+        
         # Build, serialize and return the requested data
         
         data = self.objdata(namespaces, url_args, query_args, action)
@@ -679,9 +681,9 @@ class ExportView(View):
         encoder = self.CustomJSONEncoder
         
         if 'file' in request.GET:
-            name = node['name'] + ('s' if action == 'list' else '') + '.json'
-            response = http.HttpResponse(content_type='application/json')
-            response['Content-Disposition']='attachment; filename="'+ name +'"'
+            response = http.HttpResponse()
+            response['Content-Disposition'] = 'attachment; filename="' + \
+                name + ('s' if action == 'list' else '') + '.json"'
             json.dump(data, response, indent=4, sort_keys=True, cls=encoder)
         
         elif request.is_ajax():
