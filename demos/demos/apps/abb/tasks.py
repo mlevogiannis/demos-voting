@@ -126,22 +126,25 @@ def tally_protocol(election_id):
         r = ea_session.post('command/cryptotools/add_decom/', data)
         decom_sum = r.json()
         
-        # 'verify_com' task
+        # 'verify_com' task, iff at least one ballot had been cast
+        # An empty decom cannot be verified (False is always returned)
         
-        _request = request.copy()
-        _request['com'] = com_sum
-        _request['decom'] = decom_sum
+        if ballots:
         
-        data = {
-            'data': json.dumps(_request, separators=(',', ':'), \
-                cls=CustomJSONEncoder)
-        }
-        
-        r = ea_session.post('command/cryptotools/verify_com/', data)
-        verified = r.json()
-        
-        if not verified:
-            logger.error("verify_com failed (election id: %s)" % election.id)
+            _request = request.copy()
+            _request['com'] = com_sum
+            _request['decom'] = decom_sum
+            
+            data = {
+                'data': json.dumps(_request, separators=(',', ':'), \
+                    cls=CustomJSONEncoder)
+            }
+            
+            r = ea_session.post('command/cryptotools/verify_com/', data)
+            verified = r.json()
+            
+            if not verified:
+                logger.error('verify_com failed (election id: %s)'% election.id)
         
         # Save question's com_sum and decom_sum fields
         
