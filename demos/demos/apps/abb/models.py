@@ -11,13 +11,14 @@ from demos.common.utils.config import registry
 config = registry.get_config('abb')
 
 
-cert_fs = storage.PrivateFileSystemStorage(
-    location=os.path.join(config.FILESYSTEM_ROOT, 'certs'),
-    file_permissions_mode=0o600, directory_permissions_mode=0o700
-)
+fs_root = storage.PrivateFileSystemStorage(location=config.FILESYSTEM_ROOT,
+    file_permissions_mode=0o600, directory_permissions_mode=0o700)
 
 def get_cert_file_path(election, filename):
-    return "%s%s" % (election.id, os.path.splitext(filename)[-1])
+    return "certs/%s%s" % (election.id, os.path.splitext(filename)[-1])
+
+def get_json_file_path(election, filename):
+    return "export/%s%s" % (election.id, os.path.splitext(filename)[-1])
 
 
 class Election(models.Model):
@@ -34,7 +35,8 @@ class Election(models.Model):
     
     ballots = models.PositiveIntegerField()
     
-    x509_cert = models.FileField(upload_to=get_cert_file_path, storage=cert_fs)
+    x509_cert = models.FileField(upload_to=get_cert_file_path, storage=fs_root)
+    json_data = models.FileField(upload_to=get_json_file_path, storage=fs_root)
     
     # Post-vote data
     

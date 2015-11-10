@@ -503,7 +503,11 @@ class ExportView(View):
         },
     }
     
-    _namespace_root = ['election']
+    _namespace_root = {
+        'election': {
+            'cache_filefield': 'json_data',
+        },
+    }
     
     
     @staticmethod
@@ -530,8 +534,8 @@ class ExportView(View):
             return urlpatterns
         
         urlpatterns = []
-        for ns in ExportView._namespace_root:
-            urlpatterns += _build_urlpatterns(ns['name'])
+        for ns in ExportView._namespace_root.keys():
+            urlpatterns += _build_urlpatterns(ns)
         
         return urlpatterns
     
@@ -673,6 +677,28 @@ class ExportView(View):
             namespaces.pop(0)
         
         name = self._namespaces[namespaces[-1]]['name']
+        
+        # If the data of a root namespace were requested and the namespace has a
+        # cache FileField, return that cached json file
+        
+        root_ns = namespaces[0]
+        cache_filefield = self._namespace_root[root_ns].get('cache_filefield')
+        
+        if len(namespaces) == 1 and cache_filefield and action == 'get':
+            
+            model = self._namespaces[root_ns]['model']
+            kwflds = url_args.get(model.__name__) or {}
+            
+            obj = model.objects.get(**kwflds)
+            
+            cache_file = getattr(obj, cache_filefield)
+            cache_file.open('rb')
+            
+            response = http.FileResponse(cache_file.file)
+            response['Content-Disposition'] = 'attachment; filename="' + \
+                name + '.json"'
+            
+            return response
         
         # Build, serialize and return the requested data
         

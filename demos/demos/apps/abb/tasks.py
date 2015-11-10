@@ -2,13 +2,16 @@
 
 from __future__ import division
 
+import io
 import json
 import hashlib
 import logging
 
 from base64 import b64decode
 from celery import shared_task
+
 from django.apps import apps
+from django.core.files import File
 
 from demos.apps.abb.models import Election, Question, Ballot, Part, OptionV, \
     Task
@@ -219,10 +222,39 @@ def tally_protocol(election_id):
                     optionv.zk2 = zk2
                     optionv.save(update_fields=['zk2'])
     
+    # Import the ExportView here to avoid circular dependency error
+    
+    from demos.apps.abb.views import ExportView
+    
+    objdata = ExportView.objdata
+    encoder = ExportView.CustomJSONEncoder
+    
+    del ExportView
+    
+    # Create an empty file and open it for writing, workaround for:
+    # https://code.djangoproject.com/ticket/13809
+    
+    json_data = election.json_data
+    
+    json_data.save('export.json', File(io.BytesIO(b'')), save=False)
+    json_data.close()
+    
+    json_data.file = json_data.storage.open(json_data.name, 'w')
+    
+    # Generate the json file
+    
+    # TODO: iterate over ballots and manually generate the file, otherwise a lot
+    # of resources will be required for elections with many ballots and options
+    
+    data = objdata(['election'], {'Election': {'id': election_id}}, {}, 'get')
+    json.dump(data, json_data, indent=4, sort_keys=True, cls=encoder)
+    
+    json_data.close()
+    
     # Update election state
     
     election.state = enums.State.COMPLETED
-    election.save(update_fields=['state'])
+    election.save(update_fields=['state', 'json_data'])
     
     request = {
         'e_id': election.id,
