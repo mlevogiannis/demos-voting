@@ -100,9 +100,9 @@ def tally_protocol(election_id):
         ballots = []
         
         # Grab all ballot parts that have options marked as 'voted'
-            
+        
         part_qs = Part.objects.filter(ballot__election=election, \
-            ballot__serial__range=(lo, hi-1), optionv__voted=True).distinct()
+            optionv__voted=True).distinct()
         
         # Prepare 'ballots' data structure
         
