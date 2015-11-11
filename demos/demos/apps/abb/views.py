@@ -530,7 +530,7 @@ class ExportView(View):
             urlpatterns = [url(r'^' + node['name'] + 's/', include([
                 url(r'^$', ExportView.as_view(), name='schema'),
                 url(r'^' + argpath + '/', include([
-                    url(r'^$', ExportView.as_view(), name='export'),
+                    url(r'^$', ExportView.as_view(), name='data'),
                 ] + urlpatterns)),
             ], namespace=ns))]
             
@@ -566,7 +566,7 @@ class ExportView(View):
         
         # Build and return the requested data
         
-        if url_name == 'export':
+        if url_name == 'data':
             
             def _build_data(ns, objects, kwflds):
                 
