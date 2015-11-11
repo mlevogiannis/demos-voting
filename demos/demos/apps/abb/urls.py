@@ -23,6 +23,6 @@ apipatterns = [
         url(r'^logout/$', api.logout, name='logout'),
     ], namespace='auth')),
     
-    url(r'^export/', include(views.ExportView.urlpatterns(), namespace='export')),
+    url(r'^export/', include(views.ExportView._urlpatterns(), namespace='export')),
 ]
 

@@ -231,8 +231,8 @@ def tally_protocol(election_id):
     
     from demos.apps.abb.views import ExportView
     
-    objdata = ExportView.objdata
-    encoder = ExportView.CustomJSONEncoder
+    export = ExportView._export
+    encoder = ExportView._CustomJSONEncoder
     
     del ExportView
     
@@ -251,7 +251,7 @@ def tally_protocol(election_id):
     # TODO: iterate over ballots and manually generate the file, otherwise a lot
     # of resources will be required for elections with many ballots and options
     
-    data = objdata(['election'], {'Election': {'id': election_id}}, {}, 'get')
+    data = export(['election'], {'Election': {'id': election_id}}, {}, 'export')
     json.dump(data, json_data, indent=4, sort_keys=True, cls=encoder)
     
     json_data.close()

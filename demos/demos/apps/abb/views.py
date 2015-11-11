@@ -513,7 +513,7 @@ class ExportView(View):
     
     
     @staticmethod
-    def urlpatterns():
+    def _urlpatterns():
         
         def _build_urlpatterns(ns):
             
@@ -527,9 +527,9 @@ class ExportView(View):
                 + '>' + regex + ')' for field, regex in node.get('args', [])])
             
             urlpatterns = [url(r'^' + node['name'] + 's/', include([
-                url(r'^$', ExportView.as_view(), name='list'),
+                url(r'^$', ExportView.as_view(), name='schema'),
                 url(r'^' + argpath + '/', include([
-                    url(r'^$', ExportView.as_view(), name='get'),
+                    url(r'^$', ExportView.as_view(), name='export'),
                 ] + urlpatterns)),
             ], namespace=ns))]
             
@@ -543,9 +543,9 @@ class ExportView(View):
     
     
     @staticmethod
-    def objdata(namespaces, url_args, query_args, action):
+    def _export(namespaces, url_args, query_args, url_name):
         
-        # Get each namespace's model instance up to the requested one, excluding
+        # Get each namespace's model instance, until the requested one is found
         
         objects = {}
         
@@ -557,7 +557,7 @@ class ExportView(View):
                 in node['model']._meta.get_fields() if f.is_relation
                 and k == f.related_model.__name__}
             
-            kwflds.update(url_args.get(node['model'].__name__) or {})
+            kwflds.update(url_args.get(node['model'].__name__, {}))
             
             if i < len(namespaces):
                 objects[node['model'].__name__] = \
@@ -565,7 +565,7 @@ class ExportView(View):
         
         # Build and return the requested data
         
-        if action == 'get':
+        if url_name == 'export':
             
             def _build_data(ns, objects, kwflds):
                 
@@ -619,7 +619,7 @@ class ExportView(View):
             
             data = _build_data(ns, objects, kwflds)[1][0]
             
-        elif action == 'list':
+        elif url_name == 'schema':
             
             # Get the list of available input arguments
             
@@ -644,8 +644,6 @@ class ExportView(View):
         
     
     def get(self, request, **kwargs):
-        
-        action = request.resolver_match.url_name
         
         # Accept case insensitive ballot part tags
         
@@ -695,7 +693,7 @@ class ExportView(View):
         
         file_args = query_args.get('file', [])
         if len(file_args) > 1 or (len(file_args) == 1 and len(query_args) > 1):
-            raise http.Http404('Invalid "file" query field(s): select 0 or 1')
+            raise http.Http404('Invalid "file" query: select 0 or 1 fields')
         
         # Validate query's names
         
@@ -713,43 +711,48 @@ class ExportView(View):
             s2 = set(namespace_fields_by_name[name])
             
             if not (s1 <= s2):
-                raise http.Http404('Invalid "' + name + \
-                    '" query field(s): ' + ', '.join(s1-s2))
+                raise http.Http404('Invalid "' + name + '" query field(s): ' + \
+                    ', '.join(s1-s2))
         
+        # 'url_name is the action, 'name' is the requested namespace's name
+        
+        url_name = request.resolver_match.url_name
         name = self._namespaces[namespaces[-1]]['name']
         
-        # If the data of a root namespace were requested and the namespace has a
-        # cache FileField, return that cached json file
+        # If the data of a root namespace were requested and this namespace
+        # has a cache FileField, immediately return that cached file
         
         root_ns = namespaces[0]
         cache_filefield = self._namespace_root[root_ns].get('cache_filefield')
         
-        if len(namespaces) == 1 and cache_filefield and action == 'get':
+        if len(namespaces) == 1 and cache_filefield and url_name == 'export':
             
             model = self._namespaces[root_ns]['model']
-            kwflds = url_args.get(model.__name__) or {}
             
+            kwflds = url_args.get(model.__name__, {})
             obj = model.objects.get(**kwflds)
             
-            cache_file = getattr(obj, cache_filefield)
-            cache_file.open('rb')
+            cache_field = getattr(obj, cache_filefield)
+            cache_field.open('rb')
             
-            response = http.FileResponse(cache_file.file)
+            response = http.FileResponse(cache_field.file)
             response['Content-Disposition'] = 'attachment; filename="' + \
                 name + '.json"'
             
             return response
         
-        # Build, serialize and return the requested data
+        # Export the requested data
         
-        data = self.objdata(namespaces, url_args, query_args, action)
+        data = self._export(namespaces, url_args, query_args, url_name)
         
-        encoder = self.CustomJSONEncoder
+        # Serialize and return the requested data
+        
+        encoder = self._CustomJSONEncoder
         
         if 'file' in request.GET:
             response = http.HttpResponse()
             response['Content-Disposition'] = 'attachment; filename="' + \
-                name + ('s' if action == 'list' else '') + '.json"'
+                name + ('s' if url_name == 'schema' else '') + '.json"'
             json.dump(data, response, indent=4, sort_keys=True, cls=encoder)
         
         elif request.is_ajax():
@@ -762,7 +765,7 @@ class ExportView(View):
         return response
     
     
-    class CustomJSONEncoder(DjangoJSONEncoder):
+    class _CustomJSONEncoder(DjangoJSONEncoder):
         """JSONEncoder subclass that supports date/time and protobuf types."""
         
         from demos.common.utils import protobuf
