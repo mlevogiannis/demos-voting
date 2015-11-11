@@ -464,43 +464,44 @@ class ExportView(View):
             'name': 'election',
             'model': Election,
             'args': [('id', '[a-zA-Z0-9]+')],
-            'fields': [],
+            'fields': ['id', 'long_votecodes', 'coins'],
+            'files': ['x509_cert'],
             'next': ['ballot', 'question_fk'],
         },
         'ballot': {
             'name': 'ballot',
             'model': Ballot,
             'args': [('serial', '[0-9]+')],
-            'fields': [],
+            'fields': ['serial'],
             'next': ['part'],
         },
         'part': {
             'name': 'part',
             'model': Part,
             'args': [('tag', '[AaBb]')],
-            'fields': [],
+            'fields': ['tag', 'security_code', 'l_votecode_salt', \
+                'l_votecode_iterations'],
             'next': ['question'],
         },
         'question': {
             'name': 'question',
             'model': Question,
             'args': [('index', '[0-9]+')],
-            'fields': [],
+            'fields': ['index'],
             'next': ['option'],
         },
         'option': {
             'name': 'option',
             'model': OptionV,
             'args': [('index', '[0-9]+')],
-            'fields': ['com', 'zk1', 'zk2'],
-            'next': [],
+            'fields': ['index', 'votecode', 'l_votecode', 'receipt_full', \
+                'com', 'zk1', 'zk2', 'voted'],
         },
         'question_fk': {
             'name': 'question',
             'model': Question,
             'args': [('index', '[0-9]+')],
-            'fields': ['key'],
-            'next': [],
+            'fields': ['index', 'key', 'com_sum', 'decom_sum'],
         },
     }
     
@@ -623,19 +624,22 @@ class ExportView(View):
             
         elif action == 'list':
             
-            # Return the list of available input arguments and output fields
+            # Get the list of available input arguments
             
-            fields = [field for field, _ in node.get('args', [])]
+            args = [arg for arg, _ in node.get('args', [])]
             
-            if fields:
-                flat = (len(fields) == 1)
+            if args:
+                flat = (len(args) == 1)
                 object_qs = node['model'].objects.filter(**kwflds)
-                values = list(object_qs.values_list(*fields, flat=flat))
+                values = list(object_qs.values_list(*args, flat=flat))
             else:
                 values = []
             
+            # Also return the lists of output fields and files
+            
             data = {
-                'arguments': values,
+                'values': values,
+                'files': node.get('files', []),
                 'fields': node.get('fields', []),
             }
         
