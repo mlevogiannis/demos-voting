@@ -238,9 +238,9 @@ class SetupView(View):
             
             if task == 'election':
                 
-                cert_dump = election_obj['x509_cert'].encode()
+                cert_dump = election_obj['cert'].encode()
                 cert_file = File(BytesIO(cert_dump), name='cert.pem')
-                election_obj['x509_cert'] = cert_file
+                election_obj['cert'] = cert_file
                 
                 dbsetup.election(election_obj, app_config)
                 election = Election.objects.get(id=election_obj['id'])
@@ -466,7 +466,7 @@ class ExportView(View):
             'model': Election,
             'args': [('id', '[a-zA-Z0-9]+')],
             'fields': ['id', 'long_votecodes', 'coins'],
-            'files': ['x509_cert'],
+            'files': ['cert'],
             'next': ['ballot', 'question_fk'],
         },
         'ballot': {
@@ -508,7 +508,7 @@ class ExportView(View):
     
     _namespace_root = {
         'election': {
-            'cache_filefield': 'json_data',
+            'cache_filefield': 'export_file',
         },
     }
     

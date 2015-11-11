@@ -17,7 +17,7 @@ fs_root = storage.PrivateFileSystemStorage(location=config.FILESYSTEM_ROOT,
 def get_cert_file_path(election, filename):
     return "certs/%s%s" % (election.id, os.path.splitext(filename)[-1])
 
-def get_json_file_path(election, filename):
+def get_export_file_path(election, filename):
     return "export/%s%s" % (election.id, os.path.splitext(filename)[-1])
 
 
@@ -35,9 +35,9 @@ class Election(models.Model):
     
     ballots = models.PositiveIntegerField()
     
-    x509_cert = models.FileField(upload_to=get_cert_file_path, storage=fs_root)
-    json_data = models.FileField(upload_to=get_json_file_path, storage=fs_root,
-        blank=True)
+    cert = models.FileField(upload_to=get_cert_file_path, storage=fs_root)
+    export_file = models.FileField(upload_to=get_export_file_path,
+        storage=fs_root, blank=True)
     
     # Post-vote data
     

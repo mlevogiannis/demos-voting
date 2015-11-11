@@ -137,7 +137,7 @@ def election_setup(election_obj, language):
     cert.set_pubkey(pkey)
     cert.sign(ca_pkey if not self_signed else pkey, 'sha256')
     
-    election_obj['x509_cert'] = \
+    election_obj['cert'] = \
         crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode()
     
     # Generate question keys and calculate max_options

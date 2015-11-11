@@ -239,12 +239,12 @@ def tally_protocol(election_id):
     # Create an empty file and open it for writing, workaround for:
     # https://code.djangoproject.com/ticket/13809
     
-    json_data = election.json_data
+    export_file = election.export_file
     
-    json_data.save('export.json', File(io.BytesIO(b'')), save=False)
-    json_data.close()
+    export_file.save('export.json', File(io.BytesIO(b'')), save=False)
+    export_file.close()
     
-    json_data.file = json_data.storage.open(json_data.name, 'w')
+    export_file.file = export_file.storage.open(export_file.name, 'w')
     
     # Generate the json file
     
@@ -252,14 +252,14 @@ def tally_protocol(election_id):
     # of resources will be required for elections with many ballots and options
     
     data = export(['election'], {'Election': {'id': election_id}}, {}, 'export')
-    json.dump(data, json_data, indent=4, sort_keys=True, cls=encoder)
+    json.dump(data, export_file, indent=4, sort_keys=True, cls=encoder)
     
-    json_data.close()
+    export_file.close()
     
     # Update election state
     
     election.state = enums.State.COMPLETED
-    election.save(update_fields=['state', 'json_data'])
+    election.save(update_fields=['state', 'export_file'])
     
     request = {
         'e_id': election.id,

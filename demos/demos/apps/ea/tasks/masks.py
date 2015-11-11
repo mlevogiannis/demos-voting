@@ -16,7 +16,7 @@ _masks = {
     
     'abb' : {
         'Election': ['id', 'title', 'start_datetime', 'end_datetime', \
-            'long_votecodes', 'state', 'ballots', 'x509_cert'],
+            'long_votecodes', 'state', 'ballots', 'cert'],
         'Question': ['text', 'key', 'index', 'choices'],
         'OptionC': ['text', 'index'],
         'Ballot': ['serial', 'credential_hash'],
