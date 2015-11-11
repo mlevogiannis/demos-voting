@@ -36,7 +36,8 @@ class Election(models.Model):
     ballots = models.PositiveIntegerField()
     
     x509_cert = models.FileField(upload_to=get_cert_file_path, storage=fs_root)
-    json_data = models.FileField(upload_to=get_json_file_path, storage=fs_root)
+    json_data = models.FileField(upload_to=get_json_file_path, storage=fs_root,
+        blank=True)
     
     # Post-vote data
     
