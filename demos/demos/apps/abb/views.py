@@ -2,6 +2,7 @@
 
 from __future__ import division
 
+import os
 import json
 import hmac
 import math
@@ -641,9 +642,38 @@ class ExportView(View):
             }
         
         return data
+    
+    
+    @staticmethod
+    def _export_file(namespace, url_args, fieldname, filename=None):
         
+        model = ExportView._namespaces[namespace]['model']
+        
+        kwflds = url_args.get(model.__name__, {})
+        obj = get_object_or_404(model, **kwflds)
+        
+        filefield = getattr(obj, fieldname)
+        
+        if not (filefield and filefield.storage.exists(filefield.name)):
+            raise http.Http404('File not found: ' + fieldname)
+        
+        filename = os.path.basename(filefield.name) if not filename \
+            else filename + os.path.splitext(filefield.name)[-1]
+        
+        try:
+            filefield.open('rb')
+        except IOError:
+            raise http.Http404('Error opening file: ' + filename)
+        
+        response = http.FileResponse(filefield.file)
+        response['Content-Disposition'] = 'attachment; filename="'+filename+'"'
+            
+        return response
+    
     
     def get(self, request, **kwargs):
+        
+        url_name = request.resolver_match.url_name
         
         # Accept case insensitive ballot part tags
         
@@ -654,6 +684,9 @@ class ExportView(View):
         
         namespaces = list(dropwhile(lambda ns: \
             ns not in self._namespace_root, request.resolver_match.namespaces))
+        
+        ns = namespaces[-1]
+        node = self._namespaces[ns]
         
         # 'url_args' is a dict containing all captured url arguments (dicts),
         # organized by their model's name
@@ -683,12 +716,11 @@ class ExportView(View):
             fields = namespace_fields_by_name.setdefault(node['name'], set())
             fields.update(set(node['fields']))
         
-        _build_nodes(namespaces[-1])
+        _build_nodes(ns)
         
         # 'file' is a magic name (no namespace should use it), but it is always
-        # available and refers only to the request's target namespace
+        # available and refers only to the requested namespace
         
-        node = self._namespaces[namespaces[-1]]
         namespace_fields_by_name['file'] = set(node.get('files', []))
         
         file_args = query_args.get('file', [])
@@ -714,32 +746,18 @@ class ExportView(View):
                 raise http.Http404('Invalid "' + name + '" query field(s): ' + \
                     ', '.join(s1-s2))
         
-        # 'url_name is the action, 'name' is the requested namespace's name
+        # Return the file that was requested, if any
         
-        url_name = request.resolver_match.url_name
-        name = self._namespaces[namespaces[-1]]['name']
+        if file_args:
+            return self._export_file(ns, url_args, file_args[0], file_args[0])
         
-        # If the data of a root namespace were requested and this namespace
-        # has a cache FileField, immediately return that cached file
+        # If the root namespace was requested and it has a cache FileField,
+        # return that file, ignoring any url query string arguments
         
-        root_ns = namespaces[0]
-        cache_filefield = self._namespace_root[root_ns].get('cache_filefield')
+        filefield = self._namespace_root[namespaces[0]].get('cache_filefield')
         
-        if len(namespaces) == 1 and cache_filefield and url_name == 'export':
-            
-            model = self._namespaces[root_ns]['model']
-            
-            kwflds = url_args.get(model.__name__, {})
-            obj = model.objects.get(**kwflds)
-            
-            cache_field = getattr(obj, cache_filefield)
-            cache_field.open('rb')
-            
-            response = http.FileResponse(cache_field.file)
-            response['Content-Disposition'] = 'attachment; filename="' + \
-                name + '.json"'
-            
-            return response
+        if len(namespaces) == 1 and filefield and url_name == 'export':
+            return self._export_file(ns, url_args, filefield, node['name'])
         
         # Export the requested data
         
@@ -752,7 +770,7 @@ class ExportView(View):
         if 'file' in request.GET:
             response = http.HttpResponse()
             response['Content-Disposition'] = 'attachment; filename="' + \
-                name + ('s' if url_name == 'schema' else '') + '.json"'
+                node['name'] + ('s' if url_name == 'schema' else '') + '.json"'
             json.dump(data, response, indent=4, sort_keys=True, cls=encoder)
         
         elif request.is_ajax():
