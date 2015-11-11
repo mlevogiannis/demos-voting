@@ -579,9 +579,6 @@ class ExportView(View):
                 f1 = set(node.get('fields', []))
                 f2 = set(query_args.get(node['name'], []))
                 
-                if not (f2 <= f1):
-                    raise http.Http404('Invalid field(s): ' + ', '.join(f2-f1))
-                
                 fields = list(f1 & f2 if f2 else f1 \
                     if node['name'] not in query_args else set())
                 
@@ -674,6 +671,50 @@ class ExportView(View):
         
         query_args = {k: [s for q in v for s in q.split(',') if s]
             for k, v in request.GET.iterlists()}
+        
+        # Traverse the namespace tree, starting from the requested namespace,
+        # and build a dict whose keys are the names of each namespace and values
+        # are the sets of all their fields. It is used only for validation. 
+        
+        namespace_fields_by_name = {}
+        
+        def _build_nodes(ns):
+            node = self._namespaces[ns]
+            for next in node.get('next', []):
+                _build_nodes(next)
+            fields = namespace_fields_by_name.setdefault(node['name'], set())
+            fields.update(set(node['fields']))
+        
+        _build_nodes(namespaces[-1])
+        
+        # 'file' is a magic name (no namespace should use it), but it is always
+        # available and refers only to the request's target namespace
+        
+        node = self._namespaces[namespaces[-1]]
+        namespace_fields_by_name['file'] = set(node.get('files', []))
+        
+        file_args = query_args.get('file', [])
+        if len(file_args) > 1 or (len(file_args) == 1 and len(query_args) > 1):
+            raise http.Http404('Invalid "file" query field(s): select 0 or 1')
+        
+        # Validate query's names
+        
+        s1 = set(query_args.keys())
+        s2 = set(namespace_fields_by_name.keys())
+        
+        if not (s1 <= s2):
+            raise http.Http404('Invalid query name(s): ' + ', '.join(s1-s2))
+        
+        # Validate query's fields
+        
+        for name, fields in query_args.items():
+            
+            s1 = set(fields)
+            s2 = set(namespace_fields_by_name[name])
+            
+            if not (s1 <= s2):
+                raise http.Http404('Invalid "' + name + \
+                    '" query field(s): ' + ', '.join(s1-s2))
         
         name = self._namespaces[namespaces[-1]]['name']
         
