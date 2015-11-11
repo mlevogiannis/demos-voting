@@ -116,6 +116,7 @@
 
 <script src="{% static 'common/libs/sjcl/sjcl.custom.min.js' %}"></script>
 <script src="{% static 'common/sjcl-extras.js' %}"></script>
+<script src="{% static 'common/permutation.js' %}"></script>
 
 <script>
     var long_votecodes = {{ election.long_votecodes|yesno:'true,false' }};
