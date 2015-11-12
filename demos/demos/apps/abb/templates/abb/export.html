@@ -1,13 +1,19 @@
 {% extends "abb/base.html" %}
 
-{% load i18n %}
 {% load abb.custom %}
 {% load staticfiles %}
 
 {% block css %}
 
-<!-- export.css -->
-<link rel="stylesheet" href="{% static 'abb/export.css' %}">
+<link rel="stylesheet" href="{% static 'common/libs/highlight.js/8.9.1/styles/github.css' %}">
+
+<style>
+    pre {
+        overflow: auto;
+        font-size: 13px;
+        word-wrap: normal;
+    }
+</style>
 
 {% endblock css %}
 
@@ -16,9 +22,7 @@
 
 <div class="row">
     <div class="col-xs-12">
-        <pre>
-{{ data }}
-        </pre>
+        <pre class="language-json">{{ data }}</pre>
     </div>
 </div>
 
@@ -27,8 +31,8 @@
 
 {% block script %}
 
-<!-- export.js -->
-<script src="{% static 'abb/export.js' %}"></script>
+<script src="{% static 'common/libs/highlight.js/8.9.1/highlight.pack.js' %}"></script>
+<script>hljs.highlightBlock(document.getElementsByTagName('pre')[0]);</script>
 
 {% endblock script %}
 
