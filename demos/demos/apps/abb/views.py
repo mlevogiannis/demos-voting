@@ -22,7 +22,7 @@ except ImportError:
 from google.protobuf import message
 
 from django import http
-from django.db import transaction
+from django.db import models, transaction
 from django.apps import apps
 from django.utils import timezone
 from django.conf.urls import include, url
@@ -465,8 +465,7 @@ class ExportView(View):
             'name': 'election',
             'model': Election,
             'args': [('id', '[a-zA-Z0-9]+')],
-            'fields': ['id', 'long_votecodes', 'coins'],
-            'files': ['cert'],
+            'fields': ['id', 'long_votecodes', 'coins', 'cert'],
             'next': ['ballot', 'question_fk'],
         },
         'ballot': {
@@ -633,12 +632,19 @@ class ExportView(View):
             else:
                 values = []
             
-            # Also return the lists of output fields and files
+            # Get separate lists for fields and files
+            
+            fields = list(node.get('fields', []))
+            
+            files = [f for f in list(fields) if isinstance(node['model'].\
+                _meta.get_field(f), models.FileField) and not fields.remove(f)]
+            
+            # Return the requested model's data
             
             data = {
+                'fields': fields,
+                'files': files,
                 'values': values,
-                'files': node.get('files', []),
-                'fields': node.get('fields', []),
             }
         
         return data
@@ -705,54 +711,74 @@ class ExportView(View):
         
         # Traverse the namespace tree, starting from the requested namespace,
         # and build a dict whose keys are the names of each namespace and values
-        # are the sets of all their fields. It is used only for validation. 
+        # are lists of all possible namespaces. It is used only for validation.
         
-        namespace_fields_by_name = {}
+        namespace_nodes_by_name = {}
         
-        def _build_nodes(ns):
-            node = self._namespaces[ns]
+        def _build_nodes(_ns):
+            node = self._namespaces[_ns]
             for next in node.get('next', []):
                 _build_nodes(next)
-            fields = namespace_fields_by_name.setdefault(node['name'], set())
-            fields.update(set(node['fields']))
+            namespace_nodes_by_name.setdefault(node['name'], []).append(node)
         
         _build_nodes(ns)
         
-        # 'file' is a magic name (no namespace should use it), but it is always
-        # available and refers only to the requested namespace
+        # 'html' is a built-in name, no namespace is allowed to use it. If true,
+        # return a HTML page with the data, if undefined or false return a file.
         
-        namespace_fields_by_name['file'] = set(node.get('files', []))
+        html_args = query_args.pop('html', ['false'])
+        html = html_args[0].lower() if html_args else ''
         
-        file_args = query_args.get('file', [])
-        if len(file_args) > 1 or (len(file_args) == 1 and len(query_args) > 1):
-            raise http.Http404('Invalid "file" query: select 0 or 1 fields')
+        if len(html_args) != 1 or html not in ('true', 'false'):
+            raise http.Http404('Invalid "html" query: true / false')
+        
+        html = (html == 'true')
         
         # Validate query's names
         
         s1 = set(query_args.keys())
-        s2 = set(namespace_fields_by_name.keys())
+        s2 = set(namespace_nodes_by_name.keys())
         
         if not (s1 <= s2):
             raise http.Http404('Invalid query name(s): ' + ', '.join(s1-s2))
         
         # Validate query's fields
         
+        filefield = None
+        total_fields = sum([len(fields) for fields in query_args.values()])
+        
         for name, fields in query_args.items():
             
-            s1 = set(fields)
-            s2 = set(namespace_fields_by_name[name])
+            _nodes = namespace_nodes_by_name[name]
             
+            s1 = set(fields)
+            s2 = set([f for n in _nodes for f in n['fields']])
+           
             if not (s1 <= s2):
-                raise http.Http404('Invalid "' + name + '" query field(s): ' + \
-                    ', '.join(s1-s2))
+                raise http.Http404('Invalid "' + \
+                    name + '" query field(s): ' + ', '.join(s1-s2))
+            
+            # Ensure that if a file field is requested, no other field is also
+            # requested (file or not), and that this file field is selected from
+            # the requested namespace (and not from any nested one)
+            
+            for _field in fields:
+                for _node in _nodes:
+                    field = _node['model']._meta.get_field(_field)
+                    if isinstance(field, models.FileField):
+                        if total_fields != 1 or node != _node:
+                            raise http.Http404('Invalid query: a file field' + \
+                                ' cannot be combined with any other fields' + \
+                                ' or be selected from a nested namespace.')
+                        filefield = _field
         
-        # Return the file that was requested, if any
+        # Return the requested file, if any
         
-        if file_args:
-            return self._export_file(ns, url_args, file_args[0], file_args[0])
+        if filefield:
+            return self._export_file(ns, url_args, filefield, filefield)
         
         # If the root namespace was requested and it has a cache FileField,
-        # return that file, ignoring any url query string arguments
+        # return the file, ignoring any url query string arguments
         
         filefield = self._namespace_root[namespaces[0]].get('cache_filefield')
         
@@ -767,18 +793,18 @@ class ExportView(View):
         
         encoder = self._CustomJSONEncoder
         
-        if 'file' in request.GET:
-            response = http.HttpResponse()
-            response['Content-Disposition'] = 'attachment; filename="' + \
-                node['name'] + ('s' if url_name == 'schema' else '') + '.json"'
-            json.dump(data, response, indent=4, sort_keys=True, cls=encoder)
+        if html:
+            data = json.dumps(data, indent=4, sort_keys=True, cls=encoder)
+            response = render(request, self.template_name, {'data': data})
         
         elif request.is_ajax():
             response = http.JsonResponse(data, safe=False, encoder=encoder)
         
         else:
-            data = json.dumps(data, indent=4, sort_keys=True, cls=encoder)
-            response = render(request, self.template_name, {'data': data})
+            response = http.HttpResponse()
+            response['Content-Disposition'] = 'attachment; filename="' + \
+                node['name'] + ('s' if url_name == 'schema' else '') + '.json"'
+            json.dump(data, response, indent=4, sort_keys=True, cls=encoder)
         
         return response
     
