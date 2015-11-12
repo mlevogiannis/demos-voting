@@ -150,7 +150,7 @@ class AuditView(View):
                         # If a ballot part has a security code, the other ballot
                         # part was used by the client to vote
                         
-                        vote = 'A' if p.tag != 'A' else 'B'
+                        vote = 'A' if p.index != 'A' else 'B'
                         
                         # Restore options' correct order
                         
@@ -163,7 +163,7 @@ class AuditView(View):
                     
                     questions.append((q.index, options))
                 
-                parts.append((p.tag, questions) + extra_args)
+                parts.append((p.index, questions) + extra_args)
             
             # Return response
             
@@ -315,7 +315,7 @@ class VoteView(View):
             e_id = votedata['e_id']
             b_serial = votedata['b_serial']
             b_credential = b64decode(votedata['b_credential'].encode())
-            p1_tag = votedata['p1_tag']
+            p1_index = votedata['p1_index']
             p1_votecodes = votedata['p1_votecodes']
             p2_security_code = votedata['p2_security_code']
             
@@ -325,7 +325,7 @@ class VoteView(View):
             # part1 is always the part that the client used to vote, part2 is
             # the other part.
             
-            order = ('' if p1_tag == 'A' else '-') + 'tag'
+            order = ('' if p1_index == 'A' else '-') + 'index'
             part1, part2 = Part.objects.filter(ballot=ballot).order_by(order)
             
             question_qs = Question.objects.filter(election=election)
@@ -479,8 +479,8 @@ class ExportView(View):
         'part': {
             'name': 'part',
             'model': Part,
-            'args': [('tag', '[AaBb]')],
-            'fields': ['tag', 'security_code', 'l_votecode_salt', \
+            'args': [('index', '[AaBb]')],
+            'fields': ['index', 'security_code', 'l_votecode_salt', \
                 'l_votecode_iterations'],
             'next': ['question'],
         },
@@ -675,10 +675,10 @@ class ExportView(View):
         
         url_name = request.resolver_match.url_name
         
-        # Accept case insensitive ballot part tags
+        # Accept case insensitive ballot part indices
         
-        if 'Part__tag' in kwargs:
-            kwargs['Part__tag'] = kwargs['Part__tag'].upper()
+        if 'Part__index' in kwargs:
+            kwargs['Part__index'] = kwargs['Part__index'].upper()
         
         # Ignore any namespaces before root
         

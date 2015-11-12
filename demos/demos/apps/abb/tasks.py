@@ -41,7 +41,7 @@ def tally_protocol(election_id):
     
     for ballot in ballot_qs.iterator():
         coins += '%d' % (1 if ballot.part_set.\
-            filter(tag='B', optionv__voted=True).exists() else 0)
+            filter(index='B', optionv__voted=True).exists() else 0)
     
     coins = coins.encode('ascii')
     coins = hashlib.sha256(coins).hexdigest()
@@ -108,10 +108,10 @@ def tally_protocol(election_id):
         
         for part in part_qs.iterator():
             
-            index_list = OptionV.objects.filter(question=question, \
+            o_index_list = OptionV.objects.filter(question=question, \
                 part=part, voted=True).values_list('index', flat=True)
             
-            ballots.append((part.ballot.serial, part.tag, list(index_list)))
+            ballots.append((part.ballot.serial, part.index, list(o_index_list)))
         
         # Send request
         
@@ -202,7 +202,7 @@ def tally_protocol(election_id):
                 zk1_list = OptionV.objects.filter(part=part, \
                     question=question).values_list('zk1', flat=True)
                 
-                ballots.append((part.ballot.serial, part.tag, list(zk1_list)))
+                ballots.append((part.ballot.serial, part.index, list(zk1_list)))
             
             # Send request
             

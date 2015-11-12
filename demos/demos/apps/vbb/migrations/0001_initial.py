@@ -78,14 +78,14 @@ class Migration(migrations.Migration):
             name='Part',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, primary_key=True, auto_created=True)),
-                ('tag', models.CharField(choices=[('A', 'A'), ('B', 'B')], max_length=1)),
+                ('index', models.CharField(choices=[('A', 'A'), ('B', 'B')], max_length=1)),
                 ('security_code_hash2', models.CharField(max_length=128)),
                 ('l_votecode_salt', models.CharField(blank=True, max_length=128, default='')),
                 ('l_votecode_iterations', models.PositiveIntegerField(null=True, blank=True, default=None)),
                 ('ballot', models.ForeignKey(to='vbb.Ballot')),
             ],
             options={
-                'ordering': ['ballot', 'tag'],
+                'ordering': ['ballot', 'index'],
             },
         ),
         migrations.CreateModel(
@@ -155,7 +155,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='part',
-            unique_together=set([('ballot', 'tag')]),
+            unique_together=set([('ballot', 'index')]),
         ),
         migrations.AlterUniqueTogether(
             name='optionv',

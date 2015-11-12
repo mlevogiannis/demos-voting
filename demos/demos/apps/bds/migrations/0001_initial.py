@@ -54,13 +54,13 @@ class Migration(migrations.Migration):
             name='Part',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, primary_key=True, auto_created=True)),
-                ('tag', models.CharField(choices=[('A', 'A'), ('B', 'B')], max_length=1)),
+                ('index', models.CharField(choices=[('A', 'A'), ('B', 'B')], max_length=1)),
                 ('vote_token', models.TextField()),
                 ('security_code', models.CharField(max_length=8)),
                 ('ballot', models.ForeignKey(to='bds.Ballot')),
             ],
             options={
-                'ordering': ['ballot', 'tag'],
+                'ordering': ['ballot', 'index'],
             },
         ),
         migrations.CreateModel(
@@ -104,7 +104,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name='part',
-            unique_together=set([('ballot', 'tag')]),
+            unique_together=set([('ballot', 'index')]),
         ),
         migrations.AlterUniqueTogether(
             name='ballot',

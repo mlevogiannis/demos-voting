@@ -95,7 +95,7 @@ class Part(models.Model):
     
     ballot = models.ForeignKey(Ballot)
     
-    tag = models.CharField(max_length=1, choices=(('A', 'A'), ('B', 'B')))
+    index = models.CharField(max_length=1, choices=(('A', 'A'), ('B', 'B')))
     
     security_code = models.CharField(max_length=config.SECURITY_CODE_LEN,
         blank=True, default='')
@@ -113,21 +113,21 @@ class Part(models.Model):
     # Other model methods and meta options
     
     def __str__(self):
-        return "%s" % self.tag
+        return "%s" % self.index
     
     class Meta:
-        ordering = ['ballot', 'tag']
-        unique_together = ['ballot', 'tag']
+        ordering = ['ballot', 'index']
+        unique_together = ['ballot', 'index']
     
     class PartManager(models.Manager):
-        def get_by_natural_key(self, p_tag, b_serial, e_id):
-            return self.get(tag=p_tag, ballot__serial=b_serial,
+        def get_by_natural_key(self, p_index, b_serial, e_id):
+            return self.get(index=p_index, ballot__serial=b_serial,
                 ballot__election__id=e_id)
     
     objects = PartManager()
     
     def natural_key(self):
-        return (self.tag,) + self.ballot.natural_key()
+        return (self.index,) + self.ballot.natural_key()
 
 
 class Question(models.Model):
@@ -200,10 +200,10 @@ class OptionV(models.Model):
         unique_together = ['part', 'question', 'index']
     
     class OptionVManager(models.Manager):
-        def get_by_natural_key(self, o_index, q_index, p_tag, b_serial, e_id):
+        def get_by_natural_key(self, o_index, q_index, p_index, b_serial, e_id):
             return self.get(index=o_index, part__ballot__serial=b_serial,
                 question__index=q_index, question__election__id=e_id,
-                part__tag=p_tag, part__ballot__election__id=e_id)
+                part__index=p_index, part__ballot__election__id=e_id)
     
     objects = OptionVManager()
     

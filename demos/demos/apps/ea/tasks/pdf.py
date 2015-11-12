@@ -170,7 +170,7 @@ class BallotBuilder:
     page_height -= h_margin * 2
     
     img_size = page_width // 4.5
-    font_size_tag = int(img_size)
+    font_size_index = int(img_size)
     
     url_indent = page_width // 20
     table_top_gap = page_width // 15
@@ -276,7 +276,7 @@ class BallotBuilder:
         ('ALIGN',         ( 2, 0), ( 2,-1), 'RIGHT'),
         ('VALIGN',        ( 2, 0), ( 2,-1), 'BOTTOM'),
         ('FONT',          ( 2, 0), ( 2,-1), sans_bold),
-        ('FONTSIZE',      ( 2, 0), ( 2,-1), font_size_tag),
+        ('FONTSIZE',      ( 2, 0), ( 2,-1), font_size_index),
     ])
     
     table_hlp_style = TableStyle([
@@ -496,7 +496,7 @@ class BallotBuilder:
                 colWidths=[self.page_width], style=self.table_url_style
             )
             
-            table_img = Table([["", "", part_obj['tag']], [qr_img,
+            table_img = Table([["", "", part_obj['index']], [qr_img,
                 self.logo_img, ""]], style=self.table_img_style,
                 colWidths=[self.page_width/3, self.page_width/3,
                 self.page_width/3], rowHeights=[0, None]

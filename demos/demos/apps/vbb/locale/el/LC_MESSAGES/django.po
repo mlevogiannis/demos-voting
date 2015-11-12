@@ -218,8 +218,8 @@ msgstr "Παρακαλούμε εισαγάγετε τον κωδικό ασφα
 
 #: demos/apps/vbb/templates/vbb/vote.html:150
 #, python-format
-msgid "Ballot %(serial)s - Side %(tag)s"
-msgstr "Ψηφοδέλτιο %(serial)s - Όψη %(tag)s"
+msgid "Ballot %(b_serial)s - Side %(p_index)s"
+msgstr "Ψηφοδέλτιο %(b_serial)s - Όψη %(p_index)s"
 
 #: demos/apps/vbb/templates/vbb/vote.html:159
 msgid ""

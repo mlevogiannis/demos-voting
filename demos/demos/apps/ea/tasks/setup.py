@@ -64,11 +64,11 @@ def election_setup(election_obj, language):
     
     # Election-specific vote-token bit lengths
     
-    tag_bits = 1
+    index_bits = 1
     serial_bits = (election.ballots + 100).bit_length()
     credential_bits = config.CREDENTIAL_LEN * 8
     security_code_bits = config.SECURITY_CODE_LEN * 5
-    token_bits = serial_bits + credential_bits + tag_bits + security_code_bits
+    token_bits = serial_bits + credential_bits + index_bits + security_code_bits
     pad_bits = int(math.ceil(token_bits / 5)) * 5 - token_bits
     
     # Initialize common utilities
@@ -210,7 +210,7 @@ def election_setup(election_obj, language):
                 '__list_Part__': [],
             }
             
-            for tag, crypto_qo_list in zip(['A', 'B'], crypto_sqo_list):
+            for p_index, crypto_qo_list in zip(['A', 'B'], crypto_sqo_list):
                 
                 # Generate a random security code and compute its hash value and
                 # its hash's hash value. The client will use the first hash to
@@ -226,7 +226,7 @@ def election_setup(election_obj, language):
                 l_votecode_iterations = hasher.iterations
                 
                 part_obj = {
-                    'tag': tag,
+                    'index': p_index,
                     'security_code': security_code,
                     'security_code_hash2': security_code_hash2,
                     'l_votecode_salt': l_votecode_salt,
@@ -339,17 +339,17 @@ def election_setup(election_obj, language):
                 security_code = base32cf.decode(other_part_obj['security_code'])
                 
                 # The vote token consists of two parts. The first part is the
-                # ballot's serial number and credential and the part's tag,
+                # ballot's serial number and credential and the part's index,
                 # XORed with the second part. The second part is the other
                 # part's security code, bit-inversed. This is done so that the
                 # tokens of the two parts appear to be completely different.
                 
-                p1 = (serial << (tag_bits + credential_bits)) | \
-                    (intc.from_bytes(credential, 'big') << tag_bits) | i
+                p1 = (serial << (index_bits + credential_bits)) | \
+                    (intc.from_bytes(credential, 'big') << index_bits) | i
                 
                 p2 = (~security_code) & ((1 << security_code_bits) - 1)
                 
-                p1_len = serial_bits + credential_bits + tag_bits
+                p1_len = serial_bits + credential_bits + index_bits
                 p2_len = security_code_bits
                 
                 for i in range(0, p1_len, p2_len):
@@ -429,8 +429,8 @@ def election_setup(election_obj, language):
                     
                     # Set the indices in proper order
                     
-                    for index, optionv in enumerate(optionv_list):
-                        optionv['index'] = index
+                    for o_index, optionv in enumerate(optionv_list):
+                        optionv['index'] = o_index
                     
                     question_obj['__list_OptionV__'] = optionv_list
         

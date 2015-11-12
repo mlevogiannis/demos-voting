@@ -160,10 +160,10 @@ class CreateView(View):
                     '__list_Part__': [],
                 }
                 
-                for tag in ['A', 'B']:
+                for p_index in ['A', 'B']:
                     
                     part_obj = {
-                        'tag': tag,
+                        'index': p_index,
                         'vote_token': 'vote_token',
                         'security_code': base32cf.random(
                             config.SECURITY_CODE_LEN,crypto=False
@@ -391,8 +391,8 @@ class CryptoToolsView(View):
             
             elif command == 'add_decom':
                 
-                # Input is a list of 3-tuples: (b_serial, p_tag, index_list),
-                # returns 'decom'.
+                # Input is a list of 3-tuples: (b_serial, p_index,
+                # o_index_list), returns 'decom'.
                 
                 ballots = request_obj['ballots']
                 
@@ -405,14 +405,14 @@ class CryptoToolsView(View):
                     
                     decom_list = [] if lo == 0 else [decom]
                     
-                    for b_serial, p_tag, index_list in ballots[lo: hi]:
+                    for b_serial, p_index, o_index_list in ballots[lo: hi]:
                         
                         _decom_list = OptionV.objects.filter(
                             part__ballot__election__id=e_id,
                             part__ballot__serial=b_serial,
-                            part__tag=p_tag,
+                            part__index=p_index,
                             question__index=q_index,
-                            index__in=index_list,
+                            index__in=o_index_list,
                         ).values_list('decom', flat=True)
                         
                         decom_list.extend(_decom_list)
@@ -423,7 +423,7 @@ class CryptoToolsView(View):
                 
             elif command == 'complete_zk':
                 
-                # Input is a list of 3-tuples: (b_serial, p_tag, zk1_list),
+                # Input is a list of 3-tuples: (b_serial, p_index, zk1_list),
                 # where zk1_list is the list of all zk1 fields of this ballot
                 # part, in ascending index order. Returns a list of zk2 lists,
                 # in the same order.
@@ -436,13 +436,13 @@ class CryptoToolsView(View):
                 options = OptionC.objects.filter(question__election__id=e_id, \
                     question__index=q_index).count()
                 
-                for b_serial, p_tag, zk1_list in ballots:
+                for b_serial, p_index, zk1_list in ballots:
                     
                     zk1_list = [self._deserialize(zk1, crypto.ZK1) \
                         for zk1 in zk1_list]
                     
-                    zk_state_list = OptionV.objects.filter(part__tag=p_tag, \
-                        part__ballot__serial=b_serial).\
+                    zk_state_list = OptionV.objects.filter(part__index=\
+                        p_index, part__ballot__serial=b_serial).\
                         values_list('zk_state', flat=True)
                     
                     zk_list = list(zip(zk1_list, zk_state_list))

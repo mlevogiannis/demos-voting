@@ -114,11 +114,11 @@ class VoteView(View):
         
         # Vote token bits definitions
         
-        tag_bits = 1
+        index_bits = 1
         serial_bits = (election.ballots + 100).bit_length()
         credential_bits = config.CREDENTIAL_LEN * 8
         security_code_bits = config.SECURITY_CODE_LEN * 5
-        token_bits = serial_bits+credential_bits+tag_bits+security_code_bits
+        token_bits = serial_bits+credential_bits+index_bits+security_code_bits
         
         # Verify vote token's length
         
@@ -129,7 +129,7 @@ class VoteView(View):
             raise VoteView.Error(VoteView.State.INVALID_VOTE_TOKEN, *retval)
         
         # The vote token consists of two parts. The first part is the
-        # ballot's serial number and credential and the part's tag,
+        # ballot's serial number and credential and the part's index,
         # XORed with the second part. The second part is the other
         # part's security code, bit-inversed. This is done so that the
         # tokens of the two parts appear to be completely different.
@@ -139,7 +139,7 @@ class VoteView(View):
         except (AttributeError, TypeError, ValueError):
             raise VoteView.Error(VoteView.State.INVALID_VOTE_TOKEN, *retval)
         
-        p1_len = serial_bits + credential_bits + tag_bits
+        p1_len = serial_bits + credential_bits + index_bits
         p2_len = security_code_bits
         
         p1 = p >> p2_len
@@ -150,15 +150,15 @@ class VoteView(View):
         
         p1 &= (1 << p1_len) - 1
         
-        # Extract the selected part's serial number, credential and tag and
+        # Extract the selected part's serial number, credential and index and
         # the other part's security code
         
-        serial = (p1 >> credential_bits + tag_bits) & ((1 << serial_bits) - 1)
+        serial = (p1 >> credential_bits + index_bits) & ((1 << serial_bits) - 1)
         
-        credential = ((p1 >> tag_bits) & ((1 << credential_bits) - 1))
+        credential = ((p1 >> index_bits) & ((1 << credential_bits) - 1))
         credential = intc.to_bytes(credential, config.CREDENTIAL_LEN, 'big')
             
-        tag = 'A' if p1 & ((1 << tag_bits) - 1) == 0 else 'B'
+        index = 'A' if p1 & ((1 << index_bits) - 1) == 0 else 'B'
         
         security_code = base32cf.encode((~p2) & ((1 << security_code_bits) - 1))
         security_code = security_code.zfill(config.SECURITY_CODE_LEN)
@@ -179,7 +179,7 @@ class VoteView(View):
         # matched object (part1) is always the part used by the client to vote,
         # the second matched object (part2) is the opposite part.
         
-        order = ('' if tag == 'A' else '-') + 'tag'
+        order = ('' if index == 'A' else '-') + 'index'
         
         try:
             part_qs = Part.objects.filter(ballot=ballot).order_by(order)
@@ -253,8 +253,8 @@ class VoteView(View):
                 'state': e.args[0].value,
                 'election': e.args[1] if args_len >= 2 else None,
                 'questions': e.args[2] if args_len >= 3 else None,
-                'serial': str(e.args[3].serial) if args_len >= 4 else None,
-                'tag': e.args[4].first().tag if args_len >= 5 else None,
+                'b_serial': str(e.args[3].serial) if args_len >= 4 else None,
+                'p_index': e.args[4].first().index if args_len >= 5 else None,
             }
         
         else:
@@ -269,8 +269,8 @@ class VoteView(View):
                 'state': VoteView.State.NO_ERROR.value,
                 'election': election,
                 'questions': question_qs,
-                'serial': str(ballot.serial),
-                'tag': part1.tag,
+                'b_serial': str(ballot.serial),
+                'p_index': part1.index,
                 'abb_url': abb_url,
                 'credential': credential,
                 'votecode_len': config.VOTECODE_LEN,
@@ -425,7 +425,7 @@ class VoteView(View):
                         'e_id': election.id,
                         'b_serial': ballot.serial,
                         'b_credential': credential,
-                        'p1_tag': part1.tag,
+                        'p1_index': part1.index,
                         'p1_votecodes': vote_obj,
                         'p2_security_code': security_code,
                     })
