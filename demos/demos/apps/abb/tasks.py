@@ -251,7 +251,7 @@ def tally_protocol(election_id):
     # TODO: iterate over ballots and manually generate the file, otherwise a lot
     # of resources will be required for elections with many ballots and options
     
-    data = export(['election'], {'Election': {'id': election_id}}, {}, 'export')
+    data = export(['election'], {'Election': {'id': election_id}}, {}, 'data')
     json.dump(data, export_file, indent=4, sort_keys=True, cls=encoder)
     
     export_file.close()
