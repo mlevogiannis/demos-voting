@@ -81,7 +81,7 @@ $(document).ready(function() {
     if (!time.length)
         return;
     
-    var span = time.children(".message");
+    var span = time.children(".text");
     
     // common values
     
@@ -111,7 +111,7 @@ $(document).ready(function() {
 
 function update_election_box_time() {
     
-    var span = $(".election-box > .header > .time > .message");
+    var span = $(".election-box > .header > .time > .text");
     
     var start_datetime = span.data("start-datetime");
     var end_datetime = span.data("end-datetime");

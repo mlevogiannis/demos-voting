@@ -5,7 +5,7 @@
         <h3>{{ object.title }}</h3>
         <span class="time">
             <span class="glyphicon glyphicon-time" aria-hidden="true"></span>
-            <span class="message"
+            <span class="text"
                 data-start-datetime="{{ object.start_datetime|date:'c' }}"
                 data-end-datetime="{{ object.end_datetime|date:'c' }}"
                 data-now-datetime="{% if now_datetime %}{{ now_datetime|date:'c' }}{% else %}{% now 'c' %}{% endif %}"

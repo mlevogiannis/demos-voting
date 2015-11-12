@@ -301,11 +301,16 @@ footer .vertical-separator {
 
 .election-box > .header > .time {
     color: #666;
+    cursor: help;
     text-decoration: none;
 }
 
+.election-box > .header > .time > .text {
+    border-bottom: 1px dotted #c3c3c3;
+}
+
 .election-box > .header > .time > .glyphicon {
-    top: 2px;
+    top: 3px;
     margin-right: 2px;
 }
 
