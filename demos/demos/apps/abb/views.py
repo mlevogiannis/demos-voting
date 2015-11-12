@@ -495,8 +495,8 @@ class ExportView(View):
             'name': 'option',
             'model': OptionV,
             'args': [('index', '[0-9]+')],
-            'fields': ['index', 'votecode', 'l_votecode', 'receipt_full', \
-                'com', 'zk1', 'zk2', 'voted'],
+            'fields': ['index', 'votecode', 'l_votecode', 'l_votecode_hash', \
+                'receipt_full', 'com', 'zk1', 'zk2', 'voted'],
         },
         'question_fk': {
             'name': 'question',
