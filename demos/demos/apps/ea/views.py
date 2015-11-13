@@ -166,8 +166,7 @@ class CreateView(View):
                         'index': p_index,
                         'vote_token': 'vote_token',
                         'security_code': base32cf.random(
-                            config.SECURITY_CODE_LEN,crypto=False
-                        ),
+                            config.SECURITY_CODE_LEN, urandom=False),
                         '__list_Question__': [],
                     }
                     
@@ -182,15 +181,14 @@ class CreateView(View):
                             random.shuffle(votecode_list)
                         else:
                             votecode_list=[base32cf.random(config.VOTECODE_LEN,
-                                crypto=False) for _ in range(options)]
+                                urandom=False) for _ in range(options)]
                         
                         for votecode in votecode_list:
                             
                             data_obj = {
                                 vc_type: votecode,
                                 'receipt': base32cf.random(
-                                    config.RECEIPT_LEN, crypto=False
-                                ),
+                                    config.RECEIPT_LEN, urandom=False),
                             }
                             
                             question_obj['__list_OptionV__'].append(data_obj)

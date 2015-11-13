@@ -2,10 +2,11 @@
 
 from __future__ import division
 
+import os
 import re
 import math
-from os import urandom
-from random import getrandbits
+import random
+
 from demos.common.utils import intc
 
 # Reference: http://www.crockford.com/wrmg/base32.html
@@ -63,7 +64,7 @@ def decode(encoded):
     return number
 
 
-def random(length, hyphens=-1, crypto=True):
+def random(length, hyphens=-1, urandom=True):
     """Generate a random base32cf encoded string. 'length' is the length of
     resulting encoded string."""
     
@@ -71,10 +72,10 @@ def random(length, hyphens=-1, crypto=True):
     bytes = int(math.ceil(bits / 8))
     shift_bits = (8 * bytes) - bits
     
-    if crypto:
-        number = intc.from_bytes(urandom(bytes), 'big')
+    if urandom:
+        number = intc.from_bytes(os.urandom(bytes), 'big')
     else:
-        number = getrandbits(bytes * 8)
+        number = random.getrandbits(bytes * 8)
     
     number = number >> shift_bits
     encoded = encode(number).zfill(length)
