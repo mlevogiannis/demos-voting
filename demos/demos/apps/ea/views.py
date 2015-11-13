@@ -275,17 +275,14 @@ class StatusView(View):
         
         election_id = kwargs.get('election_id')
         
+        normalized = base32cf.normalize(election_id)
+        if normalized != election_id:
+            return redirect('ea:status', election_id=normalized)
+        
         try:
-            normalized = base32cf.normalize(election_id)
-        except (TypeError, ValueError):
+            election = Election.objects.get(id=election_id)
+        except Election.DoesNotExist:
             election = None
-        else:
-            if normalized != election_id:
-                return redirect('ea:status', election_id=normalized)
-            try:
-                election = Election.objects.get(id=election_id)
-            except Election.DoesNotExist:
-                election = None
         
         if not election:
            return redirect(reverse('ea:home') + '?error=id')

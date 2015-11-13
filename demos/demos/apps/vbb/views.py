@@ -215,24 +215,11 @@ class VoteView(View):
         
         # Normalize election_id and vote_token
         
-        args = {
-            'election_id': election_id,
-            'vote_token': vote_token,
-        }
+        normalized = \
+            (base32cf.normalize(election_id), base32cf.normalize(vote_token))
         
-        normalized = False
-        
-        for key, value in args.items():
-            
-            try:
-                args[key] = base32cf.normalize(value)
-            except (AttributeError, TypeError, ValueError):
-                pass
-            else:
-                normalized |= args[key] != value
-        
-        if normalized:
-            return redirect('vbb:vote', **args)
+        if normalized != (election_id, vote_token):
+            return redirect('vbb:vote', **normalized)
         
         # Parse input 'election_id' and 'vote_token'. The first matched object
         # (part1) of part_qs is always the part used by the client to vote, the

@@ -23,6 +23,7 @@ except AttributeError:
     _str_translate = string.translate
 
 _validation = re.compile('^[' + _chars + '-' + ']*$')
+_valid = ''.join(set(_chars + 'OIL') | set((_chars + 'OIL').lower())) + '-'
 
 
 def encode(number, hyphens=-1):
