@@ -22,8 +22,8 @@ except AttributeError:
     _translation = string.maketrans('OIL', '011')
     _str_translate = string.translate
 
-_validation = re.compile('^[' + _chars + '-' + ']*$')
-_valid = ''.join(set(_chars + 'OIL') | set((_chars + 'OIL').lower())) + '-'
+_valid_re = '-0-9A-TV-Za-tv-z'
+_validation = re.compile('^[' + '-' + _chars + ']*$')
 
 
 def encode(number, hyphens=-1):

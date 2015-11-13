@@ -7,7 +7,7 @@ from demos.apps.bds import views
 urlpatterns = patterns('',
     
     url(r'^$', views.HomeView.as_view(), name='home'),
-    url(r'^manage/(?P<election_id>[' + base32cf._valid + r']+)/$', views.ManageView.as_view(), name='manage'),
+    url(r'^manage/(?P<election_id>[' + base32cf._valid_re + r']+)/$', views.ManageView.as_view(), name='manage'),
 )
 
 apipatterns = [

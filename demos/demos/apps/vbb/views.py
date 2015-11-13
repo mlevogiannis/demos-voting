@@ -215,10 +215,17 @@ class VoteView(View):
         
         # Normalize election_id and vote_token
         
-        normalized = \
-            (base32cf.normalize(election_id), base32cf.normalize(vote_token))
+        args = {
+            'election_id': election_id,
+            'vote_token': vote_token,
+        }
         
-        if normalized != (election_id, vote_token):
+        normalized = {
+            'election_id': base32cf.normalize(election_id),
+            'vote_token': base32cf.normalize(vote_token),
+        }
+        
+        if args != normalized:
             return redirect('vbb:vote', **normalized)
         
         # Parse input 'election_id' and 'vote_token'. The first matched object

@@ -458,7 +458,7 @@ class ExportView(View):
         'election': {
             'name': 'election',
             'model': Election,
-            'args': [('id', '[' + base32cf._valid + ']+')],
+            'args': [('id', '[' + base32cf._valid_re + ']+')],
             'fields': ['id', 'long_votecodes', 'coins', 'cert'],
             'next': ['ballot', 'question_fk'],
         },

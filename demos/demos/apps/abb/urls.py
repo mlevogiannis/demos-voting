@@ -6,8 +6,8 @@ from demos.apps.abb import views
 
 urlpatterns = patterns('',
     url(r'^$', views.HomeView.as_view(), name='home'),
-    url(r'^audit/(?:(?P<election_id>[' + base32cf._valid + r']+)/)?$', views.AuditView.as_view(), name='audit'),
-    url(r'^results/(?:(?P<election_id>[' + base32cf._valid + r']+)/)?$', views.ResultsView.as_view(), name='results'),
+    url(r'^audit/(?:(?P<election_id>[' + base32cf._valid_re + r']+)/)?$', views.AuditView.as_view(), name='audit'),
+    url(r'^results/(?:(?P<election_id>[' + base32cf._valid_re + r']+)/)?$', views.ResultsView.as_view(), name='results'),
 )
 
 apipatterns = [
