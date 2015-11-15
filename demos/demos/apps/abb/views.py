@@ -317,8 +317,8 @@ class VoteView(View):
             election = Election.objects.get(id=e_id)
             ballot = Ballot.objects.get(election=election, serial=b_serial)
             
-            # part1 is always the part that the client used to vote, part2 is
-            # the other part.
+            # part1 is always the part that the client has used to vote,
+            # part2 is the other part.
             
             order = ('' if p1_index == 'A' else '-') + 'index'
             part1, part2 = Part.objects.filter(ballot=ballot).order_by(order)
@@ -374,6 +374,9 @@ class VoteView(View):
                     optionv_qs = OptionV.objects.\
                         filter(part=part1, question=question)
                     
+                    optionv2_qs = OptionV.objects.\
+                        filter(part=part2, question=question)
+                    
                     vc_type = 'votecode'
                     vc_list = p1_votecodes[str(question.index)]
                     
@@ -398,6 +401,8 @@ class VoteView(View):
                     # Get options for the requested votecodes
                     
                     vc_filter = {vc_type + '__in': vc_list}
+                    
+                    optionv_not_qs = optionv_qs.exclude(**vc_filter)
                     optionv_qs = optionv_qs.filter(**vc_filter)
                     
                     # If lengths do not match, at least one votecode was invalid
@@ -405,25 +410,26 @@ class VoteView(View):
                     if optionv_qs.count() != len(vc_list):
                         raise Exception('Invalid votecode')
                     
-                    # Mark the voted options
+                    # Save both voted and unvoted options
                     
                     if not election.long_votecodes:
                         
                         optionv_qs.update(voted=True)
+                        optionv_not_qs.update(voted=False)
+                        optionv2_qs.update(voted=False)
                         
                     else:
                         
-                        # Save the given long votecodes
+                        # Save the requested long votecodes
                         
                         for optionv, l_votecode in zip(optionv_qs, l_votecodes):
                             optionv.voted = True
                             optionv.l_votecode = l_votecode
                             optionv.save(update_fields=['voted', 'l_votecode'])
                         
-                        # Compute the other ballot part's long votecodes
+                        optionv_not_qs.update(voted=False)
                         
-                        optionv2_qs = OptionV.objects.\
-                            filter(part=part2, question=question)
+                        # Compute part2's long votecodes
                         
                         for optionv2 in optionv2_qs:
                             
@@ -438,8 +444,11 @@ class VoteView(View):
                             l_votecode = base32cf.\
                                 encode(digest)[-config.VOTECODE_LEN:]
                             
+                            optionv2.voted = False
                             optionv2.l_votecode = l_votecode
-                            optionv2.save(update_fields=['l_votecode'])
+                            optionv2.save(update_fields=['voted', 'l_votecode'])
+                
+                # Save part2's security code
                 
                 part2.security_code = p2_security_code
                 part2.save(update_fields=['security_code'])

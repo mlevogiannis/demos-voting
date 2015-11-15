@@ -187,7 +187,7 @@ class OptionV(models.Model):
     
     receipt_full = models.TextField()
     
-    voted = models.BooleanField(default=False)
+    voted = models.NullBooleanField(default=None)
     index = models.PositiveSmallIntegerField()
     
     # Other model methods and meta options
