@@ -24,6 +24,7 @@ from google.protobuf import message
 from django import http
 from django.db import models, transaction
 from django.apps import apps
+from django.core import exceptions
 from django.utils import timezone
 from django.conf.urls import include, url
 from django.db.models import Count, Max, Sum
@@ -456,21 +457,18 @@ class ExportView(View):
     
     _namespaces = {
         'election': {
-            'name': 'election',
             'model': Election,
             'args': [('id', '[' + base32cf._valid_re + ']+')],
             'fields': ['id', 'long_votecodes', 'coins', 'cert'],
             'next': ['ballot', 'question_fk'],
         },
         'ballot': {
-            'name': 'ballot',
             'model': Ballot,
             'args': [('serial', '[0-9]+')],
             'fields': ['serial'],
             'next': ['part'],
         },
         'part': {
-            'name': 'part',
             'model': Part,
             'args': [('index', '[AaBb]')],
             'fields': ['index', 'security_code', 'l_votecode_salt', \
@@ -478,21 +476,19 @@ class ExportView(View):
             'next': ['question'],
         },
         'question': {
-            'name': 'question',
             'model': Question,
             'args': [('index', '[0-9]+')],
             'fields': ['index'],
             'next': ['option'],
         },
         'option': {
-            'name': 'option',
             'model': OptionV,
+            'name': 'option',
             'args': [('index', '[0-9]+')],
             'fields': ['index', 'votecode', 'l_votecode', 'l_votecode_hash', \
                 'receipt_full', 'com', 'zk1', 'zk2', 'voted'],
         },
         'question_fk': {
-            'name': 'question',
             'model': Question,
             'args': [('index', '[0-9]+')],
             'fields': ['index', 'key', 'com_sum', 'decom_sum'],
@@ -506,6 +502,43 @@ class ExportView(View):
     }
     
     
+    # --------------------------------------------------------------------------
+    
+    def __update_namespaces(namespaces):
+        
+        # model: required
+        # name: optional, defaults to the model's verbose name
+        # args: optional, defaults to an empty list
+        # fields: optional, defaults to an empty list
+        # files: auto-completed, derives from fields
+        # namespaces: auto-completed, derives from next
+        # next: optional, defaults to an empty list
+        
+        for node in namespaces.values():
+            
+            node.setdefault('name', node['model']._meta.verbose_name)
+            
+            for key in ['args', 'fields', 'next']:
+                node.setdefault(key, [])
+        
+        for node in namespaces.values():
+            
+            node['namespaces'] = \
+                [namespaces[next]['name'] + 's' for next in node['next']]
+            
+            if set(node['fields']) & set(node['namespaces']):
+                raise exceptions.ImproperlyConfigured("'fields' " \
+                    "and 'namespaces' must be disjoint sets.")
+            
+            node['files'] = [field for field in list(node['fields']) \
+                if isinstance(node['model']._meta.get_field(field), \
+                models.FileField) and not node['fields'].remove(field)]
+    
+    __update_namespaces(_namespaces)
+    
+    # --------------------------------------------------------------------------
+    
+    
     @staticmethod
     def _urlpatterns():
         
@@ -514,11 +547,11 @@ class ExportView(View):
             node = ExportView._namespaces[ns]
             
             urlpatterns = []
-            for next in node.get('next', []):
+            for next in node['next']:
                 urlpatterns += _build_urlpatterns(next)
             
-            argpath = '/'.join(['(?P<' + node['model'].__name__ + '__' + field \
-                + '>' + regex + ')' for field, regex in node.get('args', [])])
+            argpath = '/'.join(['(?P<' + node['model'].__name__ + '__' + \
+                field + '>' + regex + ')' for field, regex in node['args']])
             
             urlpatterns = [url(r'^' + node['name'] + 's/', include([
                 url(r'^$', ExportView.as_view(), name='schema'),
@@ -565,16 +598,18 @@ class ExportView(View):
                 
                 node = ExportView._namespaces[ns]
                 
-                # 'fields' is the intersection of the model's fields and the
-                # fields specified in the url query, for the current namespace.
-                # If no fields are specified, all model's fields are returned.
-                # If the url query's value is empty, no fields are returned.
+                # 'obj_fields' is the intersection of the namespace's fields
+                # and the fields specified in the namespace's url query. If an
+                # url query is not specified, all fields are returned. If the
+                # url query is an empty list (or does not contain any valid
+                # 'fields'), no fields are returned. In addition to 'fields',
+                # the url query may contain 'namespaces', but this does not pose
+                # a problem since 'fields' and 'namespaces' are disjoint sets.
                 
-                f1 = set(node.get('fields', []))
-                f2 = set(query_args.get(node['name'], []))
+                f1 = set(node['fields'])
+                f2 = set(query_args.get(node['name'], node['fields']))
                 
-                fields = list(f1 & f2 if f2 else f1 \
-                    if node['name'] not in query_args else set())
+                obj_fields = list(f1 & f2)
                 
                 # Update input query's fields with the model's related fields
                 
@@ -590,34 +625,39 @@ class ExportView(View):
                         raise ObjectDoesNotExist()
                 
                 except (ValidationError, ObjectDoesNotExist):
-                    raise http.Http404('No "' + node['name'] + \
-                        '" matches the given query.')
+                    raise http.Http404('No %s matches the given query.' % \
+                        node['model'].__name__)
                 
-                obj_data_l = list(obj_qs.values(*fields)) \
-                    if fields else [dict() for _ in range(obj_qs.count())]
+                obj_data_l = list(obj_qs.values(*obj_fields)) \
+                    if obj_fields else [dict() for _ in range(obj_qs.count())]
                 
                 # Traverse the namespace tree and repeat
                 
                 objects = objects.copy()
+                fields = set(query_args.get(node['name'], node['namespaces']))
                 
-                for next in node.get('next', []):
+                for next in node['next']:
+                    
+                    name = ExportView._namespaces[next]['name'] + 's'
+                    
+                    if name not in fields:
+                        continue
+                    
                     for obj, obj_data in zip(obj_qs, obj_data_l):
-                        
                         objects[node['model'].__name__] = obj
-                        name, data = _build_data(next, objects, {})
-                        obj_data[name] = data
+                        obj_data[name] = _build_data(next, objects, {})
                 
-                return (node['name'] + 's', obj_data_l)
+                return obj_data_l
             
             # Return the requested model's data
             
-            data = _build_data(ns, objects, kwflds)[1][0]
+            data = _build_data(ns, objects, kwflds)[0]
             
         elif url_name == 'schema':
             
             # Get the list of available input arguments
             
-            args = [arg for arg, _ in node.get('args', [])]
+            args = [arg for arg, _ in node['args']]
             
             if args:
                 flat = (len(args) == 1)
@@ -626,18 +666,12 @@ class ExportView(View):
             else:
                 values = []
             
-            # Get separate lists for fields and files
-            
-            fields = list(node.get('fields', []))
-            
-            files = [f for f in list(fields) if isinstance(node['model'].\
-                _meta.get_field(f), models.FileField) and not fields.remove(f)]
-            
             # Return the requested model's data
             
             data = {
-                'fields': fields,
-                'files': files,
+                'fields': node['fields'],
+                'files': node['files'],
+                'namespaces': node['namespaces'],
                 'values': values,
             }
         
@@ -703,20 +737,6 @@ class ExportView(View):
         query_args = {k: [s for q in v for s in q.split(',') if s]
             for k, v in request.GET.iterlists()}
         
-        # Traverse the namespace tree, starting from the requested namespace,
-        # and build a dict whose keys are the names of each namespace and values
-        # are lists of all possible namespaces. It is used only for validation.
-        
-        namespace_nodes_by_name = {}
-        
-        def _build_nodes(_ns):
-            node = self._namespaces[_ns]
-            for next in node.get('next', []):
-                _build_nodes(next)
-            namespace_nodes_by_name.setdefault(node['name'], []).append(node)
-        
-        _build_nodes(ns)
-        
         # 'html' is a built-in name, no namespace is allowed to use it. If true,
         # return a HTML page with the data, if undefined or false return a file.
         
@@ -726,45 +746,59 @@ class ExportView(View):
         if len(html_args) != 1 or html not in ('true', 'false'):
             raise http.Http404('Invalid "html" query: true / false')
         
-        html = (html == 'true')
+        # Traverse the namespace tree, starting from the requested namespace and
+        # ending to all reachable leaf nodes, and build a dictionary whose keys
+        # are the names of each namespace and values are lists of all reachable
+        # namespace nodes. This structure is used only for validation.
         
-        # Validate query's names
+        nodes_by_name = {}
         
-        s1 = set(query_args.keys())
-        s2 = set(namespace_nodes_by_name.keys())
+        def _build_nodes(_ns):
+            node = self._namespaces[_ns]
+            fields = set(query_args.get(node['name'], node['namespaces']))
+            for next in node['next']:
+                if self._namespaces[next]['name'] + 's' not in fields:
+                    continue
+                _build_nodes(next)
+            nodes_by_name.setdefault(node['name'], []).append(node)
         
-        if not (s1 <= s2):
-            raise http.Http404('Invalid query name(s): ' + ', '.join(s1-s2))
+        _build_nodes(ns)
         
-        # Validate query's fields
+        # Special case: if a file field is requested, it must be the only
+        # field of the whole query and a member of the requested namespace
         
-        filefield = None
-        total_fields = sum([len(fields) for fields in query_args.values()])
+        ns_args = query_args.get(node['name'], [])
+        
+        filefield = ns_args[0] if len(query_args) == 1 and \
+            len(ns_args) == 1 and ns_args[0] in node['files'] else None
+        
+        # Validate input query fields
         
         for name, fields in query_args.items():
             
-            _nodes = namespace_nodes_by_name[name]
+            _nodes = nodes_by_name.get(name)
             
-            s1 = set(fields)
-            s2 = set([f for n in _nodes for f in n['fields']])
+            if not _nodes:
+                raise http.Http404('Invalid namespace: %s' % name)
+            
+            if not fields:
+                raise http.Http404('No fields specified: %s' % name)
+            
+            f1 = set(fields)
+            f2 = set([f for n in _nodes for f in n['fields'] + n['namespaces']])
+            f3 = set([f for n in _nodes for f in n['files']])
+            
+            # Raise an error if an input field is invalid or it is a file and
+            # the requirement for files is not fulfilled (see comment above).
+            # A node's 'fields', 'files' and 'namespaces' are disjoint sets.
            
-            if not (s1 <= s2):
-                raise http.Http404('Invalid "' + \
-                    name + '" query field(s): ' + ', '.join(s1-s2))
-            
-            # Ensure that if a file field is requested, no other field is also
-            # requested (file or not), and that this file field is selected from
-            # the requested namespace (and not from any nested one)
-            
-            for _field in fields:
-                for _node in _nodes:
-                    field = _node['model']._meta.get_field(_field)
-                    if isinstance(field, models.FileField):
-                        if total_fields != 1 or node != _node:
-                            raise http.Http404('Invalid query: a file field' + \
-                                ' cannot be combined with any other fields' + \
-                                ' or be selected from a nested namespace.')
-                        filefield = _field
+            if not (f1 <= f2 or (filefield and f1 <= f3)):
+                field_diff = f1 - (f2 | f3)
+                
+                raise http.Http404('Invalid "%s" fields: %s' % (name, \
+                    ', '.join(field_diff) if field_diff else 
+                    'a file field cannot be combined with any other '
+                    'fields or be selected from a nested namespace.'))
         
         # Return the requested file, if any
         
@@ -787,7 +821,7 @@ class ExportView(View):
         
         encoder = self._CustomJSONEncoder
         
-        if html:
+        if html == 'true':
             data = json.dumps(data, indent=4, sort_keys=True, cls=encoder)
             response = render(request, self.template_name, {'data': data})
         
