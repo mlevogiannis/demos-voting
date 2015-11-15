@@ -689,7 +689,7 @@ class ExportView(View):
         filefield = getattr(obj, fieldname)
         
         if not (filefield and filefield.storage.exists(filefield.name)):
-            raise http.Http404('File not found: ' + fieldname)
+            raise http.Http404('File not found: %s' % fieldname)
         
         filename = os.path.basename(filefield.name) if not filename \
             else filename + os.path.splitext(filefield.name)[-1]
@@ -697,10 +697,10 @@ class ExportView(View):
         try:
             filefield.open('rb')
         except IOError:
-            raise http.Http404('Error opening file: ' + filename)
+            raise http.Http404('Error opening file: %s' % filename)
         
         response = http.FileResponse(filefield.file)
-        response['Content-Disposition'] = 'attachment; filename="'+filename+'"'
+        response['Content-Disposition'] = 'attachment; filename="%s"' % filename
             
         return response
     
@@ -830,8 +830,8 @@ class ExportView(View):
         
         else:
             response = http.HttpResponse()
-            response['Content-Disposition'] = 'attachment; filename="' + \
-                node['name'] + ('s' if url_name == 'schema' else '') + '.json"'
+            response['Content-Disposition'] = 'attachment; filename="%s.json"' \
+                % (node['name'] + ('s' if url_name == 'schema' else ''))
             json.dump(data, response, indent=4, sort_keys=True, cls=encoder)
         
         return response
@@ -847,5 +847,5 @@ class ExportView(View):
             if isinstance(o, message.Message):
                 return self.protobuf.to_dict(o, ordered=True)
             
-            return super(JSONEncoder, self).default(o)
+            return super(ExportView._CustomJSONEncoder, self).default(o)
 
