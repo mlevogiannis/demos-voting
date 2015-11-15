@@ -469,6 +469,7 @@ class ExportView(View):
             'model': Election,
             'args': [('id', '[' + base32cf._valid_re + ']+')],
             'fields': ['id', 'long_votecodes', 'coins', 'cert'],
+            'cache': 'export_file',
             'next': ['ballot', 'question_fk'],
         },
         'ballot': {
@@ -504,11 +505,7 @@ class ExportView(View):
         },
     }
     
-    _namespace_root = {
-        'election': {
-            'cache_filefield': 'export_file',
-        },
-    }
+    _namespace_root = ['election']
     
     
     # --------------------------------------------------------------------------
@@ -521,6 +518,7 @@ class ExportView(View):
         # fields: optional, defaults to an empty list
         # files: auto-completed, derives from fields
         # namespaces: auto-completed, derives from next
+        # cache: optional, defaults to None
         # next: optional, defaults to an empty list
         
         for node in namespaces.values():
@@ -529,6 +527,8 @@ class ExportView(View):
             
             for key in ['args', 'fields', 'next']:
                 node.setdefault(key, [])
+            
+            node.setdefault('cache', None)
         
         for node in namespaces.values():
             
@@ -572,7 +572,7 @@ class ExportView(View):
             return urlpatterns
         
         urlpatterns = []
-        for ns in ExportView._namespace_root.keys():
+        for ns in ExportView._namespace_root:
             urlpatterns += _build_urlpatterns(ns)
         
         return urlpatterns
@@ -814,12 +814,12 @@ class ExportView(View):
         if filefield:
             return self._export_file(ns, url_args, filefield, filefield)
         
-        # If the root namespace was requested and it has a cache FileField,
-        # return the file, ignoring any url query string arguments
+        # If the namespace has a cache FileField return that cached file,
+        # ignoring html, ajax and url query arguments
         
-        filefield = self._namespace_root[namespaces[0]].get('cache_filefield')
+        filefield = node['cache']
         
-        if len(namespaces) == 1 and filefield and url_name == 'data':
+        if filefield and url_name == 'data':
             return self._export_file(ns, url_args, filefield, node['name'])
         
         # Export the requested data
