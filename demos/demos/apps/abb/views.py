@@ -785,6 +785,11 @@ class ExportView(View):
         if len(html_args) != 1 or html not in ('true', 'false'):
             raise http.Http404('Invalid "html" query: true / false')
         
+        # 'schema' does not support any query arguments
+        
+        if url_name == 'schema' and query_args:
+            raise http.Http404('Invalid query: no namespace specified')
+        
         # Traverse the namespace tree, starting from the requested namespace and
         # ending to all reachable leaf nodes, and build a dictionary whose keys
         # are the names of each namespace and values are lists of all reachable
@@ -841,7 +846,7 @@ class ExportView(View):
         
         # Return the requested file, if any
         
-        if filefield:
+        if url_name == 'data' and filefield:
             return self._export_file(ns, url_args, filefield, filefield)
         
         # If the namespace has a cache FileField return that cached file,
@@ -849,7 +854,7 @@ class ExportView(View):
         
         filefield = node['cache']
         
-        if filefield and url_name == 'data':
+        if url_name == 'data' and filefield:
             return self._export_file(ns, url_args, filefield, node['name'])
         
         # Export the requested data
