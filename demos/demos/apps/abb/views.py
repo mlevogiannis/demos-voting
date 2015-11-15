@@ -464,6 +464,10 @@ class ExportView(View):
     
     template_name = 'abb/export.html'
     
+    def __post_election(o, v, d):
+        ''' o: objects, v: value, d: default '''
+        return d if o['Election'].state != enums.State.COMPLETED else v
+    
     _namespaces = {
         'election': {
             'model': Election,
@@ -483,6 +487,8 @@ class ExportView(View):
             'args': [('index', '[AaBb]')],
             'fields': ['index', 'security_code', 'l_votecode_salt', \
                 'l_votecode_iterations'],
+            'callback': lambda o, f, v, d, _func=__post_election:
+                _func(o, v, d) or None if f == 'security_code' else v,
             'next': ['question'],
         },
         'question': {
@@ -497,6 +503,9 @@ class ExportView(View):
             'args': [('index', '[0-9]+')],
             'fields': ['index', 'votecode', 'l_votecode', 'l_votecode_hash', \
                 'receipt_full', 'com', 'zk1', 'zk2', 'voted'],
+            'callback': lambda o, f, v, d, _func=__post_election:
+                _func(o, v, d) if f in ('zk2', 'voted') else \
+                _func(o, v, d) or None if f == 'l_votecode' else v,
         },
         'question_fk': {
             'model': Question,
@@ -519,6 +528,7 @@ class ExportView(View):
         # files: auto-completed, derives from fields
         # namespaces: auto-completed, derives from next
         # cache: optional, defaults to None
+        # callback: optional, defaults to None
         # next: optional, defaults to an empty list
         
         for node in namespaces.values():
@@ -528,7 +538,8 @@ class ExportView(View):
             for key in ['args', 'fields', 'next']:
                 node.setdefault(key, [])
             
-            node.setdefault('cache', None)
+            for key in ['cache', 'callback']:
+                node.setdefault(key, None)
         
         for node in namespaces.values():
             
@@ -639,6 +650,25 @@ class ExportView(View):
                 
                 obj_data_l = list(obj_qs.values(*obj_fields)) \
                     if obj_fields else [dict() for _ in range(obj_qs.count())]
+                
+                # Check if the namespace has a callback function
+                
+                callback = node['callback']
+                
+                if obj_fields and callback:
+                    
+                    # In addition to objects, pass each field's default value
+                    # to the callback, too. This may or may not be taken into
+                    # account when determining the callback's return value.
+                    
+                    default = {f: node['model'].\
+                        _meta.get_field(f).get_default() for f in obj_fields}
+                    
+                    # Call the callback function for every returned field
+                    
+                    for obj_data in obj_data_l:
+                        for f, v in obj_data.items():
+                            obj_data[f] = callback(objects, f, v, default[f])
                 
                 # Traverse the namespace tree and repeat
                 
