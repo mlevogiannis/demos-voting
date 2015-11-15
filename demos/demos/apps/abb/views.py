@@ -472,7 +472,7 @@ class ExportView(View):
         'election': {
             'model': Election,
             'args': [('id', '[' + base32cf._valid_re + ']+')],
-            'fields': ['id', 'long_votecodes', 'coins', 'cert'],
+            'fields': ['cert', 'coins', 'id', 'long_votecodes'],
             'cache': 'export_file',
             'next': ['ballot', 'question_fk'],
         },
@@ -485,8 +485,8 @@ class ExportView(View):
         'part': {
             'model': Part,
             'args': [('index', '[AaBb]')],
-            'fields': ['index', 'security_code', 'l_votecode_salt', \
-                'l_votecode_iterations'],
+            'fields': ['index', 'l_votecode_iterations', 'l_votecode_salt',
+                'security_code'],
             'callback': lambda o, f, v, d, _func=__post_election:
                 _func(o, v, d) or None if f == 'security_code' else v,
             'next': ['question'],
@@ -501,16 +501,16 @@ class ExportView(View):
             'model': OptionV,
             'name': 'option',
             'args': [('index', '[0-9]+')],
-            'fields': ['index', 'votecode', 'l_votecode', 'l_votecode_hash', \
-                'receipt_full', 'com', 'zk1', 'zk2', 'voted'],
+            'fields': ['com', 'index', 'l_votecode', 'l_votecode_hash',
+                'receipt_full', 'votecode', 'voted', 'zk1', 'zk2'],
             'callback': lambda o, f, v, d, _func=__post_election:
-                _func(o, v, d) if f in ('zk2', 'voted') else \
+                _func(o, v, d) if f in ('voted', 'zk2') else \
                 _func(o, v, d) or None if f == 'l_votecode' else v,
         },
         'question_fk': {
             'model': Question,
             'args': [('index', '[0-9]+')],
-            'fields': ['index', 'key', 'com_sum', 'decom_sum'],
+            'fields': ['com_sum', 'decom_sum', 'index', 'key'],
         },
     }
     
@@ -708,9 +708,9 @@ class ExportView(View):
             # Return the requested model's data
             
             data = {
-                'fields': node['fields'],
-                'files': node['files'],
-                'namespaces': node['namespaces'],
+                'fields': sorted(node['fields']),
+                'files': sorted(node['files']),
+                'namespaces': sorted(node['namespaces']),
                 'values': values,
             }
         
