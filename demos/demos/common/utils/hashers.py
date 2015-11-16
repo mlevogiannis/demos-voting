@@ -2,10 +2,12 @@
 
 from __future__ import division
 
-from base64 import b64encode
+from collections import OrderedDict
 
 from django.utils.crypto import constant_time_compare, pbkdf2
-from django.contrib.auth.hashers import PBKDF2PasswordHasher
+from django.contrib.auth.hashers import PBKDF2PasswordHasher, mask_hash
+
+from demos.common.utils import base32cf, intc
 
 
 class PBKDF2Hasher(PBKDF2PasswordHasher):
@@ -30,42 +32,44 @@ class PBKDF2Hasher(PBKDF2PasswordHasher):
             iterations = self.iterations
         
         hash = pbkdf2(password, salt, int(iterations), digest=self.digest)
-        hash = b64encode(hash).decode('ascii').strip()
+        hash = base32cf.encode(intc.from_bytes(hash, 'big'))
         
         out = (hash, salt, iterations)
         return out if split else ("%s$%s$%d" % out)
     
     def verify(self, password, encoded, salt=None, iterations=None):
         
-        assert (salt is None and iterations is None) \
-            or (salt is not None and iterations is not None)
-        
-        if salt is None and iterations is None:
-            hash, salt, iterations = encoded.split('$')
-        else:
-            hash = encoded
+        hash, salt, iterations = _split_encoded(encoded, salt, iterations)
         
         encoded_2 = self.encode(password, salt, int(iterations))
         return constant_time_compare(encoded, encoded_2)
+
+    def safe_summary(self, encoded, salt=None, iterations=None):
+        
+        hash, salt, iterations = _split_encoded(encoded, salt, iterations)
+        
+        return OrderedDict([
+            ('algorithm', self.algorithm),
+            ('iterations', iterations),
+            ('salt', mask_hash(salt)),
+            ('hash', mask_hash(hash)),
+        ])
+
+    def must_update(self, encoded, salt=None, iterations=None):
+        
+        _, _, iterations = _split_encoded(encoded, salt, iterations)
+        
+        return int(iterations) != self.iterations
     
-    def verify_list(self, password, encoded_list):
-        """Checks if the given password is correct, by searching in a list of
-        encoded hashes. Returns the matching hash's index or -1"""
+    def _split_encoded(encoded, salt=None, iterations=None):
         
-        lru_cache = (None, None)
+        assert (salt is None and iterations is None) \
+            or (salt is not None and iterations is not None)
         
-        for index, encoded in enumerate(encoded_list):
-            
-            iterations_c, salt_c = lru_cache
-            _, salt, iterations  = encoded.split('$', 3)
-            
-            if iterations != iterations_c or salt != salt_c:
-                
-                lru_cache = (iterations, salt)
-                encoded_2 = self.encode(password, salt, int(iterations))
-            
-            if constant_time_compare(encoded, encoded_2):
-                return index
+        hash = encoded
         
-        return -1
+        if salt is None and iterations is None:
+            hash, salt, iterations = encoded.split('$')
+        
+        return hash, salt, iterations
 
