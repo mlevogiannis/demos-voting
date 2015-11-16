@@ -222,8 +222,23 @@ def election_setup(election_obj, language):
                 hash, salt, _ = hasher.encode(security_code, split=True)
                 security_code_hash2 = hasher.encode(hash, salt[::-1])
                 
-                l_votecode_salt = hasher.salt()
-                l_votecode_iterations = hasher.iterations
+                # Prepare long votecodes' key, salt and iterations (if enabled)
+                
+                if not election.long_votecodes:
+                    
+                    l_votecode_salt = ''
+                    l_votecode_iterations = None
+                    
+                else:
+                    
+                    key = base32cf.decode(security_code)
+                    bytes = int(math.ceil(key.bit_length() / 8))
+                    key = intc.to_bytes(key, bytes, 'big')
+                    
+                    l_votecode_salt = hasher.salt()
+                    l_votecode_iterations = hasher.iterations
+                
+                # Pack ballot part's data
                 
                 part_obj = {
                     'index': p_index,
@@ -233,14 +248,6 @@ def election_setup(election_obj, language):
                     'l_votecode_iterations': l_votecode_iterations,
                     '__list_Question__': [],
                 }
-                
-                # Compute long votecodes' key only once per ballot part
-                
-                if election.long_votecodes:
-                    
-                    key = base32cf.decode(security_code)
-                    bytes = int(math.ceil(key.bit_length() / 8))
-                    key = intc.to_bytes(key, bytes, 'big')
                 
                 for q_index, crypto_o_list in enumerate(crypto_qo_list):
                     

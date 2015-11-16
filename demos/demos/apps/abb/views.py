@@ -488,7 +488,8 @@ class ExportView(View):
             'fields': ['index', 'l_votecode_iterations', 'l_votecode_salt',
                 'security_code'],
             'callback': lambda o, f, v, d, _func=__post_election:
-                _func(o, v, d) or None if f == 'security_code' else v,
+                v or None if f in ('l_votecode_iterations', 'l_votecode_salt') \
+                else _func(o, v, d) or None if f == 'security_code' else v,
             'next': ['question'],
         },
         'question': {
@@ -504,6 +505,7 @@ class ExportView(View):
             'fields': ['com', 'index', 'l_votecode', 'l_votecode_hash',
                 'receipt_full', 'votecode', 'voted', 'zk1', 'zk2'],
             'callback': lambda o, f, v, d, _func=__post_election:
+                v or None if f == 'l_votecode_hash' else \
                 _func(o, v, d) if f in ('voted', 'zk2') else \
                 _func(o, v, d) or None if f == 'l_votecode' else v,
         },
