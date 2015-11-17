@@ -17,12 +17,11 @@ demos-crypto: main.o crypto.o CryptoServer.o socket_io.o ThreadPool.o \
 main.o: main.cpp ThreadPool.hpp CryptoServer.hpp protobuf miracl
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-crypto.o: crypto.cpp miracl/ecn.h miracl/big.h miracl protobuf \
- crypto.hpp
+crypto.o: crypto.cpp miracl/ecn.h miracl/big.h miracl protobuf crypto.hpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-CryptoServer.o: CryptoServer.cpp crypto.hpp protobuf \
- socket_io.hpp ThreadPool.hpp CryptoServer.hpp
+CryptoServer.o: CryptoServer.cpp crypto.hpp protobuf socket_io.hpp \
+ ThreadPool.hpp CryptoServer.hpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 socket_io.o: socket_io.cpp socket_io.hpp

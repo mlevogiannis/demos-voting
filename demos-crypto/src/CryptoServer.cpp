@@ -243,12 +243,12 @@ unique_ptr<ThreadPool::ConsumerTask> CryptoServer::ProducerTask::produce(size_t 
 		
 		// Special case: GenBallot
 		
-		if (req->request_case() == CryptoRequest::kGb)
+		if (req->cmd() == CryptoRequest_Cmd_GenBallot && req->has_gb())
 		{
 			data_len = req->gb().number();
 			total_workers = thread_pool_size > data_len ? data_len : thread_pool_size;
 			
-			if (req->gb().number() < 1 || req->gb().number() > MAXGENB)
+			if (data_len < 1 || data_len > MAXGENB)
 				throw range_error("gen_ballot number out of range");
 		}
 		
@@ -280,8 +280,6 @@ CryptoServer::ConsumerTask::~ConsumerTask()
 
 void CryptoServer::ConsumerTask::consume(size_t curr_worker, size_t total_workers)
 {
-	bool send = false;
-	
 	// Calculate current worker's data slice
 	
 	size_t worker_data = data_len;
@@ -300,21 +298,18 @@ void CryptoServer::ConsumerTask::consume(size_t curr_worker, size_t total_worker
 		}
 	}
 	
-	// Execute command
+	// Execute requested command
 	
-	CryptoRequest::RequestCase request_case = req->request_case();
+	CryptoRequest_Cmd cmd = req->cmd();
 	
-	if (request_case == CryptoRequest::kKg)
+	if (cmd == CryptoRequest_Cmd_KeyGen && req->has_kg())
 	{
 		KeyGen(req->kg(), res->mutable_key());
-		send = true;
 	}
-	else if (request_case == CryptoRequest::kGb)
+	else if (cmd == CryptoRequest_Cmd_GenBallot && req->has_gb())
 	{
 		CryptoResponse_BallotData ballot_data;
 		GenBallot(req->gb(), &ballot_data, worker_data);
-		
-		// Acquire the lock
 		
 		mutex_lock();
 		
@@ -332,48 +327,46 @@ void CryptoServer::ConsumerTask::consume(size_t curr_worker, size_t total_worker
 		
 		// Only the last worker sends the response
 		
-		if(--remaining_workers == 0)
-			send = true;
+		bool not_last_worker = (--remaining_workers > 0);
 		
 		mutex_unlock();
+		
+		if (not_last_worker) return;
 	}
-	else if (request_case == CryptoRequest::kAc)
+	else if (cmd == CryptoRequest_Cmd_AddCom && req->has_ac())
 	{
 		AddCom(req->ac(), res->mutable_added_com());
-		send = true;
 	}
-	else if (request_case == CryptoRequest::kAd)
+	else if (cmd == CryptoRequest_Cmd_AddDecom && req->has_ad())
 	{
 		AddDecom(req->ad(), res->mutable_added_decom());
-		send = true;
 	}
-	else if (request_case == CryptoRequest::kCz)
+	else if (cmd == CryptoRequest_Cmd_CompleteZK && req->has_cz())
 	{
 		CompleteZK(req->cz(), res->mutable_zk_set());
-		send = true;
 	}
-	else if (request_case == CryptoRequest::kVc)
+	else if (cmd == CryptoRequest_Cmd_VerifyCom && req->has_vc())
 	{
 		res->set_check(VerifyCom(req->vc()));
-		send = true;
+	}
+	else
+	{
+		throw runtime_error("invalid CryptoRequest command");
 	}
 	
 	// Serialize and send response
 	
-	if (send)
-	{
-		string data;
-		uint32_t res_size;
-		
-		res->SerializeToString(&data);
-		
-		unique_ptr<char[]> buffer(new char[data.size()]);
-		data.copy(buffer.get(), data.size());
-		
-		res_size = htonl(data.size());
-		
-		send_all_w(newsock_fd, &res_size, sizeof(uint32_t), 0);
-		send_all_w(newsock_fd, buffer.get(), data.size(), 0);
-	}
+	string data;
+	uint32_t res_size;
+	
+	res->SerializeToString(&data);
+	
+	unique_ptr<char[]> buffer(new char[data.size()]);
+	data.copy(buffer.get(), data.size());
+	
+	res_size = htonl(data.size());
+	
+	send_all_w(newsock_fd, &res_size, sizeof(uint32_t), 0);
+	send_all_w(newsock_fd, buffer.get(), data.size(), 0);
 }
 

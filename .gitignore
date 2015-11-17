@@ -61,6 +61,8 @@ target/
 /demos-crypto/src/demos-crypto
 /demos-crypto/src/protobuf/crypto.pb.cc
 /demos-crypto/src/protobuf/crypto.pb.h
+/demos-crypto/src/miracl/mirdef.h
+/demos-crypto/src/miracl/mrmuldv.c
 
 # Other
 *~

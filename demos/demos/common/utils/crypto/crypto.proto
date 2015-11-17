@@ -35,6 +35,8 @@ message ZK2 {
 	repeated string zp = 1;
 }
 
+// -----------------------------------------------------------------------------
+
 message CryptoRequest {
 	
 	message KeyGenData {
@@ -77,15 +79,24 @@ message CryptoRequest {
 		required Com com = 2;
 		required Decom decom = 3;
 	}
- 	
- 	oneof request {
-		KeyGenData kg = 1;
-		GenBallotData gb = 2;
-		AddComData ac = 3;
-		AddDecomData ad = 4;
-		CompleteZKData cz = 5;
-		VerifyComData vc = 6;
+	
+	enum Cmd {
+		KeyGen = 0;
+		GenBallot = 1;
+		AddCom = 2;
+		AddDecom = 3;
+		CompleteZK = 4;
+		VerifyCom = 5;
 	}
+	
+	required Cmd cmd = 1;
+	
+	optional KeyGenData kg = 2;
+	optional GenBallotData gb = 3;
+	optional AddComData ac = 4;
+	optional AddDecomData ad = 5;
+	optional CompleteZKData cz = 6;
+	optional VerifyComData vc = 7;
 }
 
 message CryptoResponse {
@@ -109,13 +120,11 @@ message CryptoResponse {
 		repeated ZK2 zk2 = 1;
 	}
 	
- 	oneof response {
-		Key key = 1;
-		BallotData ballot_data = 2;
-		Com added_com = 3;
-		Decom added_decom = 4;
-		bool check = 5;
-		ZKSet zk_set = 6;
-	}
+	optional Key key = 1;
+	optional BallotData ballot_data = 2;
+	optional Com added_com = 3;
+	optional Decom added_decom = 4;
+	optional ZKSet zk_set = 5;
+	optional bool check = 6;
 }
 

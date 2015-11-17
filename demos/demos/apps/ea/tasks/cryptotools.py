@@ -12,7 +12,8 @@ config = registry.get_config('ea')
 
 def gen_key(ballots, options):
     
-    req = crypto.CryptoRequest()
+    req = crypto._CryptoRequest()
+    req.cmd = crypto._CryptoRequest.KeyGen
     
     req.kg.ballots = ballots
     req.kg.options = options
@@ -23,7 +24,8 @@ def gen_key(ballots, options):
 
 def gen_ballot(key, ballots, options, number):
     
-    req = crypto.CryptoRequest()
+    req = crypto._CryptoRequest()
+    req.cmd = crypto._CryptoRequest.GenBallot
     
     req.gb.key.CopyFrom(key)
     req.gb.ballots = ballots
@@ -38,7 +40,8 @@ def gen_ballot(key, ballots, options, number):
 
 def add_com(key, com_list):
     
-    req = crypto.CryptoRequest()
+    req = crypto._CryptoRequest()
+    req.cmd = crypto._CryptoRequest.AddCom
     
     req.ac.key.CopyFrom(key)
     req.ac.com.extend(com_list)
@@ -49,7 +52,8 @@ def add_com(key, com_list):
 
 def add_decom(key, decom_list):
     
-    req = crypto.CryptoRequest()
+    req = crypto._CryptoRequest()
+    req.cmd = crypto._CryptoRequest.AddDecom
     
     req.ad.key.CopyFrom(key)
     req.ad.decom.extend(decom_list)
@@ -60,7 +64,8 @@ def add_decom(key, decom_list):
 
 def complete_zk(key, options, coins, zk_list):
     
-    req = crypto.CryptoRequest()
+    req = crypto._CryptoRequest()
+    req.cmd = crypto._CryptoRequest.CompleteZK
     
     req.cz.key.CopyFrom(key)
     req.cz.options = options
@@ -77,7 +82,8 @@ def complete_zk(key, options, coins, zk_list):
 
 def verify_com(key, com, decom):
     
-    req = crypto.CryptoRequest()
+    req = crypto._CryptoRequest()
+    req.cmd = crypto._CryptoRequest.VerifyCom
     
     req.vc.key.CopyFrom(key)
     req.vc.com.CopyFrom(com)
@@ -87,7 +93,7 @@ def verify_com(key, com, decom):
     return res.check
 
 
-def _request_to_response(request, response_oneof):
+def _request_to_response(request, response_field):
     
     data = request.SerializeToString()
     size = intc.to_bytes(len(data), 4, 'big')
@@ -112,10 +118,10 @@ def _request_to_response(request, response_oneof):
     
     sock.close()
     
-    response = crypto.CryptoResponse()
+    response = crypto._CryptoResponse()
     response.ParseFromString(data)
     
-    if response.WhichOneof("response") != response_oneof:
+    if not response.HasField(response_field):
         raise RuntimeError("demos-crypto: invalid response")
     
     return response
