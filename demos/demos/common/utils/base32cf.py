@@ -5,8 +5,8 @@ from __future__ import division, unicode_literals
 import os
 import re
 import math
-import random
 
+from random import getrandbits
 from demos.common.utils import intc
 
 # Reference: http://www.crockford.com/wrmg/base32.html
@@ -76,7 +76,7 @@ def random(length, hyphens=-1, urandom=True):
     if urandom:
         number = intc.from_bytes(os.urandom(bytes), 'big')
     else:
-        number = random.getrandbits(bytes * 8)
+        number = getrandbits(bytes * 8)
     
     number = number >> shift_bits
     encoded = encode(number).zfill(length)
