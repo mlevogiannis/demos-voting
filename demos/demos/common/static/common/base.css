@@ -306,7 +306,7 @@ footer .vertical-separator {
 }
 
 .election-box > .header > .time > .text {
-    border-bottom: 1px dotted #c3c3c3;
+    border-bottom: 1px dotted #666;
 }
 
 .election-box > .header > .time > .glyphicon {

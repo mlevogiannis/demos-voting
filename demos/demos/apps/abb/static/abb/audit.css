@@ -1,3 +1,8 @@
+.main-header-small {
+    margin-top: 40px;
+    margin-bottom: 20px;
+}
+
 #audit-panel {
     display: none;
     margin-top: 20px;
@@ -18,12 +23,17 @@
     text-overflow: ellipsis;
 }
 
-#audit-panel table {
+#audit-panel .table,
+#audit-panel .panel-table {
+    margin-bottom: 0px !important;
+}
+
+#audit-panel .table {
     table-layout: fixed;
 }
 
-#audit-panel table th,
-#audit-panel table td {
+#audit-panel .table th,
+#audit-panel .table td {
     width: 112px;
     text-align: center;
     vertical-align: middle;
@@ -37,53 +47,32 @@
 
 @media (min-width: 992px) {
     #audit-panel table td > button {
-        width: 96px;
+        width: 108px;
     }
 }
 
-#audit-panel table.vote-col th:nth-child(2) > span:last-child,
-#audit-panel table:not(.option-col) th:nth-child(2) > span:last-child {
+#audit-panel .table.vote-col th:nth-child(2) > span:last-child,
+#audit-panel .table:not(.text-col) th:nth-child(2) > span:last-child {
     display: none;
 }
 
-#audit-panel table.option-col th:nth-child(2) > span:first-child {
+#audit-panel .table.text-col th:nth-child(2) > span:first-child {
     display: none;
 }
 
-#audit-panel table td > button {
+#audit-panel .table td > button {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-/*#audit-panel table td > .btn-info,
-#audit-panel table td > .btn-info:hover,
-#audit-panel table td > .btn-info:focus,
-#audit-panel table td > .btn-info:active {
+#audit-panel .table.vote-col td > .btn-primary,
+#audit-panel .table.vote-col td > .btn-primary:hover,
+#audit-panel .table.vote-col td > .btn-primary:focus,
+#audit-panel .table.vote-col td > .btn-primary:active {
     opacity: 1.0;
     outline: none;
-    cursor: default;
-    border-color: #28a4c9;
-    background-color: #5bc0de;
-    background-position: center;
-    background-image: -webkit-linear-gradient(top,#5bc0de 0,#2aabd2 100%);
-    background-image: -o-linear-gradient(top,#5bc0de 0,#2aabd2 100%);
-    background-image: -webkit-gradient(linear,left top,left bottom,from(#5bc0de),to(#2aabd2));
-    background-image: linear-gradient(to bottom,#5bc0de 0,#2aabd2 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff5bc0de', endColorstr='#ff2aabd2', GradientType=0);
-    filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
-    -webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.15),0 1px 1px rgba(0,0,0,.075);
-    -moz-box-shadow: inset 0 1px 0 rgba(255,255,255,.15),0 1px 1px rgba(0,0,0,.075);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.15),0 1px 1px rgba(0,0,0,.075);
-}
-
-#audit-panel table td > .btn-primary,
-#audit-panel table td > .btn-primary:hover,
-#audit-panel table td > .btn-primary:focus,
-#audit-panel table td > .btn-primary:active {
-    opacity: 1.0;
-    outline: none;
-    cursor: default;
+    cursor: not-allowed;
     border-color: #245580;
     background-color: #337ab7;
     background-position: center;
@@ -96,11 +85,19 @@
     -webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.15),0 1px 1px rgba(0,0,0,.075);
     -moz-box-shadow: inset 0 1px 0 rgba(255,255,255,.15),0 1px 1px rgba(0,0,0,.075);
     box-shadow: inset 0 1px 0 rgba(255,255,255,.15),0 1px 1px rgba(0,0,0,.075);
-}*/
+}
+
+.popover {
+    border: 1px solid #999;
+}
+
+.popover.top > .arrow {
+    border-top-color: #999;
+}
 
 /* -------------------------------------------------------------------------- */
 
-#json-viewer .modal-body pre {
+#json-modal .modal-body pre {
     max-width: 100%;
     overflow: auto;
     font-size: 13px;
@@ -109,41 +106,35 @@
     white-space: pre;
 }
 
-#json-viewer .modal-header > h4 {
+#json-modal .modal-header > h4 {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 @media (max-width: 767px) {
-    #json-viewer .modal-body pre {
+    #json-modal .modal-body pre {
         max-height: calc(100vh - 174px);
     }
 }
 
 @media (min-width: 768px) {
-    #json-viewer .modal-body pre {
+    #json-modal .modal-body pre {
         max-height: calc(100vh - 214px);
     }
 }
 
-#json-viewer .modal-body p {
+#json-modal .modal-body p {
     margin: 0px;
 }
 
-#json-viewer .modal-body > .spinner {
+#json-modal .modal-body > .spinner {
     position: relative;
 }
 
-#json-viewer .modal-body > .spinner > p {
+#json-modal .modal-body > .spinner > p {
     padding-top: 50px;
 }
-
-#json-viewer .modal-body .string { color: #690; }
-#json-viewer .modal-body .number { color: #905; }
-#json-viewer .modal-body .boolean { color: #905; }
-#json-viewer .modal-body .null { color: #905; }
-#json-viewer .modal-body .key { color: #690; }
 
 /* -------------------------------------------------------------------------- */
 

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-25 09:53+0000\n"
+"POT-Creation-Date: 2015-11-17 16:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: demos/apps/abb/apps.py:9 demos/apps/abb/templates/abb/base.html:7
+#: demos/apps/abb/apps.py:11 demos/apps/abb/templates/abb/base.html:7
 #: demos/apps/abb/templates/abb/base.html:12
 msgid "Audit and Results"
 msgstr "Επαλήθευση και Αποτελέσματα"
@@ -31,64 +31,85 @@ msgstr "Ψηφοφορία"
 msgid "Participants"
 msgstr "Συμμετέχοντες"
 
-#: demos/apps/abb/templates/abb/audit.html:28
+#: demos/apps/abb/templates/abb/audit.html:29
+msgid "Export Data"
+msgstr "Εξαγωγή Δεδομένων"
+
+#: demos/apps/abb/templates/abb/audit.html:30
+#: demos/apps/abb/templates/abb/audit.html:41
+msgid "all fields are required"
+msgstr ""
+
+#: demos/apps/abb/templates/abb/audit.html:33
+msgid "Export ballots"
+msgstr "Εξαγωγή ψηφοδελτίων "
+
+#: demos/apps/abb/templates/abb/audit.html:34
+msgid "Export certificate"
+msgstr "Εξαγωγή πιστοποιητικού"
+
+#: demos/apps/abb/templates/abb/audit.html:40
+msgid "Audit Ballot"
+msgstr "Επαλήθευση Ψηφοδελτίου"
+
+#: demos/apps/abb/templates/abb/audit.html:47
 msgid "Serial number"
 msgstr "Σειριακός αριθμός"
 
-#: demos/apps/abb/templates/abb/audit.html:30
+#: demos/apps/abb/templates/abb/audit.html:49
 msgid "Check"
 msgstr "Έλεγχος"
 
-#: demos/apps/abb/templates/abb/audit.html:41
+#: demos/apps/abb/templates/abb/audit.html:62
 msgid "Side"
 msgstr "Όψη"
 
-#: demos/apps/abb/templates/abb/audit.html:52
+#: demos/apps/abb/templates/abb/audit.html:73
 #: demos/apps/abb/templates/abb/results.html:34
 msgid "Question"
 msgstr "Ερώτημα"
 
-#: demos/apps/abb/templates/abb/audit.html:57
+#: demos/apps/abb/templates/abb/audit.html:78
 msgid "Vote-code"
 msgstr "Κωδικός"
 
-#: demos/apps/abb/templates/abb/audit.html:58
+#: demos/apps/abb/templates/abb/audit.html:79
 msgid "Vote"
 msgstr "Ψήφος"
 
-#: demos/apps/abb/templates/abb/audit.html:58
+#: demos/apps/abb/templates/abb/audit.html:79
 msgid "Option"
 msgstr "Επιλογή"
 
-#: demos/apps/abb/templates/abb/audit.html:59
+#: demos/apps/abb/templates/abb/audit.html:80
 msgid "Pre-vote Audit"
 msgstr "Αρχικά στοιχεία επαλήθευσης"
 
-#: demos/apps/abb/templates/abb/audit.html:60
+#: demos/apps/abb/templates/abb/audit.html:81
 msgid "Candidate"
 msgstr "Φάκελος επιλογής"
 
-#: demos/apps/abb/templates/abb/audit.html:61
+#: demos/apps/abb/templates/abb/audit.html:82
 msgid "Post-vote Audit"
 msgstr "Τελικά στοιχεία επαλήθευσης"
 
-#: demos/apps/abb/templates/abb/audit.html:92
+#: demos/apps/abb/templates/abb/audit.html:113
 msgid "JSON Viewer"
 msgstr "Προβολή JSON"
 
-#: demos/apps/abb/templates/abb/audit.html:96
+#: demos/apps/abb/templates/abb/audit.html:117
 msgid "Please wait..."
 msgstr "Παρακαλούμε περιμένετε..."
 
-#: demos/apps/abb/templates/abb/audit.html:99
+#: demos/apps/abb/templates/abb/audit.html:120
 msgid "An error occurred while processing your request"
 msgstr "Παρουσιάστηκε σφάλμα κατά την επεξεργασία του αιτήματός σας"
 
-#: demos/apps/abb/templates/abb/audit.html:105
-msgid "Download"
-msgstr "Λήψη"
+#: demos/apps/abb/templates/abb/audit.html:125
+msgid "Save"
+msgstr "Αποθήκευση"
 
-#: demos/apps/abb/templates/abb/audit.html:106
+#: demos/apps/abb/templates/abb/audit.html:126
 msgid "Close"
 msgstr "Κλείσιμο"
 

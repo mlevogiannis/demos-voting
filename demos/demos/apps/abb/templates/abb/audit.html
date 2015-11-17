@@ -6,7 +6,7 @@
 
 {% block css %}
 
-<!-- audit.css -->
+<link rel="stylesheet" href="{% static 'common/libs/highlight.js/8.9.1/styles/github.css' %}">
 <link rel="stylesheet" href="{% static 'abb/audit.css' %}">
 
 {% endblock css %}
@@ -22,13 +22,32 @@
         {% tuple t1 t2 as panels %}
         {% include "common/election_box.html" with object=election panels=panels %}
         
-        <div class="panel panel-default panel-input">
-            <div class="panel-body">
-                <div class="input-group">
-                    <input id="audit-input" type="text" class="form-control" placeholder="{% trans 'Serial number' %}">
-                    <span class="input-group-btn">
-                        <button id="audit-button" class="btn btn-default btn-circle">{% trans "Check" %}</button>
-                    </span>
+        <div class="row">
+            <div class="col-xs-12 col-sm-6 col-sm-push-6">
+                
+                <div class="main-header-small">
+                    <h3>{% trans "Export Data" %}</h3>
+                </div>
+                
+                <a class="btn btn-default" href="{% url 'abb-api:export:election:data' Election__id=election.id %}" role="button">{% trans "Export ballot data" %}</a>
+                <a class="btn btn-default" href="{% url 'abb-api:export:election:data' Election__id=election.id %}?election=cert" role="button">{% trans "Export certificate" %}</a>
+                
+            </div>
+            <div class="col-xs-12 col-sm-6 col-sm-pull-6">
+                
+                <div class="main-header-small">
+                    <h3>{% trans "Audit Ballot" %}</h3>
+                </div>
+                
+                <div class="panel panel-default panel-input">
+                    <div class="panel-body">
+                        <div class="input-group">
+                            <input id="audit-input" type="text" class="form-control" placeholder="{% trans 'Serial number' %}">
+                            <span class="input-group-btn">
+                                <button id="audit-button" class="btn btn-default btn-circle">{% trans "Check" %}</button>
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -63,9 +82,9 @@
                                     </thead>
                                     <tbody>
                                         {% for option in question.optionc_set.values %}
-                                        <tr data-text="{{ option.text }}">
+                                        <tr>
                                             <td><button type="button" class="btn btn-info votecode"><span class="glyphicon glyphicon-lock" aria-hidden="true"></span></button></td>
-                                            <td><button type="button" class="btn btn-primary voted hidden"><span></span></button></d>
+                                            <td><button type="button" class="btn btn-primary option" data-content="{{ option.text }}"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></button></d>
                                             <td><button type="button" class="btn btn-warning zk1"><span class="glyphicon glyphicon-folder-close" aria-hidden="true"></span></button></td>
                                             <td><button type="button" class="btn btn-danger com"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span></button></td>
                                             <td><button type="button" class="btn btn-success zk2"><span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span></button></td>
@@ -84,12 +103,12 @@
     </div>
 </div>
 
-<div id="json-viewer" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="json-viewer-label">
+<div id="json-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="json-modal-label">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="json-viewer-label">{% trans "JSON Viewer" %}</h4>
+                <h4 class="modal-title" id="json-modal-label">{% trans "JSON Viewer" %}</h4>
             </div>
             <div class="modal-body">
                 <div class="spinner hidden">
@@ -98,11 +117,10 @@
                 <div class="error hidden">
                     <p class="text-center">{% trans "An error occurred while processing your request" %}.</p>
                 </div>
-                <pre class="hidden">
-                </pre>
+                <pre class="json hidden"></pre>
             </div>
             <div class="modal-footer">
-                <a class="btn btn-default" role="button"><span class="glyphicon glyphicon-save" aria-hidden="true"></span> {% trans "Download" %}</a>
+                <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-save" aria-hidden="true"></span> {% trans "Save" %}</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
             </div>
         </div>
@@ -114,15 +132,18 @@
 
 {% block script %}
 
+<script src="{% static 'common/libs/highlight.js/8.9.1/highlight.pack.js' %}"></script>
+<script src="{% static 'common/libs/JSON.sortify/1.0.2/index.js' %}"></script>
 <script src="{% static 'common/libs/sjcl/sjcl.custom.min.js' %}"></script>
 <script src="{% static 'common/sjcl-base32cf.js' %}"></script>
+<script src="{% static 'common/sjcl-divmod.js' %}"></script>
 <script src="{% static 'common/permutation.js' %}"></script>
 
 <script>
     var long_votecodes = {{ election.long_votecodes|yesno:'true,false' }};
+    var e_url = "{% url 'abb-api:export:election:data' Election__id=election.id %}";
 </script>
 
-<!-- audit.js -->
 <script src="{% static 'abb/audit.js' %}"></script>
 
 {% endblock script %}
