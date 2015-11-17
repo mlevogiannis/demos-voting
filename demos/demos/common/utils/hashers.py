@@ -1,6 +1,6 @@
 # File: hashers.py
 
-from __future__ import division
+from __future__ import division, unicode_literals
 
 from collections import OrderedDict
 

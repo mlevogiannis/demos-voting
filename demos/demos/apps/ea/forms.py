@@ -1,5 +1,7 @@
 # File: forms.py
 
+from __future__ import division, unicode_literals
+
 from functools import partial
 
 from django import forms

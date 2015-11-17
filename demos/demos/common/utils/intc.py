@@ -1,6 +1,6 @@
 # File: intc.py
 
-from __future__ import division
+from __future__ import division, unicode_literals
 
 
 if hasattr(int, 'to_bytes'):

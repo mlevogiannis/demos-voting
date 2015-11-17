@@ -1,9 +1,12 @@
 # File: models.py
 
+from __future__ import division, unicode_literals
+
 import os
 
 from django.db import models
 from django.core import urlresolvers
+from django.utils.encoding import python_2_unicode_compatible
 
 from demos.common.utils import crypto, enums, fields, storage
 from demos.common.utils.config import registry
@@ -21,6 +24,7 @@ def get_export_file_path(election, filename):
     return "export/%s%s" % (election.id, os.path.splitext(filename)[-1])
 
 
+@python_2_unicode_compatible
 class Election(models.Model):
     
     id = fields.Base32Field(primary_key=True)
@@ -65,6 +69,7 @@ class Election(models.Model):
         return (self.id,)
 
 
+@python_2_unicode_compatible
 class Ballot(models.Model):
     
     election = models.ForeignKey(Election)
@@ -91,6 +96,7 @@ class Ballot(models.Model):
         return (self.serial,) + self.election.natural_key()
 
 
+@python_2_unicode_compatible
 class Part(models.Model):
     
     ballot = models.ForeignKey(Ballot)
@@ -130,6 +136,7 @@ class Part(models.Model):
         return (self.index,) + self.ballot.natural_key()
 
 
+@python_2_unicode_compatible
 class Question(models.Model):
     
     election = models.ForeignKey(Election)
@@ -168,6 +175,7 @@ class Question(models.Model):
         return (self.index,) + self.election.natural_key()
 
 
+@python_2_unicode_compatible
 class OptionV(models.Model):
     
     part = models.ForeignKey(Part)
@@ -212,6 +220,7 @@ class OptionV(models.Model):
             self.question.natural_key()[:-1] + self.part.natural_key()
 
 
+@python_2_unicode_compatible
 class OptionC(models.Model):
     
     question = models.ForeignKey(Question)

@@ -1,6 +1,6 @@
 # File: api.py
 
-from __future__ import division
+from __future__ import division, unicode_literals
 
 import logging
 import requests
@@ -10,14 +10,14 @@ try:
 except ImportError:
     from urlparse import urljoin
 
-from six import string_types
-
 from django.db import models
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseForbidden
+from django.utils import six
 from django.middleware import csrf
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.forms import AuthenticationForm
+from django.utils.encoding import python_2_unicode_compatible
 
 
 class Session:
@@ -118,7 +118,7 @@ def user_required(username):
     """
     
     # Ensure that username is always an iterable
-    if isinstance(username, string_types):
+    if isinstance(username, six.string_types):
         username = [username]
     
     def decorator(view_func):
@@ -140,6 +140,7 @@ def user_required(username):
     return decorator
 
 
+@python_2_unicode_compatible
 class RemoteUserBase(models.Model):
     
     username = models.CharField(max_length=128, unique=True)

@@ -1,11 +1,11 @@
 # File: fields.py
 
-from __future__ import division
+from __future__ import division, unicode_literals
 
 from base64 import b64encode, b64decode
-from six import integer_types, string_types
 
 from django.db import models
+from django.utils import six
 from django.core.exceptions import ValidationError
 
 from demos.common.utils import base32cf
@@ -52,7 +52,7 @@ class IntEnumField(models.SmallIntegerField):
     
     def get_prep_value(self, value):
         
-        if value is None or isinstance(value, integer_types):
+        if value is None or isinstance(value, six.integer_types):
             return value
         
         return value.value
@@ -88,7 +88,7 @@ class Base32Field(models.PositiveIntegerField):
     
     def get_prep_value(self, value):
         
-        if value is None or isinstance(value, integer_types):
+        if value is None or isinstance(value, six.integer_types):
             return value
         
         try:
@@ -160,7 +160,7 @@ class ProtoField(models.BinaryField):
             return value
         
         try:
-            if isinstance(value, string_types):
+            if isinstance(value, six.string_types):
                 value = b64decode(value.encode('ascii'))
             elif isinstance(value, self.cls):
                 value = value.SerializeToString()

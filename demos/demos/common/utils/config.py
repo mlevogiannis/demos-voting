@@ -1,5 +1,7 @@
 # File: config.py
 
+from __future__ import division, unicode_literals
+
 _CONFIG = {
     
     'TITLE_MAXLEN': 128,                      # chars
@@ -48,7 +50,9 @@ registry = ConfigRegistry(settings.DEMOS_APPS)
 # ------------------------------------------------------------------------------
 
 from django.db import models
+from django.utils.encoding import python_2_unicode_compatible
 
+@python_2_unicode_compatible
 class ConfigBase(models.Model):
     
     key = models.CharField(max_length=128, unique=True)

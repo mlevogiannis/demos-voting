@@ -1,5 +1,7 @@
 # File: __init__.py
 
+from __future__ import division, unicode_literals
+
 from django.core import checks as _checks
 
 @_checks.register(deploy=True)

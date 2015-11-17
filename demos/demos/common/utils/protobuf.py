@@ -1,6 +1,6 @@
 # File: protobuf.py
 
-from __future__ import division
+from __future__ import division, unicode_literals
 
 from collections import OrderedDict
 from google.protobuf.descriptor import FieldDescriptor

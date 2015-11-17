@@ -1,6 +1,6 @@
 # File: storage.py
 
-from __future__ import division
+from __future__ import division, unicode_literals
 
 import io
 import os

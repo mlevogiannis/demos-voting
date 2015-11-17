@@ -1,11 +1,13 @@
 # File: fields.py
 
+from __future__ import division, unicode_literals
+
 import re
 
 from django import forms
 from django.core import validators
+from django.utils import six
 from django.utils.dateparse import parse_datetime
-from six import string_types
 
 
 class MultiEmailField(forms.Field):
@@ -58,7 +60,7 @@ class DateTimeField(forms.DateTimeField):
     
     def to_python(self, value):
         
-        if isinstance(value, string_types):
+        if isinstance(value, six.string_types):
             try:
                 parsed_value = parse_datetime(value)
             except ValueError:

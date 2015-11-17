@@ -1,6 +1,6 @@
 # File: setup.py
 
-from __future__ import division
+from __future__ import division, unicode_literals
 
 import io
 import os
@@ -135,7 +135,7 @@ def election_setup(election_obj, language):
     cert.set_notAfter(force_bytes(election.end_datetime.strftime(time_fmt)))
     
     cert.set_pubkey(pkey)
-    cert.sign(ca_pkey if not self_signed else pkey, 'sha256')
+    cert.sign(ca_pkey if not self_signed else pkey, str('sha256'))
     
     election_obj['cert'] = \
         crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode()
@@ -310,7 +310,9 @@ def election_setup(election_obj, language):
                         bytes = int(math.ceil(receipt_data.bit_length() / 8))
                         receipt_data = intc.to_bytes(receipt_data, bytes, 'big')
                         
-                        receipt_data = crypto.sign(pkey, receipt_data, 'sha256')
+                        receipt_data = \
+                            crypto.sign(pkey, receipt_data, str('sha256'))
+                        
                         receipt_data = intc.from_bytes(receipt_data, 'big')
                         
                         receipt_full = base32cf.encode(receipt_data)

@@ -1,6 +1,6 @@
 # File: views.py
 
-from __future__ import division
+from __future__ import division, unicode_literals
 
 import json
 import math
@@ -9,7 +9,6 @@ import requests
 
 from base64 import b64encode
 from enum import IntEnum, unique
-from six import integer_types, string_types
 
 try:
     from urllib.parse import urljoin, quote
@@ -20,7 +19,7 @@ except ImportError:
 from django import http
 from django.db import transaction
 from django.apps import apps
-from django.utils import timezone
+from django.utils import six, timezone
 from django.db.models import Count, Max
 from django.shortcuts import render, redirect
 from django.middleware import csrf
@@ -122,7 +121,7 @@ class VoteView(View):
         
         # Verify vote token's length
         
-        if not isinstance(vote_token, string_types):
+        if not isinstance(vote_token, six.string_types):
             raise VoteView.Error(VoteView.State.INVALID_VOTE_TOKEN, *retval)
         
         if len(vote_token) != int(math.ceil(token_bits / 5)):
@@ -320,7 +319,7 @@ class VoteView(View):
             
             hash = json_obj.get('hash')
             
-            if not isinstance(hash, string_types):
+            if not isinstance(hash, six.string_types):
                 return http.JsonResponse(error, status=422)
             
             if not hasher.verify(hash, part1.security_code_hash2):
@@ -348,12 +347,13 @@ class VoteView(View):
             q_options = dict(question_qs.annotate(\
                 Count('optionc')).values_list('index', 'optionc__count'))
             
-            vc_type = string_types if election.long_votecodes else integer_types
+            vc_type = six.integer_types \
+                if not election.long_votecodes else six.string_types
             
             try:
                 if not (isinstance(vote_obj, dict)
                     and len(vote_obj) == len(q_options)
-                    and all(isinstance(q_index, string_types)
+                    and all(isinstance(q_index, six.string_types)
                     and isinstance(vc_list, list)
                     and 1 <= len(vc_list) <= q_options.get(int(q_index), -1)
                     and all(isinstance(vc, vc_type) for vc in vc_list)

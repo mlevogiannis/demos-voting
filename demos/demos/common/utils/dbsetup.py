@@ -1,6 +1,6 @@
 # File: dbsetup.py
 
-from __future__ import division
+from __future__ import division, unicode_literals
 
 import itertools
 from django.db import transaction

@@ -1,6 +1,6 @@
 # File: views.py
 
-from __future__ import division
+from __future__ import division, unicode_literals
 
 import json
 import random
@@ -97,7 +97,7 @@ class CreateView(View):
         
         # Get the question formset
         
-        BaseQuestionFormSet1 = type('BaseQuestionFormSet',
+        BaseQuestionFormSet1 = type(str('BaseQuestionFormSet'),
             (BaseQuestionFormSet,), dict(option_formsets=option_formsets))
         
         QuestionFormSet = PartialQuestionFormSet(formset=BaseQuestionFormSet1)

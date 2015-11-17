@@ -1,9 +1,12 @@
 # File: models.py
 
+from __future__ import division, unicode_literals
+
 import os
 
 from django.db import models
 from django.core import urlresolvers
+from django.utils.encoding import python_2_unicode_compatible
 
 from demos.common.utils import enums, fields, storage
 from demos.common.utils.config import registry
@@ -11,6 +14,7 @@ from demos.common.utils.config import registry
 config = registry.get_config('bds')
 
 
+@python_2_unicode_compatible
 class Election(models.Model):
     
     id = fields.Base32Field(primary_key=True)
@@ -54,6 +58,7 @@ def get_ballot_file_path(ballot, filename):
     return "%s/%s" % (ballot.election.id, filename)
 
 
+@python_2_unicode_compatible
 class Ballot(models.Model):
     
     election = models.ForeignKey(Election)
@@ -80,6 +85,7 @@ class Ballot(models.Model):
         return (self.serial,) + self.election.natural_key()
 
 
+@python_2_unicode_compatible
 class Part(models.Model):
     
     ballot = models.ForeignKey(Ballot)
@@ -109,6 +115,7 @@ class Part(models.Model):
         return (self.index,) + self.ballot.natural_key()
 
 
+@python_2_unicode_compatible
 class Trustee(models.Model):
     
     election = models.ForeignKey(Election)
