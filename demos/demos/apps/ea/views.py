@@ -386,14 +386,18 @@ class CryptoToolsView(View):
             
             elif command == 'add_decom':
                 
-                # Input is a list of 3-tuples: (b_serial, p_index,
-                # o_index_list), returns 'decom'.
+                # Input is a list of 3-tuples: (b_serial, p_index, o_index_list)
+                # returns 'decom'.
                 
                 ballots = request_obj['ballots']
                 
-                decom = crypto.Decom()
-                decom.randomness = ''
-                decom.msg = ''
+                if len(ballots) == 0:
+                    
+                    decom = crypto.Decom()
+                    for _ in range(request_obj['options']):
+                        dp = decom.dp.add()
+                        dp.randomness = ''
+                        dp.msg = 0
                 
                 for lo in range(0, len(ballots), config.BATCH_SIZE):
                     hi = lo + min(config.BATCH_SIZE, len(ballots) - lo)

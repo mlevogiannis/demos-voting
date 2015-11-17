@@ -15,7 +15,7 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='demos/common/utils/crypto/crypto.proto',
   package='',
-  serialized_pb='\n&demos/common/utils/crypto/crypto.proto\"\x1a\n\x02GG\x12\t\n\x01x\x18\x01 \x02(\t\x12\t\n\x01y\x18\x02 \x02(\x08\"\'\n\x03\x43om\x12\x0f\n\x02\x63\x31\x18\x01 \x02(\x0b\x32\x03.GG\x12\x0f\n\x02\x63\x32\x18\x02 \x02(\x0b\x32\x03.GG\"(\n\x05\x44\x65\x63om\x12\x12\n\nrandomness\x18\x01 \x02(\t\x12\x0b\n\x03msg\x18\x02 \x02(\t\"1\n\x03Key\x12\x0f\n\x02pk\x18\x01 \x02(\x0b\x32\x03.GG\x12\n\n\x02sk\x18\x02 \x01(\t\x12\r\n\x05\x63urve\x18\x03 \x02(\r\"\x1b\n\x03ZK1\x12\x14\n\x07\x65lement\x18\x01 \x03(\x0b\x32\x03.GG\"\x15\n\x07ZKState\x12\n\n\x02zp\x18\x01 \x03(\t\"\x11\n\x03ZK2\x12\n\n\x02zp\x18\x01 \x03(\t\"\xf6\x06\n\rCryptoRequest\x12\x1f\n\x03\x63md\x18\x01 \x02(\x0e\x32\x12.CryptoRequest.Cmd\x12%\n\x02kg\x18\x02 \x01(\x0b\x32\x19.CryptoRequest.KeyGenData\x12(\n\x02gb\x18\x03 \x01(\x0b\x32\x1c.CryptoRequest.GenBallotData\x12%\n\x02\x61\x63\x18\x04 \x01(\x0b\x32\x19.CryptoRequest.AddComData\x12\'\n\x02\x61\x64\x18\x05 \x01(\x0b\x32\x1b.CryptoRequest.AddDecomData\x12)\n\x02\x63z\x18\x06 \x01(\x0b\x32\x1d.CryptoRequest.CompleteZKData\x12(\n\x02vc\x18\x07 \x01(\x0b\x32\x1c.CryptoRequest.VerifyComData\x1a.\n\nKeyGenData\x12\x0f\n\x07\x62\x61llots\x18\x01 \x02(\r\x12\x0f\n\x07options\x18\x02 \x02(\r\x1aT\n\rGenBallotData\x12\x11\n\x03key\x18\x01 \x02(\x0b\x32\x04.Key\x12\x0f\n\x07\x62\x61llots\x18\x02 \x02(\r\x12\x0f\n\x07options\x18\x03 \x02(\r\x12\x0e\n\x06number\x18\x04 \x02(\r\x1a\x32\n\nAddComData\x12\x11\n\x03key\x18\x01 \x02(\x0b\x32\x04.Key\x12\x11\n\x03\x63om\x18\x02 \x03(\x0b\x32\x04.Com\x1a\x38\n\x0c\x41\x64\x64\x44\x65\x63omData\x12\x11\n\x03key\x18\x01 \x02(\x0b\x32\x04.Key\x12\x15\n\x05\x64\x65\x63om\x18\x02 \x03(\x0b\x32\x06.Decom\x1a\xb0\x01\n\x0e\x43ompleteZKData\x12\x11\n\x03key\x18\x01 \x02(\x0b\x32\x04.Key\x12\x0f\n\x07options\x18\x02 \x02(\r\x12\r\n\x05\x63oins\x18\x03 \x02(\t\x12\x33\n\x06zk_set\x18\x04 \x03(\x0b\x32#.CryptoRequest.CompleteZKData.ZKSet\x1a\x36\n\x05ZKSet\x12\x11\n\x03zk1\x18\x01 \x02(\x0b\x32\x04.ZK1\x12\x1a\n\x08zk_state\x18\x02 \x02(\x0b\x32\x08.ZKState\x1aL\n\rVerifyComData\x12\x11\n\x03key\x18\x01 \x02(\x0b\x32\x04.Key\x12\x11\n\x03\x63om\x18\x02 \x02(\x0b\x32\x04.Com\x12\x15\n\x05\x64\x65\x63om\x18\x03 \x02(\x0b\x32\x06.Decom\"Y\n\x03\x43md\x12\n\n\x06KeyGen\x10\x00\x12\r\n\tGenBallot\x10\x01\x12\n\n\x06\x41\x64\x64\x43om\x10\x02\x12\x0c\n\x08\x41\x64\x64\x44\x65\x63om\x10\x03\x12\x0e\n\nCompleteZK\x10\x04\x12\r\n\tVerifyCom\x10\x05\"\xc3\x03\n\x0e\x43ryptoResponse\x12\x11\n\x03key\x18\x01 \x01(\x0b\x32\x04.Key\x12/\n\x0b\x62\x61llot_data\x18\x02 \x01(\x0b\x32\x1a.CryptoResponse.BallotData\x12\x1a\n\x0c\x63ombined_com\x18\x03 \x01(\x0b\x32\x04.Com\x12\x1e\n\x0e\x63ombined_decom\x18\x04 \x01(\x0b\x32\x06.Decom\x12%\n\x06zk_set\x18\x05 \x01(\x0b\x32\x15.CryptoResponse.ZKSet\x12\r\n\x05\x63heck\x18\x06 \x01(\x08\x1a\xde\x01\n\nBallotData\x12\x31\n\x06\x62\x61llot\x18\x01 \x03(\x0b\x32!.CryptoResponse.BallotData.Ballot\x1a\x9c\x01\n\x06\x42\x61llot\x12\x32\n\x03\x65nc\x18\x01 \x03(\x0b\x32%.CryptoResponse.BallotData.Ballot.Enc\x1a^\n\x03\x45nc\x12\x11\n\x03\x63om\x18\x01 \x02(\x0b\x32\x04.Com\x12\x15\n\x05\x64\x65\x63om\x18\x02 \x02(\x0b\x32\x06.Decom\x12\x11\n\x03zk1\x18\x03 \x02(\x0b\x32\x04.ZK1\x12\x1a\n\x08zk_state\x18\x04 \x02(\x0b\x32\x08.ZKState\x1a\x1a\n\x05ZKSet\x12\x11\n\x03zk2\x18\x01 \x03(\x0b\x32\x04.ZK2')
+  serialized_pb='\n&demos/common/utils/crypto/crypto.proto\"\x1a\n\x02GG\x12\t\n\x01x\x18\x01 \x02(\t\x12\t\n\x01y\x18\x02 \x02(\t\"\x1b\n\x03\x43om\x12\x14\n\x07\x65lement\x18\x01 \x03(\x0b\x32\x03.GG\"K\n\x05\x44\x65\x63om\x12\x18\n\x02\x64p\x18\x01 \x03(\x0b\x32\x0c.Decom.Dpair\x1a(\n\x05\x44pair\x12\x12\n\nrandomness\x18\x01 \x02(\t\x12\x0b\n\x03msg\x18\x02 \x02(\r\"1\n\x03Key\x12\x0f\n\x02pk\x18\x01 \x02(\x0b\x32\x03.GG\x12\n\n\x02sk\x18\x02 \x01(\t\x12\r\n\x05\x63urve\x18\x03 \x02(\r\"\x1b\n\x03ZK1\x12\x14\n\x07\x65lement\x18\x01 \x03(\x0b\x32\x03.GG\"\x15\n\x07ZKState\x12\n\n\x02zp\x18\x01 \x03(\t\"\x11\n\x03ZK2\x12\n\n\x02zp\x18\x01 \x03(\t\"\xe2\x06\n\rCryptoRequest\x12\x1f\n\x03\x63md\x18\x01 \x02(\x0e\x32\x12.CryptoRequest.Cmd\x12%\n\x02kg\x18\x02 \x01(\x0b\x32\x19.CryptoRequest.KeyGenData\x12(\n\x02gb\x18\x03 \x01(\x0b\x32\x1c.CryptoRequest.GenBallotData\x12%\n\x02\x61\x63\x18\x04 \x01(\x0b\x32\x19.CryptoRequest.AddComData\x12\'\n\x02\x61\x64\x18\x05 \x01(\x0b\x32\x1b.CryptoRequest.AddDecomData\x12)\n\x02\x63z\x18\x06 \x01(\x0b\x32\x1d.CryptoRequest.CompleteZKData\x12(\n\x02vc\x18\x07 \x01(\x0b\x32\x1c.CryptoRequest.VerifyComData\x1a\x1b\n\nKeyGenData\x12\r\n\x05\x63urve\x18\x01 \x02(\r\x1aS\n\rGenBallotData\x12\x11\n\x03key\x18\x01 \x02(\x0b\x32\x04.Key\x12\x0f\n\x07options\x18\x02 \x02(\r\x12\x0e\n\x06\x62lanks\x18\x03 \x02(\r\x12\x0e\n\x06number\x18\x04 \x02(\r\x1a\x32\n\nAddComData\x12\x11\n\x03key\x18\x01 \x02(\x0b\x32\x04.Key\x12\x11\n\x03\x63om\x18\x02 \x03(\x0b\x32\x04.Com\x1a\x38\n\x0c\x41\x64\x64\x44\x65\x63omData\x12\x11\n\x03key\x18\x01 \x02(\x0b\x32\x04.Key\x12\x15\n\x05\x64\x65\x63om\x18\x02 \x03(\x0b\x32\x06.Decom\x1a\xb0\x01\n\x0e\x43ompleteZKData\x12\x11\n\x03key\x18\x01 \x02(\x0b\x32\x04.Key\x12\x0f\n\x07options\x18\x02 \x02(\r\x12\r\n\x05\x63oins\x18\x03 \x02(\t\x12\x33\n\x06zk_set\x18\x04 \x03(\x0b\x32#.CryptoRequest.CompleteZKData.ZKSet\x1a\x36\n\x05ZKSet\x12\x11\n\x03zk1\x18\x01 \x02(\x0b\x32\x04.ZK1\x12\x1a\n\x08zk_state\x18\x02 \x02(\x0b\x32\x08.ZKState\x1aL\n\rVerifyComData\x12\x11\n\x03key\x18\x01 \x02(\x0b\x32\x04.Key\x12\x11\n\x03\x63om\x18\x02 \x02(\x0b\x32\x04.Com\x12\x15\n\x05\x64\x65\x63om\x18\x03 \x02(\x0b\x32\x06.Decom\"Y\n\x03\x43md\x12\n\n\x06KeyGen\x10\x00\x12\r\n\tGenBallot\x10\x01\x12\n\n\x06\x41\x64\x64\x43om\x10\x02\x12\x0c\n\x08\x41\x64\x64\x44\x65\x63om\x10\x03\x12\x0e\n\nCompleteZK\x10\x04\x12\r\n\tVerifyCom\x10\x05\"\xf9\x03\n\x0e\x43ryptoResponse\x12\x11\n\x03key\x18\x01 \x01(\x0b\x32\x04.Key\x12/\n\x0b\x62\x61llot_data\x18\x02 \x01(\x0b\x32\x1a.CryptoResponse.BallotData\x12\x1a\n\x0c\x63ombined_com\x18\x03 \x01(\x0b\x32\x04.Com\x12\x1e\n\x0e\x63ombined_decom\x18\x04 \x01(\x0b\x32\x06.Decom\x12%\n\x06zk_set\x18\x05 \x01(\x0b\x32\x15.CryptoResponse.ZKSet\x12\r\n\x05\x63heck\x18\x06 \x01(\x08\x1a\x94\x02\n\nBallotData\x12\x31\n\x06\x62\x61llot\x18\x01 \x03(\x0b\x32!.CryptoResponse.BallotData.Ballot\x1a\xd2\x01\n\x06\x42\x61llot\x12\x32\n\x03opt\x18\x01 \x03(\x0b\x32%.CryptoResponse.BallotData.Ballot.Enc\x12\x34\n\x05\x62lank\x18\x02 \x03(\x0b\x32%.CryptoResponse.BallotData.Ballot.Enc\x1a^\n\x03\x45nc\x12\x11\n\x03\x63om\x18\x01 \x02(\x0b\x32\x04.Com\x12\x15\n\x05\x64\x65\x63om\x18\x02 \x02(\x0b\x32\x06.Decom\x12\x11\n\x03zk1\x18\x03 \x02(\x0b\x32\x04.ZK1\x12\x1a\n\x08zk_state\x18\x04 \x02(\x0b\x32\x08.ZKState\x1a\x1a\n\x05ZKSet\x12\x11\n\x03zk2\x18\x01 \x03(\x0b\x32\x04.ZK2')
 
 
 
@@ -52,8 +52,8 @@ _CRYPTOREQUEST_CMD = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1073,
-  serialized_end=1162,
+  serialized_start=1076,
+  serialized_end=1165,
 )
 
 
@@ -73,8 +73,8 @@ _GG = _descriptor.Descriptor(
       options=None),
     _descriptor.FieldDescriptor(
       name='y', full_name='GG.y', index=1,
-      number=2, type=8, cpp_type=7, label=2,
-      has_default_value=False, default_value=False,
+      number=2, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=six.text_type(b"", "utf-8"),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -100,16 +100,9 @@ _COM = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='c1', full_name='Com.c1', index=0,
-      number=1, type=11, cpp_type=10, label=2,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='c2', full_name='Com.c2', index=1,
-      number=2, type=11, cpp_type=10, label=2,
-      has_default_value=False, default_value=None,
+      name='element', full_name='Com.element', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -123,28 +116,28 @@ _COM = _descriptor.Descriptor(
   is_extendable=False,
   extension_ranges=[],
   serialized_start=70,
-  serialized_end=109,
+  serialized_end=97,
 )
 
 
-_DECOM = _descriptor.Descriptor(
-  name='Decom',
-  full_name='Decom',
+_DECOM_DPAIR = _descriptor.Descriptor(
+  name='Dpair',
+  full_name='Decom.Dpair',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='randomness', full_name='Decom.randomness', index=0,
+      name='randomness', full_name='Decom.Dpair.randomness', index=0,
       number=1, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=six.text_type(b"", "utf-8"),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='msg', full_name='Decom.msg', index=1,
-      number=2, type=9, cpp_type=9, label=2,
-      has_default_value=False, default_value=six.text_type(b"", "utf-8"),
+      name='msg', full_name='Decom.Dpair.msg', index=1,
+      number=2, type=13, cpp_type=3, label=2,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -157,8 +150,35 @@ _DECOM = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=111,
-  serialized_end=151,
+  serialized_start=134,
+  serialized_end=174,
+)
+
+_DECOM = _descriptor.Descriptor(
+  name='Decom',
+  full_name='Decom',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='dp', full_name='Decom.dp', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[_DECOM_DPAIR, ],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=99,
+  serialized_end=174,
 )
 
 
@@ -199,8 +219,8 @@ _KEY = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=153,
-  serialized_end=202,
+  serialized_start=176,
+  serialized_end=225,
 )
 
 
@@ -227,8 +247,8 @@ _ZK1 = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=204,
-  serialized_end=231,
+  serialized_start=227,
+  serialized_end=254,
 )
 
 
@@ -255,8 +275,8 @@ _ZKSTATE = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=233,
-  serialized_end=254,
+  serialized_start=256,
+  serialized_end=277,
 )
 
 
@@ -283,8 +303,8 @@ _ZK2 = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=256,
-  serialized_end=273,
+  serialized_start=279,
+  serialized_end=296,
 )
 
 
@@ -296,15 +316,8 @@ _CRYPTOREQUEST_KEYGENDATA = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='ballots', full_name='CryptoRequest.KeyGenData.ballots', index=0,
+      name='curve', full_name='CryptoRequest.KeyGenData.curve', index=0,
       number=1, type=13, cpp_type=3, label=2,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='options', full_name='CryptoRequest.KeyGenData.options', index=1,
-      number=2, type=13, cpp_type=3, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -318,8 +331,8 @@ _CRYPTOREQUEST_KEYGENDATA = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=572,
-  serialized_end=618,
+  serialized_start=595,
+  serialized_end=622,
 )
 
 _CRYPTOREQUEST_GENBALLOTDATA = _descriptor.Descriptor(
@@ -337,14 +350,14 @@ _CRYPTOREQUEST_GENBALLOTDATA = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='ballots', full_name='CryptoRequest.GenBallotData.ballots', index=1,
+      name='options', full_name='CryptoRequest.GenBallotData.options', index=1,
       number=2, type=13, cpp_type=3, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='options', full_name='CryptoRequest.GenBallotData.options', index=2,
+      name='blanks', full_name='CryptoRequest.GenBallotData.blanks', index=2,
       number=3, type=13, cpp_type=3, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -366,8 +379,8 @@ _CRYPTOREQUEST_GENBALLOTDATA = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=620,
-  serialized_end=704,
+  serialized_start=624,
+  serialized_end=707,
 )
 
 _CRYPTOREQUEST_ADDCOMDATA = _descriptor.Descriptor(
@@ -400,8 +413,8 @@ _CRYPTOREQUEST_ADDCOMDATA = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=706,
-  serialized_end=756,
+  serialized_start=709,
+  serialized_end=759,
 )
 
 _CRYPTOREQUEST_ADDDECOMDATA = _descriptor.Descriptor(
@@ -434,8 +447,8 @@ _CRYPTOREQUEST_ADDDECOMDATA = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=758,
-  serialized_end=814,
+  serialized_start=761,
+  serialized_end=817,
 )
 
 _CRYPTOREQUEST_COMPLETEZKDATA_ZKSET = _descriptor.Descriptor(
@@ -468,8 +481,8 @@ _CRYPTOREQUEST_COMPLETEZKDATA_ZKSET = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=939,
-  serialized_end=993,
+  serialized_start=942,
+  serialized_end=996,
 )
 
 _CRYPTOREQUEST_COMPLETEZKDATA = _descriptor.Descriptor(
@@ -516,8 +529,8 @@ _CRYPTOREQUEST_COMPLETEZKDATA = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=817,
-  serialized_end=993,
+  serialized_start=820,
+  serialized_end=996,
 )
 
 _CRYPTOREQUEST_VERIFYCOMDATA = _descriptor.Descriptor(
@@ -557,8 +570,8 @@ _CRYPTOREQUEST_VERIFYCOMDATA = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=995,
-  serialized_end=1071,
+  serialized_start=998,
+  serialized_end=1074,
 )
 
 _CRYPTOREQUEST = _descriptor.Descriptor(
@@ -627,8 +640,8 @@ _CRYPTOREQUEST = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=276,
-  serialized_end=1162,
+  serialized_start=299,
+  serialized_end=1165,
 )
 
 
@@ -676,8 +689,8 @@ _CRYPTORESPONSE_BALLOTDATA_BALLOT_ENC = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1494,
-  serialized_end=1588,
+  serialized_start=1551,
+  serialized_end=1645,
 )
 
 _CRYPTORESPONSE_BALLOTDATA_BALLOT = _descriptor.Descriptor(
@@ -688,8 +701,15 @@ _CRYPTORESPONSE_BALLOTDATA_BALLOT = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='enc', full_name='CryptoResponse.BallotData.Ballot.enc', index=0,
+      name='opt', full_name='CryptoResponse.BallotData.Ballot.opt', index=0,
       number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='blank', full_name='CryptoResponse.BallotData.Ballot.blank', index=1,
+      number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -703,8 +723,8 @@ _CRYPTORESPONSE_BALLOTDATA_BALLOT = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1432,
-  serialized_end=1588,
+  serialized_start=1435,
+  serialized_end=1645,
 )
 
 _CRYPTORESPONSE_BALLOTDATA = _descriptor.Descriptor(
@@ -730,8 +750,8 @@ _CRYPTORESPONSE_BALLOTDATA = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1366,
-  serialized_end=1588,
+  serialized_start=1369,
+  serialized_end=1645,
 )
 
 _CRYPTORESPONSE_ZKSET = _descriptor.Descriptor(
@@ -757,8 +777,8 @@ _CRYPTORESPONSE_ZKSET = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1590,
-  serialized_end=1616,
+  serialized_start=1647,
+  serialized_end=1673,
 )
 
 _CRYPTORESPONSE = _descriptor.Descriptor(
@@ -819,12 +839,13 @@ _CRYPTORESPONSE = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1165,
-  serialized_end=1616,
+  serialized_start=1168,
+  serialized_end=1673,
 )
 
-_COM.fields_by_name['c1'].message_type = _GG
-_COM.fields_by_name['c2'].message_type = _GG
+_COM.fields_by_name['element'].message_type = _GG
+_DECOM_DPAIR.containing_type = _DECOM;
+_DECOM.fields_by_name['dp'].message_type = _DECOM_DPAIR
 _KEY.fields_by_name['pk'].message_type = _GG
 _ZK1.fields_by_name['element'].message_type = _GG
 _CRYPTOREQUEST_KEYGENDATA.containing_type = _CRYPTOREQUEST;
@@ -859,7 +880,8 @@ _CRYPTORESPONSE_BALLOTDATA_BALLOT_ENC.fields_by_name['decom'].message_type = _DE
 _CRYPTORESPONSE_BALLOTDATA_BALLOT_ENC.fields_by_name['zk1'].message_type = _ZK1
 _CRYPTORESPONSE_BALLOTDATA_BALLOT_ENC.fields_by_name['zk_state'].message_type = _ZKSTATE
 _CRYPTORESPONSE_BALLOTDATA_BALLOT_ENC.containing_type = _CRYPTORESPONSE_BALLOTDATA_BALLOT;
-_CRYPTORESPONSE_BALLOTDATA_BALLOT.fields_by_name['enc'].message_type = _CRYPTORESPONSE_BALLOTDATA_BALLOT_ENC
+_CRYPTORESPONSE_BALLOTDATA_BALLOT.fields_by_name['opt'].message_type = _CRYPTORESPONSE_BALLOTDATA_BALLOT_ENC
+_CRYPTORESPONSE_BALLOTDATA_BALLOT.fields_by_name['blank'].message_type = _CRYPTORESPONSE_BALLOTDATA_BALLOT_ENC
 _CRYPTORESPONSE_BALLOTDATA_BALLOT.containing_type = _CRYPTORESPONSE_BALLOTDATA;
 _CRYPTORESPONSE_BALLOTDATA.fields_by_name['ballot'].message_type = _CRYPTORESPONSE_BALLOTDATA_BALLOT
 _CRYPTORESPONSE_BALLOTDATA.containing_type = _CRYPTORESPONSE;
@@ -894,6 +916,12 @@ class Com(_message.Message):
 
 @six.add_metaclass(_reflection.GeneratedProtocolMessageType)
 class Decom(_message.Message):
+
+  @six.add_metaclass(_reflection.GeneratedProtocolMessageType)
+  class Dpair(_message.Message):
+    DESCRIPTOR = _DECOM_DPAIR
+
+    # @@protoc_insertion_point(class_scope:Decom.Dpair)
   DESCRIPTOR = _DECOM
 
   # @@protoc_insertion_point(class_scope:Decom)

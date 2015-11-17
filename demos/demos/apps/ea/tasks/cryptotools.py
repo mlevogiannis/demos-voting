@@ -10,32 +10,36 @@ from demos.common.utils.config import registry
 config = registry.get_config('ea')
 
 
-def gen_key(ballots, options):
+def gen_key(curve):
     
     req = crypto._CryptoRequest()
     req.cmd = crypto._CryptoRequest.KeyGen
     
-    req.kg.ballots = ballots
-    req.kg.options = options
+    req.kg.curve = curve
     
     res = _request_to_response(req, "key")
     return res.key
 
 
-def gen_ballot(key, ballots, options, number):
+def gen_ballot(key, options, blanks, number):
     
     req = crypto._CryptoRequest()
     req.cmd = crypto._CryptoRequest.GenBallot
     
     req.gb.key.CopyFrom(key)
-    req.gb.ballots = ballots
     req.gb.options = options
+    req.gb.blanks = blanks
     req.gb.number = 2 * number
     
     res = _request_to_response(req, "ballot_data")
     
-    return [[[(enc.com, enc.decom, enc.zk1, enc.zk_state) for enc in part.enc]
+    opts = [[[(opt.com, opt.decom, opt.zk1, opt.zk_state) for opt in part.opt]
     for part in ballot] for ballot in zip(*[iter(res.ballot_data.ballot)] * 2)]
+    
+    blks = [[[(blk.com, blk.decom, blk.zk1, blk.zk_state) for blk in part.blank]
+    for part in ballot] for ballot in zip(*[iter(res.ballot_data.ballot)] * 2)]
+    
+    return (opts, blks)
 
 
 def add_com(key, com_list):

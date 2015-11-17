@@ -4,17 +4,19 @@ syntax = "proto2";
 
 message GG {
 	required string x = 1;
-	required bool y = 2;
+	required string y = 2;
 }
 
 message Com {
-	required GG c1 = 1;
-	required GG c2 = 2;
+	repeated GG element = 1;
 }
 
 message Decom {
-	required string randomness = 1;
-	required string msg = 2;
+	message Dpair {
+		required string randomness = 1;
+		required uint32 msg = 2;
+	}
+	repeated Dpair dp = 1;
 }
 
 message Key {
@@ -40,14 +42,13 @@ message ZK2 {
 message CryptoRequest {
 	
 	message KeyGenData {
-		required uint32 ballots = 1;
-		required uint32 options = 2;
+		required uint32 curve = 1;
 	}
 	
 	message GenBallotData {
 		required Key key = 1;
-		required uint32 ballots = 2;
-		required uint32 options = 3;
+		required uint32 options = 2;
+		required uint32 blanks = 3;
 		required uint32 number = 4;
 	}
 	
@@ -111,7 +112,8 @@ message CryptoResponse {
 				required ZK1 zk1 = 3;
 				required ZKState zk_state = 4;
 			}
-			repeated Enc enc = 1;
+			repeated Enc opt = 1;
+			repeated Enc blank = 2;
 		}
 		repeated Ballot ballot = 1;
 	}

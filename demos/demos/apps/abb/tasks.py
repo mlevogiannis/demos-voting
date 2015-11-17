@@ -117,6 +117,7 @@ def tally_protocol(election_id):
         
         _request = request.copy()
         _request['ballots'] = ballots
+        _request['options'] = question.optionc_set.count()
         
         data = {
             'data': json.dumps(_request, separators=(',', ':'), \
@@ -158,20 +159,14 @@ def tally_protocol(election_id):
         ballots = election.ballots
         optionc_qs = question.optionc_set.all()
         
-        decom = b64decode(combined_decom)
+        decom = crypto.Decom()
+        decom.ParseFromString(b64decode(combined_decom))
         
-        pb_decom = crypto.Decom()
-        pb_decom.ParseFromString(decom)
+        assert len(optionc_qs) == len(decom.dp)
         
-        msg = b64decode(pb_decom.msg)
-        msg = intc.from_bytes(msg, byteorder='big')
-        
-        for optionc in optionc_qs:
+        for optionc, dp in zip(optionc_qs, decom.dp):
             
-            votes = msg % (ballots + 1)
-            msg = (msg - votes) // (ballots + 1)
-            
-            optionc.votes = votes
+            optionc.votes = dp.msg
             optionc.save(update_fields=['votes'])
     
     # Perform 'complete_zk' task

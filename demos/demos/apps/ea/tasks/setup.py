@@ -151,7 +151,7 @@ def election_setup(election_obj, language):
         if options > max_options:
             max_options = options
             
-        question_obj['key'] = cryptotools.gen_key(election.ballots, options)
+        question_obj['key'] = cryptotools.gen_key(config.CURVE)
     
     # Populate local and remote databases
     
@@ -172,11 +172,11 @@ def election_setup(election_obj, language):
     progress = {'current': 0, 'total': election.ballots * 2}
     current_task.update_state(state='PROGRESS', meta=progress)
     
-    q_list = [(question_obj['key'], len(question_obj['__list_OptionC__'])) \
+    q_list = [(question_obj['key'], len(question_obj['__list_OptionC__']), 0) \
         for question_obj in election_obj['__list_Question__']]
     
     async_result = thread_pool.apply_async(crypto_gen, \
-        (election.ballots, q_list, min(config.BATCH_SIZE, election.ballots)))
+        (q_list, min(config.BATCH_SIZE, election.ballots)))
     
     for lo in range(100, election.ballots + 100, config.BATCH_SIZE):
         
@@ -184,11 +184,11 @@ def election_setup(election_obj, language):
         
         # Get current batch's crypto elements and generate the next one's
         
-        crypto_bsqo_list = async_result.get()
+        crypto_bsqo_list, _ = async_result.get()
         
         if hi - 100 < election.ballots:
-            async_result=thread_pool.apply_async(crypto_gen, (election.ballots,\
-                q_list, min(config.BATCH_SIZE, election.ballots + 100 - hi)))
+            async_result=thread_pool.apply_async(crypto_gen, \
+                (q_list, min(config.BATCH_SIZE, election.ballots + 100 - hi)))
         
         # Generate the rest data for all ballots and parts and store them in
         # lists of dictionaries. They will be used to populate the databases.
@@ -537,7 +537,7 @@ def api_update(app_name, **kwargs):
     app_session.post(url_path, data)
 
 
-def crypto_gen(ballots, q_list, number):
+def crypto_gen(q_list, number):
     
     # This function is used in a seperate thread.
     
@@ -545,10 +545,20 @@ def crypto_gen(ballots, q_list, number):
     # ballots of parts of crypto elements to a list of ballots of parts of
     # questions of crypto elements!
     
-    crypto_list = [cryptotools.gen_ballot(key, ballots, options, number) \
-        for key, options in q_list]
+    opt_list = []
+    blk_list = []
     
-    return zip(*[iter([j for i in zip(*crypto_list) for j in zip(*i)])] * 2)
+    for key, options, blanks in q_list:
+        
+        opts, blks = cryptotools.gen_ballot(key, options, blanks, number)
+        
+        opt_list.append(opts)
+        blk_list.append(blks)
+    
+    opt_list = zip(*[iter([j for i in zip(*opt_list) for j in zip(*i)])] * 2)
+    blk_list = zip(*[iter([j for i in zip(*blk_list) for j in zip(*i)])] * 2)
+    
+    return (opt_list, blk_list)
 
 
 def ballot_gen(ballot_obj, builder):
