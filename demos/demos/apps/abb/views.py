@@ -512,7 +512,7 @@ class ExportView(View):
         'question_fk': {
             'model': Question,
             'args': [('index', '[0-9]+')],
-            'fields': ['com_sum', 'decom_sum', 'index', 'key'],
+            'fields': ['combined_com', 'combined_decom', 'index', 'key'],
         },
     }
     

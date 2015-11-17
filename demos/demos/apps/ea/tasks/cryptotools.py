@@ -46,8 +46,8 @@ def add_com(key, com_list):
     req.ac.key.CopyFrom(key)
     req.ac.com.extend(com_list)
     
-    res = _request_to_response(req, "added_com")
-    return res.added_com
+    res = _request_to_response(req, "combined_com")
+    return res.combined_com
 
 
 def add_decom(key, decom_list):
@@ -58,8 +58,8 @@ def add_decom(key, decom_list):
     req.ad.key.CopyFrom(key)
     req.ad.decom.extend(decom_list)
     
-    res = _request_to_response(req, "added_decom")
-    return res.added_decom
+    res = _request_to_response(req, "combined_decom")
+    return res.combined_decom
 
 
 def complete_zk(key, options, coins, zk_list):

@@ -122,8 +122,8 @@ message CryptoResponse {
 	
 	optional Key key = 1;
 	optional BallotData ballot_data = 2;
-	optional Com added_com = 3;
-	optional Decom added_decom = 4;
+	optional Com combined_com = 3;
+	optional Decom combined_decom = 4;
 	optional ZKSet zk_set = 5;
 	optional bool check = 6;
 }

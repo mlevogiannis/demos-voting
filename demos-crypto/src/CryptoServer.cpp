@@ -335,11 +335,11 @@ void CryptoServer::ConsumerTask::consume(size_t curr_worker, size_t total_worker
 	}
 	else if (cmd == CryptoRequest_Cmd_AddCom && req->has_ac())
 	{
-		AddCom(req->ac(), res->mutable_added_com());
+		AddCom(req->ac(), res->mutable_combined_com());
 	}
 	else if (cmd == CryptoRequest_Cmd_AddDecom && req->has_ad())
 	{
-		AddDecom(req->ad(), res->mutable_added_decom());
+		AddDecom(req->ad(), res->mutable_combined_decom());
 	}
 	else if (cmd == CryptoRequest_Cmd_CompleteZK && req->has_cz())
 	{

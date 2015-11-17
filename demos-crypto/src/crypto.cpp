@@ -426,7 +426,7 @@ void GenBallot(const CryptoRequest_GenBallotData& data, CryptoResponse_BallotDat
 
 
 // Add Ballots
-void AddCom(const CryptoRequest_AddComData& data, Com* added_com)
+void AddCom(const CryptoRequest_AddComData& data, Com* combined_com)
 {
 		#ifndef MR_NOFULLWIDTH
 		Miracl precision(50,0);
@@ -473,12 +473,12 @@ void AddCom(const CryptoRequest_AddComData& data, Com* added_com)
 		}
 
 		//write com
-		GG *G1 = added_com->mutable_c1();
+		GG *G1 = combined_com->mutable_c1();
 		if(s1.get(x) == 1) G1->set_y(true);
 		else G1->set_y(false);
 		c<<x;
 		G1->set_x(string(c));
-		GG *G2 = added_com->mutable_c2();
+		GG *G2 = combined_com->mutable_c2();
 		if(s2.get(x) == 1) G2->set_y(true);
 		else G2->set_y(false);
 		c<<x;
@@ -488,7 +488,7 @@ void AddCom(const CryptoRequest_AddComData& data, Com* added_com)
 
 
 // Add decommitment
-void AddDecom(const CryptoRequest_AddDecomData& data, Decom* added_decom)
+void AddDecom(const CryptoRequest_AddDecomData& data, Decom* combined_decom)
 {
 		#ifndef MR_NOFULLWIDTH
 		Miracl precision(50,0);
@@ -531,9 +531,9 @@ void AddDecom(const CryptoRequest_AddDecomData& data, Decom* added_decom)
 		s2 = modmult(s2,x,q);
 		mip->IOBASE=64;
 		c<<s1;
-		added_decom->set_msg(c);
+		combined_decom->set_msg(c);
 		c<<s2;
-		added_decom->set_randomness(c);
+		combined_decom->set_randomness(c);
 }
 
 

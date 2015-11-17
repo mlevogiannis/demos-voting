@@ -150,10 +150,10 @@ class Question(models.Model):
     
     # Post-vote data
     
-    com_sum = fields.ProtoField(cls=crypto.Com, null=True, blank=True,
+    combined_com = fields.ProtoField(cls=crypto.Com, null=True, blank=True,
         default=None)
     
-    decom_sum = fields.ProtoField(cls=crypto.Decom, null=True, blank=True,
+    combined_decom = fields.ProtoField(cls=crypto.Decom, null=True, blank=True,
         default=None)
     
     # Other model methods and meta options

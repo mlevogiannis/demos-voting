@@ -61,7 +61,7 @@ def tally_protocol(election_id):
         
         # 'add_com' task
         
-        com_sum = None
+        combined_com = None
         
         for lo in range(100, election.ballots + 100, config.BATCH_SIZE):
             hi = lo + min(config.BATCH_SIZE, election.ballots + 100 - lo)
@@ -73,7 +73,7 @@ def tally_protocol(election_id):
             
             # Get com fields of the current ballot slice
             
-            com_list = [] if com_sum is None else [com_sum]
+            com_list = [] if combined_com is None else [combined_com]
             
             for part in part_qs.iterator():
                 
@@ -93,7 +93,7 @@ def tally_protocol(election_id):
             }
             
             r = ea_session.post('command/cryptotools/add_com/', data)
-            com_sum = r.json()
+            combined_com = r.json()
         
         # 'add_decom' task
         
@@ -124,7 +124,7 @@ def tally_protocol(election_id):
         }
         
         r = ea_session.post('command/cryptotools/add_decom/', data)
-        decom_sum = r.json()
+        combined_decom = r.json()
         
         # 'verify_com' task, iff at least one ballot had been cast
         # An empty decom cannot be verified (False is always returned)
@@ -132,8 +132,8 @@ def tally_protocol(election_id):
         if ballots:
         
             _request = request.copy()
-            _request['com'] = com_sum
-            _request['decom'] = decom_sum
+            _request['com'] = combined_com
+            _request['decom'] = combined_decom
             
             data = {
                 'data': json.dumps(_request, separators=(',', ':'), \
@@ -146,19 +146,19 @@ def tally_protocol(election_id):
             if not verified:
                 logger.error('verify_com failed (election id: %s)'% election.id)
         
-        # Save question's com_sum and decom_sum fields
+        # Save question's combined_com and combined_decom fields
         
-        question.com_sum = com_sum
-        question.decom_sum = decom_sum
+        question.combined_com = combined_com
+        question.combined_decom = combined_decom
         
-        question.save(update_fields=['com_sum', 'decom_sum'])
+        question.save(update_fields=['combined_com', 'combined_decom'])
         
         # Now, calculate votes
         
         ballots = election.ballots
         optionc_qs = question.optionc_set.all()
         
-        decom = b64decode(decom_sum)
+        decom = b64decode(combined_decom)
         
         pb_decom = crypto.Decom()
         pb_decom.ParseFromString(decom)
