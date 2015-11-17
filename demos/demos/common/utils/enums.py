@@ -4,17 +4,12 @@ from __future__ import division, unicode_literals
 
 from enum import IntEnum, unique
 
+# workaround for json encoder bug
+# see: https://bugs.python.org/issue18264
 
-# workaround for json encoder bug in python < 3.4
-# reference: https://bugs.python.org/issue18264
-
-import sys
-
-if sys.version_info[0:2] < (3,4):
-    
-    class IntEnum(IntEnum):
-        def __str__(self):
-            return str(int(self))
+class IntEnum(IntEnum):
+    def __str__(self):
+        return str(int(self))
 
 
 @unique
