@@ -179,9 +179,8 @@ $("#security-code-input").on("input", function(e) {
         return;
     }
     
-    var hash = sjcl.codec.base64.fromBits(
-        sjcl.misc.pbkdf2(value, salt, iterations)
-    );
+    var hash = sjcl.misc.pbkdf2(value, salt, iterations);
+    hash = sjcl.codec.base32cf.fromBits(hash);
     
     // request security code's verification
     

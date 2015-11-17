@@ -39,14 +39,14 @@ class PBKDF2Hasher(PBKDF2PasswordHasher):
     
     def verify(self, password, encoded, salt=None, iterations=None):
         
-        hash, salt, iterations = _split_encoded(encoded, salt, iterations)
+        hash, salt, iterations = self._split_encoded(encoded, salt, iterations)
         
         encoded_2 = self.encode(password, salt, int(iterations))
         return constant_time_compare(encoded, encoded_2)
 
     def safe_summary(self, encoded, salt=None, iterations=None):
         
-        hash, salt, iterations = _split_encoded(encoded, salt, iterations)
+        hash, salt, iterations = self._split_encoded(encoded, salt, iterations)
         
         return OrderedDict([
             ('algorithm', self.algorithm),
@@ -57,10 +57,11 @@ class PBKDF2Hasher(PBKDF2PasswordHasher):
 
     def must_update(self, encoded, salt=None, iterations=None):
         
-        _, _, iterations = _split_encoded(encoded, salt, iterations)
+        _, _, iterations = self._split_encoded(encoded, salt, iterations)
         
         return int(iterations) != self.iterations
     
+    @staticmethod
     def _split_encoded(encoded, salt=None, iterations=None):
         
         assert (salt is None and iterations is None) \
