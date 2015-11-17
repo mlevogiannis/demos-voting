@@ -32,7 +32,7 @@ class ElectionForm(forms.Form):
     language = forms.ChoiceField(label=_('Language'),choices=settings.LANGUAGES)
     
     trustee_list = fields.MultiEmailField(label=_('Trustee e-mails'),
-        min_length=1, max_length=config.MAX_TRUSTEES)
+        min_length=1, max_length=config.MAX_TRUSTEES, required=False)
     
     votecodes = forms.ChoiceField(label=_('Vote-codes'), \
         choices=(('short', _('Short')), ('long', _('Long'))))

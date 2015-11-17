@@ -137,7 +137,7 @@
                 </div>
                 
                 <!-- Trustee input -->
-                <div class="form-group {% if election_form.trustee_list.errors %} has-error {% endif %}">
+                <div class="form-group {% if election_form.trustee_list.errors %} has-error {% endif %} hidden">
                     <label class="sr-only" for="{{ election_form.trustee_list.id_for_label }}">{{ election_form.trustee_list.label }}</label>
                     <div class="input-group">
                         <div class="input-group-addon">{{ election_form.trustee_list.label }}:</div>
