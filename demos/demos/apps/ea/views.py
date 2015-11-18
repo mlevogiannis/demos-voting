@@ -149,8 +149,8 @@ class CreateView(View):
                 q_options_list = [len(q_obj['__list_OptionC__'])
                     for q_obj in election_obj['__list_Question__']]
                 
-                vc_type = 'votecode' \
-                    if not election_obj['long_votecodes'] else 'l_votecode'
+                vc_name = ('l_' if election_obj['vc_type'] == \
+                    enums.Vc.LONG else '') + 'votecode'
                 
                 # Create a sample ballot. Since this is not a real ballot,
                 # pseudo-random number generators are used instead of urandom.
@@ -165,8 +165,8 @@ class CreateView(View):
                     part_obj = {
                         'index': p_index,
                         'vote_token': 'vote_token',
-                        'security_code': base32cf.random(
-                            config.SECURITY_CODE_LEN, urandom=False),
+                        'security_code': base32cf.random(config.\
+                            SECURITY_CODE_LEN, urandom=False),
                         '__list_Question__': [],
                     }
                     
@@ -176,19 +176,19 @@ class CreateView(View):
                             '__list_OptionV__': [],
                         }
                         
-                        if not election_obj['long_votecodes']:
+                        if election_obj['vc_type'] == enums.Vc.SHORT:
                             votecode_list = list(range(1, options + 1))
                             random.shuffle(votecode_list)
-                        else:
+                        elif election_obj['vc_type'] == enums.Vc.LONG:
                             votecode_list=[base32cf.random(config.VOTECODE_LEN,
                                 urandom=False) for _ in range(options)]
                         
                         for votecode in votecode_list:
                             
                             data_obj = {
-                                vc_type: votecode,
-                                'receipt': base32cf.random(
-                                    config.RECEIPT_LEN, urandom=False),
+                                vc_name: votecode,
+                                'receipt': base32cf.random(config.\
+                                    RECEIPT_LEN, urandom=False),
                             }
                             
                             question_obj['__list_OptionV__'].append(data_obj)

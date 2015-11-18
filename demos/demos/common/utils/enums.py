@@ -24,3 +24,9 @@ class State(IntEnum):
     ERROR = 7
     TEMPLATE = 8
 
+@unique
+class Vc(IntEnum):
+    
+    SHORT = 1
+    LONG = 2
+

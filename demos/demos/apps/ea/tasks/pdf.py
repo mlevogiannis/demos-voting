@@ -17,7 +17,8 @@ except ImportError:
 from qrcode import QRCode, constants
 from django.utils.translation import ugettext as _
 
-from reportlab.lib import colors, enums, pagesizes
+from reportlab.lib import colors, pagesizes
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib.utils import ImageReader
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.pdfbase.ttfonts import TTFont
@@ -25,7 +26,7 @@ from reportlab.pdfbase.pdfmetrics import registerFont, stringWidth
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, \
     Paragraph, Image, Spacer, PageBreak
 
-from demos.common.utils import base32cf
+from demos.common.utils import base32cf, enums
 from demos.common.utils.config import registry
 
 config = registry.get_config('ea')
@@ -297,7 +298,7 @@ class BallotBuilder:
         name='url_style',
         fontSize=font_md,
         fontName=sans_regular,
-        alignment=enums.TA_LEFT,
+        alignment=TA_LEFT,
         firstLineIndent=-url_indent,
         leftIndent=url_indent,
         leading=16,
@@ -307,14 +308,14 @@ class BallotBuilder:
         name='hlp_style',
         fontSize=font_md,
         fontName=sans_regular,
-        alignment=enums.TA_CENTER,
+        alignment=TA_CENTER,
     )
     
     def __init__(self, election_obj):
         """Inits BallotBuilder and prepares common ballot data."""
         
         self.election_id = election_obj['id']
-        self.long_votecodes = election_obj['long_votecodes']
+        self.vc_type = election_obj['vc_type']
         
         # Translatable text
         
@@ -335,10 +336,10 @@ class BallotBuilder:
         
         # Votecode defaults
         
-        if not self.long_votecodes:
+        if self.vc_type == enums.Vc.SHORT:
             vc_charset = "0123456789"
             vc_maxchars = len(str(config.MAX_OPTIONS - 1))
-        else:
+        elif self.vc_type == enums.Vc.LONG:
             vc_charset = base32cf._chars + "-"
             vc_maxchars = config.VOTECODE_LEN + self.long_vc_hyphens
         
@@ -379,8 +380,10 @@ class BallotBuilder:
             option_list = [optionc_obj['text'] for optionc_obj \
                 in question_obj['__list_OptionC__']]
             
-            vc_chars = config.VOTECODE_LEN + self.long_vc_hyphens \
-                if self.long_votecodes else len(str(len(option_list)-1))
+            if self.vc_type == enums.Vc.SHORT:
+                vc_chars = len(str(len(option_list)-1))
+            elif self.vc_type == enums.Vc.LONG:
+                vc_chars = config.VOTECODE_LEN + self.long_vc_hyphens
             
             vc_width  = self.vc_width
             rec_width = self.rec_width
@@ -441,6 +444,7 @@ class BallotBuilder:
         """Generates a new PDF ballot and returns it as a BytesIO object"""
         
         serial = ballot_obj['serial']
+        vc_name = ('l_' if self.vc_type == enums.Vc.LONG else '') + 'votecode'
         
         # Initialize PDF object, using a BytesIO object as its file
         
@@ -519,8 +523,6 @@ class BallotBuilder:
             )
             
             table_s_list.append((table_hdr, table_ftr))
-            
-        vc_type = 'votecode' if not self.long_votecodes else 'l_votecode'
         
         # Iterate over all parts and fill element_list
         
@@ -547,7 +549,7 @@ class BallotBuilder:
                 rec_width, vc_chars, table_que, two_columns) \
                 in zip(part_obj['__list_Question__'], self.config_q_list):
                 
-                vc_list = [optionv_obj[vc_type] for optionv_obj
+                vc_list = [optionv_obj[vc_name] for optionv_obj
                     in question_obj['__list_OptionV__']]
                 
                 rec_list = [optionv_obj['receipt'] for optionv_obj
@@ -556,11 +558,11 @@ class BallotBuilder:
                 col_widths = [opt_width, vc_width, rec_width]
                 title = [[self.opt_text, self.vc_text, self.rec_text]]
                 
-                if not self.long_votecodes:
+                if self.vc_type == enums.Vc.SHORT:
                     vc_list = [str(vc).zfill(vc_chars) for vc in vc_list]
-                else:
-                    vc_list = [base32cf.hyphen(vc, self.long_vc_split) \
-                        for vc in vc_list]
+                elif self.vc_type == enums.Vc.LONG:
+                    vc_list = [base32cf.hyphen(vc, \
+                        self.long_vc_split) for vc in vc_list]
                 
                 data_list = list(zip(opt_list, vc_list, rec_list))
                 data_len = len(data_list)

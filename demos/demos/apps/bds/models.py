@@ -24,8 +24,10 @@ class Election(models.Model):
     start_datetime = models.DateTimeField()
     end_datetime = models.DateTimeField()
     
-    long_votecodes = models.BooleanField()
     state = fields.IntEnumField(cls=enums.State)
+    
+    vc_type = models.PositiveSmallIntegerField(choices=\
+        ((enums.Vc.SHORT.value, 'short'), (enums.Vc.LONG.value, 'long')))
     
     # Other model methods and meta options
     

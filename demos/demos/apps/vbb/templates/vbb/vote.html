@@ -267,7 +267,9 @@
     var max_options = {{ max_options|default:'null' }};
     var votecode_len = {{ votecode_len|default:'null' }};
     var credential = sjcl.codec.base64.toBits("{{ credential|default:'' }}");
-    var long_votecodes = {{ election.long_votecodes|yesno:'true,false,null' }};
+    var vc_type = {{ election.vc_type }};
+    
+    var Vc = { {% for name, value in Vc.items %} {{ name }}: {{ value }}, {% endfor %} };
     var State = { {% for name, value in State.items %} {{ name }}: {{ value }}, {% endfor %} };
 </script>
 

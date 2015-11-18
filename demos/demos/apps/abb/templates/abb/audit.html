@@ -140,8 +140,10 @@
 <script src="{% static 'common/permutation.js' %}"></script>
 
 <script>
-    var long_votecodes = {{ election.long_votecodes|yesno:'true,false' }};
+    var vc_type = {{ election.vc_type }};
     var e_url = "{% url 'abb-api:export:election:data' Election__id=election.id %}";
+    
+    var Vc = { {% for name, value in Vc.items %} {{ name }}: {{ value }}, {% endfor %} };
 </script>
 
 <script src="{% static 'abb/audit.js' %}"></script>

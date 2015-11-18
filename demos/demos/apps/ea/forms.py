@@ -11,6 +11,8 @@ from django.forms.formsets import BaseFormSet, formset_factory
 from django.utils.translation import ugettext_lazy as _
 
 from demos.apps.ea import fields
+
+from demos.common.utils import enums
 from demos.common.utils.config import registry
 
 config = registry.get_config('ea')
@@ -34,7 +36,7 @@ class ElectionForm(forms.Form):
     trustee_list = fields.MultiEmailField(label=_('Trustee e-mails'),
         min_length=1, max_length=config.MAX_TRUSTEES, required=False)
     
-    votecodes = forms.ChoiceField(label=_('Vote-codes'), \
+    votecode_type = forms.ChoiceField(label=_('Vote-codes'), \
         choices=(('short', _('Short')), ('long', _('Long'))))
     
     error_msg = {
@@ -74,18 +76,22 @@ class ElectionForm(forms.Form):
         start_datetime = cleaned_data.get('start_datetime')
         end_datetime = cleaned_data.get('end_datetime')
         
-        # Verify that end_datetime is not before end_datetime
+        # Verify that end_datetime is not before start_datetime
         
         if start_datetime and end_datetime and end_datetime <= start_datetime:
-            self.add_error(None, forms.ValidationError(
-                self.error_msg['order'], code='invalid'))
+            error=forms.ValidationError(self.error_msg['order'], code='invalid')
+            self.add_error(None, error)
         
-        # Set long_votecodes boolean variable
+        # Set 'vc_type' value
         
-        votecodes = cleaned_data.get('votecodes')
+        votecode_type = cleaned_data.get('votecode_type')
         
-        if votecodes is not None:
-            cleaned_data['long_votecodes'] = (votecodes == 'long')
+        if votecode_type is not None:
+            
+            if votecode_type == 'short':
+                cleaned_data['vc_type'] = enums.Vc.SHORT
+            elif votecode_type == 'long':
+                cleaned_data['vc_type'] = enums.Vc.LONG
 
 
 class QuestionForm(forms.Form):

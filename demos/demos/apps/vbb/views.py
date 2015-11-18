@@ -275,6 +275,7 @@ class VoteView(View):
         
         context.update({
             'timezone_now': now,
+            'Vc': { s.name: s.value for s in enums.Vc },
             'State': { s.name: s.value for s in VoteView.State },
         })
         
@@ -347,8 +348,8 @@ class VoteView(View):
             q_options = dict(question_qs.annotate(\
                 Count('optionc')).values_list('index', 'optionc__count'))
             
-            vc_type = six.integer_types \
-                if not election.long_votecodes else six.string_types
+            vc_type = six.integer_types if election.vc_type == \
+                enums.Vc.SHORT else six.string_types
             
             try:
                 if not (isinstance(vote_obj, dict)
@@ -379,25 +380,25 @@ class VoteView(View):
                     optionv_qs = OptionV.objects.\
                         filter(part=part1, question=question)
                     
-                    vc_type = 'votecode'
+                    vc_name = 'votecode'
                     vc_list = vote_obj[str(question.index)]
                     
                     # Long votecode version: use hashes instead of votecodes
                     
-                    if election.long_votecodes:
+                    if election.vc_type == enums.Vc.LONG:
                         
                         vc_list = [hasher.encode(vc, part1.l_votecode_salt, \
                             part1.l_votecode_iterations, True)[0] \
                             for vc in vc_list]
                         
-                        vc_type = 'l_' + vc_type + '_hash'
+                        vc_name = 'l_' + vc_name + '_hash'
                     
                     # Get options for the requested votecodes
                     
-                    vc_filter = {vc_type + '__in': vc_list}
+                    vc_filter = {vc_name + '__in': vc_list}
                     
                     optionvs = dict(optionv_qs.filter(**vc_filter).\
-                        values_list(vc_type, 'receipt'))
+                        values_list(vc_name, 'receipt'))
                     
                     # Return receipt list in the correct order
                     

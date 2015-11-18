@@ -121,14 +121,14 @@
                         </div>
                     </div>
                     <div class="col-xs-12 col-sm-4">
-                        <div class="form-group {% if election_form.votecodes.errors %} has-error {% endif %}">
-                            <label class="sr-only" for="{{ election_form.votecodes.id_for_label }}">{{ election_form.votecodes.label }}</label>
+                        <div class="form-group {% if election_form.votecode_type.errors %} has-error {% endif %}">
+                            <label class="sr-only" for="{{ election_form.votecode_type.id_for_label }}">{{ election_form.votecode_type.label }}</label>
                             <div class="input-group">
-                                <div class="input-group-addon">{{ election_form.votecodes.label }}:</div>
-                                <select class="form-control select-placeholder" id="{{ election_form.votecodes.auto_id }}" name="{{ election_form.votecodes.html_name }}">
-                                    <option {% if not election_form.votecodes.data %} selected {% endif %} disabled>{% trans "Select" %}</option>
-                                    {% for value, name in election_form.votecodes.field.choices %}
-                                    <option {% if not election_form.votecodes.data and election_form.votecodes.field.initial == value or election_form.votecodes.data == value %}selected{% endif %} value="{{ value }}">{{ name }}</option>
+                                <div class="input-group-addon">{{ election_form.votecode_type.label }}:</div>
+                                <select class="form-control select-placeholder" id="{{ election_form.votecode_type.auto_id }}" name="{{ election_form.votecode_type.html_name }}">
+                                    <option {% if not election_form.votecode_type.data %} selected {% endif %} disabled>{% trans "Select" %}</option>
+                                    {% for value, name in election_form.votecode_type.field.choices %}
+                                    <option {% if not election_form.votecode_type.data and election_form.votecode_type.field.initial == value or election_form.votecode_type.data == value %}selected{% endif %} value="{{ value }}">{{ name }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
