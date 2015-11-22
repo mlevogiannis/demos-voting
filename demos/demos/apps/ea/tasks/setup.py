@@ -140,18 +140,15 @@ def election_setup(election_obj, language):
     election_obj['cert'] = \
         crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode()
     
-    # Generate question keys and calculate max_options
-    
-    max_options = 0
+    # Generate question keys
     
     for question_obj in election_obj['__list_Question__']:
-        
-        options = len(question_obj['__list_OptionC__'])
-        
-        if options > max_options:
-            max_options = options
-            
         question_obj['key'] = cryptotools.gen_key(config.CURVE)
+    
+    # Find the options of the question with the maximum number of options
+    
+    max_options = max([q_obj['options'] \
+        for q_obj in election_obj['__list_Question__']])
     
     # Populate local and remote databases
     

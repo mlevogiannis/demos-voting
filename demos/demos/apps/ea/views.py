@@ -124,6 +124,7 @@ class CreateView(View):
                 question_obj = {
                     'index': q_index,
                     'text': question_form.cleaned_data['question'],
+                    'options': len(option_formset),
                     'columns': question_form.cleaned_data['columns'],
                     'choices': question_form.cleaned_data['choices'],
                     '__list_OptionC__': [],
@@ -146,7 +147,7 @@ class CreateView(View):
             
             if request.is_ajax():
                 
-                q_options_list = [len(q_obj['__list_OptionC__'])
+                q_options_list = [q_obj['options'] \
                     for q_obj in election_obj['__list_Question__']]
                 
                 vc_name = ('l_' if election_obj['vc_type'] == \

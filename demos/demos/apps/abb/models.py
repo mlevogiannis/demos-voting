@@ -147,6 +147,8 @@ class Question(models.Model):
     
     key = fields.ProtoField(cls=crypto.Key)
     index = models.PositiveSmallIntegerField()
+
+    options = models.PositiveSmallIntegerField()
     
     # Post-vote data
     

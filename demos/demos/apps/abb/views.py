@@ -27,7 +27,7 @@ from django.apps import apps
 from django.core import exceptions
 from django.utils import timezone
 from django.conf.urls import include, url
-from django.db.models import Count, Max, Sum
+from django.db.models import Max, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.core.files import File
 from django.middleware import csrf
@@ -275,8 +275,8 @@ class VoteView(View):
             
             if election.vc_type == enums.VcType.LONG:
                 
-                max_options = question_qs.annotate(Count('optionc')).\
-                    aggregate(Max('optionc__count'))['optionc__count__max']
+                max_options = question_qs.\
+                    aggregate(Max('options'))['options__max']
                 
                 credential_int = intc.from_bytes(b_credential, 'big')
                 

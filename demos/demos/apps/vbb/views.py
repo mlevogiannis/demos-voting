@@ -20,7 +20,7 @@ from django import http
 from django.db import transaction
 from django.apps import apps
 from django.utils import six, timezone
-from django.db.models import Count, Max
+from django.db.models import Max
 from django.shortcuts import render, redirect
 from django.middleware import csrf
 from django.views.generic import View
@@ -253,8 +253,7 @@ class VoteView(View):
         else:
             
             status = 200
-            max_options = question_qs.\
-                annotate(Count('optionc')).aggregate(Max('optionc__count'))
+            max_options = question_qs.aggregate(Max('options'))['options__max']
             abb_url = urljoin(config.URL['abb'], quote('%s/' % election_id))
             security_code_hash2_split = part1.security_code_hash2.split('$')
             
@@ -267,7 +266,7 @@ class VoteView(View):
                 'abb_url': abb_url,
                 'credential': credential,
                 'votecode_len': config.VOTECODE_LEN,
-                'max_options': max_options['optionc__count__max'],
+                'max_options': max_options,
                 'sc_iterations': security_code_hash2_split[2],
                 'sc_salt': security_code_hash2_split[1][::-1],
                 'sc_length': config.SECURITY_CODE_LEN,
@@ -345,8 +344,7 @@ class VoteView(View):
             
             # Verify vote_obj's structure validity
             
-            q_options = dict(question_qs.annotate(\
-                Count('optionc')).values_list('index', 'optionc__count'))
+            q_options = dict(question_qs.values_list('index', 'options'))
             
             vc_type = six.integer_types if election.vc_type == \
                 enums.VcType.SHORT else six.string_types

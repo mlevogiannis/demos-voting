@@ -26,6 +26,8 @@ class Election(models.Model):
     
     state = fields.IntEnumField(cls=enums.State)
     vc_type = fields.IntEnumField(cls=enums.VcType)
+
+    ballots = models.PositiveIntegerField()
     
     # Other model methods and meta options
     

@@ -109,6 +109,8 @@ class Question(models.Model):
     
     text = models.CharField(max_length=config.QUESTION_MAXLEN)
     index = models.PositiveSmallIntegerField()
+
+    options = models.PositiveSmallIntegerField()
     
     # Other model methods and meta options
     
