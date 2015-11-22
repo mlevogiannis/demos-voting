@@ -10,9 +10,7 @@ from django.utils import timezone
 from django.forms.formsets import BaseFormSet, formset_factory
 from django.utils.translation import ugettext_lazy as _
 
-from demos.apps.ea import fields
-
-from demos.common.utils import enums
+from demos.common.utils import enums, fields
 from demos.common.utils.config import registry
 
 config = registry.get_config('ea')
