@@ -224,12 +224,12 @@ def election_setup(election_obj, language):
                 
                 # Prepare long votecodes' key, salt and iterations (if enabled)
                 
-                if election.vc_type == enums.Vc.SHORT:
+                if election.vc_type == enums.VcType.SHORT:
                     
                     l_votecode_salt = ''
                     l_votecode_iterations = None
                     
-                elif election.vc_type == enums.Vc.LONG:
+                elif election.vc_type == enums.VcType.LONG:
                     
                     key = base32cf.decode(security_code)
                     bytes = int(math.ceil(key.bit_length() / 8))
@@ -275,14 +275,14 @@ def election_setup(election_obj, language):
                         
                         # Prepare long votecodes (if enabled) and receipt data
                         
-                        if election.vc_type == enums.Vc.SHORT:
+                        if election.vc_type == enums.VcType.SHORT:
                             
                             l_votecode = ''
                             l_votecode_hash = ''
                             
                             receipt_data = optionv_id
                             
-                        elif election.vc_type == enums.Vc.LONG:
+                        elif election.vc_type == enums.VcType.LONG:
                             
                             # Each long votecode is constructed as follows:
                             # hmac(security_code, credential + (question_index

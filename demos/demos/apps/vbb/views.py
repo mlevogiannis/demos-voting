@@ -275,7 +275,7 @@ class VoteView(View):
         
         context.update({
             'timezone_now': now,
-            'Vc': { s.name: s.value for s in enums.Vc },
+            'VcType': { s.name: s.value for s in enums.VcType },
             'State': { s.name: s.value for s in VoteView.State },
         })
         
@@ -349,7 +349,7 @@ class VoteView(View):
                 Count('optionc')).values_list('index', 'optionc__count'))
             
             vc_type = six.integer_types if election.vc_type == \
-                enums.Vc.SHORT else six.string_types
+                enums.VcType.SHORT else six.string_types
             
             try:
                 if not (isinstance(vote_obj, dict)
@@ -385,7 +385,7 @@ class VoteView(View):
                     
                     # Long votecode version: use hashes instead of votecodes
                     
-                    if election.vc_type == enums.Vc.LONG:
+                    if election.vc_type == enums.VcType.LONG:
                         
                         vc_list = [hasher.encode(vc, part1.l_votecode_salt, \
                             part1.l_votecode_iterations, True)[0] \

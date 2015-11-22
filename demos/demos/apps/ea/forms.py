@@ -82,16 +82,16 @@ class ElectionForm(forms.Form):
             error=forms.ValidationError(self.error_msg['order'], code='invalid')
             self.add_error(None, error)
         
-        # Set 'vc_type' value
+        # 'vc_type' depends on 'votecode_type'
         
         votecode_type = cleaned_data.get('votecode_type')
         
         if votecode_type is not None:
             
             if votecode_type == 'short':
-                cleaned_data['vc_type'] = enums.Vc.SHORT
+                cleaned_data['vc_type'] = enums.VcType.SHORT
             elif votecode_type == 'long':
-                cleaned_data['vc_type'] = enums.Vc.LONG
+                cleaned_data['vc_type'] = enums.VcType.LONG
 
 
 class QuestionForm(forms.Form):

@@ -25,7 +25,7 @@ class State(IntEnum):
     TEMPLATE = 8
 
 @unique
-class Vc(IntEnum):
+class VcType(IntEnum):
     
     SHORT = 1
     LONG = 2

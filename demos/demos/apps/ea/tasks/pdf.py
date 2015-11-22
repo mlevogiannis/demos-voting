@@ -336,10 +336,10 @@ class BallotBuilder:
         
         # Votecode defaults
         
-        if self.vc_type == enums.Vc.SHORT:
+        if self.vc_type == enums.VcType.SHORT:
             vc_charset = "0123456789"
             vc_maxchars = len(str(config.MAX_OPTIONS - 1))
-        elif self.vc_type == enums.Vc.LONG:
+        elif self.vc_type == enums.VcType.LONG:
             vc_charset = base32cf._chars + "-"
             vc_maxchars = config.VOTECODE_LEN + self.long_vc_hyphens
         
@@ -380,9 +380,9 @@ class BallotBuilder:
             option_list = [optionc_obj['text'] for optionc_obj \
                 in question_obj['__list_OptionC__']]
             
-            if self.vc_type == enums.Vc.SHORT:
+            if self.vc_type == enums.VcType.SHORT:
                 vc_chars = len(str(len(option_list)-1))
-            elif self.vc_type == enums.Vc.LONG:
+            elif self.vc_type == enums.VcType.LONG:
                 vc_chars = config.VOTECODE_LEN + self.long_vc_hyphens
             
             vc_width  = self.vc_width
@@ -444,7 +444,7 @@ class BallotBuilder:
         """Generates a new PDF ballot and returns it as a BytesIO object"""
         
         serial = ballot_obj['serial']
-        vc_name = ('l_' if self.vc_type == enums.Vc.LONG else '') + 'votecode'
+        vc_name = ('l_' if self.vc_type == enums.VcType.LONG else '')+'votecode'
         
         # Initialize PDF object, using a BytesIO object as its file
         
@@ -558,9 +558,9 @@ class BallotBuilder:
                 col_widths = [opt_width, vc_width, rec_width]
                 title = [[self.opt_text, self.vc_text, self.rec_text]]
                 
-                if self.vc_type == enums.Vc.SHORT:
+                if self.vc_type == enums.VcType.SHORT:
                     vc_list = [str(vc).zfill(vc_chars) for vc in vc_list]
-                elif self.vc_type == enums.Vc.LONG:
+                elif self.vc_type == enums.VcType.LONG:
                     vc_list = [base32cf.hyphen(vc, \
                         self.long_vc_split) for vc in vc_list]
                 

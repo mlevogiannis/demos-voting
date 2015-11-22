@@ -89,7 +89,7 @@ class AuditView(View):
             'election': election,
             'questions': questions,
             'participants': str(participants),
-            'Vc': { s.name: s.value for s in enums.Vc },
+            'VcType': { s.name: s.value for s in enums.VcType },
         }
         
         csrf.get_token(request)
@@ -273,7 +273,7 @@ class VoteView(View):
             
             # Common long votecode values
             
-            if election.vc_type == enums.Vc.LONG:
+            if election.vc_type == enums.VcType.LONG:
                 
                 max_options = question_qs.annotate(Count('optionc')).\
                     aggregate(Max('optionc__count'))['optionc__count__max']
@@ -307,7 +307,7 @@ class VoteView(View):
                     
                     # Long votecode version: use hashes instead of votecodes
                     
-                    if election.vc_type == enums.Vc.LONG:
+                    if election.vc_type == enums.VcType.LONG:
                         
                         l_votecodes = vc_list
                         
@@ -331,13 +331,13 @@ class VoteView(View):
                     
                     # Save both voted and unvoted options
                     
-                    if election.vc_type == enums.Vc.SHORT:
+                    if election.vc_type == enums.VcType.SHORT:
                         
                         optionv_qs.update(voted=True)
                         optionv_not_qs.update(voted=False)
                         optionv2_qs.update(voted=False)
                         
-                    elif election.vc_type == enums.Vc.LONG:
+                    elif election.vc_type == enums.VcType.LONG:
                         
                         # Save the requested long votecodes
                         

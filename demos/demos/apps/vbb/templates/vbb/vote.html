@@ -269,7 +269,7 @@
     var credential = sjcl.codec.base64.toBits("{{ credential|default:'' }}");
     var vc_type = {{ election.vc_type }};
     
-    var Vc = { {% for name, value in Vc.items %} {{ name }}: {{ value }}, {% endfor %} };
+    var VcType = { {% for name, value in VcType.items %} {{ name }}: {{ value }}, {% endfor %} };
     var State = { {% for name, value in State.items %} {{ name }}: {{ value }}, {% endfor %} };
 </script>
 

@@ -357,7 +357,7 @@ $("#vote-submit").click(function(e) {
         // short votecode version: just return the short votecode
         
         var votecode = option.data("votecode");
-        if (vc_type == Vc.SHORT) return [votecode];
+        if (vc_type == VcType.SHORT) return [votecode];
         
         // long votecode version: check if option already has a long votecode
         // (e.g.: the user may have clicked cancel before), if not, generate it
@@ -404,7 +404,7 @@ $("#vote-confirm").click(function(e) {
         
         $(this).find(".option.active").each(function(index) {
             
-            var votecode = (vc_type == Vc.SHORT) ?
+            var votecode = (vc_type == VcType.SHORT) ?
                 parseInt($(this).data("votecode")) :
                 String($(this).data("l_votecode"));
             
@@ -430,13 +430,13 @@ $("#vote-confirm").click(function(e) {
                 
                 var q_index = String(question.data("index"));
                 
-                var votecode = (vc_type == Vc.SHORT) ?
+                var votecode = (vc_type == VcType.SHORT) ?
                     parseInt(option.data("votecode")) :
                     String(option.data("l_votecode"));
                 
                 var receipt = data[q_index].shift();
                 
-                if (vc_type == Vc.LONG)
+                if (vc_type == VcType.LONG)
                     votecode = sjcl.codec.base32cf.hyphen(votecode, 4);
                 
                 return [votecode, receipt];

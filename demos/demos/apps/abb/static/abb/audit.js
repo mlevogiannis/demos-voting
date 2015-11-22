@@ -15,7 +15,7 @@ $("#audit-button").click(function(e) {
     
     var b_url = e_url + "ballots/" + b_serial + "/";
     var b_query = "?ballot=parts&part=index,security_code,questions&question=" +
-        "index,options&option=index," + (vc_type == Vc.LONG ? "l_" : "") + "votecode,voted";
+        "index,options&option=index," + (vc_type == VcType.LONG ? "l_" : "") + "votecode,voted";
     
     // Request the data from the server
     
@@ -64,7 +64,7 @@ $("#audit-button").click(function(e) {
                     
                     var table_rows = panels.eq(q).find("table > tbody > tr");
                     
-                    if (vc_type == Vc.SHORT)
+                    if (vc_type == VcType.SHORT)
                         var vc_chars = ((question.options.length - 1) + "").length;
                     
                     // If the security code is available, restore options' correct order
@@ -90,7 +90,7 @@ $("#audit-button").click(function(e) {
                         
                         // Populate votecode column
                         
-                        var votecode = vc_type == Vc.SHORT ? 
+                        var votecode = vc_type == VcType.SHORT ?
                             zfill(option.votecode, vc_chars) : 
                             option.l_votecode ? sjcl.codec.base32cf.hyphen(option.l_votecode, 4) : "";
                         
@@ -127,9 +127,9 @@ $("#audit-button").click(function(e) {
                         tr.find(".zk2").data("url", o_url + "?option=zk2");
                         
                         tr.find(".votecode").data("url", o_url + "?option=receipt_full,"
-                            + (vc_type == Vc.SHORT ? "votecode" : "l_votecode,l_votecode_hash"));
+                            + (vc_type == VcType.SHORT ? "votecode" : "l_votecode,l_votecode_hash"));
                         
-                        /*tr.find(".votecode").data("url", !vc_type == Vc.SHORT ? o_url + "?option=receipt_full,votecode" :
+                        /*tr.find(".votecode").data("url", !vc_type == VcType.SHORT ? o_url + "?option=receipt_full,votecode" :
                             [o_url + "?option=receipt_full,l_votecode,l_votecode_hash", p_url + "?part=l_votecode_iterations,l_votecode_salt"]);*/
                         
                         tr.find(".com,.zk1,.zk2,.votecode").click(json_modal_click_handler);
