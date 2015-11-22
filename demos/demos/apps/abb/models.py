@@ -35,10 +35,8 @@ class Election(models.Model):
     end_datetime = models.DateTimeField()
     
     state = fields.IntEnumField(cls=enums.State)
-    
-    vc_type = models.PositiveSmallIntegerField(choices=\
-        ((enums.Vc.SHORT.value, 'short'), (enums.Vc.LONG.value, 'long')))
-    
+    vc_type = fields.IntEnumField(cls=enums.Vc)
+
     ballots = models.PositiveIntegerField()
     
     cert = models.FileField(upload_to=get_cert_file_path, storage=fs_root)
