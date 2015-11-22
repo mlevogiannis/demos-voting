@@ -1,8 +1,7 @@
 # File: __init__.py
 
-from .settings import base
+from . import settings
 
-if set(base.DEMOS_APPS).intersection(['ea', 'bds', 'abb']):
-    from .settings.celeryapp import app as celery_app
+if set(settings.DEMOS_APPS) & set(['ea', 'bds', 'abb']):
+    from .celery import app as celery_app
 
-#eof

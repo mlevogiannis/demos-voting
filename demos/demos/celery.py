@@ -1,7 +1,10 @@
 # -*- encoding: utf-8 -*-
 # File: celery.py
 
+from __future__ import absolute_import
+
 import os
+
 from celery import Celery
 
 # set the default Django settings module for the 'celery' program.
@@ -21,4 +24,3 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 def debug_task(self):
     print('Request: {0!r}'.format(self.request))
 
-#eof

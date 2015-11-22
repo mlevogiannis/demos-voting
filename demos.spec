@@ -31,7 +31,6 @@ BuildArch:      noarch
 Requires:       python-django >= 1.8
 Requires:       python-psycopg2
 Requires:       python-requests
-Requires:       python-celery
 Requires:       python-enum34
 Requires:       gettext
 %if %{with_apache}
@@ -53,6 +52,8 @@ Summary:        Audit Bulletin Board for Secure Voting
 Group:          Applications/Web
 BuildArch:      noarch
 Requires:       %{name}-common == %{version}
+Requires:       python-celery
+Requires:       python-redis
 Requires:       python-protobuf >= 3.0
 
 %package ea
@@ -61,10 +62,12 @@ Group:          Applications/Web
 # no BuildArch, this one is platform-dependant!
 Requires:       %{name}-common == %{version}
 Requires:       fontconfig
+Requires:       python-celery
+Requires:       python-redis
 Requires:       python-protobuf >= 3.0
 Requires:       python-qrcode
 Requires:       python-reportlab
-Requires:       liberation-sans-fonts, liberation-serif-fonts, liberation-mono-fonts
+Requires:       liberation-sans-fonts, liberation-mono-fonts
 %if %{_target_vendor} == mageia
 Requires:       python-openssl
 %else
@@ -76,13 +79,14 @@ Summary:        Ballot Distribution Server for Secure Voting
 Group:          Applications/Web
 BuildArch:      noarch
 Requires:       %{name}-common == %{version}
+Requires:       python-celery
+Requires:       python-redis
 
 %package vbb
 Summary:        Vote Bulletin Board for Secure Voting
 Group:          Applications/Web
 BuildArch:      noarch
 Requires:       %{name}-common == %{version}
-Requires:       fontconfig
 
 
 %description
@@ -143,7 +147,7 @@ rm -f %{buildroot}%{app_dir}/settings/base.py?
 mv %{buildroot}%{app_dir}/demos/settings/base.py %{buildroot}%{_sysconfdir}/%{name}/settings.py
 ln -s %{_sysconfdir}/%{name}/settings.py %{buildroot}%{app_dir}/demos/settings/base.py
 
-install -d %{buildroot}%{_var}/spool/demos-voting/
+install -d %{buildroot}%{_var}/lib/demos-voting/
 
 %if %{with_apache}
 # Configuration for Apache and its mod_wsgi
@@ -245,8 +249,8 @@ popd
 
 %post ea
 NEW_SECRET_KEY=$(python -c 'import os; import base64; print(base64.b64encode(os.urandom(60)))')
-sed -i "s|NO_SECRET_KEY_DEFINED|'$NEW_SECRET_KEY'|" %{_sysconfdir}/%{name}/settings.py
-sed -i "s|NO_APP_CHOSEN|('ea',)|" %{_sysconfdir}/%{name}/settings.py
+sed -i "s|SECRET_KEY = ''|SECRET_KEY = $NEW_SECRET_KEY|" %{_sysconfdir}/%{name}/settings.py
+sed -i "s|DEMOS_APPS = \[\]|DEMOS_APPS = [ 'ea' ]|" %{_sysconfdir}/%{name}/settings.py
 
 cd %{app_dir}
 ./manage.py collectstatic --noinput --no-color
@@ -255,8 +259,8 @@ cd %{app_dir}
 
 %post bds
 NEW_SECRET_KEY=$(python -c 'import os; import base64; print(base64.b64encode(os.urandom(60)))')
-sed -i "s|NO_SECRET_KEY_DEFINED|'$NEW_SECRET_KEY'|" %{_sysconfdir}/%{name}/settings.py
-sed -i "s|NO_APP_CHOSEN|('bds',)|" %{_sysconfdir}/%{name}/settings.py
+sed -i "s|SECRET_KEY = ''|SECRET_KEY = $NEW_SECRET_KEY|" %{_sysconfdir}/%{name}/settings.py
+sed -i "s|DEMOS_APPS = \[\]|DEMOS_APPS = [ 'bds' ]|" %{_sysconfdir}/%{name}/settings.py
 
 cd %{app_dir}
 ./manage.py collectstatic --noinput --no-color
@@ -264,8 +268,8 @@ cd %{app_dir}
 
 %post abb
 NEW_SECRET_KEY=$(python -c 'import os; import base64; print(base64.b64encode(os.urandom(60)))')
-sed -i "s|NO_SECRET_KEY_DEFINED|'$NEW_SECRET_KEY'|" %{_sysconfdir}/%{name}/settings.py
-sed -i "s|NO_APP_CHOSEN|('abb',)|" %{_sysconfdir}/%{name}/settings.py
+sed -i "s|SECRET_KEY = ''|SECRET_KEY = $NEW_SECRET_KEY|" %{_sysconfdir}/%{name}/settings.py
+sed -i "s|DEMOS_APPS = \[\]|DEMOS_APPS = [ 'abb' ]|" %{_sysconfdir}/%{name}/settings.py
 
 cd %{app_dir}
 ./manage.py collectstatic --noinput --no-color
@@ -273,8 +277,8 @@ cd %{app_dir}
 
 %post vbb
 NEW_SECRET_KEY=$(python -c 'import os; import base64; print(base64.b64encode(os.urandom(60)))')
-sed -i "s|NO_SECRET_KEY_DEFINED|'$NEW_SECRET_KEY'|" %{_sysconfdir}/%{name}/settings.py
-sed -i "s|NO_APP_CHOSEN|('vbb',)|" %{_sysconfdir}/%{name}/settings.py
+sed -i "s|SECRET_KEY = ''|SECRET_KEY = $NEW_SECRET_KEY|" %{_sysconfdir}/%{name}/settings.py
+sed -i "s|DEMOS_APPS = \[\]|DEMOS_APPS = [ 'vbb' ]|" %{_sysconfdir}/%{name}/settings.py
 
 cd %{app_dir}
 ./manage.py collectstatic --noinput --no-color
@@ -285,7 +289,7 @@ cd %{app_dir}
 %doc demos/LICENSE demos/README
 %dir %{app_dir}/demos
 %dir %attr(0755,root,root) %{_sysconfdir}/%{name}/
-%dir %attr(0750,apache,apache) %{_var}/spool/demos-voting/
+%dir %attr(0750,apache,apache) %{_var}/lib/demos-voting/
 %config(noreplace) %attr(0755,root,root) %{_sysconfdir}/%{name}/settings.py
 %exclude %{_sysconfdir}/%{name}/settings.py?
 %{app_dir}/demos/__init__.py*

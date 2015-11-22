@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-# File: base.py
+# File: settings.py
 
 """
 Django settings for demos project.
@@ -9,21 +9,15 @@ https://docs.djangoproject.com/en/1.8/topics/settings/
 
 """
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = NO_SECRET_KEY_DEFINED
-
-# SECURITY WARNING: don't run with debug or development turned on in production!
-DEBUG = False
-DEVELOPMENT = False
 
 ALLOWED_HOSTS = [
     '',
@@ -34,12 +28,30 @@ ADMINS = [
 ]
 
 
-# All writable files may have this as a reference
+# SECURITY WARNING: keep the secret key used in production secret!
 
-SPOOL_DIR = '/var/spool/demos-voting'
+SECRET_KEY = ''
+
+# SECURITY WARNING: don't run with debug or development turned on in production!
+
+DEBUG = False
+DEVELOPMENT = False
 
 if DEVELOPMENT:
-    SPOOL_DIR = os.path.join(os.path.dirname(BASE_DIR), 'data')
+    
+    DEBUG = True
+    DEVEL_DIR = os.path.join(os.path.dirname(BASE_DIR), 'devel')
+
+
+# UNIX-domain sockets are placed under RUN_DIR, app data under VARLIB_DIR
+
+RUN_DIR = '/run/demos-voting'
+VARLIB_DIR = '/var/lib/demos-voting'
+
+if DEVELOPMENT:
+    
+    RUN_DIR = os.path.join(DEVEL_DIR, 'sockets')
+    VARLIB_DIR = os.path.join(DEVEL_DIR, 'data')
 
 
 # Application definition
@@ -94,6 +106,11 @@ TEMPLATES = [
         },
     },
 ]
+
+if DEVELOPMENT:
+    
+    TEMPLATES[0]['APP_DIRS'] = True
+    del TEMPLATES[0]['OPTIONS']['loaders']
 
 WSGI_APPLICATION = 'demos.wsgi.application'
 
@@ -159,6 +176,9 @@ EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = ''
 SERVER_EMAIL = ''
 
+if DEVELOPMENT:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 
 # Logging
 # https://docs.djangoproject.com/en/1.8/topics/logging/
@@ -192,137 +212,7 @@ LOGGING = {
     },
 }
 
-
-# Security Middleware
-# https://docs.djangoproject.com/en/1.8/ref/middleware/#module-django.middleware.security
-
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_SECONDS = 31536000
-
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
-
-
-# Demos-specific configuration
-
-DEMOS_APPS = NO_APP_CHOSEN   # one or more of: ea, bds, abb, vbb
-
-DEMOS_CONFIG = {
-    
-    'ea': {
-        
-        # Election configuration
-        
-        'MAX_BALLOTS': 100000,
-        'MAX_OPTIONS': 128,
-        'MAX_TRUSTEES': 128,
-        'MAX_QUESTIONS': 32,
-        
-        # demos-crypto connection parameters, see:
-        # https://docs.python.org/3/library/socket.html
-        
-        # CRYPTO_AF: e.g. 'AF_UNIX' or 'AF_INET' or 'AF_INET6'
-        # CRYPTO_ADDR: e.g. '/run/demos-crypto.sock' or ('127.0.0.1', 8999)
-        
-        'CRYPTO_AF': 'AF_UNIX',
-        'CRYPTO_ADDR': '/run/demos-voting/demos-crypto.sock',
-        
-        # Performance settings, they affect CPU and RAM usage, etc
-        
-        'BATCH_SIZE': 128,
-        
-        'RECV_MAX': 67108864,   # 64 MB
-        'RECV_TIMEOUT': 900,   # 15 mins
-        
-        # Certificate Authority (X.509 / RSA)
-        
-        # CA_CERT_PEM: e.g. 'BASE_DIR/ca/cacert.pem',
-        # CA_PKEY_PEM: e.g. 'BASE_DIR/ca/private/cakey.pem',
-        
-        # If DEVELOPMENT is True and pem-file paths are empty or invalid,
-        # self-signed certificates will be generated
-        
-        'CA_CERT_PEM': '',
-        'CA_PKEY_PEM': '',
-        'CA_PKEY_PASSPHRASE': '',
-    },
-    
-    'bds': {
-        
-        # Absolute path to the directory that will hold machine-local files
-        
-        'FILESYSTEM_ROOT': os.path.join(SPOOL_DIR, 'bds'),
-    },
-    
-    'abb': {
-        
-        # Performance settings, they affect CPU and RAM usage, etc
-        
-        'BATCH_SIZE': 128,
-        
-        # Absolute path to the directory that will hold machine-local files
-        
-        'FILESYSTEM_ROOT': os.path.join(SPOOL_DIR, 'abb'),
-    },
-    
-    'vbb': {
-    },
-}
-
-DEMOS_URL = {
-    'ea': 'https://demos-ea.domain-name.example/',
-    'bds': 'https://demos-bds.domain-name.example/',
-    'abb': 'https://demos-abb.domain-name.example/',
-    'vbb': 'https://demos-vbb.domain-name.example/',
-}
-
-DEMOS_API_URL = {
-    'ea': 'https://api.demos-ea.domain-name.example/',
-    'bds': 'https://api.demos-bds.domain-name.example/',
-    'abb': 'https://api.demos-abb.domain-name.example/',
-    'vbb': 'https://api.demos-vbb.domain-name.example/',
-}
-
-# In case the API URLs are SSL-enabled and use self-signed certificates,
-# their verification can be disabled to allow requests among servers
-# http://docs.python-requests.org/en/latest/user/advanced/#ssl-cert-verification
-
-# DEMOS_API_VERIFY = False        # the default is True
-
-
-DEMOS_APPS = [ DEMOS_APPS ] if not isinstance(DEMOS_APPS, (list, tuple)) else DEMOS_APPS
-INSTALLED_APPS += [ 'demos.apps.%s' % app for app in DEMOS_APPS ]
-LOCALE_PATHS += [ os.path.join(BASE_DIR, 'apps/%s/locale' % app) for app in DEMOS_APPS ]
-
-
-# Celery-specific configuration
-# http://docs.celeryproject.org/en/latest/getting-started/brokers/index.html
-
-BROKER_URL = 'amqp://'
-CELERY_RESULT_BACKEND = 'amqp'
-# CELERY_TASK_SERIALIZER = 'json'
-# CELERY_ACCEPT_CONTENT = ['json', 'msgpack']
-
 if DEVELOPMENT:
-    
-    # Alternative config, only using Django + existing db
-    # Note: introduces dependency on python-SQLAlchemy
-    
-    BROKER_URL = 'django://'
-    INSTALLED_APPS.append('kombu.transport.django')
-    CELERY_RESULT_BACKEND = 'db+postgresql://%(USER)s:%(PASSWORD)s@' \
-        '%(HOST)s:%(PORT)s/%(NAME)s' % DATABASES['default']
-
-
-# Development-only settings, not to be used in production
-
-if DEVELOPMENT:
-    DEBUG = True
-    
-    TEMPLATES[0]['APP_DIRS'] = True
-    del TEMPLATES[0]['OPTIONS']['loaders']
     
     LOGGING = {
         'version': 1,
@@ -345,19 +235,31 @@ if DEVELOPMENT:
                 'handlers': ['console'],
                 'level': 'DEBUG',
             },
-            'demos': {
-                'handlers': ['console'],
-                'level': 'DEBUG',
-            },
             'django.db.backends': {
                 'handlers': ['console'],
                 'level': 'INFO',
                 'propagate': False,
             },
+            'demos': {
+                'handlers': ['console'],
+                'level': 'DEBUG',
+            },
         }
     }
-    
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
+# Security Middleware
+# https://docs.djangoproject.com/en/1.8/ref/middleware/#module-django.middleware.security
+
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_SECONDS = 31536000
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+if DEVELOPMENT:
     
     SECURE_BROWSER_XSS_FILTER = False
     SECURE_CONTENT_TYPE_NOSNIFF = False
@@ -366,4 +268,119 @@ if DEVELOPMENT:
     
     CSRF_COOKIE_SECURE = False
     SESSION_COOKIE_SECURE = False
+
+
+# Demos-specific configuration
+
+DEMOS_APPS = []    # one or more of: ea, bds, abb, vbb
+
+DEMOS_CONFIG = {
+    
+    'ea': {
+        
+        # Election configuration
+        
+        'MAX_BALLOTS': 100000,
+        'MAX_OPTIONS': 128,
+        'MAX_TRUSTEES': 128,
+        'MAX_QUESTIONS': 32,
+        
+        # demos-crypto connection parameters, see:
+        # https://docs.python.org/3/library/socket.html
+        
+        # CRYPTO_AF: e.g. 'AF_UNIX' or 'AF_INET' or 'AF_INET6'
+        # CRYPTO_ADDR: e.g. '/run/demos-crypto.sock' or ('127.0.0.1', 8999)
+        
+        'CRYPTO_AF': 'AF_UNIX',
+        'CRYPTO_ADDR': os.path.join(RUN_DIR, 'demos-crypto.sock'),
+        
+        # Performance settings, they affect CPU and RAM usage, etc
+        
+        'BATCH_SIZE': 128,
+        
+        'RECV_MAX': 67108864,   # 64 MB
+        'RECV_TIMEOUT': 900,   # 15 mins
+        
+        # Certificate Authority (X.509 / RSA)
+        
+        # CA_CERT_PEM: e.g. '/etc/pki/CA/cacert.pem',
+        # CA_PKEY_PEM: e.g. '/etc/pki/CA/private/cakey.pem',
+        
+        # If DEVELOPMENT is True and pem-file paths are empty or invalid,
+        # self-signed certificates will be generated
+        
+        'CA_CERT_PEM': '',
+        'CA_PKEY_PEM': '',
+        'CA_PKEY_PASSPHRASE': '',
+    },
+    
+    'bds': {
+        
+        # Performance settings, they affect CPU and RAM usage, etc
+        
+        'BATCH_SIZE': 128,
+        
+        # Absolute path to the directory that will hold machine-local files
+        
+        'FILESYSTEM_ROOT': os.path.join(VARLIB_DIR, 'bds'),
+    },
+    
+    'abb': {
+        
+        # Performance settings, they affect CPU and RAM usage, etc
+        
+        'BATCH_SIZE': 128,
+        
+        # Absolute path to the directory that will hold machine-local files
+        
+        'FILESYSTEM_ROOT': os.path.join(VARLIB_DIR, 'abb'),
+    },
+    
+    'vbb': {
+    },
+}
+
+DEMOS_URL = {
+    'ea': 'https://demos-ea.domain-name.example/',
+    'bds': 'https://demos-bds.domain-name.example/',
+    'abb': 'https://demos-abb.domain-name.example/',
+    'vbb': 'https://demos-vbb.domain-name.example/',
+}
+
+DEMOS_API_URL = {
+    'ea': 'https://demos-ea.domain-name.example/api/',
+    'bds': 'https://demos-bds.domain-name.example/api/',
+    'abb': 'https://demos-abb.domain-name.example/api/',
+    'vbb': 'https://demos-vbb.domain-name.example/api/',
+}
+
+# In case the API URLs are SSL-enabled and use self-signed certificates,
+# their verification can be disabled to allow requests among servers
+# http://docs.python-requests.org/en/latest/user/advanced/#ssl-cert-verification
+
+# DEMOS_API_VERIFY = False    # the default is True
+
+
+INSTALLED_APPS += [ 'demos.apps.%s' % app for app in DEMOS_APPS ]
+LOCALE_PATHS += [ os.path.join(BASE_DIR, 'apps/%s/locale' % app) for app in DEMOS_APPS ]
+
+
+# Celery-specific configuration
+# http://docs.celeryproject.org/en/latest/getting-started/brokers/index.html
+
+BROKER_URL = 'redis+socket://' + os.path.join(RUN_DIR, 'redis.sock')
+CELERY_RESULT_BACKEND = 'redis'
+
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ['json', 'msgpack']
+
+if DEVELOPMENT and False:
+    
+    # Alternative config, only using Django + existing db
+    # Note: introduces dependency on python-SQLAlchemy
+    
+    BROKER_URL = 'django://'
+    INSTALLED_APPS += [ 'kombu.transport.django' ]
+    CELERY_RESULT_BACKEND = 'db+postgresql://%(USER)s:%(PASSWORD)s@' \
+        '%(HOST)s:%(PORT)s/%(NAME)s' % DATABASES['default']
 

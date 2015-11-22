@@ -55,7 +55,8 @@ coverage.xml
 target/
 
 # demos
-/demos/data/
+/devel/
+/demos/devel/
 
 # demos-crypto
 /demos-crypto/src/demos-crypto
