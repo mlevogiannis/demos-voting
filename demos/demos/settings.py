@@ -371,8 +371,9 @@ LOCALE_PATHS += [ os.path.join(BASE_DIR, 'apps/%s/locale' % app) for app in DEMO
 BROKER_URL = 'redis+socket://' + os.path.join(RUN_DIR, 'redis.sock')
 CELERY_RESULT_BACKEND = 'redis'
 
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_ACCEPT_CONTENT = ['json', 'msgpack']
+CELERY_TASK_SERIALIZER = 'custom-json'
+CELERY_RESULT_SERIALIZER = 'custom-json'
+CELERY_ACCEPT_CONTENT = ['custom-json', 'json', 'msgpack']
 
 if DEVELOPMENT and False:
     
