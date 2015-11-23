@@ -35,6 +35,8 @@ class Election(models.Model):
     end_datetime = models.DateTimeField()
     
     state = fields.IntEnumField(cls=enums.State)
+
+    type = fields.IntEnumField(cls=enums.Type)
     vc_type = fields.IntEnumField(cls=enums.VcType)
 
     ballots = models.PositiveIntegerField()

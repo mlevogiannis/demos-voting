@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Ballot',
             fields=[
-                ('id', models.AutoField(serialize=False, primary_key=True, verbose_name='ID', auto_created=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('serial', models.PositiveIntegerField()),
             ],
             options={
@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Config',
             fields=[
-                ('id', models.AutoField(serialize=False, primary_key=True, verbose_name='ID', auto_created=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('key', models.CharField(unique=True, max_length=128)),
                 ('value', models.CharField(max_length=128)),
             ],
@@ -41,8 +41,9 @@ class Migration(migrations.Migration):
                 ('title', models.CharField(max_length=128)),
                 ('start_datetime', models.DateTimeField()),
                 ('end_datetime', models.DateTimeField()),
-                ('state', demos.common.utils.fields.IntEnumField(cls=demos.common.utils.enums.State)),
-                ('vc_type', models.PositiveSmallIntegerField(choices=[(1, 'short'), (2, 'long')])),
+                ('state', demos.common.utils.fields.IntEnumField(cls=demos.common.utils.enums.State, choices=[(1, b'draft'), (2, b'pending'), (3, b'working'), (4, b'running'), (5, b'completed'), (6, b'paused'), (7, b'error'), (8, b'template')])),
+                ('type', demos.common.utils.fields.IntEnumField(cls=demos.common.utils.enums.Type, choices=[(1, b'elections'), (2, b'referendum')])),
+                ('vc_type', demos.common.utils.fields.IntEnumField(cls=demos.common.utils.enums.VcType, choices=[(1, b'short'), (2, b'long')])),
                 ('ballots', models.PositiveIntegerField()),
             ],
             options={
@@ -52,7 +53,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='OptionC',
             fields=[
-                ('id', models.AutoField(serialize=False, primary_key=True, verbose_name='ID', auto_created=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('text', models.CharField(max_length=128)),
                 ('index', models.PositiveSmallIntegerField()),
             ],
@@ -63,7 +64,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='OptionV',
             fields=[
-                ('id', models.AutoField(serialize=False, primary_key=True, verbose_name='ID', auto_created=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('decom', demos.common.utils.fields.ProtoField(cls=demos.common.utils.crypto.crypto_pb2.Decom)),
                 ('zk_state', demos.common.utils.fields.ProtoField(cls=demos.common.utils.crypto.crypto_pb2.ZKState)),
                 ('index', models.PositiveSmallIntegerField()),
@@ -75,8 +76,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Part',
             fields=[
-                ('id', models.AutoField(serialize=False, primary_key=True, verbose_name='ID', auto_created=True)),
-                ('index', models.CharField(choices=[('A', 'A'), ('B', 'B')], max_length=1)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('index', models.CharField(max_length=1, choices=[('A', 'A'), ('B', 'B')])),
                 ('ballot', models.ForeignKey(to='ea.Ballot')),
             ],
             options={
@@ -86,9 +87,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Question',
             fields=[
-                ('id', models.AutoField(serialize=False, primary_key=True, verbose_name='ID', auto_created=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('text', models.CharField(max_length=128)),
                 ('index', models.PositiveSmallIntegerField()),
+                ('options', models.PositiveSmallIntegerField()),
             ],
             options={
                 'ordering': ['election', 'index'],
@@ -97,7 +99,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='RemoteUser',
             fields=[
-                ('id', models.AutoField(serialize=False, primary_key=True, verbose_name='ID', auto_created=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('username', models.CharField(unique=True, max_length=128)),
                 ('password', models.CharField(max_length=128)),
             ],
@@ -108,14 +110,14 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Trustee',
             fields=[
-                ('id', models.AutoField(serialize=False, primary_key=True, verbose_name='ID', auto_created=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('email', models.EmailField(max_length=254)),
             ],
         ),
         migrations.CreateModel(
             name='Task',
             fields=[
-                ('election', models.OneToOneField(serialize=False, primary_key=True, to='ea.Election')),
+                ('election', models.OneToOneField(primary_key=True, serialize=False, to='ea.Election')),
                 ('task_id', models.UUIDField()),
             ],
         ),

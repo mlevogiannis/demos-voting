@@ -16,8 +16,6 @@ from demos.common.utils.config import registry
 config = registry.get_config('ea')
 
 
-# DefineView Forms -------------------------------------------------------------
-
 class ElectionForm(forms.Form):
     
     title = forms.CharField(label=_('Title'),
@@ -34,8 +32,34 @@ class ElectionForm(forms.Form):
     trustee_list = fields.MultiEmailField(label=_('Trustee e-mails'),
         min_length=1, max_length=config.MAX_TRUSTEES, required=False)
     
-    votecode_type = forms.ChoiceField(label=_('Vote-codes'), \
-        choices=(('short', _('Short')), ('long', _('Long'))))
+    _votecode_type_choices = (
+        ('short', _('Short')),
+        ('long', _('Long'))
+    )
+    
+    votecode_type = forms.ChoiceField(label=_('Vote-codes'),
+        choices=_votecode_type_choices)
+    
+    _election_type_choices = (
+        ('elections', _('Elections')),
+        ('referendum', _('Referendum'))
+    )
+    
+    election_type = forms.ChoiceField(label=_('Election type'),
+        choices=_election_type_choices)
+    
+    _election_system_choices = (
+        ('pr',  _('Proportional representation')),
+        ('mbs', _('Majority bonus system')),
+        ('mmp', _('Mixed Member Proportional')),
+        ('mr',  _('Majority rule')),
+    )
+    
+    electoral_system = forms.ChoiceField(label=_('Electoral system'),
+        choices=_election_system_choices, required=False)
+    
+    choices = forms.IntegerField(label=_('Choices'),
+        initial=1, min_value=1, max_value=config.MAX_OPTIONS, required=False)
     
     error_msg = {
         'passed': _("The date and time you selected have passed."),
@@ -49,7 +73,7 @@ class ElectionForm(forms.Form):
         
         start_datetime = self.cleaned_data['start_datetime']
         
-        # Verify start_datetime is valid
+        # Verify that start_datetime is valid
         
         if start_datetime < timezone.now():
             raise forms.ValidationError(self.error_msg['passed'],code='invalid')
@@ -60,7 +84,7 @@ class ElectionForm(forms.Form):
         
         end_datetime = self.cleaned_data['end_datetime']
         
-        # Verify end_datetime is valid
+        # Verify that end_datetime is valid
         
         if end_datetime < timezone.now():
             raise forms.ValidationError(self.error_msg['passed'],code='invalid')
@@ -71,10 +95,10 @@ class ElectionForm(forms.Form):
         
         cleaned_data = super(ElectionForm, self).clean()
         
+        # Verify that end_datetime is not before start_datetime
+        
         start_datetime = cleaned_data.get('start_datetime')
         end_datetime = cleaned_data.get('end_datetime')
-        
-        # Verify that end_datetime is not before start_datetime
         
         if start_datetime and end_datetime and end_datetime <= start_datetime:
             error=forms.ValidationError(self.error_msg['order'], code='invalid')
@@ -90,6 +114,27 @@ class ElectionForm(forms.Form):
                 cleaned_data['vc_type'] = enums.VcType.SHORT
             elif votecode_type == 'long':
                 cleaned_data['vc_type'] = enums.VcType.LONG
+        
+        # 'type' depends on 'election_type'
+        
+        election_type = cleaned_data.get('election_type')
+        
+        if election_type is not None:
+            
+            if election_type == 'elections':
+                cleaned_data['type'] = enums.Type.ELECTIONS
+            elif election_type == 'referendum':
+                cleaned_data['type'] = enums.Type.REFERENDUM
+        
+        # 'electoral_system' and 'choices' are required if and only if
+        # 'election_type' is 'elections'
+        
+        if cleaned_data.get('type') == enums.Type.ELECTIONS:
+            
+            for field in ('electoral_system', 'choices'):
+                if not cleaned_data.get(field):
+                    self.add_error(field, forms.ValidationError(forms.Field.\
+                        default_error_messages['required'], code='required'))
 
 
 class QuestionForm(forms.Form):

@@ -6,6 +6,10 @@
     padding-top: 12px;
 }
 
+#question-table {
+    display: none;
+}
+
 #question-table tr > td:last-child button,
 .question .option .input-group-addon:last-child {
     width: 56px;
@@ -106,6 +110,11 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+}
+
+.ctrl-elections,
+.ctrl-referendum {
+    display: none;
 }
 
 /* -------------------------------------------------------------------------- */

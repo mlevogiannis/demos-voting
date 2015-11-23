@@ -12,6 +12,8 @@ class IntEnum(IntEnum):
         return str(int(self))
 
 
+# Enum definitions -------------------------------------------------------------
+
 @unique
 class State(IntEnum):
     
@@ -23,6 +25,12 @@ class State(IntEnum):
     PAUSED = 6
     ERROR = 7
     TEMPLATE = 8
+
+@unique
+class Type(IntEnum):
+
+    ELECTIONS = 1
+    REFERENDUM = 2
 
 @unique
 class VcType(IntEnum):

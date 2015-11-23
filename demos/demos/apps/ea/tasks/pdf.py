@@ -321,15 +321,21 @@ class BallotBuilder:
         
         self.serial_text = _("Serial number") + ":"
         self.security_text = _("Security code") + ":"
-        self.opt_text = _("Option")
         self.vc_text = _("Vote-code")
         self.rec_text = _("Receipt")
         self.abb_text = _("Audit and Results") + ":"
         self.vbb_text = _("Digital Ballot Box") + ":"
         self.ballot_text = _("Ballot")
         
-        self.question_text = _("Question") + (" %(index)s:"
-            if len(election_obj['__list_Question__']) > 1 else ":")
+        if election_obj['type'] == enums.Type.REFERENDUM:
+            self.opt_text = _("Option")
+            self.question_text = _("Question")
+        else:
+            self.opt_text = _("Candidate")
+            self.question_text = _("Party")
+        
+        self.question_text += \
+            " %s:" if len(election_obj['__list_Question__']) > 1 else ":"
         
         self.help_text = _( "Please use one of the two sides to vote and the " \
             "other one to audit your vote")
@@ -421,7 +427,7 @@ class BallotBuilder:
             
             # Question title table
             
-            question_text = self.question_text % {'index': index}
+            question_text = self.question_text % index
             
             que_text_width = stringWidth(question_text, self.sans_bold,
                 self.font_md) + self.cell_padding

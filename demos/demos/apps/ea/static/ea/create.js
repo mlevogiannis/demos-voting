@@ -46,6 +46,42 @@ $(".date [data-toggle='tooltip']").click(function(e) {
     $(this).tooltip("hide");
 });
 
+// Elections/Referendum --------------------------------------------------------
+
+function election_type_change_handler() {
+    
+    var new_value = $("#id_election-election_type").val()
+    
+    if (new_value != "elections" && new_value != "referendum") {
+        $(".ctrl-elections, .ctrl-referendum, #question-table").fadeOut();
+        return;
+    }
+    
+    var old_value = new_value == "referendum" ? "elections" : "referendum";
+    
+    $(".ctrl-" + old_value).fadeOut(200, function() {
+        $(".ctrl-" + new_value).fadeIn();
+    });
+    
+    $(".btn > .ctrl-" + new_value).css("display", "inline");
+    $(".input-group-addon > .ctrl-" + new_value).css("display", "inline");
+    
+    $("#qed").toggleClass("hidden", new_value != "referendum");
+    
+    $(".elections-or-referendum[data-toggle='tooltip']").each(function(index) {
+        
+        var tooltip = $(this);
+        var title = tooltip.data("title-" + new_value);
+        
+        tooltip.attr("title", title);
+        tooltip.tooltip("fixTitle");
+    });
+    
+    $("#question-table").fadeIn();
+}
+
+$("#id_election-election_type").on("change", election_type_change_handler);
+
 // Question sortable -----------------------------------------------------------
 
 $("#question-table tbody").sortable({
@@ -206,9 +242,22 @@ function show_question(question) {
     question.removeClass("hidden");
     
     var modal_title = question_modal.find(".modal-title");
-    var title = modal_title.data((typeof question.data("question-data") === "undefined") ? "add-title" : "edit-title");
     
-    modal_title.text(title);
+    var b0 = ($("#id_election-election_type").val() == "elections");
+    var b1 = (typeof question.data("question-data") === "undefined");
+    
+    var title_attr;
+    
+    if (b0 && b1)
+        title_attr = "title-elections-add"
+    else if (b0 && !b1)
+        title_attr = "title-elections-edit"
+    else if (!b0 && b1)
+        title_attr = "title-referendum-add"
+    else // if (!b0 && !b1)
+        title_attr = "title-referendum-edit"
+    
+    modal_title.text(modal_title.data(title_attr));
     question_modal.modal("show");
 }
 
@@ -418,22 +467,25 @@ function update_option_list(question) {
             });
         }
         
+        var inputs = option.find("input");
+        var labels = option.find("label");
+        
         // Update 'id', 'name' and 'for' attributes
         
-        option.find("input").each(function(i, e) {
+        inputs.each(function(i, e) {
             replace_f($(this), "id", new_index);
             replace_f($(this), "name", new_index);
         });
         
-        option.find("label").each(function(i, e) {
+        labels.each(function(i, e) {
             replace_f($(this), "for", new_index);
         });
         
-        // Update labels
+        // Update visible text
         
-        var labels = option.find("label").add(option.find("input").prev());
+        var text = labels.add(inputs.prev().children(".index"));
         
-        labels.each(function(i, e) {
+        text.each(function(i, e) {
             $(this).text($(this).text().replace(/\d+/, new_index + 1));
         });
     });
@@ -729,6 +781,8 @@ $(".input-group-spinner > .input-group-btn > .btn").click(function(e) {
     var button = $(this);
     var input = button.parent().siblings("input");
     
+    if (input.prop("disabled")) return;
+    
     var val = parseInt(input.val());
     var minval = parseInt(input.prop("min")) || 0;
     
@@ -774,9 +828,12 @@ $("form").find(".question").each(function(index, element) {
     register_option_sortable(question);
 });
 
-// Enable tolltips
+// Enable tooltips
 
 $("body").tooltip({
     selector: "[data-toggle='tooltip']",
 });
 
+// Show question or party table
+
+election_type_change_handler();
