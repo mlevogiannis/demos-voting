@@ -194,10 +194,10 @@ def tally_protocol(election_id):
             
             for part in part_qs:
                 
-                zk1_list = OptionV.objects.filter(part=part, \
-                    question=question).values_list('zk1', flat=True)
+                o_iz_list = list(OptionV.objects.filter(part=part, \
+                    question=question).values_list('index', 'zk1'))
                 
-                ballots.append((part.ballot.serial, part.index, list(zk1_list)))
+                ballots.append((part.ballot.serial, part.index, o_iz_list))
             
             # Send request
             

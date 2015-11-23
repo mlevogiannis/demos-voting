@@ -31,7 +31,7 @@ from celery.result import AsyncResult
 from demos.apps.ea.forms import ElectionForm, OptionFormSet, \
     PartialQuestionFormSet, BaseQuestionFormSet
 from demos.apps.ea.tasks import api_update, cryptotools, election_setup, pdf
-from demos.apps.ea.models import Config, Election, OptionC, OptionV, Task
+from demos.apps.ea.models import Config, Election, Question, OptionV, Task
 
 from demos.common.utils import api, base32cf, crypto, enums
 from demos.common.utils.json import CustomJSONEncoder
@@ -349,17 +349,26 @@ class CryptoToolsView(View):
         return http.HttpResponse()
     
     @staticmethod
-    def _deserialize(field, cls):
+    def _deserialize(field_or_list, pb_cls):
         
-        # Deserialize base64-encoded pb message
+        is_field = not isinstance(field_or_list, (list, tuple))
+        field_list = [ field_or_list ] if is_field else field_or_list
         
-        field = field.encode('ascii')
-        field = b64decode(field)
+        # Deserialize a list of base64-encoded pb messages
         
-        pb_field = cls()
-        pb_field.ParseFromString(field)
+        pb_field_list = []
         
-        return pb_field
+        for field in field_list:
+            
+            field = field.encode('ascii')
+            field = b64decode(field)
+            
+            pb_field = pb_cls()
+            pb_field.ParseFromString(field)
+            
+            pb_field_list.append(pb_field)
+        
+        return pb_field_list[0] if is_field else pb_field_list
     
     def post(self, request, *args, **kwargs):
         
@@ -378,77 +387,127 @@ class CryptoToolsView(View):
             
             if command == 'add_com':
                 
-                # Input is a list of base64-encoded 'com' fields, returns 'com'.
+                # Input is a list of base64-encoded 'com' fields, returns 'com'
                 
-                com_list = [self._deserialize(com, crypto.Com) \
-                    for com in request_obj['com_list']]
+                com_list=self._deserialize(request_obj['com_list'], crypto.Com)
                 
-                response = cryptotools.add_com(key, com_list)
-            
+                # Add 'com' fields
+                
+                for lo in range(0, len(com_list), config.BATCH_SIZE):
+                    hi = lo + min(config.BATCH_SIZE, len(com_list) - lo)
+                    
+                    com_buf = com_list[lo: hi]
+                    
+                    if lo > 0:
+                        com_buf.append(com)
+                    
+                    com = cryptotools.add_com(key, com_buf)
+                
+                # Special case: no ballots
+                
+                if len(com_list) == 0:
+                    com = cryptotools.add_com(key, [])
+                
+                response = com
+                
             elif command == 'add_decom':
                 
                 # Input is a list of 3-tuples: (b_serial, p_index, o_index_list)
-                # returns 'decom'.
+                # returns 'decom'
                 
                 ballots = request_obj['ballots']
                 
-                if len(ballots) == 0:
-                    
-                    decom = crypto.Decom()
-                    for _ in range(request_obj['options']):
-                        dp = decom.dp.add()
-                        dp.randomness = ''
-                        dp.msg = 0
+                # Add 'decom' fields
                 
-                for lo in range(0, len(ballots), config.BATCH_SIZE):
-                    hi = lo + min(config.BATCH_SIZE, len(ballots) - lo)
-                    
-                    decom_list = [] if lo == 0 else [decom]
-                    
-                    for b_serial, p_index, o_index_list in ballots[lo: hi]:
-                        
-                        _decom_list = OptionV.objects.filter(
-                            part__ballot__election__id=e_id,
-                            part__ballot__serial=b_serial,
-                            part__index=p_index,
-                            question__index=q_index,
-                            index__in=o_index_list,
-                        ).values_list('decom', flat=True)
-                        
-                        decom_list.extend(_decom_list)
-                    
-                    decom = cryptotools.add_decom(key, decom_list)
+                decom_buf = []
                 
-                response = decom
+                for b_serial, p_index, o_index_list in ballots:
+                    
+                    optionv_qs = OptionV.objects.filter(
+                        part__ballot__election__id=e_id, part__ballot__serial=
+                        b_serial, question__index=q_index, part__index=p_index
+                    )
+                    
+                    for lo in range(0, len(o_index_list), config.BATCH_SIZE):
+                        hi = lo + min(config.BATCH_SIZE, len(o_index_list) - lo)
+                        
+                        _qs = optionv_qs.filter(index__in=o_index_list[lo:hi])
+                        decom_buf.extend(_qs.values_list('decom', flat=True))
+                        
+                        # Flush the buffer
+                        
+                        if len(decom_buf) > config.BATCH_SIZE:
+                            
+                            decom = cryptotools.add_decom(key, decom_buf)
+                            decom_buf = [ decom ]
+                
+                # Return the combined decom (len = 1), flush the non-empty
+                # buffer (len > 1), or add the empty list (len = 0, generates
+                # an empty decom)
+                
+                response = decom_buf[0] if len(decom_buf) == 1 \
+                    else cryptotools.add_decom(key, decom_buf)
                 
             elif command == 'complete_zk':
                 
-                # Input is a list of 3-tuples: (b_serial, p_index, zk1_list),
-                # where zk1_list is the list of all zk1 fields of this ballot
-                # part, in ascending index order. Returns a list of zk2 lists,
-                # in the same order.
-                
-                response = []
+                # Input is a list of 3-tuples: (b_serial, p_index, o_iz_list),
+                # where o_iz_list is the list of 2-tuples: (o_index, zk1).
+                # Returns a list of zk2 lists, in the same order.
                 
                 coins = request_obj['coins']
                 ballots = request_obj['ballots']
                 
-                options = OptionC.objects.filter(question__election__id=e_id, \
-                    question__index=q_index).count()
+                options = Question.objects.only('options').\
+                    get(index=q_index, election__id=e_id).options
                 
-                for b_serial, p_index, zk1_list in ballots:
+                # Compute 'zk2' fields
+                
+                zk_buf = []
+                zk2_list = []
+                
+                for b_serial, p_index, o_iz_list in ballots:
                     
-                    zk1_list = [self._deserialize(zk1, crypto.ZK1) \
-                        for zk1 in zk1_list]
+                    optionv_qs = OptionV.objects.filter(
+                        part__index=p_index, part__ballot__serial=b_serial
+                    )
                     
-                    zk_state_list = OptionV.objects.filter(part__index=\
-                        p_index, part__ballot__serial=b_serial).\
-                        values_list('zk_state', flat=True)
+                    for lo in range(0, len(o_iz_list), config.BATCH_SIZE):
+                        hi = lo + min(config.BATCH_SIZE, len(o_iz_list) - lo)
+                        
+                        o_index_list, zk1_list = zip(*o_iz_list)
+                        zk1_list = self._deserialize(zk1_list, crypto.ZK1)
+                        
+                        _qs = optionv_qs.filter(index__in=o_index_list[lo:hi])
+                        zk_state_list = _qs.values_list('zk_state', flat=True)
+                        
+                        zk_buf.extend(zip(zk1_list, zk_state_list))
+                        
+                        # Flush the buffer
+                        
+                        if len(zk_buf) > config.BATCH_SIZE:
+                            
+                            zk2_list.extend(cryptotools.\
+                                complete_zk(key, options, coins, zk_buf))
+                            zk_buf = []
+                
+                # Flush non-empty buffer
+                
+                if zk_buf:
                     
-                    zk_list = list(zip(zk1_list, zk_state_list))
-                    zk2_list=cryptotools.complete_zk(key,options,coins,zk_list)
+                    zk2_list.extend(cryptotools.\
+                        complete_zk(key, options, coins, zk_buf))
+                
+                # Re-create input's structure
+                
+                lo = hi = 0
+                response = []
+                
+                for _, _, o_iz_list in ballots:
                     
-                    response.append(zk2_list)
+                    lo = hi
+                    hi = lo + len(o_iz_list)
+                    
+                    response.append(zk2_list[lo: hi])
                 
             elif command == 'verify_com':
                 
