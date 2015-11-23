@@ -348,10 +348,10 @@ DEMOS_URL = {
 }
 
 DEMOS_API_URL = {
-    'ea': 'https://demos-ea.domain-name.example/api/',
-    'bds': 'https://demos-bds.domain-name.example/api/',
-    'abb': 'https://demos-abb.domain-name.example/api/',
-    'vbb': 'https://demos-vbb.domain-name.example/api/',
+    'ea': 'https://api.demos-ea.domain-name.example/',
+    'bds': 'https://api.demos-bds.domain-name.example/',
+    'abb': 'https://api.demos-abb.domain-name.example/',
+    'vbb': 'https://api.demos-vbb.domain-name.example/',
 }
 
 # In case the API URLs are SSL-enabled and use self-signed certificates,
