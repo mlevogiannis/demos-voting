@@ -44,6 +44,7 @@ from demos.apps.abb.models import Election, Question, Ballot, Part, OptionV, \
 
 from demos.common.utils import api, base32cf, dbsetup, enums, intc, hashers
 from demos.common.utils.config import registry
+from demos.common.utils.fields import IntEnumField
 from demos.common.utils.permutation import permute_ori
 
 logger = logging.getLogger(__name__)
@@ -391,8 +392,10 @@ class ExportView(View):
         'election': {
             'model': Election,
             'args': [('id', '[' + base32cf._valid_re + ']+')],
-            'fields': ['cert', 'coins', 'id', 'vc_type'],
+            'fields': ['cert', 'coins', 'id', 'type', 'vc_type'],
             'cache': lambda a: 'export_file' if not a or 'ballots' in a else '',
+            'callback': lambda o, f, v, d: getattr(o['Election'], \
+                'get_' + f + '_display')() if f in ('type', 'vc_type') else v,
             'next': ['ballot', 'question_fk'],
         },
         'ballot': {
@@ -582,18 +585,21 @@ class ExportView(View):
                     # to the callback, too. This may or may not be taken into
                     # account when determining the callback's return value.
                     
-                    default = {f: node['model'].\
-                        _meta.get_field(f).get_default() for f in obj_fields}
+                    default = { f: node['model'].\
+                        _meta.get_field(f).get_default() for f in obj_fields }
                     
                     # Call the callback function for every returned field
                     
-                    for obj_data in obj_data_l:
+                    _objects = objects.copy()
+
+                    for obj, obj_data in zip(obj_qs, obj_data_l):
+                        _objects[node['model'].__name__] = obj
                         for f, v in obj_data.items():
-                            obj_data[f] = callback(objects, f, v, default[f])
-                
+                            obj_data[f] = callback(_objects, f, v, default[f])
+
                 # Traverse the namespace tree and repeat
                 
-                objects = objects.copy()
+                _objects = objects.copy()
                 fields = set(query_args.get(node['name'], node['namespaces']))
                 
                 for next in node['next']:
@@ -604,8 +610,8 @@ class ExportView(View):
                         continue
                     
                     for obj, obj_data in zip(obj_qs, obj_data_l):
-                        objects[node['model'].__name__] = obj
-                        obj_data[name] = _build_data(next, objects, {})
+                        _objects[node['model'].__name__] = obj
+                        obj_data[name] = _build_data(next, _objects, {})
                 
                 return obj_data_l
             
