@@ -392,7 +392,7 @@ class ExportView(View):
             'model': Election,
             'args': [('id', '[' + base32cf._valid_re + ']+')],
             'fields': ['cert', 'coins', 'id', 'vc_type'],
-            'cache': 'export_file',
+            'cache': lambda a: 'export_file' if not a or 'ballots' in a else '',
             'next': ['ballot', 'question_fk'],
         },
         'ballot': {
@@ -773,7 +773,8 @@ class ExportView(View):
         # If the namespace has a cache FileField return that cached file,
         # ignoring html, ajax and url query arguments
         
-        filefield = node['cache']
+        cache = node['cache']
+        filefield = cache if not callable(cache) else cache(ns_args)
         
         if url_name == 'data' and filefield:
             return self._export_file(ns, url_args, filefield, node['name'])
