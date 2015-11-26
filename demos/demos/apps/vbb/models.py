@@ -1,6 +1,6 @@
 # File: models.py
 
-from __future__ import division, unicode_literals
+from __future__ import absolute_import, division, unicode_literals
 
 from django.db import models
 from django.core import urlresolvers
