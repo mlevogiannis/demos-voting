@@ -317,6 +317,8 @@ class BallotBuilder:
         self.election_id = election_obj['id']
         self.vc_type = election_obj['vc_type']
         
+        questions = len(election_obj['__list_Question__'])
+        
         # Translatable text
         
         self.serial_text = _("Serial number") + ":"
@@ -330,12 +332,11 @@ class BallotBuilder:
         if election_obj['type'] == enums.Type.REFERENDUM:
             self.opt_text = _("Option")
             self.question_text = _("Question")
-        else:
+        elif election_obj['type'] == enums.Type.ELECTIONS:
             self.opt_text = _("Candidate")
             self.question_text = _("Party")
         
-        self.question_text += \
-            " %s:" if len(election_obj['__list_Question__']) > 1 else ":"
+        self.question_text += (" %s" if questions > 1 else "") + ":"
         
         self.help_text = _( "Please use one of the two sides to vote and the " \
             "other one to audit your vote")
@@ -427,7 +428,8 @@ class BallotBuilder:
             
             # Question title table
             
-            question_text = self.question_text % index
+            question_text = self.question_text % \
+                ((index,) if questions > 1 else tuple())
             
             que_text_width = stringWidth(question_text, self.sans_bold,
                 self.font_md) + self.cell_padding
@@ -567,8 +569,8 @@ class BallotBuilder:
                 if self.vc_type == enums.VcType.SHORT:
                     vc_list = [str(vc).zfill(vc_chars) for vc in vc_list]
                 elif self.vc_type == enums.VcType.LONG:
-                    vc_list = [base32cf.hyphen(vc, \
-                        self.long_vc_split) for vc in vc_list]
+                    vc_list = [base32cf.hyphen(vc, self.long_vc_split) \
+                        for vc in vc_list]
                 
                 data_list = list(zip(opt_list, vc_list, rec_list))
                 data_len = len(data_list)
