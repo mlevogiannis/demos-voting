@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-11-23 23:19+0000\n"
+"POT-Creation-Date: 2015-11-26 19:36+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -102,7 +102,7 @@ msgstr "Η ημερομηνία και η ώρα που επιλέξατε έχ�
 msgid "Start and end dates and times are not in logical order."
 msgstr "Οι ημερομηνίες και ώρες έναρξης και λήξης δεν είναι σε λογική σειρά."
 
-#: demos/apps/ea/forms.py:142 demos/apps/ea/tasks/pdf.py:333
+#: demos/apps/ea/forms.py:142 demos/apps/ea/tasks/pdf.py:335
 #: demos/apps/ea/templates/ea/create.html:232
 #: demos/apps/ea/templates/ea/create.html:280
 msgid "Question"
@@ -120,7 +120,7 @@ msgstr "Πολλαπλές επιλογές"
 msgid "Question already exists."
 msgstr "Το ερώτημα υπάρχει ήδη."
 
-#: demos/apps/ea/forms.py:204 demos/apps/ea/tasks/pdf.py:326
+#: demos/apps/ea/forms.py:204 demos/apps/ea/tasks/pdf.py:334
 #: demos/apps/ea/templates/ea/create.html:362
 #: demos/apps/ea/templates/ea/create.html:389
 #: demos/apps/ea/templates/ea/create.html:391
@@ -139,18 +139,17 @@ msgstr "Σειριακός αριθμός"
 msgid "Security code"
 msgstr "Κωδικός ασφαλείας"
 
-#: demos/apps/ea/tasks/pdf.py:326 demos/apps/ea/templates/ea/create.html:389
-#: demos/apps/ea/templates/ea/create.html:391
-msgid "Candidate"
-msgstr "Υποψήφιος"
-
-#: demos/apps/ea/tasks/pdf.py:327
+#: demos/apps/ea/tasks/pdf.py:326
 msgid "Vote-code"
 msgstr "Κωδικός"
 
-#: demos/apps/ea/tasks/pdf.py:328
+#: demos/apps/ea/tasks/pdf.py:327
 msgid "Receipt"
 msgstr "Απόδειξη"
+
+#: demos/apps/ea/tasks/pdf.py:328
+msgid "Election ID"
+msgstr "Αναγνωριστικό Ψηφοφορίας"
 
 #: demos/apps/ea/tasks/pdf.py:329
 msgid "Audit and Results"
@@ -164,13 +163,18 @@ msgstr "Ψηφιακή Κάλπη"
 msgid "Ballot"
 msgstr "Ψηφοδέλτιο"
 
-#: demos/apps/ea/tasks/pdf.py:334 demos/apps/ea/templates/ea/create.html:232
+#: demos/apps/ea/tasks/pdf.py:337 demos/apps/ea/templates/ea/create.html:389
+#: demos/apps/ea/templates/ea/create.html:391
+msgid "Candidate"
+msgstr "Υποψήφιος"
+
+#: demos/apps/ea/tasks/pdf.py:338 demos/apps/ea/templates/ea/create.html:232
 #: demos/apps/ea/templates/ea/create.html:280
 #: demos/apps/ea/templates/ea/create.html:306
 msgid "Party"
 msgstr "Συνδυασμός"
 
-#: demos/apps/ea/tasks/pdf.py:339
+#: demos/apps/ea/tasks/pdf.py:342
 msgid ""
 "Please use one of the two sides to vote and the other one to audit your vote"
 msgstr ""

@@ -138,17 +138,17 @@ class BallotBuilder:
         line_list.append(line)
         return line_list
     
-    def _url_prepare(self, text, url):
+    def _kv_table_prepare(self, key, value, link=False):
         
         line_width = self.page_width - self.cell_padding
-        text_width = stringWidth(text + 2*" ", self.sans_bold, self.font_md)
+        key_width = stringWidth(key + 2*" ", self.sans_bold, self.font_md)
         
-        url_lines = self._split_line(url, self.sans_regular, self.font_md,
-            [line_width-text_width, line_width-self.url_indent])
+        value_lines = self._split_line(value, self.sans_regular, self.font_md,
+            [line_width-key_width, line_width-self.kv_indent])
             
-        paragraph = "<font name='" + self.sans_bold + "'>" + text + \
-            "</font>" + 2*"&nbsp;" + "<link href='" + url + "'>" + \
-            "\n".join(url_lines) + "</link>"
+        paragraph = "<font name='" + self.sans_bold + "'>" + key + "</font>" + \
+            2*"&nbsp;" + ("<link href='" + value + "'>" if link else "") + \
+            "\n".join(value_lines) + ("</link>" if link else "")
         
         return paragraph
     
@@ -173,7 +173,8 @@ class BallotBuilder:
     img_size = page_width // 4.5
     font_size_index = int(img_size)
     
-    url_indent = page_width // 20
+    kv_indent = page_width // 20
+    
     table_top_gap = page_width // 15
     table_opt_gap = page_width // 50
     
@@ -265,7 +266,7 @@ class BallotBuilder:
     
     # TableStyle definitions (footer)
     
-    table_url_style = TableStyle([
+    table_kv_style = TableStyle([
         ('ALIGN',         ( 0, 0), (-1,-1), 'LEFT'),
     ])
     
@@ -288,19 +289,19 @@ class BallotBuilder:
         ('ALIGN',         ( 0, 0), (-1,-1), 'CENTER'),
         ('VALIGN',        ( 0, 0), (-1,-1), 'MIDDLE'),
         ('TOPPADDING',    ( 0, 0), (-1, 0), spacer),
-        ('TOPPADDING',    ( 0, 1), (-1, 1), -1.5),
-        ('BOTTOMPADDING', ( 0, 2), (-1, 2), -1.5),
+        ('TOPPADDING',    ( 0, 1), (-1, 2), -1.5),
+        ('BOTTOMPADDING', ( 0, 3), (-1, 3), -1.5),
     ])
     
     # ParagraphStyle definitions
     
-    paragraph_url_style = ParagraphStyle(
-        name='url_style',
+    paragraph_kv_style = ParagraphStyle(
+        name='kv_style',
         fontSize=font_md,
         fontName=sans_regular,
         alignment=TA_LEFT,
-        firstLineIndent=-url_indent,
-        leftIndent=url_indent,
+        firstLineIndent=-kv_indent,
+        leftIndent=kv_indent,
         leading=16,
     )
     
@@ -325,6 +326,7 @@ class BallotBuilder:
         self.security_text = _("Security code") + ":"
         self.vc_text = _("Vote-code")
         self.rec_text = _("Receipt")
+        self.id_text = _("Election ID") + ":"
         self.abb_text = _("Audit and Results") + ":"
         self.vbb_text = _("Digital Ballot Box") + ":"
         self.ballot_text = _("Ballot")
@@ -473,8 +475,8 @@ class BallotBuilder:
             abb_url = urljoin(config.URL['abb'], \
                 quote("%s/" % self.election_id))
             
-            vbb_url = urljoin(config.URL['vbb'], quote("%s/%s/" \
-                 % (self.election_id, part_obj['vote_token'])))
+            vbb_url = urljoin(config.URL['vbb'], \
+                quote("%s/%s/" % (self.election_id, part_obj['vote_token'])))
             
             # Generate QRCode
             
@@ -498,14 +500,19 @@ class BallotBuilder:
                 self.top_value_width], style=self.table_top_style
             )
             
-            text = self._url_prepare(self.abb_text, abb_url)
-            table_abb = Table([[Paragraph(text, self.paragraph_url_style)]],
-                colWidths=[self.page_width], style=self.table_url_style
+            text = self._kv_table_prepare(self.id_text, self.election_id)
+            table_id = Table([[Paragraph(text, self.paragraph_kv_style)]],
+                colWidths=[self.page_width], style=self.table_kv_style
             )
             
-            text = self._url_prepare(self.vbb_text, vbb_url)
-            table_vbb = Table([[Paragraph(text, self.paragraph_url_style)]],
-                colWidths=[self.page_width], style=self.table_url_style
+            text = self._kv_table_prepare(self.vbb_text, vbb_url, link=True)
+            table_vbb = Table([[Paragraph(text, self.paragraph_kv_style)]],
+                colWidths=[self.page_width], style=self.table_kv_style
+            )
+            
+            text = self._kv_table_prepare(self.abb_text, abb_url, link=True)
+            table_abb = Table([[Paragraph(text, self.paragraph_kv_style)]],
+                colWidths=[self.page_width], style=self.table_kv_style
             )
             
             table_img = Table([["", "", part_obj['index']], [qr_img,
@@ -525,8 +532,8 @@ class BallotBuilder:
                 [self.page_width], style=self.table_header_style
             )
             
-            table_ftr = Table(data=[[table_abb], [table_vbb], [table_img],
-                [table_hlp]], colWidths=[self.page_width],
+            table_ftr = Table(data=[[table_id], [table_vbb], [table_abb],
+                [table_img], [table_hlp]], colWidths=[self.page_width],
                 style=self.table_footer_style
             )
             
