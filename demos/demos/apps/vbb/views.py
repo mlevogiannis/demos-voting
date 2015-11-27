@@ -411,20 +411,18 @@ class VoteView(View):
                 
                 # Send vote data to the abb server
                 
-                abb_session = api.Session('abb', app_config)
+                abb_session = api.ApiSession('abb', app_config)
                 
                 data = {
-                    'votedata': json.dumps({
-                        'e_id': election.id,
-                        'b_serial': ballot.serial,
-                        'b_credential': credential,
-                        'p1_index': part1.index,
-                        'p1_votecodes': vote_obj,
-                        'p2_security_code': security_code,
-                    })
+                    'e_id': election.id,
+                    'b_serial': ballot.serial,
+                    'b_credential': credential,
+                    'p1_index': part1.index,
+                    'p1_votecodes': vote_obj,
+                    'p2_security_code': security_code,
                 }
                 
-                abb_session.post('command/vote/', data)
+                abb_session.post('command/vote/', data, json=True)
                 
                 ballot.used = True
                 ballot.save(update_fields=['used'])
@@ -466,8 +464,10 @@ class SetupView(View):
     def post(self, request, *args, **kwargs):
         
         try:
-            task = request.POST['task']
-            election_obj = json.loads(request.POST['payload'])
+            request_obj = api.ApiSession.load_json_request(request.POST)
+            
+            task = request_obj['task']
+            election_obj = request_obj['payload']
             
             if task == 'election':
                 dbsetup.election(election_obj, app_config)
@@ -495,11 +495,11 @@ class UpdateView(View):
     def post(self, request, *args, **kwargs):
         
         try:
-            data = json.loads(request.POST['data'])
-            model = app_config.get_model(data['model'])
+            data = api.ApiSession.load_json_request(request.POST)
             
             fields = data['fields']
             natural_key = data['natural_key']
+            model = app_config.get_model(data['model'])
             
             obj = model.objects.get_by_natural_key(**natural_key)
             

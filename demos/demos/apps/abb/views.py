@@ -148,8 +148,10 @@ class SetupView(View):
     def post(self, request, *args, **kwargs):
         
         try:
-            task = request.POST['task']
-            election_obj = json.loads(request.POST['payload'])
+            request_obj = api.ApiSession.load_json_request(request.POST)
+            
+            task = request_obj['task']
+            election_obj = request_obj['payload']
             
             if task == 'election':
                 
@@ -192,11 +194,11 @@ class UpdateView(View):
     def post(self, request, *args, **kwargs):
         
         try:
-            data = json.loads(request.POST['data'])
-            model = app_config.get_model(data['model'])
+            data = api.ApiSession.load_json_request(request.POST)
             
             fields = data['fields']
             natural_key = data['natural_key']
+            model = app_config.get_model(data['model'])
             
             obj = model.objects.get_by_natural_key(**natural_key)
             
@@ -225,7 +227,7 @@ class VoteView(View):
     def post(self, request, *args, **kwargs):
         
         try:
-            votedata = json.loads(request.POST['votedata'])
+            votedata = api.ApiSession.load_json_request(request.POST)
             
             e_id = votedata['e_id']
             b_serial = votedata['b_serial']

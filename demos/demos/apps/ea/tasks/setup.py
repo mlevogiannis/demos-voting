@@ -5,7 +5,6 @@ from __future__ import absolute_import, division, unicode_literals
 import io
 import os
 import hmac
-import json
 import math
 import time
 import random
@@ -39,7 +38,6 @@ from demos.apps.ea.tasks.masks import apply_mask
 from demos.apps.ea.models import Election, Task
 
 from demos.common.utils import api, base32cf, dbsetup, enums, hashers, intc
-from demos.common.utils.json import CustomJSONEncoder
 from demos.common.utils.config import registry
 from demos.common.utils.permutation import permute
 
@@ -83,7 +81,7 @@ def election_setup(election_obj, language):
     
     # Establish sessions with the other servers
     
-    api_session = {app_name: api.Session(app_name, app_config)
+    api_session = {app_name: api.ApiSession(app_name, app_config)
         for app_name in ['abb', 'vbb', 'bds']}
     
     # Load CA's X.509 certificate and private key
@@ -508,14 +506,12 @@ def api_setup(app_name, **kwargs):
     data = kwargs['data'].copy()
     files = kwargs.get('files')
     
-    payload = apply_mask(app_name, data['payload'])
-    data['payload'] = json.dumps(payload, \
-        separators=(',', ':'), cls=CustomJSONEncoder)
+    data['payload'] = apply_mask(app_name, data['payload'])
     
     if app_name != 'bds':
         files = None
     
-    app_session.post(url_path, data, files)
+    app_session.post(url_path, data, files, json=True)
 
 
 def api_update(app_name, **kwargs):
@@ -526,12 +522,7 @@ def api_update(app_name, **kwargs):
     api_session = kwargs['api_session']
     
     app_session = api_session[app_name]
-    
-    data = kwargs['data'].copy()
-    json_data = json.dumps(data, separators=(',', ':'), cls=CustomJSONEncoder)
-    
-    data = { 'data': json_data }
-    app_session.post(url_path, data)
+    app_session.post(url_path, kwargs['data'], json=True)
 
 
 def crypto_gen(q_list, number):

@@ -2,7 +2,6 @@
 
 from __future__ import absolute_import, division, unicode_literals
 
-import json
 import random
 import logging
 
@@ -378,7 +377,7 @@ class CryptoToolsView(View):
         
         try:
             command = kwargs.pop('command')
-            request_obj = json.loads(request.POST['data'])
+            request_obj = api.ApiSession.load_json_request(request.POST)
             
             # Get common request data
             
@@ -526,7 +525,7 @@ class CryptoToolsView(View):
             logger.exception('CryptoToolsView: API error')
             return http.HttpResponse(status=422)
         
-        return http.JsonResponse(response,safe=False, encoder=CustomJSONEncoder)
+        return http.JsonResponse(response,safe=False,encoder=CustomJSONEncoder)
 
 
 class UpdateStateView(View):
@@ -542,7 +541,7 @@ class UpdateStateView(View):
     def post(self, request, *args, **kwargs):
         
         try:
-            data = json.loads(request.POST['data'])
+            data = api.ApiSession.load_json_request(request.POST)
             
             e_id = data['e_id']
             election = Election.objects.get(id=e_id)
@@ -578,7 +577,7 @@ class UpdateStateView(View):
                 },
             }
             
-            api_session = {app_name: api.Session(app_name, app_config)
+            api_session = {app_name: api.ApiSession(app_name, app_config)
                 for app_name in ['abb','vbb','bds'] if not app_name == username}
             
             for app_name in api_session.keys():
