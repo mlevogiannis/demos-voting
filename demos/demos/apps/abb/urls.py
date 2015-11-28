@@ -1,14 +1,14 @@
 # File: urls.py
 
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from demos.common.utils import api, base32cf
 from demos.apps.abb import views
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^$', views.HomeView.as_view(), name='home'),
     url(r'^audit/(?:(?P<election_id>[' + base32cf._valid_re + r']+)/)?$', views.AuditView.as_view(), name='audit'),
     url(r'^results/(?:(?P<election_id>[' + base32cf._valid_re + r']+)/)?$', views.ResultsView.as_view(), name='results'),
-)
+]
 
 apipatterns = [
     url(r'^manage/', include([

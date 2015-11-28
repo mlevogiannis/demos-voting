@@ -1,14 +1,13 @@
 # File: urls.py
 
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from demos.common.utils import api, base32cf
 from demos.apps.bds import views
 
-urlpatterns = patterns('',
-    
+urlpatterns = [
     url(r'^$', views.HomeView.as_view(), name='home'),
     url(r'^manage/(?P<election_id>[' + base32cf._valid_re + r']+)/$', views.ManageView.as_view(), name='manage'),
-)
+]
 
 apipatterns = [
     url(r'^manage/', include([
