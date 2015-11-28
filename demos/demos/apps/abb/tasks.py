@@ -200,14 +200,14 @@ def tally_protocol(election_id):
                     optionv.zk2 = zk2
                     optionv.save(update_fields=['zk2'])
     
-    # Import the ExportView here to avoid circular dependency error
+    # Import the ApiExportView here to avoid circular dependency error
     
-    from demos.apps.abb.views import ExportView
+    from demos.apps.abb.views import ApiExportView
     
-    export = ExportView._export
-    encoder = ExportView._CustomJSONEncoder
+    export = ApiExportView._export
+    encoder = ApiExportView._CustomJSONEncoder
     
-    del ExportView
+    del ApiExportView
     
     # Create an empty file and open it for writing, workaround for:
     # https://code.djangoproject.com/ticket/13809

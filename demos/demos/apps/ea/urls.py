@@ -14,8 +14,9 @@ urlpatterns = [
 ]
 
 apipatterns = [
-    url(r'^updatestate/$', views.UpdateStateView.as_view(), name='updatestate'),
+    url(r'^updatestate/$', views.ApiUpdateStateView.as_view(), \
+        name='updatestate'),
     url(r'^crypto/(?P<command>add_com|add_decom|complete_zk|verify_com)/$', \
-        views.CryptoToolsView.as_view(), name='crypto'),
+        views.ApiCryptoView.as_view(), name='crypto'),
 ]
 

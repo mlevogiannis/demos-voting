@@ -135,31 +135,40 @@ class ResultsView(View):
         return render(request, self.template_name, context)
 
 
-class SetupView(View):
+# API Views --------------------------------------------------------------------
+
+class ApiSetupView(api.ApiSetupView):
+    
+    def __init__(self, *args, **kwargs):
+        kwargs['app_config'] = app_config
+        super(ApiSetupView, self).__init__(*args, **kwargs)
     
     @method_decorator(api.user_required('ea'))
     def dispatch(self, *args, **kwargs):
-        return super(SetupView, self).dispatch(*args, **kwargs)
+        return super(ApiSetupView, self).dispatch(*args, **kwargs)
     
-    def get(self, request):
-        csrf.get_token(request)
-        return http.HttpResponse()
-    
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         
         try:
-            request_obj = api.ApiSession.load_json_request(request.POST)
+            data = api.ApiSession.load_json_request(request.POST)
             
-            task = request_obj['task']
-            election_obj = request_obj['payload']
-            
-            if task == 'election':
+            if data['task'] == 'election':
+                
+                election_obj = data['payload']
                 
                 cert_dump = election_obj['cert'].encode()
                 cert_file = File(BytesIO(cert_dump), name='cert.pem')
                 election_obj['cert'] = cert_file
                 
-                dbsetup.election(election_obj, app_config)
+        except Exception:
+            logger.exception('SetupView: API error')
+            return http.HttpResponse(status=422)
+                
+        ret_value = super(ApiSetupView, self).post(request, data)
+        
+        try:
+            if data['task'] == 'election':
+                
                 election = Election.objects.get(id=election_obj['id'])
                 
                 scheduled_time = election.end_datetime + timedelta(seconds=5)
@@ -170,57 +179,32 @@ class SetupView(View):
                 Task.objects.create(election=election, task_id=task.id)
                 task.apply_async(eta=scheduled_time)
                 
-            elif task == 'ballot':
-                dbsetup.ballot(election_obj, app_config)
-            else:
-                raise Exception('SetupView: Invalid POST task: %s' % task)
         except Exception:
             logger.exception('SetupView: API error')
             return http.HttpResponse(status=422)
         
-        return http.HttpResponse()
+        return ret_value
 
 
-class UpdateView(View):
+class ApiUpdateView(api.ApiUpdateView):
+    
+    def __init__(self, *args, **kwargs):
+        kwargs['app_config'] = app_config
+        super(ApiUpdateView, self).__init__(*args, **kwargs)
     
     @method_decorator(api.user_required('ea'))
     def dispatch(self, *args, **kwargs):
-        return super(UpdateView, self).dispatch(*args, **kwargs)
-    
-    def get(self, request):
-        csrf.get_token(request)
-        return http.HttpResponse()
-    
-    def post(self, request, *args, **kwargs):
-        
-        try:
-            data = api.ApiSession.load_json_request(request.POST)
-            
-            fields = data['fields']
-            natural_key = data['natural_key']
-            model = app_config.get_model(data['model'])
-            
-            obj = model.objects.get_by_natural_key(**natural_key)
-            
-            for name, value in fields.items():
-                setattr(obj, name, value)
-            
-            obj.save(update_fields=list(fields.keys()))
-        
-        except Exception:
-            logger.exception('UpdateView: API error')
-            return http.HttpResponse(status=422)
-        
-        return http.HttpResponse()
+        return super(ApiUpdateView, self).dispatch(*args, **kwargs)
 
 
-class VoteView(View):
+class ApiVoteView(View):
     
     @method_decorator(api.user_required('vbb'))
     def dispatch(self, *args, **kwargs):
-        return super(VoteView, self).dispatch( *args, **kwargs)
+        return super(ApiVoteView, self).dispatch( *args, **kwargs)
     
     def get(self, request):
+        
         csrf.get_token(request)
         return http.HttpResponse()
     
@@ -382,7 +366,7 @@ class VoteView(View):
         return http.HttpResponse()
 
 
-class ExportView(View):
+class ApiExportView(View):
     
     template_name = 'abb/export.html'
     
@@ -821,5 +805,4 @@ class ExportView(View):
             if isinstance(o, message.Message):
                 return self.protobuf.to_dict(o, ordered=True)
             
-            return super(ExportView._CustomJSONEncoder, self).default(o)
-
+            return super(ApiExportView._CustomJSONEncoder, self).default(o)

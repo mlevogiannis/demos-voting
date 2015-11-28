@@ -11,19 +11,25 @@ try:
 except ImportError:
     from urlparse import urljoin
 
-from django.db import models
+from django import http
+from django.db import models, transaction
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseForbidden
 from django.utils import six
 from django.middleware import csrf
 from django.contrib.auth import login as auth_login, logout as auth_logout
+from django.views.generic import View
 from django.utils.encoding import python_2_unicode_compatible
+from django.utils.decorators import method_decorator
 from django.contrib.auth.forms import AuthenticationForm
 
+from demos.common.utils import dbsetup
 from demos.common.utils.json import CustomJSONEncoder
 
 logger = logging.getLogger(__name__)
 
+
+# ------------------------------------------------------------------------------
 
 class ApiSession:
     
@@ -32,15 +38,17 @@ class ApiSession:
     
     _verify = getattr(settings, 'DEMOS_API_VERIFY', True)
     
-    def __init__(self, remote_app, app_config):
+    def __init__(self, remote_app, app_config, logger=logger):
         
         self.s = requests.Session()
+        
+        self.logger = logger
+        self.url = settings.DEMOS_API_URL[remote_app]
         
         self.username = app_config.label
         self.password = app_config.get_model('RemoteUser').\
             objects.get(username=remote_app).password
         
-        self.url = settings.DEMOS_API_URL[remote_app]
         self.login()
     
     def __del__(self):
@@ -48,7 +56,7 @@ class ApiSession:
         try:
             self.logout()
         except Exception:
-            logger.warning("Could not logout:", exc_info=True)
+            self.logger.warning("Could not logout:", exc_info=True)
     
     def login(self):
         
@@ -123,6 +131,74 @@ class ApiSession:
         
         return data
 
+# ------------------------------------------------------------------------------
+
+class _ApiBaseView(View):
+    
+    def __init__(self, *args, **kwargs):
+        
+        self.app_config = kwargs.pop('app_config')
+        self.logger = kwargs.pop('logger', logger)
+        
+        super(_ApiBaseView, self).__init__(*args, **kwargs)
+    
+    def get(self, request):
+        
+        csrf.get_token(request)
+        return http.HttpResponse()
+    
+
+class ApiSetupView(_ApiBaseView):
+    
+    def post(self, request, data=None):
+        
+        try:
+            if data is None:
+                data = ApiSession.load_json_request(request.POST)
+            
+            task = data['task']
+            election_obj = data['payload']
+            
+            if task == 'election':
+                dbsetup.election(election_obj, self.app_config)
+            elif task == 'ballot':
+                dbsetup.ballot(election_obj, self.app_config)
+            else:
+                raise Exception('SetupView: Invalid POST task: %s' % task)
+            
+        except Exception:
+            self.logger.exception('SetupView: API error')
+            return http.HttpResponse(status=422)
+        
+        return http.HttpResponse()
+
+
+class ApiUpdateView(_ApiBaseView):
+    
+    def post(self, request, data=None):
+        
+        try:
+            if data is None:
+                data = ApiSession.load_json_request(request.POST)
+            
+            fields = data['fields']
+            natural_key = data['natural_key']
+            model = self.app_config.get_model(data['model'])
+            
+            obj = model.objects.get_by_natural_key(**natural_key)
+            
+            for name, value in fields.items():
+                setattr(obj, name, value)
+            
+            obj.save(update_fields=list(fields.keys()))
+            
+        except Exception:
+            self.logger.exception('UpdateView: API error')
+            return http.HttpResponse(status=422)
+        
+        return http.HttpResponse()
+
+# ------------------------------------------------------------------------------
 
 def login(request):
     """API login view"""

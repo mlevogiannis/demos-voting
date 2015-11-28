@@ -45,87 +45,58 @@ class ManageView(View):
         return f
 
 
-class SetupView(View):
+# API Views --------------------------------------------------------------------
+
+class ApiSetupView(api.ApiSetupView):
+    
+    def __init__(self, *args, **kwargs):
+        kwargs['app_config'] = app_config
+        super(ApiSetupView, self).__init__(*args, **kwargs)
     
     @method_decorator(api.user_required('ea'))
     def dispatch(self, *args, **kwargs):
-        return super(SetupView, self).dispatch(*args, **kwargs)
+        return super(ApiSetupView, self).dispatch(*args, **kwargs)
     
-    def get(self, request):
-        csrf.get_token(request)
-        return http.HttpResponse()
-    
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         
         try:
-            request_obj = api.ApiSession.load_json_request(request.POST)
+            data = api.ApiSession.load_json_request(request.POST)
             
-            task = request_obj['task']
-            election_obj = request_obj['payload']
-            
-            if task == 'election':
-                dbsetup.election(election_obj, app_config)
+            if data['task'] == 'ballot':
                 
-            elif task == 'ballot':
+                election_obj = data['payload']
                 tarbuf = request.FILES['ballots.tar.gz']
-        
+                
                 if hasattr(tarbuf, 'temporary_file_path'):
                     arg = {'name': tarbuf.temporary_file_path()}
                 else:
-                    arg = {'fileobj': BytesIO(tarbuf.read())}
-        
-                tar = tarfile.open(mode='r:*', **arg)
-        
-                for ballot_obj in election_obj['__list_Ballot__']:
-            
-                    pdfname = "%s.pdf" % ballot_obj['serial']
-            
-                    tarinfo = tar.getmember(pdfname)
-                    pdfbuf = BytesIO(tar.extractfile(tarinfo).read())
-            
-                    ballot_obj['pdf'] = File(pdfbuf, name=pdfname)
-                    
-                dbsetup.ballot(election_obj, app_config)
+                    arg = {'fileobj': io.BytesIO(tarbuf.read())}
                 
-            else:
-                raise Exception('SetupView: Invalid POST task: %s' % task)
+                tar = tarfile.open(mode='r:*', **arg)
+                
+                for ballot_obj in election_obj['__list_Ballot__']:
+                    
+                    pdfname = "%s.pdf" % ballot_obj['serial']
+                    
+                    tarinfo = tar.getmember(pdfname)
+                    pdfbuf = io.BytesIO(tar.extractfile(tarinfo).read())
+                    
+                    ballot_obj['pdf'] = File(pdfbuf, name=pdfname)
                 
         except Exception:
             logger.exception('SetupView: API error')
             return http.HttpResponse(status=422)
         
-        return http.HttpResponse()
+        return super(ApiSetupView, self).post(request, data)
 
 
-class UpdateView(View):
+class ApiUpdateView(api.ApiUpdateView):
+    
+    def __init__(self, *args, **kwargs):
+        kwargs['app_config'] = app_config
+        super(ApiUpdateView, self).__init__(*args, **kwargs)
     
     @method_decorator(api.user_required('ea'))
     def dispatch(self, *args, **kwargs):
-        return super(UpdateView, self).dispatch(*args, **kwargs)
-    
-    def get(self, request):
-        csrf.get_token(request)
-        return http.HttpResponse()
-    
-    def post(self, request, *args, **kwargs):
-        
-        try:
-            data = api.ApiSession.load_json_request(request.POST)
-            
-            fields = data['fields']
-            natural_key = data['natural_key']
-            model = app_config.get_model(data['model'])
-            
-            obj = model.objects.get_by_natural_key(**natural_key)
-            
-            for name, value in fields.items():
-                setattr(obj, name, value)
-                
-            obj.save(update_fields=list(fields.keys()))
-            
-        except Exception:
-            logger.exception('UpdateView: API error')
-            return http.HttpResponse(status=422)
-        
-        return http.HttpResponse()
+        return super(ApiUpdateView, self).dispatch(*args, **kwargs)
 

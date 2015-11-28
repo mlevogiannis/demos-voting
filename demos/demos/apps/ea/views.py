@@ -341,11 +341,22 @@ class StatusView(View):
         return http.JsonResponse(response)
 
 
-class CryptoToolsView(View):
+class CenterView(View):
+    
+    template_name = 'ea/center.html'
+    
+    def get(self, request):
+        # FIXME!
+        return http.HttpResponse(status=404)
+
+
+# API Views --------------------------------------------------------------------
+
+class ApiCryptoView(View):
     
     @method_decorator(api.user_required('abb'))
     def dispatch(self, *args, **kwargs):
-        return super(CryptoToolsView, self).dispatch(*args, **kwargs)
+        return super(ApiCryptoView, self).dispatch(*args, **kwargs)
     
     def get(self, request, *args, **kwargs):
         csrf.get_token(request)
@@ -528,13 +539,14 @@ class CryptoToolsView(View):
         return http.JsonResponse(response,safe=False,encoder=CustomJSONEncoder)
 
 
-class UpdateStateView(View):
+class ApiUpdateStateView(View):
     
     @method_decorator(api.user_required(['abb', 'vbb', 'bds']))
     def dispatch(self, *args, **kwargs):
-        return super(UpdateStateView, self).dispatch(*args, **kwargs)
+        return super(ApiUpdateStateView, self).dispatch(*args, **kwargs)
     
     def get(self, request):
+        
         csrf.get_token(request)
         return http.HttpResponse()
     
@@ -590,13 +602,3 @@ class UpdateStateView(View):
         
         return http.HttpResponse()
 
-
-class CenterView(View):
-    
-    template_name = 'ea/center.html'
-    
-    def get(self, request):
-                # FIXME!
-                return http.HttpResponse(status=404)
-
-#eof

@@ -14,7 +14,7 @@ urlpatterns = [
 ]
 
 apipatterns = [
-    url(r'^setup/$', views.SetupView.as_view(), name='setup'),
-    url(r'^update/$', views.UpdateView.as_view(), name='update'),
+    url(r'^setup/$', views.ApiSetupView.as_view(), name='setup'),
+    url(r'^update/$', views.ApiUpdateView.as_view(), name='update'),
 ]
 
