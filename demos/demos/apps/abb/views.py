@@ -485,12 +485,12 @@ class ExportView(View):
     # --------------------------------------------------------------------------
     
     
-    @staticmethod
-    def as_patterns():
+    @classmethod
+    def as_patterns(cls):
         
         def _build_urlpatterns(ns):
             
-            node = ExportView._namespaces[ns]
+            node = cls._namespaces[ns]
             
             urlpatterns = []
             for next in node['next']:
@@ -500,23 +500,23 @@ class ExportView(View):
                 field + '>' + regex + ')' for field, regex in node['args']])
             
             urlpatterns = [url(r'^' + node['name'] + 's/', include([
-                url(r'^$', ExportView.as_view(), name='schema'),
+                url(r'^$', cls.as_view(), name='schema'),
                 url(r'^' + argpath + '/', include([
-                    url(r'^$', ExportView.as_view(), name='data'),
+                    url(r'^$', cls.as_view(), name='data'),
                 ] + urlpatterns)),
             ], namespace=ns))]
             
             return urlpatterns
         
         urlpatterns = []
-        for ns in ExportView._namespace_root:
+        for ns in cls._namespace_root:
             urlpatterns += _build_urlpatterns(ns)
         
         return urlpatterns
     
     
-    @staticmethod
-    def _export(namespaces, url_args, query_args, url_name):
+    @classmethod
+    def _export(cls, namespaces, url_args, query_args, url_name):
         
         # Get each namespace's model instance, until the requested one is found
         
@@ -524,7 +524,7 @@ class ExportView(View):
         
         for i, ns in enumerate(namespaces, start=1):
             
-            node = ExportView._namespaces[ns]
+            node = cls._namespaces[ns]
             
             kwflds = {f.name: objects[k] for k in objects for f
                 in node['model']._meta.get_fields() if f.is_relation
@@ -542,7 +542,7 @@ class ExportView(View):
             
             def _build_data(ns, objects, kwflds):
                 
-                node = ExportView._namespaces[ns]
+                node = cls._namespaces[ns]
                 
                 # 'obj_fields' is the intersection of the namespace's fields
                 # and the fields specified in the namespace's url query. If an
@@ -606,7 +606,7 @@ class ExportView(View):
                 
                 for next in node['next']:
                     
-                    name = ExportView._namespaces[next]['name'] + 's'
+                    name = cls._namespaces[next]['name'] + 's'
                     
                     if name not in fields:
                         continue
@@ -646,10 +646,10 @@ class ExportView(View):
         return data
     
     
-    @staticmethod
-    def _export_file(namespace, url_args, fieldname, filename=None):
+    @classmethod
+    def _export_file(cls, namespace, url_args, fieldname, filename=None):
         
-        model = ExportView._namespaces[namespace]['model']
+        model = cls._namespaces[namespace]['model']
         
         kwflds = url_args.get(model.__name__, {})
         obj = get_object_or_404(model, **kwflds)
