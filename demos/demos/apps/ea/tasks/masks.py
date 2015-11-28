@@ -9,7 +9,6 @@ _masks = {
     'bds' : {
         'Election': ['id', 'title', 'start_datetime', 'end_datetime', \
             'state', 'type', 'vc_type', 'ballots'],
-        'Trustee': ['email'],
         'Ballot': ['serial'],
         'Part': ['index', 'security_code', 'vote_token'],
      },

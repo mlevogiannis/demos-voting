@@ -119,31 +119,6 @@ class Part(models.Model):
         return (self.index,) + self.ballot.natural_key()
 
 
-@python_2_unicode_compatible
-class Trustee(models.Model):
-    
-    election = models.ForeignKey(Election)
-    
-    email = models.EmailField()
-    
-    # Other model methods and meta options
-    
-    def __str__(self):
-        return "%s" % self.email
-    
-    class Meta:
-        unique_together = ['election', 'email']
-    
-    class TrusteeManager(models.Manager):
-        def get_by_natural_key(self, t_email, e_id):
-            return self.get(election__id=e_id, email=t_email)
-    
-    objects = TrusteeManager()
-    
-    def natural_key(self):
-        return (self.email,) + self.election.natural_key()
-
-
 class Task(models.Model):
     
     election = models.OneToOneField(Election, primary_key=True)
