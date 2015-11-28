@@ -158,7 +158,7 @@ def election_setup(election_obj, language):
     }
     
     api_setup1 = partial(api_setup, data=data,
-        api_session=api_session, url_path='manage/setup/')
+        api_session=api_session, url_path='api/setup/')
     
     thread_pool.map(api_setup1, ['abb', 'vbb', 'bds'])
     
@@ -457,7 +457,7 @@ def election_setup(election_obj, language):
         }
         
         api_setup1 = partial(api_setup, data=data, files=files,
-            api_session=api_session, url_path='manage/setup/')
+            api_session=api_session, url_path='api/setup/')
         
         thread_pool.map(api_setup1, ['abb', 'vbb', 'bds'])
     
@@ -477,7 +477,7 @@ def election_setup(election_obj, language):
     }
     
     api_update1 = partial(api_update, data=data,
-        api_session=api_session, url_path='manage/update/')
+        api_session=api_session, url_path='api/update/')
     
     thread_pool.map(api_update1, ['abb', 'vbb', 'bds'])
     

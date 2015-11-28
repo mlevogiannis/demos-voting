@@ -422,7 +422,7 @@ class VoteView(View):
                     'p2_security_code': security_code,
                 }
                 
-                abb_session.post('command/vote/', data, json=True)
+                abb_session.post('api/vote/', data, json=True)
                 
                 ballot.used = True
                 ballot.save(update_fields=['used'])

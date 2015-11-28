@@ -40,7 +40,7 @@ class ApiSession:
         self.password = app_config.get_model('RemoteUser').\
             objects.get(username=remote_app).password
         
-        self.url = urljoin(settings.DEMOS_API_URL[remote_app], 'api/')
+        self.url = settings.DEMOS_API_URL[remote_app]
         self.login()
     
     def __del__(self):
@@ -52,7 +52,7 @@ class ApiSession:
     
     def login(self):
         
-        url = urljoin(self.url, 'auth/login/')
+        url = urljoin(self.url, 'api/auth/login/')
         r = self.s.get(url, verify=self._verify)
         r.raise_for_status()
         
@@ -68,7 +68,7 @@ class ApiSession:
     
     def logout(self):
         
-        url = urljoin(self.url, 'auth/logout/')
+        url = urljoin(self.url, 'api/auth/logout/')
         r = self.s.get(url, verify=self._verify)
         r.raise_for_status()
     

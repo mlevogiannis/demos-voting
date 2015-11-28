@@ -486,7 +486,7 @@ class ExportView(View):
     
     
     @staticmethod
-    def _urlpatterns():
+    def as_patterns():
         
         def _build_urlpatterns(ns):
             

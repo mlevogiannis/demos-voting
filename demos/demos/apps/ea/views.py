@@ -581,8 +581,8 @@ class UpdateStateView(View):
                 for app_name in ['abb','vbb','bds'] if not app_name == username}
             
             for app_name in api_session.keys():
-                api_update(app_name, data=data, api_session=api_session, \
-                    url_path='manage/update/');
+                api_update(app_name, data=data, \
+                    api_session=api_session, url_path='api/update/');
             
         except Exception:
             logger.exception('UpdateStateView: API error')
