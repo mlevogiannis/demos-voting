@@ -31,7 +31,7 @@ from django.core.urlresolvers import reverse
 from demos.apps.vbb.models import Election, Question, Ballot, Part, \
     OptionV, OptionC
 
-from demos.common.utils import api, base32cf, dbsetup, enums, hashers, intc
+from demos.common.utils import api, base32cf, enums, hashers, intc
 from demos.common.utils.config import registry
 
 logger = logging.getLogger(__name__)

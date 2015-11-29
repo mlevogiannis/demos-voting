@@ -42,7 +42,7 @@ from demos.apps.abb.tasks import tally_protocol
 from demos.apps.abb.models import Election, Question, Ballot, Part, OptionV, \
     Task
 
-from demos.common.utils import api, base32cf, dbsetup, enums, intc, hashers
+from demos.common.utils import api, base32cf, enums, intc, hashers
 from demos.common.utils.config import registry
 from demos.common.utils.fields import IntEnumField
 from demos.common.utils.permutation import permute_ori

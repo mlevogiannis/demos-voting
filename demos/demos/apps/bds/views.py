@@ -19,7 +19,7 @@ from django.core.urlresolvers import reverse
 
 from demos.apps.bds.models import Election
 
-from demos.common.utils import api, dbsetup
+from demos.common.utils import api
 from demos.common.utils.config import registry
 
 logger = logging.getLogger(__name__)
