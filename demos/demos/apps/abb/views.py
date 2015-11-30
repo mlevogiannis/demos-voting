@@ -153,11 +153,8 @@ class ApiSetupView(api.ApiSetupView):
             election_obj = api.ApiSession.load_json_request(request.POST)
             
             if phase == 'p1':
-                
-                cert_dump = election_obj['cert'].encode()
-                cert_file = File(BytesIO(cert_dump), name='cert.pem')
-                election_obj['cert'] = cert_file
-                
+                election_obj['cert'] = request.FILES['cert.pem']
+            
         except Exception:
             logger.exception('SetupView: API error')
             return http.HttpResponse(status=422)

@@ -69,7 +69,7 @@ class ApiSetupView(api.ApiSetupView):
                 if hasattr(tarbuf, 'temporary_file_path'):
                     arg = {'name': tarbuf.temporary_file_path()}
                 else:
-                    arg = {'fileobj': io.BytesIO(tarbuf.read())}
+                    arg = {'fileobj': tarbuf}
                 
                 tar = tarfile.open(mode='r:*', **arg)
                 
@@ -78,7 +78,7 @@ class ApiSetupView(api.ApiSetupView):
                     pdfname = "%s.pdf" % ballot_obj['serial']
                     
                     tarinfo = tar.getmember(pdfname)
-                    pdfbuf = io.BytesIO(tar.extractfile(tarinfo).read())
+                    pdfbuf = tar.extractfile(tarinfo)
                     
                     ballot_obj['pdf'] = File(pdfbuf, name=pdfname)
                 

@@ -136,8 +136,7 @@ def election_setup(election_obj, language):
     cert.set_pubkey(pkey)
     cert.sign(ca_pkey if not self_signed else pkey, str('sha256'))
     
-    election_obj['cert'] = \
-        crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode()
+    certbuf = io.BytesIO(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
     
     # Generate question keys
     
@@ -151,10 +150,16 @@ def election_setup(election_obj, language):
     
     # Populate local and remote databases
     
+    files = {
+        'abb': [
+            ('cert.pem', certbuf)
+        ]
+    }
+    
     insert_into_db(election_obj, app_config)
     
-    api_setup1 = partial(api_setup, data=election_obj,
-        api_session=api_session, url_path='api/setup/p1/')
+    api_setup1 = partial(api_setup, data=election_obj, files=files,
+         api_session=api_session, url_path='api/setup/p1/')
     
     thread_pool.map(api_setup1, ['abb', 'vbb', 'bds'])
     
@@ -404,6 +409,7 @@ def election_setup(election_obj, language):
             current_task.update_state(state='PROGRESS', meta=progress)
         
         tar.close()
+        tarbuf.seek(0)
         
         # Get optionvs' permutations from the corresponding security codes
         
@@ -445,7 +451,9 @@ def election_setup(election_obj, language):
         insert_into_db(election_obj2, app_config)
         
         files = {
-            'ballots.tar.gz': tarbuf.getvalue()
+            'bds': [
+                ('ballots.tar.gz', tarbuf)
+            ]
         }
         
         api_setup1 = partial(api_setup, data=election_obj2, files=files,
@@ -495,11 +503,8 @@ def api_setup(app_name, **kwargs):
     
     app_session = api_session[app_name]
     
-    data = apply_mask(app_name, kwargs['data'])
-    files = kwargs.get('files')
-    
-    if app_name != 'bds':
-        files = None
+    data = apply_mask(app_name, kwargs.get('data', {}))
+    files = kwargs.get('files', {}).get(app_name)
     
     app_session.post(url_path, data, files, json=True)
 
