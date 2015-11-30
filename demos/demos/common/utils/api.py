@@ -23,8 +23,8 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.decorators import method_decorator
 from django.contrib.auth.forms import AuthenticationForm
 
-from demos.common.utils import dbsetup
 from demos.common.utils.json import CustomJSONEncoder
+from demos.common.utils.setup import insert_into_db
 
 logger = logging.getLogger(__name__)
 
@@ -142,7 +142,7 @@ class _ApiBaseView(View):
         
         super(_ApiBaseView, self).__init__(*args, **kwargs)
     
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         
         csrf.get_token(request)
         return http.HttpResponse()
@@ -150,21 +150,13 @@ class _ApiBaseView(View):
 
 class ApiSetupView(_ApiBaseView):
     
-    def post(self, request, data=None):
+    def post(self, request, data=None, *args, **kwargs):
         
         try:
             if data is None:
                 data = ApiSession.load_json_request(request.POST)
             
-            task = data['task']
-            election_obj = data['payload']
-            
-            if task == 'election':
-                dbsetup.election(election_obj, self.app_config)
-            elif task == 'ballot':
-                dbsetup.ballot(election_obj, self.app_config)
-            else:
-                raise Exception('SetupView: Invalid POST task: %s' % task)
+            insert_into_db(data, self.app_config)
             
         except Exception:
             self.logger.exception('SetupView: API error')
@@ -175,7 +167,7 @@ class ApiSetupView(_ApiBaseView):
 
 class ApiUpdateView(_ApiBaseView):
     
-    def post(self, request, data=None):
+    def post(self, request, data=None, *args, **kwargs):
         
         try:
             if data is None:

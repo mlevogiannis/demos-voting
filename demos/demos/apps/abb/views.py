@@ -147,14 +147,12 @@ class ApiSetupView(api.ApiSetupView):
     def dispatch(self, *args, **kwargs):
         return super(ApiSetupView, self).dispatch(*args, **kwargs)
     
-    def post(self, request):
+    def post(self, request, phase):
         
         try:
-            data = api.ApiSession.load_json_request(request.POST)
+            election_obj = api.ApiSession.load_json_request(request.POST)
             
-            if data['task'] == 'election':
-                
-                election_obj = data['payload']
+            if phase == 'p1':
                 
                 cert_dump = election_obj['cert'].encode()
                 cert_file = File(BytesIO(cert_dump), name='cert.pem')
@@ -164,10 +162,10 @@ class ApiSetupView(api.ApiSetupView):
             logger.exception('SetupView: API error')
             return http.HttpResponse(status=422)
                 
-        ret_value = super(ApiSetupView, self).post(request, data)
+        ret_value = super(ApiSetupView, self).post(request, election_obj)
         
         try:
-            if data['task'] == 'election':
+            if phase == 'p1':
                 
                 election = Election.objects.get(id=election_obj['id'])
                 

@@ -57,14 +57,13 @@ class ApiSetupView(api.ApiSetupView):
     def dispatch(self, *args, **kwargs):
         return super(ApiSetupView, self).dispatch(*args, **kwargs)
     
-    def post(self, request):
+    def post(self, request, phase):
         
         try:
-            data = api.ApiSession.load_json_request(request.POST)
+            election_obj = api.ApiSession.load_json_request(request.POST)
             
-            if data['task'] == 'ballot':
+            if phase == 'p2':
                 
-                election_obj = data['payload']
                 tarbuf = request.FILES['ballots.tar.gz']
                 
                 if hasattr(tarbuf, 'temporary_file_path'):
@@ -87,7 +86,7 @@ class ApiSetupView(api.ApiSetupView):
             logger.exception('SetupView: API error')
             return http.HttpResponse(status=422)
         
-        return super(ApiSetupView, self).post(request, data)
+        return super(ApiSetupView, self).post(request, election_obj)
 
 
 class ApiUpdateView(api.ApiUpdateView):

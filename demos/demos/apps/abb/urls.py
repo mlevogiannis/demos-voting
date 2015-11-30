@@ -14,7 +14,7 @@ urlpatterns = [
 ]
 
 apipatterns = [
-    url(r'^setup/$', views.ApiSetupView.as_view(), name='setup'),
+    url(r'^setup/(?P<phase>p1|p2)/$',views.ApiSetupView.as_view(),name='setup'),
     url(r'^update/$', views.ApiUpdateView.as_view(), name='update'),
     url(r'^vote/$', views.ApiVoteView.as_view(), name='vote'),
     url(r'^export/', include(views.ApiExportView.as_patterns(), \

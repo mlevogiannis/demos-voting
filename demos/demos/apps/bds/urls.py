@@ -12,7 +12,7 @@ urlpatterns = [
 ]
 
 apipatterns = [
-    url(r'^setup/$', views.ApiSetupView.as_view(), name='setup'),
+    url(r'^setup/(?P<phase>p1|p2)/$',views.ApiSetupView.as_view(),name='setup'),
     url(r'^update/$', views.ApiUpdateView.as_view(), name='update'),
 ]
 

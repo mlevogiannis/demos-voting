@@ -37,7 +37,8 @@ from demos.apps.ea.tasks import cryptotools, pdf
 from demos.apps.ea.tasks.masks import apply_mask
 from demos.apps.ea.models import Election, Task
 
-from demos.common.utils import api, base32cf, dbsetup, enums, hashers, intc
+from demos.common.utils import api, base32cf, enums, hashers, intc
+from demos.common.utils.setup import insert_into_db
 from demos.common.utils.config import registry
 from demos.common.utils.permutation import permute
 
@@ -150,15 +151,10 @@ def election_setup(election_obj, language):
     
     # Populate local and remote databases
     
-    dbsetup.election(election, election_obj, app_config)
+    insert_into_db(election_obj, app_config)
     
-    data = {
-        'task': 'election',
-        'payload': election_obj,
-    }
-    
-    api_setup1 = partial(api_setup, data=data,
-        api_session=api_session, url_path='api/setup/')
+    api_setup1 = partial(api_setup, data=election_obj,
+        api_session=api_session, url_path='api/setup/p1/')
     
     thread_pool.map(api_setup1, ['abb', 'vbb', 'bds'])
     
@@ -249,6 +245,7 @@ def election_setup(election_obj, language):
                     # Each ballot part's votecodes are grouped by question
                     
                     question_obj = {
+                        'index': q_index,
                         '__list_OptionV__': [],
                     }
                     
@@ -440,24 +437,19 @@ def election_setup(election_obj, language):
         
         # Populate local and remote databases
         
-        election_obj_t = {
+        election_obj2 = {
             'id': election_obj['id'],
             '__list_Ballot__': ballot_list,
         }
         
-        dbsetup.ballot(election_obj_t, app_config)
-        
-        data = {
-            'task': 'ballot',
-            'payload': election_obj_t,
-        }
+        insert_into_db(election_obj2, app_config)
         
         files = {
             'ballots.tar.gz': tarbuf.getvalue()
         }
         
-        api_setup1 = partial(api_setup, data=data, files=files,
-            api_session=api_session, url_path='api/setup/')
+        api_setup1 = partial(api_setup, data=election_obj2, files=files,
+            api_session=api_session, url_path='api/setup/p2/')
         
         thread_pool.map(api_setup1, ['abb', 'vbb', 'bds'])
     
@@ -503,10 +495,8 @@ def api_setup(app_name, **kwargs):
     
     app_session = api_session[app_name]
     
-    data = kwargs['data'].copy()
+    data = apply_mask(app_name, kwargs['data'])
     files = kwargs.get('files')
-    
-    data['payload'] = apply_mask(app_name, data['payload'])
     
     if app_name != 'bds':
         files = None

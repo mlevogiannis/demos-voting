@@ -35,7 +35,6 @@ from demos.apps.ea.models import Config, Election, Question, OptionV, Task
 from demos.common.utils import api, base32cf, crypto, enums
 from demos.common.utils.json import CustomJSONEncoder
 from demos.common.utils.config import registry
-from demos.common.utils.dbsetup import _prep_kwargs
 
 logger = logging.getLogger(__name__)
 app_config = apps.get_app_config('ea')
@@ -234,8 +233,12 @@ class CreateView(View):
                 
                 # Create the new election object
                 
-                election_kwargs = _prep_kwargs(election_obj, Election)
-                election = Election.objects.create(**election_kwargs)
+                e_kwargs = {
+                    field.name: election_obj[field.name] for field \
+                    in Election._meta.get_fields() if field.name in election_obj
+                }
+                
+                election = Election.objects.create(**e_kwargs)
                 
                 # Prepare and start the election_setup task
                 
