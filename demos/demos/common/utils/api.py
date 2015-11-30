@@ -109,10 +109,10 @@ class ApiSession:
         if kwargs.get('json', False):
             
             data = data.copy()
-            enc = kwargs.get('encoder', CustomJSONEncoder)
+            encoder = kwargs.get('encoder', CustomJSONEncoder)
             
             for key, value in data.items():
-                data[key] = json.dumps(value, cls=enc, separators=(',', ':'))
+                data[key] = json.dumps(value, cls=encoder, separators=(',',':'))
         
         return self._post(path, data, files, _retry_login=True)
     
@@ -121,13 +121,13 @@ class ApiSession:
         
         data = {}
         
-        request_keys = request.keys()
+        request = request.copy()
         
         if cls._csrfmiddlewaretoken in request:
-            request_keys.remove(cls._csrfmiddlewaretoken)
+            del request[cls._csrfmiddlewaretoken]
         
-        for key in request_keys:
-            data[key] = json.loads(request[key])
+        for key, value in request.items():
+            data[key] = json.loads(value)
         
         return data
 
