@@ -161,7 +161,8 @@ def election_setup(election_obj, language):
     _remote_app_setup_f = partial(_remote_app_setup, data=election_obj,
         files=files, api_session=api_session, url_path='api/setup/p1/')
     
-    thread_pool.map(_remote_app_setup_f, ['abb', 'vbb', 'bds'])
+    async_result1 = \
+        thread_pool.map_async(_remote_app_setup_f, ['abb', 'vbb', 'bds'])
     
     # Generate ballots in groups of BATCH_SIZE
     
@@ -171,7 +172,7 @@ def election_setup(election_obj, language):
     q_list = [(question_obj['key'], len(question_obj['__list_OptionC__']), 0) \
         for question_obj in election_obj['__list_Question__']]
     
-    async_result = thread_pool.apply_async(_gen_ballot_crypto, \
+    async_result2 = thread_pool.apply_async(_gen_ballot_crypto, \
         (q_list, min(config.BATCH_SIZE, election.ballots)))
     
     for lo in range(100, election.ballots + 100, config.BATCH_SIZE):
@@ -180,10 +181,10 @@ def election_setup(election_obj, language):
         
         # Get current batch's crypto elements and generate the next one's
         
-        crypto_bsqo_list, _ = async_result.get()
+        crypto_bsqo_list, _ = async_result2.get()
         
         if hi - 100 < election.ballots:
-            async_result=thread_pool.apply_async(_gen_ballot_crypto, \
+            async_result2 = thread_pool.apply_async(_gen_ballot_crypto, \
                 (q_list, min(config.BATCH_SIZE, election.ballots + 100 - hi)))
         
         # Generate the rest data for all ballots and parts and store them in
@@ -459,7 +460,12 @@ def election_setup(election_obj, language):
         _remote_app_setup_f = partial(_remote_app_setup, data=data,
             files=files, api_session=api_session, url_path='api/setup/p2/')
         
-        thread_pool.map(_remote_app_setup_f, ['abb', 'vbb', 'bds'])
+        async_result1.wait()
+        
+        async_result1 = \
+            thread_pool.map_async(_remote_app_setup_f, ['abb', 'vbb', 'bds'])
+    
+    async_result1.wait()
     
     # Update election state to RUNNING
     
