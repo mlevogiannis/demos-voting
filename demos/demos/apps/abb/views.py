@@ -161,27 +161,8 @@ class ApiSetupView(api.ApiSetupView):
         except Exception:
             logger.exception('SetupView: API error')
             return http.HttpResponse(status=422)
-                
-        ret_value = super(ApiSetupView, self).post(request, election_obj)
         
-        try:
-            if phase == 'p1':
-                
-                election = Election.objects.get(id=election_obj['id'])
-                
-                scheduled_time = election.end_datetime + timedelta(seconds=5)
-                
-                task = tally_protocol.s(election.id)
-                task.freeze()
-                
-                Task.objects.create(election=election, task_id=task.id)
-                task.apply_async(eta=scheduled_time)
-                
-        except Exception:
-            logger.exception('SetupView: API error')
-            return http.HttpResponse(status=422)
-        
-        return ret_value
+        return super(ApiSetupView, self).post(request, election_obj)
 
 
 class ApiUpdateView(api.ApiUpdateView):
@@ -193,6 +174,36 @@ class ApiUpdateView(api.ApiUpdateView):
     @method_decorator(api.user_required('ea'))
     def dispatch(self, *args, **kwargs):
         return super(ApiUpdateView, self).dispatch(*args, **kwargs)
+    
+    def post(self, request):
+        
+        try:
+            data = api.ApiSession.load_json_request(request.POST)
+            
+            model = data['model']
+            fields = data['fields']
+            natural_key = data['natural_key']
+            
+            if model == 'Election' and 'state' in fields:
+                
+                election = Election.objects.get_by_natural_key(**natural_key)
+                
+                if election.state == enums.State.WORKING \
+                    and fields['state'] == enums.State.RUNNING:
+                    
+                    eta = election.end_datetime + timedelta(seconds=5)
+                    
+                    task = tally_protocol.s(election.id)
+                    task.freeze()
+                    
+                    Task.objects.create(election=election, task_id=task.id)
+                    task.apply_async(eta=eta)
+            
+        except Exception:
+            logger.exception('UpdateView: API error')
+            return http.HttpResponse(status=422)
+        
+        return super(ApiUpdateView, self).post(request, data)
 
 
 class ApiVoteView(View):
