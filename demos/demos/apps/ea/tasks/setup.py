@@ -143,7 +143,7 @@ def election_setup(election_obj, language):
     for question_obj in election_obj['__list_Question__']:
         question_obj['key'] = cryptotools.gen_key(config.CURVE)
     
-    # Find the options of the question with the maximum number of options
+    # Find the maximum number of options
     
     max_options = max([q_obj['options'] \
         for q_obj in election_obj['__list_Question__']])
@@ -158,10 +158,10 @@ def election_setup(election_obj, language):
     
     insert_into_db(election_obj, app_config)
     
-    api_setup1 = partial(api_setup, data=election_obj, files=files,
-         api_session=api_session, url_path='api/setup/p1/')
+    _remote_app_setup_f = partial(_remote_app_setup, data=election_obj,
+        files=files, api_session=api_session, url_path='api/setup/p1/')
     
-    thread_pool.map(api_setup1, ['abb', 'vbb', 'bds'])
+    thread_pool.map(_remote_app_setup_f, ['abb', 'vbb', 'bds'])
     
     # Generate ballots in groups of BATCH_SIZE
     
@@ -171,7 +171,7 @@ def election_setup(election_obj, language):
     q_list = [(question_obj['key'], len(question_obj['__list_OptionC__']), 0) \
         for question_obj in election_obj['__list_Question__']]
     
-    async_result = thread_pool.apply_async(crypto_gen, \
+    async_result = thread_pool.apply_async(_gen_ballot_crypto, \
         (q_list, min(config.BATCH_SIZE, election.ballots)))
     
     for lo in range(100, election.ballots + 100, config.BATCH_SIZE):
@@ -183,7 +183,7 @@ def election_setup(election_obj, language):
         crypto_bsqo_list, _ = async_result.get()
         
         if hi - 100 < election.ballots:
-            async_result=thread_pool.apply_async(crypto_gen, \
+            async_result=thread_pool.apply_async(_gen_ballot_crypto, \
                 (q_list, min(config.BATCH_SIZE, election.ballots + 100 - hi)))
         
         # Generate the rest data for all ballots and parts and store them in
@@ -389,8 +389,8 @@ def election_setup(election_obj, language):
         tarbuf = io.BytesIO()
         tar = tarfile.open(fileobj=tarbuf, mode='w:gz')
         
-        ballot_gen1 = partial(ballot_gen, builder=builder)
-        pdf_list = process_pool.map(ballot_gen1, ballot_list)
+        _gen_ballot_pdf_f = partial(_gen_ballot_pdf, builder=builder)
+        pdf_list = process_pool.map(_gen_ballot_pdf_f, ballot_list)
         
         for serial, pdfbuf in pdf_list:
             
@@ -443,12 +443,10 @@ def election_setup(election_obj, language):
         
         # Populate local and remote databases
         
-        election_obj2 = {
-            'id': election_obj['id'],
+        data = {
+            'id': election.id,
             '__list_Ballot__': ballot_list,
         }
-        
-        insert_into_db(election_obj2, app_config)
         
         files = {
             'bds': [
@@ -456,10 +454,12 @@ def election_setup(election_obj, language):
             ]
         }
         
-        api_setup1 = partial(api_setup, data=election_obj2, files=files,
-            api_session=api_session, url_path='api/setup/p2/')
+        insert_into_db(data, app_config)
         
-        thread_pool.map(api_setup1, ['abb', 'vbb', 'bds'])
+        _remote_app_setup_f = partial(_remote_app_setup, data=data,
+            files=files, api_session=api_session, url_path='api/setup/p2/')
+        
+        thread_pool.map(_remote_app_setup_f, ['abb', 'vbb', 'bds'])
     
     # Update election state to RUNNING
     
@@ -472,14 +472,14 @@ def election_setup(election_obj, language):
             'e_id': election_obj['id']
         },
         'fields': {
-            'state': enums.State.RUNNING
+            'state': election.state
         },
     }
     
-    api_update1 = partial(api_update, data=data,
+    _remote_app_update_f = partial(_remote_app_update, data=data,
         api_session=api_session, url_path='api/update/')
     
-    thread_pool.map(api_update1, ['abb', 'vbb', 'bds'])
+    thread_pool.map(_remote_app_update_f, ['abb', 'vbb', 'bds'])
     
     # Delete celery task
     
@@ -494,7 +494,7 @@ def election_setup_failure_handler(*args, **kwargs):
     pass # TODO: database cleanup
 
 
-def api_setup(app_name, **kwargs):
+def _remote_app_setup(app_name, **kwargs):
     
     # This function is used in a seperate thread.
     
@@ -509,7 +509,7 @@ def api_setup(app_name, **kwargs):
     app_session.post(url_path, data, files, json=True)
 
 
-def api_update(app_name, **kwargs):
+def _remote_app_update(app_name, **kwargs):
     
     # This function is used in a seperate thread.
     
@@ -520,13 +520,13 @@ def api_update(app_name, **kwargs):
     app_session.post(url_path, kwargs['data'], json=True)
 
 
-def crypto_gen(q_list, number):
+def _gen_ballot_crypto(q_list, number):
     
     # This function is used in a seperate thread.
     
-    # Generates crypto elements and converts the returned list of questions of
-    # ballots of parts of crypto elements to a list of ballots of parts of
-    # questions of crypto elements!
+    # Generate ballots' crypto elements and convert the returned list of
+    # questions of ballots of parts of crypto elements to a list of ballots
+    # of parts of questions of crypto elements
     
     opt_list = []
     blk_list = []
@@ -544,7 +544,7 @@ def crypto_gen(q_list, number):
     return (opt_list, blk_list)
 
 
-def ballot_gen(ballot_obj, builder):
+def _gen_ballot_pdf(ballot_obj, builder):
     
     # This function is used in a seperate process.
     

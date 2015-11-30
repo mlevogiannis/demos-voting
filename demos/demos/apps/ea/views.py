@@ -29,8 +29,9 @@ from celery.result import AsyncResult
 
 from demos.apps.ea.forms import ElectionForm, OptionFormSet, \
     PartialQuestionFormSet, BaseQuestionFormSet
-from demos.apps.ea.tasks import api_update, cryptotools, election_setup, pdf
+from demos.apps.ea.tasks import cryptotools, election_setup, pdf
 from demos.apps.ea.models import Config, Election, Question, OptionV, Task
+from demos.apps.ea.tasks.setup import _remote_app_update
 
 from demos.common.utils import api, base32cf, crypto, enums
 from demos.common.utils.json import CustomJSONEncoder
@@ -596,7 +597,7 @@ class ApiUpdateStateView(View):
                 for app_name in ['abb','vbb','bds'] if not app_name == username}
             
             for app_name in api_session.keys():
-                api_update(app_name, data=data, \
+                _remote_app_update(app_name, data=data, \
                     api_session=api_session, url_path='api/update/');
             
         except Exception:
