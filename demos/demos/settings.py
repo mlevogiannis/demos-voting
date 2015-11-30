@@ -1,6 +1,8 @@
 # -*- encoding: utf-8 -*-
 # File: settings.py
 
+from __future__ import absolute_import, division, unicode_literals
+
 """
 Django settings for demos project.
 
@@ -40,7 +42,7 @@ DEVELOPMENT = False
 if DEVELOPMENT:
     
     DEBUG = True
-    DEVEL_DIR = os.path.join(os.path.dirname(BASE_DIR), 'devel')
+    DEVELOPMENT_DIR = os.path.join(os.path.dirname(BASE_DIR), 'devel')
 
 
 # UNIX-domain sockets are placed under RUN_DIR, app data under VARLIB_DIR
@@ -50,8 +52,8 @@ VARLIB_DIR = '/var/lib/demos-voting'
 
 if DEVELOPMENT:
     
-    RUN_DIR = os.path.join(DEVEL_DIR, 'sockets')
-    VARLIB_DIR = os.path.join(DEVEL_DIR, 'data')
+    RUN_DIR = os.path.join(DEVELOPMENT_DIR, 'sockets')
+    VARLIB_DIR = os.path.join(DEVELOPMENT_DIR, 'data')
 
 
 # Application definition
@@ -78,6 +80,12 @@ MIDDLEWARE_CLASSES = [
 ]
 
 ROOT_URLCONF = 'demos.urls'
+
+WSGI_APPLICATION = 'demos.wsgi.application'
+
+
+# Templates
+# https://docs.djangoproject.com/en/1.8/ref/settings/#templates
 
 TEMPLATES = [
     {
@@ -112,8 +120,6 @@ if DEVELOPMENT:
     TEMPLATES[0]['APP_DIRS'] = True
     del TEMPLATES[0]['OPTIONS']['loaders']
 
-WSGI_APPLICATION = 'demos.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
@@ -143,7 +149,7 @@ LANGUAGES = [
 LANGUAGE_CODE = 'en-us'
 
 USE_TZ = True
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Athens'
 
 USE_I18N = True
 USE_L10N = True
@@ -208,7 +214,7 @@ LOGGING = {
         'demos': {
             'handlers': ['mail_admins', 'syslog'],
             'level': 'INFO',
-        }
+        },
     },
 }
 
@@ -270,7 +276,7 @@ if DEVELOPMENT:
     SESSION_COOKIE_SECURE = False
 
 
-# Demos-specific configuration
+# Demos-Voting configuration
 
 DEMOS_APPS = []    # one or more of: ea, bds, abb, vbb
 
@@ -341,17 +347,17 @@ DEMOS_CONFIG = {
 }
 
 DEMOS_URL = {
-    'ea': 'https://demos-ea.domain-name.example/',
-    'bds': 'https://demos-bds.domain-name.example/',
-    'abb': 'https://demos-abb.domain-name.example/',
-    'vbb': 'https://demos-vbb.domain-name.example/',
+    'ea' : 'https://www.example.org/demos/ea/',
+    'bds': 'https://www.example.org/demos/bds/',
+    'abb': 'https://www.example.org/demos/abb/',
+    'vbb': 'https://www.example.org/demos/vbb/',
 }
 
 DEMOS_API_URL = {
-    'ea': 'https://api.demos-ea.domain-name.example/',
-    'bds': 'https://api.demos-bds.domain-name.example/',
-    'abb': 'https://api.demos-abb.domain-name.example/',
-    'vbb': 'https://api.demos-vbb.domain-name.example/',
+    'ea' : 'https://api.example.org/demos/ea/',
+    'bds': 'https://api.example.org/demos/bds/',
+    'abb': 'https://api.example.org/demos/abb/',
+    'vbb': 'https://api.example.org/demos/vbb/',
 }
 
 # In case the API URLs are SSL-enabled and use self-signed certificates,
@@ -365,11 +371,11 @@ INSTALLED_APPS += [ 'demos.apps.%s' % app for app in DEMOS_APPS ]
 LOCALE_PATHS += [ os.path.join(BASE_DIR, 'apps/%s/locale' % app) for app in DEMOS_APPS ]
 
 
-# Celery-specific configuration
+# Celery configuration
 # http://docs.celeryproject.org/en/latest/getting-started/brokers/index.html
 
 BROKER_URL = 'redis+socket://' + os.path.join(RUN_DIR, 'redis.sock')
-CELERY_RESULT_BACKEND = 'redis'
+CELERY_RESULT_BACKEND = BROKER_URL
 
 CELERY_TASK_SERIALIZER = 'custom-json'
 CELERY_RESULT_SERIALIZER = 'custom-json'
@@ -380,8 +386,9 @@ if DEVELOPMENT and False:
     # Alternative config, only using Django + existing db
     # Note: introduces dependency on python-SQLAlchemy
     
-    BROKER_URL = 'django://'
     INSTALLED_APPS += [ 'kombu.transport.django' ]
+    
+    BROKER_URL = 'django://'
     CELERY_RESULT_BACKEND = 'db+postgresql://%(USER)s:%(PASSWORD)s@' \
         '%(HOST)s:%(PORT)s/%(NAME)s' % DATABASES['default']
 
