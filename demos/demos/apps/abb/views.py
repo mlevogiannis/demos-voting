@@ -188,7 +188,7 @@ class ApiUpdateView(api.ApiUpdateView):
                 if election.state == enums.State.WORKING \
                     and fields['state'] == enums.State.RUNNING:
                     
-                    eta = election.end_datetime + timedelta(seconds=5)
+                    eta = election.ends_at + timedelta(seconds=5)
                     
                     task = tally_protocol.s(election.id)
                     task.freeze()
@@ -241,8 +241,8 @@ class ApiVoteView(View):
             
             now = timezone.now()
             
-            if not(election.state == enums.State.RUNNING and now >= \
-                election.start_datetime and now < election.end_datetime):
+            if not(election.state == enums.State.RUNNING and \
+                now >= election.starts_at and now < election.ends_at):
                 raise Exception('Invalid election state')
             
             # Verify ballot's credential
@@ -269,7 +269,7 @@ class ApiVoteView(View):
             if election.vc_type == enums.VcType.LONG:
                 
                 max_options = question_qs.\
-                    aggregate(Max('options'))['options__max']
+                    aggregate(Max('option_cnt'))['option_cnt__max']
                 
                 credential_int = intc.from_bytes(b_credential, 'big')
                 

@@ -7,16 +7,16 @@ import re
 _masks = {
     
     'bds' : {
-        'Election': ['id', 'title', 'start_datetime', 'end_datetime', \
-            'state', 'type', 'vc_type', 'ballots'],
+        'Election': ['id', 'state', 'type', 'vc_type', 'name', 'starts_at', \
+            'ends_at', 'ballot_cnt'],
         'Ballot': ['serial'],
         'Part': ['index', 'security_code', 'vote_token'],
      },
     
     'abb' : {
-        'Election': ['id', 'title', 'start_datetime', 'end_datetime', \
-            'state', 'type', 'vc_type', 'ballots', 'cert'],
-        'Question': ['text', 'key', 'index', 'options', 'choices'],
+        'Election': ['id', 'state', 'type', 'vc_type', 'name', 'starts_at', \
+            'ends_at', 'ballot_cnt'],
+        'Question': ['text', 'key', 'index', 'option_cnt', 'choices'],
         'OptionC': ['text', 'index'],
         'Ballot': ['serial', 'credential_hash'],
         'Part': ['index', 'security_code_hash2', 'l_votecode_salt', \
@@ -26,9 +26,9 @@ _masks = {
      },
     
     'vbb' : {
-        'Election': ['id', 'title', 'start_datetime', 'end_datetime', \
-            'state', 'type', 'vc_type', 'ballots'],
-        'Question': ['text', 'index', 'options', 'columns', 'choices'],
+        'Election': ['id', 'state', 'type', 'vc_type', 'name', 'starts_at', \
+            'ends_at', 'ballot_cnt'],
+        'Question': ['text', 'index', 'option_cnt', 'columns', 'choices'],
         'OptionC': ['text', 'index'],
         'Ballot': ['serial', 'credential_hash'],
         'Part': ['index', 'security_code_hash2', 'l_votecode_salt', \

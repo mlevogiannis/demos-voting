@@ -4,10 +4,6 @@ from __future__ import absolute_import, division, unicode_literals
 
 _CONFIG = {
     
-    'TITLE_MAXLEN': 128,                      # chars
-    'OPTION_MAXLEN': 128,                     # chars
-    'QUESTION_MAXLEN': 128,                   # chars
-    
     'RECEIPT_LEN': 10,                        # base32
     'VOTECODE_LEN': 16,                       # base32
     'CREDENTIAL_LEN': 8,                      # bytes
@@ -17,6 +13,10 @@ _CONFIG = {
     'PKEY_BIT_LEN': 2048,                     # bits
     
     'HASH_FIELD_LEN': 128,                    # chars
+    
+    'OPTION_MAXLEN': 128,                     # chars
+    'QUESTION_MAXLEN': 128,                   # chars
+    'ELECTION_MAXLEN': 128,                   # chars
 }
 
 # ------------------------------------------------------------------------------

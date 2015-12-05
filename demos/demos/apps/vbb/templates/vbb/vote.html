@@ -53,9 +53,9 @@
                 <strong>{% trans "Error" %}:</strong>
                 <span data-state="{{ State.INVALID_ELECTION_ID }}" class="{% if state != State.INVALID_ELECTION_ID %}hidden{% endif %}">{{ invalid_election_id_msg }} {{ invalid_url_msg }}</span>
                 <span data-state="{{ State.INVALID_VOTE_TOKEN }}" class="{% if state != State.INVALID_VOTE_TOKEN %}hidden{% endif %}">{{ invalid_vote_token_msg }} {{ invalid_url_msg }}</span>
-                <span data-state="{{ State.ELECTION_NOT_STARTED }}" class="{% if state != State.ELECTION_NOT_STARTED %}hidden{% endif %}">{{ election_not_started_msg }} <span class="datetime-iso8601" data-format="dddd D MMMM YYYY, hh:mm a">{{ election.start_datetime|date:"c" }}</span>.</span>
+                <span data-state="{{ State.ELECTION_NOT_STARTED }}" class="{% if state != State.ELECTION_NOT_STARTED %}hidden{% endif %}">{{ election_not_started_msg }} <span class="datetime-iso8601" data-format="dddd D MMMM YYYY, hh:mm a">{{ election.starts_at|date:"c" }}</span>.</span>
                 <span data-state="{{ State.ELECTION_PAUSED }}" class="{% if state != State.ELECTION_PAUSED %}hidden{% endif %}">{{ election_paused_msg }} {{ try_again_later_msg }}</span>
-                <span data-state="{{ State.ELECTION_ENDED }}" class="{% if state != State.ELECTION_ENDED %}hidden{% endif %}">{{ election_ended_msg }} <span class="datetime-iso8601" data-format="dddd D MMMM YYYY, hh:mm a">{{ election.end_datetime|date:"c" }}</span>.</span>
+                <span data-state="{{ State.ELECTION_ENDED }}" class="{% if state != State.ELECTION_ENDED %}hidden{% endif %}">{{ election_ended_msg }} <span class="datetime-iso8601" data-format="dddd D MMMM YYYY, hh:mm a">{{ election.ends_at|date:"c" }}</span>.</span>
                 <span data-state="{{ State.BALLOT_USED }}" class="{% if state != State.BALLOT_USED %}hidden{% endif %}">{{ ballot_used_msg }}</span>
                 <span data-state="{{ State.SERVER_ERROR }}" class="{% if state != State.SERVER_ERROR %}hidden{% endif %}">{{ unexpected_error_msg }} {{ try_again_msg }}</span>
                 <span data-state="{{ State.REQUEST_ERROR }}" class="{% if state != State.REQUEST_ERROR %}hidden{% endif %}">{{ unexpected_error_msg }} {{ try_again_msg }}</span>

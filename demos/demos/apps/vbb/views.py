@@ -99,10 +99,10 @@ class VoteView(View):
         now = timezone.now()
         
         if election.state == enums.State.WORKING or (election.state == \
-            enums.State.RUNNING and now < election.start_datetime):
+            enums.State.RUNNING and now < election.starts_at):
             raise VoteView.Error(VoteView.State.ELECTION_NOT_STARTED, *retval)
         
-        elif election.state==enums.State.RUNNING and now>=election.end_datetime:
+        elif election.state == enums.State.RUNNING and now >= election.ends_at:
             raise VoteView.Error(VoteView.State.ELECTION_ENDED, *retval)
         
         elif election.state == enums.State.PAUSED:
@@ -114,7 +114,7 @@ class VoteView(View):
         # Vote token bits definitions
         
         index_bits = 1
-        serial_bits = (election.ballots + 100).bit_length()
+        serial_bits = (election.ballot_cnt + 100).bit_length()
         credential_bits = config.CREDENTIAL_LEN * 8
         security_code_bits = config.SECURITY_CODE_LEN * 5
         token_bits = serial_bits+credential_bits+index_bits+security_code_bits
@@ -253,7 +253,7 @@ class VoteView(View):
         else:
             
             status = 200
-            max_options = question_qs.aggregate(Max('options'))['options__max']
+            max_options = question_qs.aggregate(Max('option_cnt'))['option_cnt__max']
             abb_url = urljoin(config.URL['abb'], quote('%s/' % election_id))
             security_code_hash2_split = part1.security_code_hash2.split('$')
             
@@ -344,7 +344,7 @@ class VoteView(View):
             
             # Verify vote_obj's structure validity
             
-            q_options = dict(question_qs.values_list('index', 'options'))
+            q_options = dict(question_qs.values_list('index', 'option_cnt'))
             
             vc_type = six.integer_types if election.vc_type == \
                 enums.VcType.SHORT else six.string_types

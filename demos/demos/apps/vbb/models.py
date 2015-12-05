@@ -4,9 +4,10 @@ from __future__ import absolute_import, division, unicode_literals
 
 from django.db import models
 from django.core import urlresolvers
+from django.core.validators import RegexValidator
 from django.utils.encoding import python_2_unicode_compatible
 
-from demos.common.utils import enums, fields
+from demos.common.utils import base32cf, enums, fields
 from demos.common.utils.config import registry
 
 config = registry.get_config('vbb')
@@ -15,24 +16,27 @@ config = registry.get_config('vbb')
 @python_2_unicode_compatible
 class Election(models.Model):
     
-    id = fields.Base32Field(primary_key=True)
-    
-    title = models.CharField(max_length=config.TITLE_MAXLEN)
-    
-    start_datetime = models.DateTimeField()
-    end_datetime = models.DateTimeField()
+    id = models.CharField(db_column='e_id', unique=True, max_length=16, \
+        validators=[RegexValidator(regex=base32cf.re_pattern)])
     
     state = fields.IntEnumField(cls=enums.State)
 
     type = fields.IntEnumField(cls=enums.Type)
     vc_type = fields.IntEnumField(cls=enums.VcType)
     
-    ballots = models.PositiveIntegerField()
+    name = models.CharField(max_length=config.ELECTION_MAXLEN)
+    
+    starts_at = models.DateTimeField()
+    ends_at = models.DateTimeField()
+
+    ballot_cnt = models.PositiveIntegerField()
     
     # Other model methods and meta options
     
+    _id = models.AutoField(db_column='id', primary_key=True)
+    
     def __str__(self):
-        return "%s - %s" % (self.id, self.title)
+        return "%s - %s" % (self.id, self.name)
     
     def get_absolute_url(self):
         return urlresolvers.reverse('vbb:', args=[self.id])
@@ -119,7 +123,7 @@ class Part(models.Model):
 class Question(models.Model):
     
     election = models.ForeignKey(Election)
-    m2m_parts = models.ManyToManyField(Part)
+    part_set = models.ManyToManyField(Part)
     
     text = models.CharField(max_length=config.QUESTION_MAXLEN)
     choices = models.PositiveSmallIntegerField()
@@ -127,7 +131,7 @@ class Question(models.Model):
     index = models.PositiveSmallIntegerField()
     columns = models.BooleanField(default=False)
 
-    options = models.PositiveSmallIntegerField()
+    option_cnt = models.PositiveSmallIntegerField()
     
     # Other model methods and meta options
     

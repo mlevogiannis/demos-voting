@@ -18,16 +18,17 @@ config = registry.get_config('ea')
 
 class ElectionForm(forms.Form):
     
-    title = forms.CharField(label=_('Title'),
-        min_length=1, max_length=config.TITLE_MAXLEN)
+    name = forms.CharField(label=_('Name'),
+        min_length=1, max_length=config.ELECTION_MAXLEN)
     
-    start_datetime = fields.DateTimeField(label=_('Start at'))
-    end_datetime = fields.DateTimeField(label=_('End at'))
+    starts_at = fields.DateTimeField(label=_('Start at'))
+    ends_at = fields.DateTimeField(label=_('End at'))
     
-    ballots = forms.IntegerField(label=_('Ballots'),
+    ballot_cnt = forms.IntegerField(label=_('Ballots'),
         min_value=1, max_value=config.MAX_BALLOTS)
     
-    language = forms.ChoiceField(label=_('Language'),choices=settings.LANGUAGES)
+    language = forms.ChoiceField(label=_('Language'),
+        choices=settings.LANGUAGES)
     
     trustee_list = fields.MultiEmailField(label=_('Trustee e-mails'),
         min_length=1, max_length=config.MAX_TRUSTEES, required=False)
@@ -66,41 +67,41 @@ class ElectionForm(forms.Form):
         'order': _("Start and end dates and times are not in logical order.")
     }
     
-    def clean_title(self):
-        return _trim_whitespace(self.cleaned_data['title']);
+    def clean_name(self):
+        return _trim_whitespace(self.cleaned_data['name']);
     
-    def clean_start_datetime(self):
+    def clean_starts_at(self):
         
-        start_datetime = self.cleaned_data['start_datetime']
+        starts_at = self.cleaned_data['starts_at']
         
-        # Verify that start_datetime is valid
+        # Verify that starts_at is valid
         
-        if start_datetime < timezone.now():
+        if starts_at < timezone.now():
             raise forms.ValidationError(self.error_msg['passed'],code='invalid')
         
-        return start_datetime
+        return starts_at
     
-    def clean_end_datetime(self):
+    def clean_ends_at(self):
         
-        end_datetime = self.cleaned_data['end_datetime']
+        ends_at = self.cleaned_data['ends_at']
         
-        # Verify that end_datetime is valid
+        # Verify that ends_at is valid
         
-        if end_datetime < timezone.now():
+        if ends_at < timezone.now():
             raise forms.ValidationError(self.error_msg['passed'],code='invalid')
         
-        return end_datetime
+        return ends_at
     
     def clean(self):
         
         cleaned_data = super(ElectionForm, self).clean()
         
-        # Verify that end_datetime is not before start_datetime
+        # Verify that ends_at is not before starts_at
         
-        start_datetime = cleaned_data.get('start_datetime')
-        end_datetime = cleaned_data.get('end_datetime')
+        starts_at = cleaned_data.get('starts_at')
+        ends_at = cleaned_data.get('ends_at')
         
-        if start_datetime and end_datetime and end_datetime <= start_datetime:
+        if starts_at and ends_at and ends_at <= starts_at:
             error=forms.ValidationError(self.error_msg['order'], code='invalid')
             self.add_error(None, error)
         

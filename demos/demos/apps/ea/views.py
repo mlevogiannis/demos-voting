@@ -123,7 +123,7 @@ class CreateView(View):
                 question_obj = {
                     'index': q_index,
                     'text': question_form.cleaned_data['question'],
-                    'options': len(option_formset),
+                    'option_cnt': len(option_formset),
                     'choices': question_form.cleaned_data['choices'] \
                         if election_obj['type'] == enums.Type.REFERENDUM \
                         else min(len(option_formset), election_obj['choices']),
@@ -150,7 +150,7 @@ class CreateView(View):
             
             if request.is_ajax():
                 
-                q_options_list = [q_obj['options'] \
+                q_options_list = [q_obj['option_cnt'] \
                     for q_obj in election_obj['__list_Question__']]
                 
                 vc_name = ('l_' if election_obj['vc_type'] == \
@@ -174,18 +174,18 @@ class CreateView(View):
                         '__list_Question__': [],
                     }
                     
-                    for options in q_options_list:
+                    for option_cnt in q_options_list:
                         
                         question_obj = {
                             '__list_OptionV__': [],
                         }
                         
                         if election_obj['vc_type'] == enums.VcType.SHORT:
-                            votecode_list = list(range(1, options + 1))
+                            votecode_list = list(range(1, option_cnt + 1))
                             random.shuffle(votecode_list)
                         elif election_obj['vc_type'] == enums.VcType.LONG:
                             votecode_list=[base32cf.random(config.VOTECODE_LEN,
-                                urandom=False) for _ in range(options)]
+                                urandom=False) for _ in range(option_cnt)]
                         
                         for votecode in votecode_list:
                             
@@ -332,9 +332,9 @@ class StatusView(View):
             # Return election state or invalid
             
             if election.state.value == enums.State.RUNNING.value:
-                if timezone.now() < election.start_datetime:
+                if timezone.now() < election.starts_at:
                     response['not_started'] = True
-                elif timezone.now() > election.end_datetime:
+                elif timezone.now() > election.ends_at:
                     response['ended'] = True
             
             response['state'] = election.state.value        
@@ -475,8 +475,8 @@ class ApiCryptoView(View):
                 coins = request_obj['coins']
                 ballots = request_obj['ballots']
                 
-                options = Question.objects.only('options').\
-                    get(index=q_index, election__id=e_id).options
+                option_cnt = Question.objects.only('option_cnt').\
+                    get(index=q_index, election__id=e_id).option_cnt
                 
                 # Compute 'zk2' fields
                 
@@ -505,7 +505,7 @@ class ApiCryptoView(View):
                         if len(zk_buf) > config.BATCH_SIZE:
                             
                             zk2_list.extend(cryptotools.\
-                                complete_zk(key, options, coins, zk_buf))
+                                complete_zk(key, option_cnt, coins, zk_buf))
                             zk_buf = []
                 
                 # Flush non-empty buffer
@@ -513,7 +513,7 @@ class ApiCryptoView(View):
                 if zk_buf:
                     
                     zk2_list.extend(cryptotools.\
-                        complete_zk(key, options, coins, zk_buf))
+                        complete_zk(key, option_cnt, coins, zk_buf))
                 
                 # Re-create input's structure
                 
@@ -572,7 +572,7 @@ class ApiUpdateStateView(View):
             if not (state == enums.State.ERROR or (username == 'abb' \
                 and state == enums.State.COMPLETED \
                 and election.state == enums.State.RUNNING \
-                and timezone.now() > election.end_datetime)):
+                and timezone.now() > election.ends_at)):
                 
                 raise Exception('User \'%s\' tried to set election state to '
                     '\'%s\', but current state is \'%s\'.' \

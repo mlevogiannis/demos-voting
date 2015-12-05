@@ -75,53 +75,6 @@ class IntEnumField(models.SmallIntegerField):
         return str(self.get_prep_value(value))
 
 
-class Base32Field(models.PositiveIntegerField):
-    
-    description = "Base32Field"
-    
-    def from_db_value(self, value, expression, connection, context):
-        
-        if value is None:
-            return value
-        
-        try:
-            value = base32cf.encode(value)
-        except Exception as e:
-            raise ValidationError(e, code='invalid')
-        
-        return value
-    
-    def to_python(self, value):
-        
-        if value is None:
-            return value
-        
-        return str(value)
-    
-    def get_prep_value(self, value):
-        
-        if value is None or isinstance(value, six.integer_types):
-            return value
-        
-        try:
-            value = base32cf.decode(value)
-        except Exception as e:
-            raise ValidationError(e, code='invalid')
-        
-        return value
-    
-    def value_to_string(self, obj):
-        
-        value = self._get_val_from_obj(obj)
-        
-        try:
-            value = base32cf.encode(value)
-        except Exception as e:
-            raise ValidationError(e, code='invalid')
-        
-        return value
-
-
 class ProtoField(models.BinaryField):
     
     description = "ProtoField"

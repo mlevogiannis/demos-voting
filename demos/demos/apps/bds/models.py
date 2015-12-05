@@ -6,9 +6,10 @@ import os
 
 from django.db import models
 from django.core import urlresolvers
+from django.core.validators import RegexValidator
 from django.utils.encoding import python_2_unicode_compatible
 
-from demos.common.utils import enums, fields, storage
+from demos.common.utils import base32cf, enums, fields, storage
 from demos.common.utils.config import registry
 
 config = registry.get_config('bds')
@@ -17,24 +18,27 @@ config = registry.get_config('bds')
 @python_2_unicode_compatible
 class Election(models.Model):
     
-    id = fields.Base32Field(primary_key=True)
-    
-    title = models.CharField(max_length=config.TITLE_MAXLEN)
-    
-    start_datetime = models.DateTimeField()
-    end_datetime = models.DateTimeField()
+    id = models.CharField(db_column='e_id', unique=True, max_length=16, \
+        validators=[RegexValidator(regex=base32cf.re_pattern)])
     
     state = fields.IntEnumField(cls=enums.State)
 
     type = fields.IntEnumField(cls=enums.Type)
     vc_type = fields.IntEnumField(cls=enums.VcType)
+    
+    name = models.CharField(max_length=config.ELECTION_MAXLEN)
+    
+    starts_at = models.DateTimeField()
+    ends_at = models.DateTimeField()
 
-    ballots = models.PositiveIntegerField()
+    ballot_cnt = models.PositiveIntegerField()
     
     # Other model methods and meta options
     
+    _id = models.AutoField(db_column='id', primary_key=True)
+    
     def __str__(self):
-        return "%s - %s" % (self.id, self.title)
+        return "%s - %s" % (self.id, self.name)
     
     def get_absolute_url(self):
         return urlresolvers.reverse('bds:', args=[self.id])

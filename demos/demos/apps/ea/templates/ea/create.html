@@ -55,12 +55,12 @@
                     {% endif %}
                 </div>
                 
-                <!-- Title input -->
-                <div class="form-group {% if election_form.title.errors %} has-error {% endif %}">
-                    <label class="sr-only" for="{{ election_form.title.id_for_label }}">{{ election_form.title.label }}</label>
+                <!-- Name input -->
+                <div class="form-group {% if election_form.name.errors %} has-error {% endif %}">
+                    <label class="sr-only" for="{{ election_form.name.id_for_label }}">{{ election_form.name.label }}</label>
                     <div class="input-group">
-                        <div class="input-group-addon">{{ election_form.title.label }}:</div>
-                        <input type="text" class="form-control" id="{{ election_form.title.auto_id }}" placeholder="{% trans 'Type the election title here' %}" value="{{ election_form.title.value|default_if_none:'' }}" name="{{ election_form.title.html_name }}" maxlength="{{ election_form.title.field.max_length }}">
+                        <div class="input-group-addon">{{ election_form.name.label }}:</div>
+                        <input type="text" class="form-control" id="{{ election_form.name.auto_id }}" placeholder="{% trans 'Type the election name here' %}" value="{{ election_form.name.value|default_if_none:'' }}" name="{{ election_form.name.html_name }}" maxlength="{{ election_form.name.field.max_length }}">
                     </div>
                 </div>
                 
@@ -69,25 +69,25 @@
                 <!-- Start/end date and time input -->
                 <div class="row">
                     <div class="col-xs-12 col-sm-6">
-                        <div class="form-group {% if election_form.start_datetime.errors %} has-error {% endif %}">
-                            <label class="sr-only" for="{{ election_form.start_datetime.id_for_label }}">{{ election_form.start_datetime.label }}</label>
+                        <div class="form-group {% if election_form.starts_at.errors %} has-error {% endif %}">
+                            <label class="sr-only" for="{{ election_form.starts_at.id_for_label }}">{{ election_form.starts_at.label }}</label>
                             <div class="input-group date">
-                                <div class="input-group-addon">{{ election_form.start_datetime.label }}:</div>
-                                <input type="text" class="form-control" id="{{ election_form.start_datetime.auto_id }}" placeholder="{% trans 'Date and time' %}">
+                                <div class="input-group-addon">{{ election_form.starts_at.label }}:</div>
+                                <input type="text" class="form-control" id="{{ election_form.starts_at.auto_id }}" placeholder="{% trans 'Date and time' %}">
                                 <div class="input-group-addon" data-toggle="tooltip" data-container="body" title="{{ datetime_picker }}"><span class="glyphicon glyphicon-calendar"></span></div>
                             </div>
-                            <input class="datetime-iso8601-input" type="text" value="{{ election_form.start_datetime.value|default_if_none:'' }}" name="{{ election_form.start_datetime.html_name }}" hidden>
+                            <input class="datetime-iso8601-input" type="text" value="{{ election_form.starts_at.value|default_if_none:'' }}" name="{{ election_form.starts_at.html_name }}" hidden>
                         </div>
                     </div>
                     <div class="col-xs-12 col-sm-6">
-                        <div class="form-group {% if election_form.end_datetime.errors %} has-error {% endif %}">
-                            <label class="sr-only" for="{{ election_form.end_datetime.id_for_label }}">{{ election_form.end_datetime.label }}</label>
+                        <div class="form-group {% if election_form.ends_at.errors %} has-error {% endif %}">
+                            <label class="sr-only" for="{{ election_form.ends_at.id_for_label }}">{{ election_form.ends_at.label }}</label>
                             <div class="input-group date">
-                                <div class="input-group-addon">{{ election_form.end_datetime.label }}:</div>
-                                <input type="text" class="form-control" id="{{ election_form.end_datetime.auto_id }}" placeholder="{% trans 'Date and time' %}">
+                                <div class="input-group-addon">{{ election_form.ends_at.label }}:</div>
+                                <input type="text" class="form-control" id="{{ election_form.ends_at.auto_id }}" placeholder="{% trans 'Date and time' %}">
                                 <div class="input-group-addon" data-toggle="tooltip" data-container="body" title="{{ datetime_picker }}"><span class="glyphicon glyphicon-calendar"></span></div>
                             </div>
-                            <input class="datetime-iso8601-input" type="text" value="{{ election_form.end_datetime.value|default_if_none:'' }}" name="{{ election_form.end_datetime.html_name }}" hidden>
+                            <input class="datetime-iso8601-input" type="text" value="{{ election_form.ends_at.value|default_if_none:'' }}" name="{{ election_form.ends_at.html_name }}" hidden>
                         </div>
                     </div>
                 </div>
@@ -95,11 +95,11 @@
                 <!-- Ballots and votecode type input -->
                 <div class="row">
                     <div class="col-xs-12 col-sm-6">
-                        <div class="form-group {% if election_form.ballots.errors %} has-error {% endif %}">
-                            <label class="sr-only" for="{{ election_form.ballots.id_for_label }}">{{ election_form.ballots.label }}</label>
+                        <div class="form-group {% if election_form.ballot_cnt.errors %} has-error {% endif %}">
+                            <label class="sr-only" for="{{ election_form.ballot_cnt.id_for_label }}">{{ election_form.ballot_cnt.label }}</label>
                             <div class="input-group input-group-spinner">
-                                <div class="input-group-addon">{{ election_form.ballots.label }}:</div>
-                                <input type="text" class="form-control input-type-number" id="{{ election_form.ballots.auto_id }}" placeholder="{% trans 'How many?' %}" value="{{ election_form.ballots.value|default_if_none:'' }}" name="{{ election_form.ballots.html_name }}" min="{{ election_form.ballots.field.min_value }}" max="{{ election_form.ballots.field.max_value }}">
+                                <div class="input-group-addon">{{ election_form.ballot_cnt.label }}:</div>
+                                <input type="text" class="form-control input-type-number" id="{{ election_form.ballot_cnt.auto_id }}" placeholder="{% trans 'How many?' %}" value="{{ election_form.ballot_cnt.value|default_if_none:'' }}" name="{{ election_form.ballot_cnt.html_name }}" min="{{ election_form.ballot_cnt.field.min_value }}" max="{{ election_form.ballot_cnt.field.max_value }}">
                                 <div class="input-group-btn">
                                     <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-triangle-top"></span></button>
                                     <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-triangle-bottom"></span></button>
