@@ -383,7 +383,7 @@ class ApiExportView(View):
     _namespaces = {
         'election': {
             'model': Election,
-            'args': [('id', '[' + base32cf._valid_re + ']+')],
+            'args': [('id', '[' + base32cf.re_charset + ']+')],
             'fields': ['cert', 'coins', 'id', 'type', 'vc_type'],
             'cache': lambda a: 'export_file' if not a or 'ballots' in a else '',
             'callback': lambda o, f, v, d: getattr(o['Election'], \

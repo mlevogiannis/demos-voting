@@ -349,7 +349,7 @@ class BallotBuilder:
             vc_charset = "0123456789"
             vc_maxchars = len(str(config.MAX_OPTIONS - 1))
         elif self.vc_type == enums.VcType.LONG:
-            vc_charset = base32cf._chars + "-"
+            vc_charset = base32cf.symbols + "-"
             vc_maxchars = config.VOTECODE_LEN + self.long_vc_hyphens
         
         # Calculate table widths
@@ -367,7 +367,7 @@ class BallotBuilder:
         
         self.rec_width = max([stringWidth(self.rec_text, self.sans_bold,
             self.font_sm), max([stringWidth(c, self.mono_regular, self.font_sm)
-            for c in base32cf._chars])*config.RECEIPT_LEN]) + self.cell_padding
+            for c in base32cf.symbols])*config.RECEIPT_LEN]) + self.cell_padding
         
         # Calculate table heights
         

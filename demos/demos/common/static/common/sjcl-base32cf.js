@@ -1,11 +1,11 @@
 sjcl.codec.base32cf = {
     
-    _chars: "0123456789ABCDEFGHJKMNPQRSTVWXYZ",
+    symbols: "0123456789ABCDEFGHJKMNPQRSTVWXYZ",
     
     fromBits: function(arr, hyphens) {
         
         var num = sjcl.bn.fromBits(arr);
-        var chars = sjcl.codec.base32cf._chars;
+        var chars = sjcl.codec.base32cf.symbols;
         var out = num ? "" : "0";
         
         if (num < 0)
@@ -46,7 +46,7 @@ sjcl.codec.base32cf = {
         
         var i, c, len;
         var out = new sjcl.bn();
-        var chars = sjcl.codec.base32cf._chars;
+        var chars = sjcl.codec.base32cf.symbols;
         
         str = sjcl.codec.base32cf.normalize(str);
         str = sjcl.codec.base32cf.hyphen(str, 0);
@@ -73,7 +73,7 @@ sjcl.codec.base32cf = {
         str = str.split("I").join("1");
         str = str.split("L").join("1");
         
-        var regex = new RegExp("^[" + sjcl.codec.base32cf._chars + "-" + "]*$");
+        var regex = new RegExp("^[" + sjcl.codec.base32cf.symbols + "-" + "]*$");
     
         if (!regex.test(str))
             throw new sjcl.exception.invalid("Non-base32cf digit found");
