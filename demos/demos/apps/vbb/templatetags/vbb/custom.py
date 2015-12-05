@@ -1,7 +1,11 @@
 # File custom.py
 
 import math
-from demos.common.templatetags.custom import *
+
+from django import template
+
+register = template.Library()
+
 
 @register.filter
 def floordiv(value, arg):

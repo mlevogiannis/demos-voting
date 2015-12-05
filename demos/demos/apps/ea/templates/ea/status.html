@@ -2,8 +2,10 @@
 
 {% load i18n %}
 {% load l10n %}
-{% load ea.custom %}
 {% load staticfiles %}
+{% load common.float %}
+{% load common.utils %}
+
 
 {% block css %}
 
@@ -58,7 +60,7 @@
                         </div>
                     </div>
                 </a>
-                <a class="list-group-item" data-state="{{ State.RUNNING|addfloat:'-0.1'|unlocalize }}">
+                <a class="list-group-item" data-state="{{ State.RUNNING|floatadd:'-0.1'|unlocalize }}">
                     {% trans "Awaiting start time" %}
                     <span class="glyphicon pull-right hidden"></span>
                 </a>
@@ -66,7 +68,7 @@
                     {% trans "Voting is in progress" %}
                     <span class="glyphicon pull-right hidden"></span>
                 </a>
-                <a class="list-group-item" data-state="{{ State.RUNNING|addfloat:'+0.1'|unlocalize }}">
+                <a class="list-group-item" data-state="{{ State.RUNNING|floatadd:'+0.1'|unlocalize }}">
                     {% trans "Extracting result" %}
                     <span class="glyphicon pull-right hidden"></span>
                 </a>
