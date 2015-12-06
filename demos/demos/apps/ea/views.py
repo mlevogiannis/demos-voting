@@ -2,37 +2,33 @@
 
 from __future__ import absolute_import, division, unicode_literals
 
-import random
 import logging
+import random
 
 from base64 import b64encode, b64decode
 
-try:
-    from urllib.parse import urljoin, quote
-except ImportError:
-    from urllib import quote
-    from urlparse import urljoin
-
 from django import http
-from django.db import transaction
 from django.apps import apps
+from django.db import transaction
 from django.core import urlresolvers
-from django.utils import translation, timezone
-from django.shortcuts import render, redirect
-from django.middleware import csrf
-from django.views.generic import View
 from django.core.exceptions import ValidationError
-from django.utils.decorators import method_decorator
 from django.core.urlresolvers import reverse
+from django.middleware import csrf
+from django.shortcuts import render, redirect
+from django.utils import timezone, translation
+from django.utils.decorators import method_decorator
+from django.utils.six.moves import range, zip
+from django.utils.six.moves.urllib.parse import quote, urljoin
+from django.views.generic import View
 
 from celery.result import AsyncResult
 
-from demos.apps.ea.forms import ElectionForm, OptionFormSet, \
-    PartialQuestionFormSet, BaseQuestionFormSet
-from demos.apps.ea.tasks import cryptotools, election_setup, pdf
+from demos.apps.ea.forms import (
+    ElectionForm, OptionFormSet, PartialQuestionFormSet, BaseQuestionFormSet
+)
 from demos.apps.ea.models import Config, Election, Question, OptionV, Task
+from demos.apps.ea.tasks import cryptotools, election_setup, pdf
 from demos.apps.ea.tasks.setup import _remote_app_update
-
 from demos.common.utils import api, base32cf, crypto, enums
 from demos.common.utils.json import CustomJSONEncoder
 

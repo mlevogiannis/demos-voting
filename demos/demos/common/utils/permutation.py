@@ -4,6 +4,8 @@ from __future__ import absolute_import, division, unicode_literals
 
 import math
 
+from django.utils.six.moves import range, zip
+
 
 def permute(iterable, index):
     

@@ -2,49 +2,40 @@
 
 from __future__ import absolute_import, division, unicode_literals
 
-import os
-import json
-import hmac
-import math
 import hashlib
+import hmac
+import json
 import logging
+import math
+import os
 
-from io import BytesIO
 from base64 import b64decode
 from datetime import timedelta
 from itertools import dropwhile
 
-try:
-    from itertools import zip_longest
-except ImportError:
-    from itertools import izip_longest as zip_longest
-
 from google.protobuf import message
 
 from django import http
-from django.db import models, transaction
 from django.apps import apps
-from django.core import exceptions
-from django.utils import timezone
 from django.conf.urls import include, url
-from django.db.models import Max, Sum
-from django.shortcuts import get_object_or_404, redirect, render
-from django.core.files import File
-from django.middleware import csrf
-from django.views.generic import View
-from django.db.models.query import QuerySet
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
-from django.utils.decorators import method_decorator
-from django.core.urlresolvers import reverse
+from django.core import exceptions
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
+from django.core.urlresolvers import reverse
+from django.db import models, transaction
+from django.db.models import Max, Sum
+from django.middleware import csrf
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.utils.six.moves import range, zip
+from django.views.generic import View
 
+from demos.apps.abb.models import (
+    Election, Question, Ballot, Part, OptionV, Task
+)
 from demos.apps.abb.tasks import tally_protocol
-from demos.apps.abb.models import Election, Question, Ballot, Part, OptionV, \
-    Task
-
-from demos.common.utils import api, base32cf, enums, intc, hashers
-from demos.common.utils.fields import IntEnumField
-from demos.common.utils.permutation import permute_ori
+from demos.common.utils import api, base32cf, enums, hashers, intc
 
 logger = logging.getLogger(__name__)
 

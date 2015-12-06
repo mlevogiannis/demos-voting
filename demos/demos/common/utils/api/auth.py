@@ -7,11 +7,11 @@ import logging
 from django import http
 from django.db import models
 from django.conf import settings
-from django.utils import six
-from django.middleware import csrf
 from django.contrib.auth import login as auth_login, logout as auth_logout
-from django.utils.encoding import python_2_unicode_compatible
 from django.contrib.auth.forms import AuthenticationForm
+from django.middleware import csrf
+from django.utils import six
+from django.utils.encoding import python_2_unicode_compatible
 
 logger = logging.getLogger(__name__)
 

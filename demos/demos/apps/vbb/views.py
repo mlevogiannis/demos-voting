@@ -3,34 +3,26 @@
 from __future__ import absolute_import, division, unicode_literals
 
 import json
-import math
 import logging
+import math
 import requests
 
 from base64 import b64encode
 from enum import IntEnum, unique
 
-try:
-    from urllib.parse import urljoin, quote
-except ImportError:
-    from urllib import quote
-    from urlparse import urljoin
-
 from django import http
-from django.db import transaction
 from django.apps import apps
-from django.utils import six, timezone
 from django.db.models import Max
-from django.shortcuts import render, redirect
-from django.middleware import csrf
-from django.views.generic import View
 from django.core.exceptions import ValidationError
+from django.middleware import csrf
+from django.shortcuts import render, redirect
+from django.utils import six, timezone
 from django.utils.decorators import method_decorator
-from django.core.urlresolvers import reverse
+from django.utils.six.moves import range
+from django.utils.six.moves.urllib.parse import quote, urljoin
+from django.views.generic import View
 
-from demos.apps.vbb.models import Election, Question, Ballot, Part, \
-    OptionV, OptionC
-
+from demos.apps.vbb.models import Election, Question, Ballot, Part, OptionV
 from demos.common.utils import api, base32cf, enums, hashers, intc
 
 logger = logging.getLogger(__name__)

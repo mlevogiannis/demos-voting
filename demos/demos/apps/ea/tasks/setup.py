@@ -2,24 +2,18 @@
 
 from __future__ import absolute_import, division, unicode_literals
 
-import io
-import os
-import hmac
-import math
-import time
-import random
 import hashlib
-import tarfile
+import hmac
+import io
 import logging
+import math
+import os
+import random
+import tarfile
+import time
 
-from base64 import b64encode
-from OpenSSL import crypto
 from functools import partial
-
-try:
-    from itertools import zip_longest
-except ImportError:
-    from itertools import izip_longest as zip_longest
+from OpenSSL import crypto
 
 from billiard.pool import Pool
 from multiprocessing.pool import ThreadPool
@@ -27,19 +21,18 @@ from multiprocessing.pool import ThreadPool
 from django.apps import apps
 from django.conf import settings
 from django.utils import translation
-from django.core.files import File
 from django.utils.encoding import force_bytes
+from django.utils.six.moves import range, zip, zip_longest
 
-from celery import shared_task, current_task
-from celery.signals import worker_process_init, task_failure
+from celery import current_task, shared_task
+from celery.signals import task_failure
 
+from demos.apps.ea.models import Election, Task
 from demos.apps.ea.tasks import cryptotools, pdf
 from demos.apps.ea.tasks.masks import apply_mask
-from demos.apps.ea.models import Election, Task
-
 from demos.common.utils import api, base32cf, enums, hashers, intc
-from demos.common.utils.setup import insert_into_db
 from demos.common.utils.permutation import permute
+from demos.common.utils.setup import insert_into_db
 
 logger = logging.getLogger(__name__)
 

@@ -4,8 +4,8 @@ from __future__ import absolute_import, division, unicode_literals
 
 from collections import OrderedDict
 
-from django.utils.crypto import constant_time_compare, pbkdf2
 from django.contrib.auth.hashers import PBKDF2PasswordHasher, mask_hash
+from django.utils.crypto import constant_time_compare, pbkdf2
 
 from demos.common.utils import base32cf, intc
 

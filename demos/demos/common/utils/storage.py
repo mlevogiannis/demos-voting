@@ -4,21 +4,17 @@ from __future__ import absolute_import, division, unicode_literals
 
 import io
 import os
-import time
 import tarfile
+import time
 
 from datetime import datetime
 
-try:
-    from urllib.parse import urljoin
-except ImportError:
-    from urlparse import urljoin
-
 from django.conf import settings
 from django.core.files import File
-from django.utils.encoding import filepath_to_uri
-from django.utils.deconstruct import deconstructible
 from django.core.files.storage import Storage, FileSystemStorage
+from django.utils.deconstruct import deconstructible
+from django.utils.encoding import filepath_to_uri
+from django.utils.six.moves.urllib.parse import urljoin
 
 
 @deconstructible

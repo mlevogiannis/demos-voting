@@ -1,8 +1,9 @@
 # File: urls.py
 
 from django.conf.urls import include, url
-from demos.common.utils import base32cf
+
 from demos.apps.abb import views
+from demos.common.utils import base32cf
 
 
 urlpatterns = [

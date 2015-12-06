@@ -4,8 +4,8 @@ from __future__ import absolute_import, division, unicode_literals
 
 import logging
 
-from django.db import models
 from django.apps import apps
+from django.db import models
 
 from demos.common.models import base
 from demos.common.utils import crypto, fields

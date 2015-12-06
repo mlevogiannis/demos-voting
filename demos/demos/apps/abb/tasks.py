@@ -2,21 +2,23 @@
 
 from __future__ import absolute_import, division, unicode_literals
 
+import hashlib
 import io
 import json
-import hashlib
 import logging
 
 from base64 import b64decode
-from celery import shared_task
 
 from django.apps import apps
 from django.core.files import File
+from django.utils.six.moves import range, zip
 
-from demos.apps.abb.models import Election, Question, Ballot, Part, OptionV, \
-    Task
+from celery import shared_task
 
-from demos.common.utils import api, crypto, enums, intc
+from demos.apps.abb.models import (
+    Election, Question, Ballot, Part, OptionV, Task
+)
+from demos.common.utils import api, crypto, enums
 
 logger = logging.getLogger(__name__)
 

@@ -2,11 +2,12 @@
 
 from __future__ import absolute_import, division, unicode_literals
 
-from operator import itemgetter
 from itertools import chain
+from operator import itemgetter
 
 from django.db import transaction
 from django.db.models.query import QuerySet
+from django.utils.six.moves import zip
 
 
 @transaction.atomic

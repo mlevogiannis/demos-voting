@@ -8,17 +8,16 @@ import tarfile
 from io import BytesIO
 
 from django import http
-from django.db import transaction
 from django.apps import apps
-from django.shortcuts import render
-from django.middleware import csrf
 from django.core.files import File
-from django.views.generic import View
-from django.utils.decorators import method_decorator
 from django.core.urlresolvers import reverse
+from django.db import transaction
+from django.middleware import csrf
+from django.shortcuts import render
+from django.utils.decorators import method_decorator
+from django.views.generic import View
 
 from demos.apps.bds.models import Election
-
 from demos.common.utils import api
 
 logger = logging.getLogger(__name__)

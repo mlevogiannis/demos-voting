@@ -3,6 +3,7 @@
 import math
 
 from django import template
+from django.utils.six.moves import range
 
 register = template.Library()
 

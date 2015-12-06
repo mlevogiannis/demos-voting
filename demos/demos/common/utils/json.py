@@ -2,11 +2,9 @@
 
 from __future__ import absolute_import, division, unicode_literals
 
-import json
-
 from base64 import b64encode
-from google.protobuf import message
 from django.core.serializers.json import DjangoJSONEncoder
+from google.protobuf import message
 
 
 class CustomJSONEncoder(DjangoJSONEncoder):

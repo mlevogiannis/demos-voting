@@ -9,11 +9,9 @@ from base64 import b64encode, b64decode
 from django import forms
 from django.db import models
 from django.core import validators
+from django.core.exceptions import ValidationError
 from django.utils import six
 from django.utils.dateparse import parse_datetime
-from django.core.exceptions import ValidationError
-
-from demos.common.utils import base32cf
 
 
 # Model fields -----------------------------------------------------------------

@@ -2,8 +2,8 @@
 
 from __future__ import absolute_import, division, unicode_literals
 
-import sys
 import getpass
+import sys
 
 from django.contrib.auth.models import User as LocalUser
 from django.core.management.base import BaseCommand, CommandError

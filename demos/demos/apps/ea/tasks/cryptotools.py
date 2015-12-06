@@ -5,6 +5,8 @@ from __future__ import absolute_import, division, unicode_literals
 import socket
 
 from django.apps import apps
+from django.utils.six.moves import zip
+
 from demos.common.utils import crypto, intc
 
 app_config = apps.get_app_config('ea')

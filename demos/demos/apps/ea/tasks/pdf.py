@@ -4,29 +4,26 @@ from __future__ import absolute_import, division, unicode_literals
 
 import math
 
-from os import path
 from io import BytesIO
+from os import path
 from subprocess import check_output
 
-try:
-    from urllib.parse import urljoin, quote
-except ImportError:
-    from urllib import quote
-    from urlparse import urljoin
-
 from django.apps import apps
+from django.utils.six.moves import range, zip
+from django.utils.six.moves.urllib.parse import quote, urljoin
 from django.utils.translation import ugettext as _
 
 from qrcode import QRCode, constants
 
 from reportlab.lib import colors, pagesizes
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
-from reportlab.lib.utils import ImageReader
 from reportlab.lib.styles import ParagraphStyle
-from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase.pdfmetrics import registerFont, stringWidth
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, \
-    Paragraph, Image, Spacer, PageBreak
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.platypus import (
+    Image, PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+)
 
 from demos.common.utils import base32cf, enums
 

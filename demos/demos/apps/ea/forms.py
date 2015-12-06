@@ -7,8 +7,8 @@ from functools import partial
 from django import forms
 from django.apps import apps
 from django.conf import settings
-from django.utils import timezone
 from django.forms.formsets import BaseFormSet, formset_factory
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 from demos.common.utils import enums, fields

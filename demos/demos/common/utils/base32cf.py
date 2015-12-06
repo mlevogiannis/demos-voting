@@ -2,11 +2,12 @@
 
 from __future__ import absolute_import, division, unicode_literals
 
+import math
 import os
 import re
-import math
 
 from random import getrandbits
+
 from demos.common.utils import intc
 
 # Reference: http://www.crockford.com/wrmg/base32.html

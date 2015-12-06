@@ -3,5 +3,5 @@
 from .crypto_pb2 import CryptoRequest as _CryptoRequest
 from .crypto_pb2 import CryptoResponse as _CryptoResponse
 
-from .crypto_pb2 import Key, Com, Decom, ZK1, ZKState, ZK2
+from .crypto_pb2 import Com, Decom, Key, ZK1, ZK2, ZKState
 
