@@ -42,8 +42,6 @@ logger = logging.getLogger(__name__)
 app_config = apps.get_app_config('abb')
 conf = app_config.get_constants_and_settings()
 
-hasher = hashers.PBKDF2Hasher()
-
 
 class HomeView(View):
     
@@ -210,6 +208,8 @@ class ApiVoteView(View):
         
         try:
             votedata = api.ApiSession.load_json_request(request.POST)
+            
+            hasher = hashers.PBKDF2Hasher()
             
             e_id = votedata['e_id']
             b_serial = votedata['b_serial']

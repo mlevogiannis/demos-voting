@@ -39,8 +39,6 @@ logger = logging.getLogger(__name__)
 app_config = apps.get_app_config('ea')
 conf = app_config.get_constants_and_settings()
 
-hasher = hashers.PBKDF2Hasher()
-
 
 @shared_task(ignore_result=True)
 def election_setup(election_obj, language):
@@ -68,6 +66,7 @@ def election_setup(election_obj, language):
     # Initialize common utilities
     
     rand = random.SystemRandom()
+    hasher = hashers.PBKDF2Hasher()
     builder = pdf.BallotBuilder(election_obj)
     
     process_pool = Pool()

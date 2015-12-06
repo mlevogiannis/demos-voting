@@ -30,8 +30,6 @@ logger = logging.getLogger(__name__)
 app_config = apps.get_app_config('vbb')
 conf = app_config.get_constants_and_settings()
 
-hasher = hashers.PBKDF2Hasher()
-
 
 class HomeView(View):
     
@@ -63,6 +61,8 @@ class VoteView(View):
     
     @staticmethod
     def _parse_input(election_id, vote_token,):
+        
+        hasher = hashers.PBKDF2Hasher()
         
         retval = []
         
@@ -275,6 +275,8 @@ class VoteView(View):
         return render(request, self.template_name, context, status=status)
     
     def post(self, request, **kwargs):
+        
+        hasher = hashers.PBKDF2Hasher()
         
         election_id = kwargs.get('election_id')
         vote_token = kwargs.get('vote_token')
