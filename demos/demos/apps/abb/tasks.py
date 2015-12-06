@@ -17,11 +17,11 @@ from demos.apps.abb.models import Election, Question, Ballot, Part, OptionV, \
     Task
 
 from demos.common.utils import api, crypto, enums, intc
-from demos.common.utils.config import registry
 
 logger = logging.getLogger(__name__)
+
 app_config = apps.get_app_config('abb')
-config = registry.get_config('abb')
+conf = app_config.get_constants_and_settings()
 
 
 @shared_task
@@ -62,8 +62,8 @@ def tally_protocol(election_id):
         
         combined_com = None
         
-        for lo in range(100, election.ballot_cnt + 100, config.BATCH_SIZE):
-            hi = lo + min(config.BATCH_SIZE, election.ballot_cnt + 100 - lo)
+        for lo in range(100, election.ballot_cnt + 100, conf.BATCH_SIZE):
+            hi = lo + min(conf.BATCH_SIZE, election.ballot_cnt + 100 - lo)
             
             # Grab all ballot parts that have options marked as 'voted'
             
@@ -163,8 +163,8 @@ def tally_protocol(election_id):
             'coins': election.coins,
         }
         
-        for lo in range(100, election.ballot_cnt + 100, config.BATCH_SIZE):
-            hi = lo + min(config.BATCH_SIZE, election.ballot_cnt + 100 - lo)
+        for lo in range(100, election.ballot_cnt + 100, conf.BATCH_SIZE):
+            hi = lo + min(conf.BATCH_SIZE, election.ballot_cnt + 100 - lo)
             
             # Grab all ballot parts
                 

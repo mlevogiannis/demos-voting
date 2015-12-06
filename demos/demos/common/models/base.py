@@ -3,15 +3,15 @@
 from __future__ import absolute_import, division, unicode_literals
 
 import logging
+
 from django.core import validators
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 
+from demos.common.conf import constants
 from demos.common.utils import base32cf, enums, fields
-from demos.common.utils.config import registry
 
 logger = logging.getLogger(__name__)
-config = registry.get_config('common')
 
 
 @python_2_unicode_compatible
@@ -25,7 +25,7 @@ class Election(models.Model):
     type = fields.IntEnumField(cls=enums.Type)
     vc_type = fields.IntEnumField(cls=enums.VcType)
     
-    name = models.CharField(max_length=config.ELECTION_MAXLEN)
+    name = models.CharField(max_length=constants.ELECTION_MAXLEN)
     
     starts_at = models.DateTimeField()
     ends_at = models.DateTimeField()
@@ -63,7 +63,7 @@ class Question(models.Model):
     part_set = models.ManyToManyField('Part')
     
     index = models.PositiveSmallIntegerField()
-    text = models.CharField(max_length=config.QUESTION_MAXLEN)
+    text = models.CharField(max_length=constants.QUESTION_MAXLEN)
 
     option_cnt = models.PositiveSmallIntegerField()
     
@@ -102,7 +102,7 @@ class OptionC(models.Model):
     question = models.ForeignKey('Question')
     
     index = models.PositiveSmallIntegerField()
-    text = models.CharField(max_length=config.OPTION_MAXLEN)
+    text = models.CharField(max_length=constants.OPTION_MAXLEN)
     
     # Special methods and meta options
     

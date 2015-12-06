@@ -43,13 +43,14 @@ from demos.apps.abb.models import Election, Question, Ballot, Part, OptionV, \
     Task
 
 from demos.common.utils import api, base32cf, enums, intc, hashers
-from demos.common.utils.config import registry
 from demos.common.utils.fields import IntEnumField
 from demos.common.utils.permutation import permute_ori
 
 logger = logging.getLogger(__name__)
+
 app_config = apps.get_app_config('abb')
-config = registry.get_config('abb')
+conf = app_config.get_constants_and_settings()
+
 hasher = hashers.PBKDF2Hasher()
 
 
@@ -354,7 +355,7 @@ class ApiVoteView(View):
                             digest = intc.from_bytes(hmac_obj.digest(), 'big')
                             
                             l_votecode = base32cf.\
-                                encode(digest)[-config.VOTECODE_LEN:]
+                                encode(digest)[-conf.VOTECODE_LEN:]
                             
                             optionv2.voted = False
                             optionv2.l_votecode = l_votecode

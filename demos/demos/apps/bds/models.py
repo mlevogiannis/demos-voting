@@ -6,13 +6,15 @@ import os
 import logging
 
 from django.db import models
+from django.apps import apps
 
 from demos.common.models import base
 from demos.common.utils import fields, storage
-from demos.common.utils.config import registry
 
 logger = logging.getLogger(__name__)
-config = registry.get_config('bds')
+
+app_config = apps.get_app_config('bds')
+conf = app_config.get_constants_and_settings()
 
 
 class Election(base.Election):
@@ -20,7 +22,7 @@ class Election(base.Election):
 
 
 ballot_fs = storage.PrivateTarFileStorage(
-    location=os.path.join(config.FILESYSTEM_ROOT, 'ballots'),
+    location=os.path.join(conf.FILESYSTEM_ROOT, 'ballots'),
     tar_permissions_mode=0o600, tar_file_permissions_mode=0o600,
     tar_directory_permissions_mode=0o700
 )
@@ -37,7 +39,7 @@ class Ballot(base.Ballot):
 class Part(base.Part):
     
     vote_token = models.TextField()
-    security_code = models.CharField(max_length=config.SECURITY_CODE_LEN)
+    security_code = models.CharField(max_length=conf.SECURITY_CODE_LEN)
 
 
 class Task(base.Task):

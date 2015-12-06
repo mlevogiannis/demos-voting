@@ -5,11 +5,16 @@ from __future__ import absolute_import, division, unicode_literals
 import logging
 
 from django.db import models
+from django.apps import apps
 
 from demos.common.models import base
 from demos.common.utils import crypto, fields
 
 logger = logging.getLogger(__name__)
+
+app_config = apps.get_app_config('ea')
+conf = app_config.get_constants_and_settings()
+
 
 class Election(base.Election):
     pass

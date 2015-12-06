@@ -14,8 +14,10 @@ except ImportError:
     from urllib import quote
     from urlparse import urljoin
 
-from qrcode import QRCode, constants
+from django.apps import apps
 from django.utils.translation import ugettext as _
+
+from qrcode import QRCode, constants
 
 from reportlab.lib import colors, pagesizes
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
@@ -27,9 +29,9 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, \
     Paragraph, Image, Spacer, PageBreak
 
 from demos.common.utils import base32cf, enums
-from demos.common.utils.config import registry
 
-config = registry.get_config('ea')
+app_config = apps.get_app_config('ea')
+conf = app_config.get_constants_and_settings()
 
 
 class BallotBuilder:
@@ -179,7 +181,7 @@ class BallotBuilder:
     table_opt_gap = page_width // 50
     
     long_vc_split = 4
-    long_vc_hyphens = int(math.ceil(config.VOTECODE_LEN / long_vc_split)) - 1
+    long_vc_hyphens = int(math.ceil(conf.VOTECODE_LEN / long_vc_split)) - 1
     
     # TrueType fonts
     
@@ -347,10 +349,10 @@ class BallotBuilder:
         
         if self.vc_type == enums.VcType.SHORT:
             vc_charset = "0123456789"
-            vc_maxchars = len(str(config.MAX_OPTIONS - 1))
+            vc_maxchars = len(str(conf.MAX_OPTIONS - 1))
         elif self.vc_type == enums.VcType.LONG:
             vc_charset = base32cf.symbols + "-"
-            vc_maxchars = config.VOTECODE_LEN + self.long_vc_hyphens
+            vc_maxchars = conf.VOTECODE_LEN + self.long_vc_hyphens
         
         # Calculate table widths
         
@@ -367,7 +369,7 @@ class BallotBuilder:
         
         self.rec_width = max([stringWidth(self.rec_text, self.sans_bold,
             self.font_sm), max([stringWidth(c, self.mono_regular, self.font_sm)
-            for c in base32cf.symbols])*config.RECEIPT_LEN]) + self.cell_padding
+            for c in base32cf.symbols])*conf.RECEIPT_LEN]) + self.cell_padding
         
         # Calculate table heights
         
@@ -392,7 +394,7 @@ class BallotBuilder:
             if self.vc_type == enums.VcType.SHORT:
                 vc_chars = len(str(len(option_list)-1))
             elif self.vc_type == enums.VcType.LONG:
-                vc_chars = config.VOTECODE_LEN + self.long_vc_hyphens
+                vc_chars = conf.VOTECODE_LEN + self.long_vc_hyphens
             
             vc_width  = self.vc_width
             rec_width = self.rec_width
@@ -472,11 +474,10 @@ class BallotBuilder:
         
         for part_obj in ballot_obj['__list_Part__']:
             
-            abb_url = urljoin(config.URL['abb'], \
-                quote("%s/" % self.election_id))
+            abb_url = urljoin(conf.URL['abb'], quote("%s/" % self.election_id))
             
-            vbb_url = urljoin(config.URL['vbb'], \
-                quote("%s/%s/" % (self.election_id, part_obj['vote_token'])))
+            vbb_url = urljoin(conf.URL['vbb'], quote("%s/%s/" %
+                (self.election_id, part_obj['vote_token'])))
             
             # Generate QRCode
             

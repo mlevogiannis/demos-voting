@@ -39,11 +39,13 @@ from demos.apps.ea.models import Election, Task
 
 from demos.common.utils import api, base32cf, enums, hashers, intc
 from demos.common.utils.setup import insert_into_db
-from demos.common.utils.config import registry
 from demos.common.utils.permutation import permute
 
 logger = logging.getLogger(__name__)
-config = registry.get_config('ea')
+
+app_config = apps.get_app_config('ea')
+conf = app_config.get_constants_and_settings()
+
 hasher = hashers.PBKDF2Hasher()
 
 
@@ -65,8 +67,8 @@ def election_setup(election_obj, language):
     
     index_bits = 1
     serial_bits = (election.ballot_cnt + 100).bit_length()
-    credential_bits = config.CREDENTIAL_LEN * 8
-    security_code_bits = config.SECURITY_CODE_LEN * 5
+    credential_bits = conf.CREDENTIAL_LEN * 8
+    security_code_bits = conf.SECURITY_CODE_LEN * 5
     token_bits = serial_bits + credential_bits + index_bits + security_code_bits
     pad_bits = int(math.ceil(token_bits / 5)) * 5 - token_bits
     
@@ -78,8 +80,6 @@ def election_setup(election_obj, language):
     process_pool = Pool()
     thread_pool = ThreadPool(processes=4)
     
-    app_config = apps.get_app_config('ea')
-    
     # Establish sessions with the other servers
     
     api_session = {app_name: api.ApiSession(app_name, app_config)
@@ -88,13 +88,13 @@ def election_setup(election_obj, language):
     # Load CA's X.509 certificate and private key
     
     try:
-        with open(config.CA_CERT_PEM, 'r') as ca_file:
+        with open(conf.CA_CERT_PEM, 'r') as ca_file:
             ca_cert = crypto.load_certificate(crypto.FILETYPE_PEM, \
                 ca_file.read())
         
-        with open(config.CA_PKEY_PEM, 'r') as ca_file:
+        with open(conf.CA_PKEY_PEM, 'r') as ca_file:
             ca_pkey=crypto.load_privatekey(crypto.FILETYPE_PEM, \
-                ca_file.read(), force_bytes(config.CA_PKEY_PASSPHRASE))
+                ca_file.read(), force_bytes(conf.CA_PKEY_PASSPHRASE))
         
     except (AttributeError, TypeError, IOError, OSError) as e:
         
@@ -110,7 +110,7 @@ def election_setup(election_obj, language):
     # Generate a new RSA key pair
     
     pkey = crypto.PKey()
-    pkey.generate_key(crypto.TYPE_RSA, config.PKEY_BIT_LEN)
+    pkey.generate_key(crypto.TYPE_RSA, conf.PKEY_BIT_LEN)
     
     # Generate a new X.509 certificate
     
@@ -141,7 +141,7 @@ def election_setup(election_obj, language):
     # Generate question keys
     
     for question_obj in election_obj['__list_Question__']:
-        question_obj['key'] = cryptotools.gen_key(config.CURVE)
+        question_obj['key'] = cryptotools.gen_key(conf.ECC_CURVE)
     
     # Find the maximum number of options
     
@@ -173,11 +173,11 @@ def election_setup(election_obj, language):
         for question_obj in election_obj['__list_Question__']]
     
     async_result2 = thread_pool.apply_async(_gen_ballot_crypto, \
-        (q_list, min(config.BATCH_SIZE, election.ballot_cnt)))
+        (q_list, min(conf.BATCH_SIZE, election.ballot_cnt)))
     
-    for lo in range(100, election.ballot_cnt + 100, config.BATCH_SIZE):
+    for lo in range(100, election.ballot_cnt + 100, conf.BATCH_SIZE):
         
-        hi = lo + min(config.BATCH_SIZE, election.ballot_cnt + 100 - lo)
+        hi = lo + min(conf.BATCH_SIZE, election.ballot_cnt + 100 - lo)
         
         # Get current batch's crypto elements and generate the next one's
         
@@ -185,7 +185,7 @@ def election_setup(election_obj, language):
         
         if hi - 100 < election.ballot_cnt:
             async_result2 = thread_pool.apply_async(_gen_ballot_crypto, \
-                (q_list, min(config.BATCH_SIZE, election.ballot_cnt + 100 - hi)))
+                (q_list, min(conf.BATCH_SIZE, election.ballot_cnt + 100 - hi)))
         
         # Generate the rest data for all ballots and parts and store them in
         # lists of dictionaries. They will be used to populate the databases.
@@ -196,7 +196,7 @@ def election_setup(election_obj, language):
             
             # Generate a random credential and compute its hash value
             
-            credential = os.urandom(config.CREDENTIAL_LEN)
+            credential = os.urandom(conf.CREDENTIAL_LEN)
             credential_int = intc.from_bytes(credential, 'big')
             credential_hash = hasher.encode(credential)
             
@@ -214,7 +214,7 @@ def election_setup(election_obj, language):
                 # access the votecodes (as password) and to verify the security
                 # code. The second hash uses the first hash's salt, reversed.
                 
-                security_code = base32cf.random(config.SECURITY_CODE_LEN)
+                security_code = base32cf.random(conf.SECURITY_CODE_LEN)
                 
                 hash, salt, _ = hasher.encode(security_code, split=True)
                 security_code_hash2 = hasher.encode(hash, salt[::-1])
@@ -296,7 +296,7 @@ def election_setup(election_obj, language):
                             digest = intc.from_bytes(hmac_obj.digest(), 'big')
                             
                             l_votecode = base32cf.\
-                                encode(digest)[-config.VOTECODE_LEN:]
+                                encode(digest)[-conf.VOTECODE_LEN:]
                             
                             l_votecode_hash, _, _ = hasher.encode(l_votecode, \
                                 l_votecode_salt, l_votecode_iterations, True)
@@ -314,7 +314,7 @@ def election_setup(election_obj, language):
                         receipt_data = intc.from_bytes(receipt_data, 'big')
                         
                         receipt_full = base32cf.encode(receipt_data)
-                        receipt = receipt_full[-config.RECEIPT_LEN:]
+                        receipt = receipt_full[-conf.RECEIPT_LEN:]
                         
                         # Pack optionv's data
                         

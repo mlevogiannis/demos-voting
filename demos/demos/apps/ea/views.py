@@ -35,11 +35,11 @@ from demos.apps.ea.tasks.setup import _remote_app_update
 
 from demos.common.utils import api, base32cf, crypto, enums
 from demos.common.utils.json import CustomJSONEncoder
-from demos.common.utils.config import registry
 
 logger = logging.getLogger(__name__)
+
 app_config = apps.get_app_config('ea')
-config = registry.get_config('ea')
+conf = app_config.get_constants_and_settings()
 
 
 class HomeView(View):
@@ -84,7 +84,7 @@ class CreateView(View):
         
         try:
             questions = int(request.POST['question-TOTAL_FORMS'])
-            if questions < 1 or questions > config.MAX_QUESTIONS:
+            if questions < 1 or questions > conf.MAX_QUESTIONS:
                 raise ValueError
         except (ValueError, TypeError, KeyError):
             questions = 0
@@ -169,8 +169,8 @@ class CreateView(View):
                     part_obj = {
                         'index': p_index,
                         'vote_token': 'vote_token',
-                        'security_code': base32cf.random(config.\
-                            SECURITY_CODE_LEN, urandom=False),
+                        'security_code': base32cf.random(
+                            conf.SECURITY_CODE_LEN, urandom=False),
                         '__list_Question__': [],
                     }
                     
@@ -184,15 +184,15 @@ class CreateView(View):
                             votecode_list = list(range(1, option_cnt + 1))
                             random.shuffle(votecode_list)
                         elif election_obj['vc_type'] == enums.VcType.LONG:
-                            votecode_list=[base32cf.random(config.VOTECODE_LEN,
+                            votecode_list=[base32cf.random(conf.VOTECODE_LEN,
                                 urandom=False) for _ in range(option_cnt)]
                         
                         for votecode in votecode_list:
                             
                             data_obj = {
                                 vc_name: votecode,
-                                'receipt': base32cf.random(config.\
-                                    RECEIPT_LEN, urandom=False),
+                                'receipt': base32cf.random(
+                                    conf.RECEIPT_LEN, urandom=False),
                             }
                             
                             question_obj['__list_OptionV__'].append(data_obj)
@@ -295,8 +295,8 @@ class StatusView(View):
         if not election:
            return redirect(reverse('ea:home') + '?error=id')
         
-        abb_url = urljoin(config.URL['abb'], quote("results/%s/" % election_id))
-        bds_url = urljoin(config.URL['bds'], quote("manage/%s/" % election_id))
+        abb_url = urljoin(conf.URL['abb'], quote("results/%s/" % election_id))
+        bds_url = urljoin(conf.URL['bds'], quote("manage/%s/" % election_id))
         
         context = {
             'abb_url': abb_url,
@@ -411,8 +411,8 @@ class ApiCryptoView(View):
                 
                 # Add 'com' fields
                 
-                for lo in range(0, len(com_list), config.BATCH_SIZE):
-                    hi = lo + min(config.BATCH_SIZE, len(com_list) - lo)
+                for lo in range(0, len(com_list), conf.BATCH_SIZE):
+                    hi = lo + min(conf.BATCH_SIZE, len(com_list) - lo)
                     
                     com_buf = com_list[lo: hi]
                     
@@ -446,15 +446,15 @@ class ApiCryptoView(View):
                         b_serial, question__index=q_index, part__index=p_index
                     )
                     
-                    for lo in range(0, len(o_index_list), config.BATCH_SIZE):
-                        hi = lo + min(config.BATCH_SIZE, len(o_index_list) - lo)
+                    for lo in range(0, len(o_index_list), conf.BATCH_SIZE):
+                        hi = lo + min(conf.BATCH_SIZE, len(o_index_list) - lo)
                         
                         _qs = optionv_qs.filter(index__in=o_index_list[lo:hi])
                         decom_buf.extend(_qs.values_list('decom', flat=True))
                         
                         # Flush the buffer
                         
-                        if len(decom_buf) > config.BATCH_SIZE:
+                        if len(decom_buf) > conf.BATCH_SIZE:
                             
                             decom = cryptotools.add_decom(key, decom_buf)
                             decom_buf = [ decom ]
@@ -489,8 +489,8 @@ class ApiCryptoView(View):
                         part__index=p_index, part__ballot__serial=b_serial
                     )
                     
-                    for lo in range(0, len(o_iz_list), config.BATCH_SIZE):
-                        hi = lo + min(config.BATCH_SIZE, len(o_iz_list) - lo)
+                    for lo in range(0, len(o_iz_list), conf.BATCH_SIZE):
+                        hi = lo + min(conf.BATCH_SIZE, len(o_iz_list) - lo)
                         
                         o_index_list, zk1_list = zip(*o_iz_list)
                         zk1_list = self._deserialize(zk1_list, crypto.ZK1)
@@ -502,7 +502,7 @@ class ApiCryptoView(View):
                         
                         # Flush the buffer
                         
-                        if len(zk_buf) > config.BATCH_SIZE:
+                        if len(zk_buf) > conf.BATCH_SIZE:
                             
                             zk2_list.extend(cryptotools.\
                                 complete_zk(key, option_cnt, coins, zk_buf))

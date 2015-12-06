@@ -32,11 +32,12 @@ from demos.apps.vbb.models import Election, Question, Ballot, Part, \
     OptionV, OptionC
 
 from demos.common.utils import api, base32cf, enums, hashers, intc
-from demos.common.utils.config import registry
 
 logger = logging.getLogger(__name__)
+
 app_config = apps.get_app_config('vbb')
-config = registry.get_config('vbb')
+conf = app_config.get_constants_and_settings()
+
 hasher = hashers.PBKDF2Hasher()
 
 
@@ -115,8 +116,8 @@ class VoteView(View):
         
         index_bits = 1
         serial_bits = (election.ballot_cnt + 100).bit_length()
-        credential_bits = config.CREDENTIAL_LEN * 8
-        security_code_bits = config.SECURITY_CODE_LEN * 5
+        credential_bits = conf.CREDENTIAL_LEN * 8
+        security_code_bits = conf.SECURITY_CODE_LEN * 5
         token_bits = serial_bits+credential_bits+index_bits+security_code_bits
         
         # Verify vote token's length
@@ -155,12 +156,12 @@ class VoteView(View):
         serial = (p1 >> credential_bits + index_bits) & ((1 << serial_bits) - 1)
         
         credential = ((p1 >> index_bits) & ((1 << credential_bits) - 1))
-        credential = intc.to_bytes(credential, config.CREDENTIAL_LEN, 'big')
+        credential = intc.to_bytes(credential, conf.CREDENTIAL_LEN, 'big')
             
         index = 'A' if p1 & ((1 << index_bits) - 1) == 0 else 'B'
         
         security_code = base32cf.encode((~p2) & ((1 << security_code_bits) - 1))
-        security_code = security_code.zfill(config.SECURITY_CODE_LEN)
+        security_code = security_code.zfill(conf.SECURITY_CODE_LEN)
         
         # Get ballot object and verify credential
         
@@ -254,7 +255,7 @@ class VoteView(View):
             
             status = 200
             max_options = question_qs.aggregate(Max('option_cnt'))['option_cnt__max']
-            abb_url = urljoin(config.URL['abb'], quote('%s/' % election_id))
+            abb_url = urljoin(conf.URL['abb'], quote('%s/' % election_id))
             security_code_hash2_split = part1.security_code_hash2.split('$')
             
             context = {
@@ -265,11 +266,11 @@ class VoteView(View):
                 'p_index': part1.index,
                 'abb_url': abb_url,
                 'credential': credential,
-                'votecode_len': config.VOTECODE_LEN,
+                'votecode_len': conf.VOTECODE_LEN,
                 'max_options': max_options,
                 'sc_iterations': security_code_hash2_split[2],
                 'sc_salt': security_code_hash2_split[1][::-1],
-                'sc_length': config.SECURITY_CODE_LEN,
+                'sc_length': conf.SECURITY_CODE_LEN,
             }
         
         context.update({

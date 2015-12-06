@@ -5,33 +5,34 @@ from __future__ import absolute_import, division, unicode_literals
 from functools import partial
 
 from django import forms
+from django.apps import apps
 from django.conf import settings
 from django.utils import timezone
 from django.forms.formsets import BaseFormSet, formset_factory
 from django.utils.translation import ugettext_lazy as _
 
 from demos.common.utils import enums, fields
-from demos.common.utils.config import registry
 
-config = registry.get_config('ea')
+app_config = apps.get_app_config('ea')
+conf = app_config.get_constants_and_settings()
 
 
 class ElectionForm(forms.Form):
     
     name = forms.CharField(label=_('Name'),
-        min_length=1, max_length=config.ELECTION_MAXLEN)
+        min_length=1, max_length=conf.ELECTION_MAXLEN)
     
     starts_at = fields.DateTimeField(label=_('Start at'))
     ends_at = fields.DateTimeField(label=_('End at'))
     
     ballot_cnt = forms.IntegerField(label=_('Ballots'),
-        min_value=1, max_value=config.MAX_BALLOTS)
+        min_value=1, max_value=conf.MAX_BALLOTS)
     
     language = forms.ChoiceField(label=_('Language'),
         choices=settings.LANGUAGES)
     
     trustee_list = fields.MultiEmailField(label=_('Trustee e-mails'),
-        min_length=1, max_length=config.MAX_TRUSTEES, required=False)
+        min_length=1, max_length=conf.MAX_TRUSTEES, required=False)
     
     _votecode_type_choices = (
         ('short', _('Short')),
@@ -60,7 +61,7 @@ class ElectionForm(forms.Form):
         choices=_election_system_choices, required=False)
     
     choices = forms.IntegerField(label=_('Choices'),
-        initial=1, min_value=1, max_value=config.MAX_OPTIONS, required=False)
+        initial=1, min_value=1, max_value=conf.MAX_OPTIONS, required=False)
     
     error_msg = {
         'passed': _("The date and time you selected have passed."),
@@ -141,7 +142,7 @@ class ElectionForm(forms.Form):
 class QuestionForm(forms.Form):
     
     question = forms.CharField(label=_('Question'), min_length=1,
-        max_length=config.QUESTION_MAXLEN)
+        max_length=conf.QUESTION_MAXLEN)
     
     columns = forms.BooleanField(label=_('Display in columns'), required=False)
     
@@ -203,7 +204,7 @@ class BaseQuestionFormSet(BaseFormSet):
 class OptionForm(forms.Form):
     
     text = forms.CharField(label=_('Option'),
-        min_length=1, max_length=config.OPTION_MAXLEN)
+        min_length=1, max_length=conf.OPTION_MAXLEN)
     
     def clean_option(self):
         return _trim_whitespace(self.cleaned_data['text']);
@@ -242,10 +243,10 @@ class BaseOptionFormSet(BaseFormSet):
 
 
 PartialQuestionFormSet = partial(formset_factory, QuestionForm, extra=-1, 
-  validate_min=True, validate_max=True, min_num=1, max_num=config.MAX_QUESTIONS)
+    validate_min=True, validate_max=True, min_num=1, max_num=conf.MAX_QUESTIONS)
 
 OptionFormSet = formset_factory(OptionForm, formset=BaseOptionFormSet, extra=0,
-    validate_min=True, validate_max=True, min_num=2, max_num=config.MAX_OPTIONS)
+    validate_min=True, validate_max=True, min_num=2, max_num=conf.MAX_OPTIONS)
 
 # ------------------------------------------------------------------------------
 

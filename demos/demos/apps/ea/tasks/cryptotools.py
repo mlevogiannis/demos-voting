@@ -4,10 +4,11 @@ from __future__ import absolute_import, division, unicode_literals
 
 import socket
 
+from django.apps import apps
 from demos.common.utils import crypto, intc
-from demos.common.utils.config import registry
 
-config = registry.get_config('ea')
+app_config = apps.get_app_config('ea')
+conf = app_config.get_constants_and_settings()
 
 
 def gen_key(curve):
@@ -102,11 +103,11 @@ def _request_to_response(request, response_field):
     data = request.SerializeToString()
     size = intc.to_bytes(len(data), 4, 'big')
     
-    af = getattr(socket, config.CRYPTO_AF)
+    af = getattr(socket, conf.CRYPTO_AF)
     sock = socket.socket(af)
     
-    sock.settimeout(config.RECV_TIMEOUT)
-    sock.connect(config.CRYPTO_ADDR)
+    sock.settimeout(conf.RECV_TIMEOUT)
+    sock.connect(conf.CRYPTO_ADDR)
     
     sock.sendall(size + data)
     sock.shutdown(socket.SHUT_WR)
@@ -114,7 +115,7 @@ def _request_to_response(request, response_field):
     size = _recvall(sock, 4)
     size = intc.from_bytes(size, 'big')
     
-    if size < 1 or size > config.RECV_MAX:
+    if size < 1 or size > conf.RECV_MAX:
         raise RuntimeError("demos-crypto: response size out of range")
         
     data = _recvall(sock, size)

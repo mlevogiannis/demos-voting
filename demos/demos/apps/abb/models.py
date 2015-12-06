@@ -6,16 +6,18 @@ import os
 import logging
 
 from django.db import models
+from django.apps import apps
 
 from demos.common.models import base
 from demos.common.utils import crypto, fields, storage
-from demos.common.utils.config import registry
 
 logger = logging.getLogger(__name__)
-config = registry.get_config('abb')
+
+app_config = apps.get_app_config('abb')
+conf = app_config.get_constants_and_settings()
 
 
-fs_root = storage.PrivateFileSystemStorage(location=config.FILESYSTEM_ROOT,
+fs_root = storage.PrivateFileSystemStorage(location=conf.FILESYSTEM_ROOT,
     file_permissions_mode=0o600, directory_permissions_mode=0o700)
 
 def get_cert_file_path(election, filename):
@@ -33,8 +35,7 @@ class Election(base.Election):
     
     # Post-voting data
     
-    coins = models.CharField(max_length=config.HASH_FIELD_LEN, blank=True,
-        default='')
+    coins = models.CharField(max_length=128, blank=True, default='')
 
 
 class Question(base.Question):
@@ -60,21 +61,19 @@ class OptionC(base.OptionC):
 
 class Ballot(base.Ballot):
     
-    credential_hash = models.CharField(max_length=config.HASH_FIELD_LEN)
+    credential_hash = models.CharField(max_length=128)
 
 
 class Part(base.Part):
     
-    security_code = models.CharField(max_length=config.SECURITY_CODE_LEN,
+    security_code = models.CharField(max_length=conf.SECURITY_CODE_LEN,
         blank=True, default='')
     
-    security_code_hash2 = models.CharField(max_length=config.HASH_FIELD_LEN)
+    security_code_hash2 = models.CharField(max_length=128)
     
     # OptionV common data
     
-    l_votecode_salt = models.CharField(max_length=config.HASH_FIELD_LEN,
-        blank=True, default='')
-    
+    l_votecode_salt = models.CharField(max_length=128, blank=True, default='')
     l_votecode_iterations = models.PositiveIntegerField(null=True,
         blank=True, default=None)
 
@@ -83,11 +82,10 @@ class OptionV(base.OptionV):
     
     votecode = models.PositiveSmallIntegerField()
     
-    l_votecode = models.CharField(max_length=config.VOTECODE_LEN,
+    l_votecode = models.CharField(max_length=conf.VOTECODE_LEN,
         blank=True, default='')
     
-    l_votecode_hash = models.CharField(max_length=config.HASH_FIELD_LEN,
-        blank=True, default='')
+    l_votecode_hash = models.CharField(max_length=128, blank=True, default='')
     
     com = fields.ProtoField(cls=crypto.Com)
     zk1 = fields.ProtoField(cls=crypto.ZK1)
