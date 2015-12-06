@@ -3,57 +3,20 @@
 from __future__ import absolute_import, division, unicode_literals
 
 import os
+import logging
 
 from django.db import models
-from django.core import urlresolvers
-from django.core.validators import RegexValidator
-from django.utils.encoding import python_2_unicode_compatible
 
-from demos.common.utils import base32cf, enums, fields, storage
+from demos.common.models import base
+from demos.common.utils import fields, storage
 from demos.common.utils.config import registry
 
+logger = logging.getLogger(__name__)
 config = registry.get_config('bds')
 
 
-@python_2_unicode_compatible
-class Election(models.Model):
-    
-    id = models.CharField(db_column='e_id', unique=True, max_length=16, \
-        validators=[RegexValidator(regex=base32cf.re_pattern)])
-    
-    state = fields.IntEnumField(cls=enums.State)
-
-    type = fields.IntEnumField(cls=enums.Type)
-    vc_type = fields.IntEnumField(cls=enums.VcType)
-    
-    name = models.CharField(max_length=config.ELECTION_MAXLEN)
-    
-    starts_at = models.DateTimeField()
-    ends_at = models.DateTimeField()
-
-    ballot_cnt = models.PositiveIntegerField()
-    
-    # Other model methods and meta options
-    
-    _id = models.AutoField(db_column='id', primary_key=True)
-    
-    def __str__(self):
-        return "%s - %s" % (self.id, self.name)
-    
-    def get_absolute_url(self):
-        return urlresolvers.reverse('bds:', args=[self.id])
-    
-    class Meta:
-        ordering = ['id']
-    
-    class ElectionManager(models.Manager):
-        def get_by_natural_key(self, e_id):
-            return self.get(id=e_id)
-    
-    objects = ElectionManager()
-    
-    def natural_key(self):
-        return (self.id,)
+class Election(base.Election):
+    pass
 
 
 ballot_fs = storage.PrivateTarFileStorage(
@@ -66,67 +29,19 @@ def get_ballot_file_path(ballot, filename):
     return "%s/%s" % (ballot.election.id, filename)
 
 
-@python_2_unicode_compatible
-class Ballot(models.Model):
+class Ballot(base.Ballot):
     
-    election = models.ForeignKey(Election)
-    
-    serial = models.PositiveIntegerField()
     pdf = models.FileField(upload_to=get_ballot_file_path, storage=ballot_fs)
-    
-    # Other model methods and meta options
-    
-    def __str__(self):
-        return "%s" % self.serial
-    
-    class Meta:
-        ordering = ['election', 'serial']
-        unique_together = ['election', 'serial']
-    
-    class BallotManager(models.Manager):
-        def get_by_natural_key(self, b_serial, e_id):
-            return self.get(serial=b_serial, election__id=e_id)
-    
-    objects = BallotManager()
-    
-    def natural_key(self):
-        return (self.serial,) + self.election.natural_key()
 
 
-@python_2_unicode_compatible
-class Part(models.Model):
-    
-    ballot = models.ForeignKey(Ballot)
-    
-    index = models.CharField(max_length=1, choices=(('A', 'A'), ('B', 'B')))
+class Part(base.Part):
     
     vote_token = models.TextField()
     security_code = models.CharField(max_length=config.SECURITY_CODE_LEN)
-    
-    # Other model methods and meta options
-    
-    def __str__(self):
-        return "%s" % self.index
-    
-    class Meta:
-        ordering = ['ballot', 'index']
-        unique_together = ['ballot', 'index']
-    
-    class PartManager(models.Manager):
-        def get_by_natural_key(self, p_index, b_serial, e_id):
-            return self.get(index=p_index, ballot__serial=b_serial,
-                ballot__election__id=e_id)
-    
-    objects = PartManager()
-    
-    def natural_key(self):
-        return (self.index,) + self.ballot.natural_key()
 
 
-class Task(models.Model):
-    
-    election = models.OneToOneField(Election, primary_key=True)
-    task_id = models.UUIDField()
+class Task(base.Task):
+    pass
 
 
 # Common models ----------------------------------------------------------------
