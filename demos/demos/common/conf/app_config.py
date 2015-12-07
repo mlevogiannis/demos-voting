@@ -3,10 +3,12 @@
 from __future__ import absolute_import, division, unicode_literals
 
 from django.apps import AppConfig as _AppConfig
+from django.db.models.signals import pre_delete
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
-from . import constants
+from demos.common.conf import constants
+from demos.common.models.signals import pre_delete_protected_handler
 
 
 class AppConfig(_AppConfig):
@@ -15,6 +17,11 @@ class AppConfig(_AppConfig):
         
         super(AppConfig, self).__init__(*args, **kwargs)
         self._constants_and_settings = ConstantsAndSettings(self.label)
+    
+    def ready(self):
+        
+        Election = self.get_model('Election')
+        pre_delete.connect(pre_delete_protected_handler, sender=Election)
     
     def get_constants_and_settings(self):
         
