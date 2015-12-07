@@ -35,7 +35,8 @@ from demos.apps.abb.models import (
     Election, Question, Ballot, Part, OptionV, Task
 )
 from demos.apps.abb.tasks import tally_protocol
-from demos.common.utils import api, base32cf, enums, hashers, intc
+from demos.common.utils import api, base32cf, enums, hashers
+from demos.common.utils.int import int_from_bytes, int_to_bytes
 
 logger = logging.getLogger(__name__)
 
@@ -263,11 +264,11 @@ class ApiVoteView(View):
                 max_options = question_qs.\
                     aggregate(Max('option_cnt'))['option_cnt__max']
                 
-                credential_int = intc.from_bytes(b_credential, 'big')
+                credential_int = int_from_bytes(b_credential, 'big')
                 
                 key = base32cf.decode(p2_security_code)
                 bytes = int(math.ceil(key.bit_length() / 8))
-                key = intc.to_bytes(key, bytes, 'big')
+                key = int_to_bytes(key, bytes, 'big')
             
             # Verify vote's correctness and save it to the db in an atomic
             # transaction. If anything fails, rollback and return the error.
@@ -340,10 +341,10 @@ class ApiVoteView(View):
                             msg = credential_int + (question.index * \
                                 max_options) + optionv2.votecode
                             bytes = int(math.ceil(msg.bit_length() / 8))
-                            msg = intc.to_bytes(msg, bytes, 'big')
+                            msg = int_to_bytes(msg, bytes, 'big')
                             
                             hmac_obj = hmac.new(key, msg, hashlib.sha256)
-                            digest = intc.from_bytes(hmac_obj.digest(), 'big')
+                            digest = int_from_bytes(hmac_obj.digest(), 'big')
                             
                             l_votecode = base32cf.\
                                 encode(digest)[-conf.VOTECODE_LEN:]

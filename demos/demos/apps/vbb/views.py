@@ -23,7 +23,8 @@ from django.utils.six.moves.urllib.parse import quote, urljoin
 from django.views.generic import View
 
 from demos.apps.vbb.models import Election, Question, Ballot, Part, OptionV
-from demos.common.utils import api, base32cf, enums, hashers, intc
+from demos.common.utils import api, base32cf, enums, hashers
+from demos.common.utils.int import int_to_bytes
 
 logger = logging.getLogger(__name__)
 
@@ -148,7 +149,7 @@ class VoteView(View):
         serial = (p1 >> credential_bits + index_bits) & ((1 << serial_bits) - 1)
         
         credential = ((p1 >> index_bits) & ((1 << credential_bits) - 1))
-        credential = intc.to_bytes(credential, conf.CREDENTIAL_LEN, 'big')
+        credential = int_to_bytes(credential, conf.CREDENTIAL_LEN, 'big')
             
         index = 'A' if p1 & ((1 << index_bits) - 1) == 0 else 'B'
         

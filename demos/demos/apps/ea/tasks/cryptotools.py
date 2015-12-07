@@ -7,7 +7,8 @@ import socket
 from django.apps import apps
 from django.utils.six.moves import zip
 
-from demos.common.utils import crypto, intc
+from demos.common.utils import crypto
+from demos.common.utils.int import int_from_bytes, int_to_bytes
 
 app_config = apps.get_app_config('ea')
 conf = app_config.get_constants_and_settings()
@@ -103,7 +104,7 @@ def verify_com(key, com, decom):
 def _request_to_response(request, response_field):
     
     data = request.SerializeToString()
-    size = intc.to_bytes(len(data), 4, 'big')
+    size = int_to_bytes(len(data), 4, 'big')
     
     af = getattr(socket, conf.CRYPTO_AF)
     sock = socket.socket(af)
@@ -115,7 +116,7 @@ def _request_to_response(request, response_field):
     sock.shutdown(socket.SHUT_WR)
     
     size = _recvall(sock, 4)
-    size = intc.from_bytes(size, 'big')
+    size = int_from_bytes(size, 'big')
     
     if size < 1 or size > conf.RECV_MAX:
         raise RuntimeError("demos-crypto: response size out of range")

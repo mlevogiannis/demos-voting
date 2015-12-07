@@ -7,7 +7,8 @@ from collections import OrderedDict
 from django.contrib.auth.hashers import PBKDF2PasswordHasher, mask_hash
 from django.utils.crypto import constant_time_compare, pbkdf2
 
-from demos.common.utils import base32cf, intc
+from demos.common.utils import base32cf
+from demos.common.utils.int import int_from_bytes
 
 
 class PBKDF2Hasher(PBKDF2PasswordHasher):
@@ -32,7 +33,7 @@ class PBKDF2Hasher(PBKDF2PasswordHasher):
             iterations = self.iterations
         
         hash = pbkdf2(password, salt, int(iterations), digest=self.digest)
-        hash = base32cf.encode(intc.from_bytes(hash, 'big'))
+        hash = base32cf.encode(int_from_bytes(hash, 'big'))
         
         out = (hash, salt, iterations)
         return out if split else ("%s$%s$%d" % out)

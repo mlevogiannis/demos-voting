@@ -7,8 +7,7 @@ import os
 import re
 
 from random import getrandbits
-
-from demos.common.utils import intc
+from demos.common.utils.int import int_from_bytes
 
 # Reference: http://www.crockford.com/wrmg/base32.html
 
@@ -106,7 +105,7 @@ def random(length, hyphens=-1, urandom=True):
     shift_bits = (8 * bytes) - bits
     
     if urandom:
-        number = intc.from_bytes(os.urandom(bytes), 'big')
+        number = int_from_bytes(os.urandom(bytes), 'big')
     else:
         number = getrandbits(bytes * 8)
     

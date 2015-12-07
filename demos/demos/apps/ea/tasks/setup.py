@@ -30,7 +30,8 @@ from celery.signals import task_failure
 from demos.apps.ea.models import Election, Task
 from demos.apps.ea.tasks import cryptotools, pdf
 from demos.apps.ea.tasks.masks import apply_mask
-from demos.common.utils import api, base32cf, enums, hashers, intc
+from demos.common.utils import api, base32cf, enums, hashers
+from demos.common.utils.int import int_from_bytes, int_to_bytes
 from demos.common.utils.permutation import permute
 from demos.common.utils.setup import insert_into_db
 
@@ -189,7 +190,7 @@ def election_setup(election_obj, language):
             # Generate a random credential and compute its hash value
             
             credential = os.urandom(conf.CREDENTIAL_LEN)
-            credential_int = intc.from_bytes(credential, 'big')
+            credential_int = int_from_bytes(credential, 'big')
             credential_hash = hasher.encode(credential)
             
             ballot_obj = {
@@ -222,7 +223,7 @@ def election_setup(election_obj, language):
                     
                     key = base32cf.decode(security_code)
                     bytes = int(math.ceil(key.bit_length() / 8))
-                    key = intc.to_bytes(key, bytes, 'big')
+                    key = int_to_bytes(key, bytes, 'big')
                     
                     l_votecode_salt = hasher.salt()
                     l_votecode_iterations = hasher.iterations
@@ -282,10 +283,10 @@ def election_setup(election_obj, language):
                             
                             msg = credential_int + optionv_id
                             bytes = int(math.ceil(msg.bit_length() / 8))
-                            msg = intc.to_bytes(msg, bytes, 'big')
+                            msg = int_to_bytes(msg, bytes, 'big')
                             
                             hmac_obj = hmac.new(key, msg, hashlib.sha256)
-                            digest = intc.from_bytes(hmac_obj.digest(), 'big')
+                            digest = int_from_bytes(hmac_obj.digest(), 'big')
                             
                             l_votecode = base32cf.\
                                 encode(digest)[-conf.VOTECODE_LEN:]
@@ -298,12 +299,12 @@ def election_setup(election_obj, language):
                         # Generate receipt (receipt_data is an integer)
                         
                         bytes = int(math.ceil(receipt_data.bit_length() / 8))
-                        receipt_data = intc.to_bytes(receipt_data, bytes, 'big')
+                        receipt_data = int_to_bytes(receipt_data, bytes, 'big')
                         
                         receipt_data = \
                             crypto.sign(pkey, receipt_data, str('sha256'))
                         
-                        receipt_data = intc.from_bytes(receipt_data, 'big')
+                        receipt_data = int_from_bytes(receipt_data, 'big')
                         
                         receipt_full = base32cf.encode(receipt_data)
                         receipt = receipt_full[-conf.RECEIPT_LEN:]
@@ -344,7 +345,7 @@ def election_setup(election_obj, language):
                 # tokens of the two parts appear to be completely different.
                 
                 p1 = (serial << (index_bits + credential_bits)) | \
-                    (intc.from_bytes(credential, 'big') << index_bits) | i
+                    (int_from_bytes(credential, 'big') << index_bits) | i
                 
                 p2 = (~security_code) & ((1 << security_code_bits) - 1)
                 
@@ -422,8 +423,8 @@ def election_setup(election_obj, language):
                     
                     int_ = base32cf.decode(security_code) + i
                     bytes_ = int(math.ceil(int_.bit_length() / 8))
-                    value = hashlib.sha256(intc.to_bytes(int_, bytes_, 'big'))
-                    p_index = intc.from_bytes(value.digest(), 'big')
+                    value = hashlib.sha256(int_to_bytes(int_, bytes_, 'big'))
+                    p_index = int_from_bytes(value.digest(), 'big')
                     
                     optionv_list = permute(optionv_list, p_index)
                     
