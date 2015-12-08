@@ -21,7 +21,8 @@ class AppConfig(_AppConfig):
     def ready(self):
         
         Election = self.get_model('Election')
-        pre_delete.connect(pre_delete_protected_handler, sender=Election)
+        pre_delete.connect(pre_delete_protected_handler, sender=Election,
+            dispatch_uid='election_pre_delete_protected_handler')
     
     def get_constants_and_settings(self):
         
