@@ -10,6 +10,7 @@ from base64 import b64encode, b64decode
 from django import http
 from django.apps import apps
 from django.db import transaction
+from django.db.models import Max
 from django.core import urlresolvers
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
@@ -26,7 +27,7 @@ from celery.result import AsyncResult
 from demos.apps.ea.forms import (
     ElectionForm, OptionFormSet, PartialQuestionFormSet, BaseQuestionFormSet
 )
-from demos.apps.ea.models import Config, Election, Question, OptionV, Task
+from demos.apps.ea.models import Election, Question, OptionV, Task
 from demos.apps.ea.tasks import cryptotools, election_setup, pdf
 from demos.apps.ea.tasks.setup import _remote_app_update
 from demos.common.utils import api, base32cf, crypto, enums
@@ -212,30 +213,31 @@ class CreateView(View):
             
             else: # Create a new election
                 
-                with transaction.atomic():
-                    
-                    # Atomically get the next election id
-                    
-                    config_, created = Config.objects.select_for_update().\
-                        get_or_create(key='next_election_id')
-                    
-                    election_id = config_.value if not created else '0'
-                    next_election_id = base32cf.decode(election_id) + 1
-                    
-                    config_.value = base32cf.encode(next_election_id)
-                    config_.save(update_fields=['value'])
-                
-                election_obj['id'] = election_id
                 election_obj['state'] = enums.State.PENDING
                 
-                # Create the new election object
+                # Get the next election_id. Concurrency control is achieved by
+                # locking for write an object with an predetermined, invalid ID
                 
-                e_kwargs = {
-                    field.name: election_obj[field.name] for field \
-                    in Election._meta.get_fields() if field.name in election_obj
-                }
+                with transaction.atomic():
+                    
+                    defaults = {f.name: election_obj[f.name] for f in
+                        Election._meta.get_fields() if f.name in election_obj}
+                    
+                    election = Election.objects.select_for_update().\
+                        create(id='-', **defaults)
+                    
+                    election.full_clean(exclude=['id'])
+                    
+                    max_id = Election.objects.exclude(id=election.id).\
+                        aggregate(Max('id'))['id__max']
+                    
+                    election_id = '0' if max_id is None else \
+                        base32cf.encode(base32cf.decode(max_id) + 1)
+                    
+                    election.id = election_id
+                    election.save(update_fields=['id'])
                 
-                election = Election.objects.create(**e_kwargs)
+                election_obj['id'] = election_id
                 
                 # Prepare and start the election_setup task
                 

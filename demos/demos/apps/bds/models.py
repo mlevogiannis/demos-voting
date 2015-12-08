@@ -49,10 +49,6 @@ class Task(base.Task):
 # Common models ----------------------------------------------------------------
 
 from demos.common.utils.api import RemoteUserBase
-from demos.common.utils.config import ConfigBase
-
-class Config(ConfigBase):
-    pass
 
 class RemoteUser(RemoteUserBase):
     pass
