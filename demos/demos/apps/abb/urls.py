@@ -8,9 +8,9 @@ from demos.common.utils import base32cf
 
 urlpatterns = [
     url(r'^$', views.HomeView.as_view(), name='home'),
-    url(r'^audit/(?:(?P<election_id>[' + base32cf.re_charset + r']+)/)?$', \
+    url(r'^audit/(?:(?P<election_id>[' + base32cf.re_valid_charset + r']+)/)?$', \
         views.AuditView.as_view(), name='audit'),
-    url(r'^results/(?:(?P<election_id>[' + base32cf.re_charset + r']+)/)?$', \
+    url(r'^results/(?:(?P<election_id>[' + base32cf.re_valid_charset + r']+)/)?$', \
         views.ResultsView.as_view(), name='results'),
 ]
 

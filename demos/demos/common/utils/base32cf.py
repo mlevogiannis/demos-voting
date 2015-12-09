@@ -14,20 +14,21 @@ from demos.common.utils.int import int_from_bytes
 
 symbols = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 
-re_charset = '-0-9A-TV-Za-tv-z'
-re_pattern = re.compile('^[' + '-' + symbols + ']*$')
+re_valid_charset = '-0-9A-TV-Za-tv-z'
+re_valid = re.compile('^[' + re_valid_charset + ']*$')
+
+re_normalized_charset = '0-9A-TV-Z'
+re_normalized = re.compile('^[' + re_normalized_charset + ']*$')
 
 
 try:
-    _translation = str.maketrans('OIL', '011')
-    _str_translate = str.translate
+    _translation_table = str.maketrans('OIL', '011')
 except AttributeError:
     import string
-    _translation = string.maketrans('OIL', '011')
-    _str_translate = string.translate
+    _translation_table = string.maketrans('OIL', '011')
 
 
-def encode(number, hyphens=-1):
+def encode(number, hyphens=0):
     """Encode an integer to base32cf string. 'number' is the integer to encode.
     The encoded string is returned."""
     
@@ -66,18 +67,18 @@ def decode(encoded):
     return number
 
 
-def normalize(encoded, hyphens=-1):
+def normalize(encoded, hyphens=0):
     """Normalize a base32cf encoded string by replacing 'I' and 'L' with '1',
     'O' with '0' and converting all characters to uppercase. 'string' is the
-    string to normalize. ValuefError is raised if there are non-alphabet
+    string to normalize. ValueError is raised if there are non-alphabet
     characters present in the input."""
     
-    encoded = _str_translate(str(encoded).upper(), _translation)
-    
-    if not re_pattern.match(encoded):
+    if not re_valid.match(encoded):
         raise ValueError("Non-base32cf digit found")
     
-    if hyphens > 0:
+    encoded = encoded.upper().translate(_translation_table)
+    
+    if hyphens >= 0:
         encoded = hyphen(encoded, hyphens)
     
     return encoded
@@ -88,7 +89,7 @@ def hyphen(encoded, hyphens):
     treated, 0 means remove all, n > 0 means add a hyphen every n characters."""
     
     if hyphens >= 0:
-        encoded = re.sub('-', '', encoded)
+        encoded = encoded.replace('-', '')
     
     if hyphens > 0:
         encoded = '-'.join(re.findall('.{,%s}' % hyphens, encoded)[:-1])
@@ -96,7 +97,7 @@ def hyphen(encoded, hyphens):
     return encoded
 
 
-def random(length, hyphens=-1, urandom=True):
+def random(length, hyphens=0, urandom=True):
     """Generate a random base32cf encoded string. 'length' is the length of
     resulting encoded string."""
     

@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class Election(models.Model):
     
     id = models.CharField(db_column='e_id', unique=True, max_length=16,
-        validators=[validators.RegexValidator(regex=base32cf.re_pattern)])
+        validators=[validators.RegexValidator(regex=base32cf.re_valid)])
     
     state = fields.IntEnumField(cls=enums.State)
 
