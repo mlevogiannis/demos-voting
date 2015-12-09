@@ -53,6 +53,10 @@ class Election(models.Model):
     
     def natural_key(self):
         return (self.id,)
+    
+    def save(self, *args, **kwargs):
+        self.id = base32cf.normalize(self.id)
+        super(Election, self).save(*args, **kwargs)
 
 
 @python_2_unicode_compatible
@@ -192,6 +196,10 @@ class Part(models.Model):
         return self.ballot.natural_key() + (self.index,)
     
     natural_key.dependencies = ['%(app_label)s.Ballot']
+    
+    def save(self, *args, **kwargs):
+        self.index = self.index.upper()
+        super(Part, self).save(*args, **kwargs)
 
 
 @python_2_unicode_compatible
