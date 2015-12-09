@@ -6,6 +6,7 @@ from django.apps import AppConfig as _AppConfig
 from django.db.models.signals import pre_delete
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.utils.functional import lazy
 
 from demos.common.conf import constants
 from demos.common.models.signals import pre_delete_protected_handler
@@ -20,9 +21,34 @@ class AppConfig(_AppConfig):
     
     def ready(self):
         
+        # Prevent deletion of Election objects
+        
         Election = self.get_model('Election')
         pre_delete.connect(pre_delete_protected_handler, sender=Election,
             dispatch_uid='election_pre_delete_protected_handler')
+        
+        # Workaround for abstract natural key dependencies. For child classes
+        # that do not override their parent class' natural_key method, any
+        # '%(app_label)s' contained in the natural_key's dependency list is
+        # replaced by the lower-cased name of the app they are contained
+        # within. Each child class gets a proxy natural_key method that has the
+        # new dependency list as an attribute.
+        
+        for model in self.get_models():
+            
+            if hasattr(model, 'natural_key') and \
+                'natural_key' not in vars(model) and \
+                hasattr(model.natural_key, 'dependencies'):
+                
+                dependencies = [dep % {'app_label': self.label.lower()}
+                    for dep in model.natural_key.dependencies]
+                
+                if dependencies != model.natural_key.dependencies:
+                    
+                    natural_key = lazy(model.natural_key, list)
+                    natural_key.dependencies = dependencies
+                    
+                    setattr(model, 'natural_key', natural_key)
     
     def get_constants_and_settings(self):
         
