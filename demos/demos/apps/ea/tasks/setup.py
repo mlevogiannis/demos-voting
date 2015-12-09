@@ -329,7 +329,7 @@ def election_setup(election_obj, language):
                 
                 ballot_obj['__list_Part__'].append(part_obj)
             
-            # Build the vote tokens for both parts
+            # Build the voter tokens for both parts
             
             for i, part_obj in enumerate(ballot_obj['__list_Part__']):
                 
@@ -338,7 +338,7 @@ def election_setup(election_obj, language):
                 other_part_obj = ballot_obj['__list_Part__'][1-i]
                 security_code = base32cf.decode(other_part_obj['security_code'])
                 
-                # The vote token consists of two parts. The first part is the
+                # The voter token consists of two parts. The first part is the
                 # ballot's serial number and credential and the part's index,
                 # XORed with the second part. The second part is the other
                 # part's security code, bit-inversed. This is done so that the
@@ -357,19 +357,19 @@ def election_setup(election_obj, language):
                 
                 p1 &= (1 << p1_len) - 1
                 
-                # Assemble the vote token and add random padding, if required
+                # Assemble the voter token and add random padding, if required
                 
                 p = (p1 << p2_len) | p2
                 
                 if pad_bits > 0:
                     p |= (rand.getrandbits(pad_bits) << token_bits)
                 
-                # Encode the vote token
+                # Encode the voter token
                 
-                vote_token = base32cf.encode(p)
-                vote_token = vote_token.zfill((token_bits + pad_bits) // 5)
+                voter_token = base32cf.encode(p)
+                voter_token = voter_token.zfill((token_bits + pad_bits) // 5)
                 
-                part_obj['vote_token'] = vote_token
+                part_obj['voter_token'] = voter_token
             
             ballot_list.append(ballot_obj)
             

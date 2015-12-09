@@ -10,7 +10,7 @@ _masks = {
         'Election': ['id', 'state', 'type', 'vc_type', 'name', 'starts_at', \
             'ends_at', 'ballot_cnt'],
         'Ballot': ['serial'],
-        'Part': ['index', 'security_code', 'vote_token'],
+        'Part': ['index', 'security_code', 'voter_token'],
      },
     
     'abb' : {

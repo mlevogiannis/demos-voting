@@ -25,7 +25,7 @@
         {% include "common/election_box.html" with object=election now_datetime=timezone_now panels=panels %}
         
         {% trans "The election ID you specified is not valid." as invalid_election_id_msg %}
-        {% trans "The vote token you specified is not valid." as invalid_vote_token_msg %}
+        {% trans "The voter token you specified is not valid." as invalid_voter_token_msg %}
         {% trans "The election starts on" as election_not_started_msg %}
         {% trans "The election has been temporarily paused." as election_paused_msg %}
         {% trans "The election ended on" as election_ended_msg %}
@@ -52,7 +52,7 @@
             <p>
                 <strong>{% trans "Error" %}:</strong>
                 <span data-state="{{ State.INVALID_ELECTION_ID }}" class="{% if state != State.INVALID_ELECTION_ID %}hidden{% endif %}">{{ invalid_election_id_msg }} {{ invalid_url_msg }}</span>
-                <span data-state="{{ State.INVALID_VOTE_TOKEN }}" class="{% if state != State.INVALID_VOTE_TOKEN %}hidden{% endif %}">{{ invalid_vote_token_msg }} {{ invalid_url_msg }}</span>
+                <span data-state="{{ State.INVALID_VOTER_TOKEN }}" class="{% if state != State.INVALID_VOTER_TOKEN %}hidden{% endif %}">{{ invalid_voter_token_msg }} {{ invalid_url_msg }}</span>
                 <span data-state="{{ State.ELECTION_NOT_STARTED }}" class="{% if state != State.ELECTION_NOT_STARTED %}hidden{% endif %}">{{ election_not_started_msg }} <span class="datetime-iso8601" data-format="dddd D MMMM YYYY, hh:mm a">{{ election.starts_at|date:"c" }}</span>.</span>
                 <span data-state="{{ State.ELECTION_PAUSED }}" class="{% if state != State.ELECTION_PAUSED %}hidden{% endif %}">{{ election_paused_msg }} {{ try_again_later_msg }}</span>
                 <span data-state="{{ State.ELECTION_ENDED }}" class="{% if state != State.ELECTION_ENDED %}hidden{% endif %}">{{ election_ended_msg }} <span class="datetime-iso8601" data-format="dddd D MMMM YYYY, hh:mm a">{{ election.ends_at|date:"c" }}</span>.</span>

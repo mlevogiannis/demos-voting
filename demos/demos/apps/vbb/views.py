@@ -50,7 +50,7 @@ class VoteView(View):
     @unique
     class State(IntEnum):
         INVALID_ELECTION_ID = 1
-        INVALID_VOTE_TOKEN = 2
+        INVALID_VOTER_TOKEN = 2
         ELECTION_NOT_STARTED = 3
         ELECTION_PAUSED = 4
         ELECTION_ENDED = 5
@@ -61,7 +61,7 @@ class VoteView(View):
         NO_ERROR = 0
     
     @staticmethod
-    def _parse_input(election_id, vote_token,):
+    def _parse_input(election_id, voter_token):
         
         hasher = hashers.PBKDF2Hasher()
         
@@ -105,7 +105,7 @@ class VoteView(View):
         elif election.state != enums.State.RUNNING:
             raise VoteView.Error(VoteView.State.SERVER_ERROR, *retval)
         
-        # Vote token bits definitions
+        # Voter token bits definitions
         
         index_bits = 1
         serial_bits = (election.ballot_cnt + 100).bit_length()
@@ -113,24 +113,24 @@ class VoteView(View):
         security_code_bits = conf.SECURITY_CODE_LEN * 5
         token_bits = serial_bits+credential_bits+index_bits+security_code_bits
         
-        # Verify vote token's length
+        # Verify voter token's length
         
-        if not isinstance(vote_token, six.string_types):
-            raise VoteView.Error(VoteView.State.INVALID_VOTE_TOKEN, *retval)
+        if not isinstance(voter_token, six.string_types):
+            raise VoteView.Error(VoteView.State.INVALID_VOTER_TOKEN, *retval)
         
-        if len(vote_token) != int(math.ceil(token_bits / 5)):
-            raise VoteView.Error(VoteView.State.INVALID_VOTE_TOKEN, *retval)
+        if len(voter_token) != int(math.ceil(token_bits / 5)):
+            raise VoteView.Error(VoteView.State.INVALID_VOTER_TOKEN, *retval)
         
-        # The vote token consists of two parts. The first part is the
+        # The voter token consists of two parts. The first part is the
         # ballot's serial number and credential and the part's index,
         # XORed with the second part. The second part is the other
         # part's security code, bit-inversed. This is done so that the
         # tokens of the two parts appear to be completely different.
         
         try:
-            p = base32cf.decode(vote_token) & ((1 << token_bits) - 1)
+            p = base32cf.decode(voter_token) & ((1 << token_bits) - 1)
         except (AttributeError, TypeError, ValueError):
-            raise VoteView.Error(VoteView.State.INVALID_VOTE_TOKEN, *retval)
+            raise VoteView.Error(VoteView.State.INVALID_VOTER_TOKEN, *retval)
         
         p1_len = serial_bits + credential_bits + index_bits
         p2_len = security_code_bits
@@ -161,12 +161,12 @@ class VoteView(View):
         try:
             ballot = Ballot.objects.get(election=election, serial=serial)
         except (ValidationError, Ballot.DoesNotExist):
-            raise VoteView.Error(VoteView.State.INVALID_VOTE_TOKEN, *retval)
+            raise VoteView.Error(VoteView.State.INVALID_VOTER_TOKEN, *retval)
         
         retval.append(ballot)
         
         if not hasher.verify(credential, ballot.credential_hash):
-            raise VoteView.Error(VoteView.State.INVALID_VOTE_TOKEN, *retval)
+            raise VoteView.Error(VoteView.State.INVALID_VOTER_TOKEN, *retval)
         
         # Get both part objects and verify the given security code. The first
         # matched object (part1) is always the part used by the client to vote,
@@ -188,7 +188,7 @@ class VoteView(View):
         hash, _, _ = hasher.encode(security_code, salt[::-1], iterations, True)
         
         if not hasher.verify(hash, part2.security_code_hash2):
-            raise VoteView.Error(VoteView.State.INVALID_VOTE_TOKEN, *retval)
+            raise VoteView.Error(VoteView.State.INVALID_VOTER_TOKEN, *retval)
         
         retval.append(security_code)
         
@@ -204,31 +204,31 @@ class VoteView(View):
     def get(self, request, **kwargs):
         
         election_id = kwargs.get('election_id')
-        vote_token = kwargs.get('vote_token')
+        voter_token = kwargs.get('voter_token')
         
-        # Normalize election_id and vote_token
+        # Normalize election_id and voter_token
         
         args = {
             'election_id': election_id,
-            'vote_token': vote_token,
+            'voter_token': voter_token,
         }
         
         normalized = {
             'election_id': base32cf.normalize(election_id),
-            'vote_token': base32cf.normalize(vote_token),
+            'voter_token': base32cf.normalize(voter_token),
         }
         
         if args != normalized:
             return redirect('vbb:vote', **normalized)
         
-        # Parse input 'election_id' and 'vote_token'. The first matched object
+        # Parse input 'election_id' and 'voter_token'. The first matched object
         # (part1) of part_qs is always the part used by the client to vote, the
         # second matched object (part2) is the other part. '_parse_input' method
         # raises a VoteView.Error exception for the first error that occurs.
         
         try:
             election, question_qs, ballot, (part1, _), credential, _, now = \
-                VoteView._parse_input(election_id, vote_token)
+                VoteView._parse_input(election_id, voter_token)
         
         except VoteView.Error as e:
             
@@ -280,16 +280,16 @@ class VoteView(View):
         hasher = hashers.PBKDF2Hasher()
         
         election_id = kwargs.get('election_id')
-        vote_token = kwargs.get('vote_token')
+        voter_token = kwargs.get('voter_token')
         
-        # Parse input 'election_id' and 'vote_token'. The first matched object
+        # Parse input 'election_id' and 'voter_token'. The first matched object
         # (part1) of part_qs is always the part used by the client to vote, the
         # second matched object (part2) is the other part. '_parse_input' method
         # raises a VoteView.Error exception for the first error that occurs.
         
         try:
              election, question_qs, ballot, part_qs, credential, \
-                security_code,_ = VoteView._parse_input(election_id, vote_token)
+                security_code,_ = VoteView._parse_input(election_id, voter_token)
         except VoteView.Error as e:
             return http.JsonResponse({'error': e.args[0].value}, status=422)
         

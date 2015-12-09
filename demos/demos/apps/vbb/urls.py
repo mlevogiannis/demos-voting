@@ -10,7 +10,7 @@ urlpatterns = [
     url(r'^$', views.HomeView.as_view(), name='home'),
     url(r'^vote/$', views.VoteView.as_view(), name='vote'),
     url(r'^qrcode/$', views.QRCodeScannerView.as_view(), name='qrcode'),
-    url(r'^(?P<election_id>[' + base32cf.re_valid_charset + r']+)/(?P<vote_token>[' \
+    url(r'^(?P<election_id>[' + base32cf.re_valid_charset + r']+)/(?P<voter_token>[' \
         + base32cf.re_valid_charset + r']+)/$', views.VoteView.as_view(), name='vote'),
 ]
 

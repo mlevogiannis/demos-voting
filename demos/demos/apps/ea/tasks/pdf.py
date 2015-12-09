@@ -431,7 +431,7 @@ class BallotPDFCreator(object):
             abb_url = urljoin(conf.URL['abb'], quote("%s/" % self.election_id))
             
             vbb_url = urljoin(conf.URL['vbb'], quote("%s/%s/" %
-                (self.election_id, part_obj['vote_token'])))
+                (self.election_id, part_obj['voter_token'])))
             
             # Generate QRCode
             
@@ -685,7 +685,7 @@ class BallotPDFCreator(object):
             
             part_obj = {
                 'index': p_index,
-                'vote_token': 'vote_token',
+                'voter_token': 'voter_token',
                 'security_code': base32cf.random(conf.SECURITY_CODE_LEN, False),
                 '__list_Question__': [],
             }

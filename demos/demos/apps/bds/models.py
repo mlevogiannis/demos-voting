@@ -38,7 +38,7 @@ class Ballot(base.Ballot):
 
 class Part(base.Part):
     
-    vote_token = models.TextField()
+    voter_token = models.TextField()
     security_code = models.CharField(max_length=conf.SECURITY_CODE_LEN)
 
 

@@ -125,8 +125,8 @@ msgid "The election ID you specified is not valid."
 msgstr "Το αναγνωριστικό ψηφοφορίας που καθορίσατε δεν είναι έγκυρο."
 
 #: demos/apps/vbb/templates/vbb/vote.html:27
-msgid "The vote token you specified is not valid."
-msgstr "Το τεκμήριο ψήφου που καθορίσατε δεν είναι έγκυρο."
+msgid "The voter token you specified is not valid."
+msgstr "Το τεκμήριο ψηφοφόρου που καθορίσατε δεν είναι έγκυρο."
 
 #: demos/apps/vbb/templates/vbb/vote.html:28
 msgid "The election starts on"
