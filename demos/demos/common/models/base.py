@@ -32,18 +32,14 @@ class Election(models.Model):
 
     ballot_cnt = models.PositiveIntegerField()
     
-    # Special methods and meta options
+    
+    # Predefined methods and meta options
     
     _id = models.AutoField(db_column='id', primary_key=True)
-    
-    def __str__(self):
-        return "%s | %s" % (self.id, self.name)
     
     class Meta:
         abstract = True
         ordering = ['id']
-    
-    # Natural keys (serialization/deserialization)
     
     class ElectionManager(models.Manager):
         
@@ -51,6 +47,9 @@ class Election(models.Model):
             return self.get(id=e_id)
     
     objects = ElectionManager()
+    
+    def __str__(self):
+        return "%s | %s" % (self.id, self.name)
     
     def natural_key(self):
         return (self.id,)
@@ -67,17 +66,12 @@ class Question(models.Model):
 
     option_cnt = models.PositiveSmallIntegerField()
     
-    # Special methods and meta options
-    
-    def __str__(self):
-        return "%s | %s" % (self.index + 1, self.text)
+    # Predefined methods and meta options
     
     class Meta:
         abstract = True
         ordering = ['election', 'index']
         unique_together = ['election', 'index']
-    
-    # Natural keys (serialization/deserialization)
     
     class QuestionManager(models.Manager):
         
@@ -89,6 +83,9 @@ class Question(models.Model):
             return self.get(election=election, index=q_index)
     
     objects = QuestionManager()
+    
+    def __str__(self):
+        return "%s | %s" % (self.index + 1, self.text)
     
     def natural_key(self):
         return self.election.natural_key() + (self.index,)
@@ -104,17 +101,12 @@ class OptionC(models.Model):
     index = models.PositiveSmallIntegerField()
     text = models.CharField(max_length=constants.OPTION_MAXLEN)
     
-    # Special methods and meta options
-    
-    def __str__(self):
-        return "%s | %s" % (self.index + 1, self.text)
+    # Predefined methods and meta options
     
     class Meta:
         abstract = True
         ordering = ['question', 'index']
         unique_together = ['question', 'text']
-    
-    # Natural keys (serialization/deserialization)
     
     class OptionCManager(models.Manager):
         
@@ -126,6 +118,9 @@ class OptionC(models.Model):
             return self.get(question=question, index=o_index)
     
     objects = OptionCManager()
+    
+    def __str__(self):
+        return "%s | %s" % (self.index + 1, self.text)
     
     def natural_key(self):
         return self.question.natural_key() + (self.index,)
@@ -139,17 +134,12 @@ class Ballot(models.Model):
     election = models.ForeignKey('Election')
     serial = models.PositiveIntegerField()
     
-    # Special methods and meta options
-    
-    def __str__(self):
-        return "%s" % self.serial
+    # Predefined methods and meta options
     
     class Meta:
         abstract = True
         ordering = ['election', 'serial']
         unique_together = ['election', 'serial']
-    
-    # Natural keys (serialization/deserialization)
     
     class BallotManager(models.Manager):
         
@@ -161,6 +151,9 @@ class Ballot(models.Model):
             return self.get(election=election, serial=b_serial)
     
     objects = BallotManager()
+    
+    def __str__(self):
+        return "%s" % self.serial
     
     def natural_key(self):
         return self.election.natural_key() + (self.serial,)
@@ -174,17 +167,12 @@ class Part(models.Model):
     ballot = models.ForeignKey('Ballot')
     index = models.CharField(max_length=1, choices=(('A', 'A'), ('B', 'B')))
     
-    # Special methods and meta options
-    
-    def __str__(self):
-        return "%s" % self.index
+    # Predefined methods and meta options
     
     class Meta:
         abstract = True
         ordering = ['ballot', 'index']
         unique_together = ['ballot', 'index']
-    
-    # Natural keys (serialization/deserialization)
     
     class PartManager(models.Manager):
         
@@ -196,6 +184,9 @@ class Part(models.Model):
             return self.get(ballot=ballot, index=p_index)
     
     objects = PartManager()
+    
+    def __str__(self):
+        return "%s" % self.index
     
     def natural_key(self):
         return self.ballot.natural_key() + (self.index,)
@@ -211,17 +202,12 @@ class OptionV(models.Model):
     
     index = models.PositiveSmallIntegerField()
     
-    # Special methods and meta options
-    
-    def __str__(self):
-        return "%s" % (self.index + 1)
+    # Predefined methods and meta options
     
     class Meta:
         abstract = True
         ordering = ['part', 'question', 'index']
         unique_together = ['part', 'question', 'index']
-    
-    # Natural keys (serialization/deserialization)
     
     class OptionVManager(models.Manager):
         
@@ -237,6 +223,9 @@ class OptionV(models.Model):
     
     objects = OptionVManager()
     
+    def __str__(self):
+        return "%s" % (self.index + 1)
+    
     def natural_key(self):
         return self.part.natural_key() + \
             self.question.natural_key()[1:] + (self.index,)
@@ -250,16 +239,11 @@ class Trustee(models.Model):
     election = models.ForeignKey('Election')
     email = models.EmailField()
     
-    # Special methods and meta options
-    
-    def __str__(self):
-        return "%s" % self.email
+    # Predefined methods and meta options
     
     class Meta:
         abstract = True
         unique_together = ['election', 'email']
-    
-    # Natural keys (serialization/deserialization)
     
     class TrusteeManager(models.Manager):
         
@@ -272,6 +256,9 @@ class Trustee(models.Model):
     
     objects = TrusteeManager()
     
+    def __str__(self):
+        return "%s" % self.email
+    
     def natural_key(self):
         return self.election.natural_key() + (self.email,)
     
@@ -283,11 +270,11 @@ class Task(models.Model):
     task_id = models.UUIDField(unique=True)
     election = models.ForeignKey('Election')
     
-    # Special methods and meta options
-    
-    def __str__(self):
-        return "%s | %s" % (self.election.id, self.task_id)
+    # Predefined methods and meta options
     
     class Meta:
         abstract = True
+    
+    def __str__(self):
+        return "%s | %s" % (self.election.id, self.task_id)
 
