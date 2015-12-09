@@ -31,7 +31,7 @@ app_config = apps.get_app_config('ea')
 conf = app_config.get_constants_and_settings()
 
 
-class BallotBuilder:
+class BallotBuilder(object):
     """Generates PDF ballots"""
     
     @staticmethod

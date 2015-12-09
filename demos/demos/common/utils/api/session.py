@@ -14,7 +14,7 @@ from demos.common.utils.json import CustomJSONEncoder
 logger = logging.getLogger(__name__)
 
 
-class ApiSession:
+class ApiSession(object):
     
     _csrftoken = settings.CSRF_COOKIE_NAME
     _csrfmiddlewaretoken = 'csrfmiddlewaretoken'
