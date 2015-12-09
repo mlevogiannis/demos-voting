@@ -5,10 +5,10 @@ from __future__ import absolute_import, division, unicode_literals
 import logging
 
 from django import http
-from django.db import models
 from django.conf import settings
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.forms import AuthenticationForm
+from django.db import models
 from django.middleware import csrf
 from django.utils import six
 from django.utils.encoding import python_2_unicode_compatible

@@ -9,11 +9,11 @@ from base64 import b64encode, b64decode
 
 from django import http
 from django.apps import apps
-from django.db import transaction
-from django.db.models import Max
 from django.core import urlresolvers
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
+from django.db import transaction
+from django.db.models import Max
 from django.middleware import csrf
 from django.shortcuts import render, redirect
 from django.utils import timezone, translation

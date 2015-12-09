@@ -3,9 +3,9 @@
 from __future__ import absolute_import, division, unicode_literals
 
 from django.apps import AppConfig as _AppConfig
-from django.db.models.signals import pre_delete
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.db.models.signals import pre_delete
 from django.utils.functional import lazy
 
 from demos.common.conf import constants

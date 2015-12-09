@@ -12,8 +12,8 @@ from enum import IntEnum, unique
 
 from django import http
 from django.apps import apps
-from django.db.models import Max
 from django.core.exceptions import ValidationError
+from django.db.models import Max
 from django.middleware import csrf
 from django.shortcuts import render, redirect
 from django.utils import six, timezone
