@@ -45,7 +45,7 @@ class AppConfig(_AppConfig):
                 
                 if dependencies != model.natural_key.dependencies:
                     
-                    natural_key = lazy(model.natural_key, list)
+                    natural_key = lazy(model.natural_key, tuple)
                     natural_key.dependencies = dependencies
                     
                     setattr(model, 'natural_key', natural_key)
