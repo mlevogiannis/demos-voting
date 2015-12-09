@@ -147,76 +147,32 @@ class CreateView(View):
             
             if request.is_ajax():
                 
-                q_options_list = [q_obj['option_cnt'] \
-                    for q_obj in election_obj['__list_Question__']]
+                # Create a sample ballot
                 
-                vc_name = ('l_' if election_obj['vc_type'] == \
-                    enums.VcType.LONG else '') + 'votecode'
-                
-                # Create a sample ballot. Since this is not a real ballot,
-                # pseudo-random number generators are used instead of urandom.
-                
-                ballot_obj = {
-                    'serial': 100,
-                    '__list_Part__': [],
-                }
-                
-                for p_index in ['A', 'B']:
-                    
-                    part_obj = {
-                        'index': p_index,
-                        'vote_token': 'vote_token',
-                        'security_code': base32cf.random(
-                            conf.SECURITY_CODE_LEN, urandom=False),
-                        '__list_Question__': [],
-                    }
-                    
-                    for option_cnt in q_options_list:
-                        
-                        question_obj = {
-                            '__list_OptionV__': [],
-                        }
-                        
-                        if election_obj['vc_type'] == enums.VcType.SHORT:
-                            votecode_list = list(range(1, option_cnt + 1))
-                            random.shuffle(votecode_list)
-                        elif election_obj['vc_type'] == enums.VcType.LONG:
-                            votecode_list=[base32cf.random(conf.VOTECODE_LEN,
-                                urandom=False) for _ in range(option_cnt)]
-                        
-                        for votecode in votecode_list:
-                            
-                            data_obj = {
-                                vc_name: votecode,
-                                'receipt': base32cf.random(
-                                    conf.RECEIPT_LEN, urandom=False),
-                            }
-                            
-                            question_obj['__list_OptionV__'].append(data_obj)
-                        part_obj['__list_Question__'].append(question_obj)
-                    ballot_obj['__list_Part__'].append(part_obj)
                 election_obj['id'] = 'election_id'
                 
                 # Temporarily enable the requested language
                 
                 translation.activate(language)
                 
-                builder = pdf.BallotBuilder(election_obj)
-                pdfbuf = builder.pdfgen(ballot_obj)
+                pdfcreator = pdf.BallotPDFCreator(election_obj)
+                pdfbuf = pdfcreator.sample()
                     
                 translation.deactivate()
                 
                 # Return the pdf ballot as a base64 encoded string
                 
-                pdfb64 = b64encode(pdfbuf.getvalue())
-                return http.HttpResponse(pdfb64.decode())
+                pdf_base64 = b64encode(pdfbuf.getvalue()).decode()
+                return http.HttpResponse(pdf_base64)
             
-            else: # Create a new election
+            else:
+                
+                # Create a new election
                 
                 election_obj['state'] = enums.State.PENDING
                 
                 # Get the next election_id. Concurrency control is achieved by
-                # locking for write an object with an predetermined, invalid ID
+                # locking for write an object with a predetermined, invalid ID.
                 
                 with transaction.atomic():
                     
@@ -249,8 +205,8 @@ class CreateView(View):
                 
                 # Redirect to status page
                 
-                return http.HttpResponseRedirect(urlresolvers.\
-                    reverse('ea:status', args=[election_id]))
+                return http.HttpResponseRedirect(
+                    urlresolvers.reverse('ea:status', args=[election_id]))
         
         # Add an empty question form and option formset
         

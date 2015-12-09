@@ -2,18 +2,18 @@
 
 from __future__ import absolute_import, division, unicode_literals
 
+import io
 import math
-
-from io import BytesIO
-from os import path
-from subprocess import check_output
+import os
+import string
+import subprocess
 
 from django.apps import apps
 from django.utils.six.moves import range, zip
 from django.utils.six.moves.urllib.parse import quote, urljoin
 from django.utils.translation import ugettext as _
 
-from qrcode import QRCode, constants
+import qrcode
 
 from reportlab.lib import colors, pagesizes
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
@@ -31,127 +31,77 @@ app_config = apps.get_app_config('ea')
 conf = app_config.get_constants_and_settings()
 
 
-class BallotBuilder(object):
+def _load_ttf_family(ttf_family, ttf_style_list):
+    """Loads a TrueType font family
+    
+    Registers the given TrueType font family's styles for use with reportlab.
+    Uses the system's fc-list utility to get font paths.
+    
+    Arguments:
+        ttf_family: The font family (string)
+        ttf_style_list: A sequence of font styles (strings)
+    
+    Returns:
+        A dict mapping ttf_style_list values to the corresponding registered
+        font names.
+    """
+    
+    ttf_dict = {}
+    
+    for ttf_style in ttf_style_list:
+        
+        ttf_tuple = (ttf_family, ttf_style)
+        ttf_name = ''.join(('%s-%s' % ttf_tuple).split())
+        
+        cmd = ['fc-list', '-f', '%{file}', ':family=%s:style=%s' % ttf_tuple]
+        ttf_path = subprocess.check_output(cmd, universal_newlines=True)
+        
+        if not ttf_path:
+            raise EnvironmentError("Missing font for: %s %s" % ttf_tuple)
+        
+        ttf_dict[ttf_style] = ttf_name
+        registerFont(TTFont(ttf_name, ttf_path))
+    
+    return ttf_dict
+
+
+def _image_aspect_ratio(filename):
+    """Calculates an image's aspect ratio
+    
+    Arguments:
+        filename: The image's path (string)
+    
+    Returns:
+        A float.
+    """
+    
+    w, h = ImageReader(filename).getSize()
+    
+    return h / w
+
+
+def _ellipsize(text, font_name, font_size, width):
+    """Truncates a string so that is fits in the specified width. Adds
+    ellipsis at its end.
+    
+    Arguments:
+        text: The text to be truncated (string)
+        font_name: The font to be used (string)
+        font_size: The font size to be used (string)
+        width: The target width (float)
+    
+    Returns:
+        A string.
+    """
+    
+    while stringWidth(text, font_name, font_size) > width:
+        text = text[:-4] + "..."
+    
+    return text
+
+
+class BallotPDFCreator(object):
     """Generates PDF ballots"""
-    
-    @staticmethod
-    def _load_ttf_family(ttf_family, ttf_style_list):
-        """Loads a TrueType font family
-        
-        Registers the given TrueType font family's styles for use with
-        reportlab. Uses system's fc-list utility to get font paths.
-        
-        Arguments:
-            ttf_family: The font family (string)
-            ttf_style_list: A sequence of font styles (strings)
-        
-        Returns:
-            A dict mapping ttf_style_list values to the corresponding registered
-            font names.
-        """
-        
-        ttf_dict = {}
-        
-        for ttf_style in ttf_style_list:
-            
-            ttf_name = ttf_family + '-' + ttf_style
-            ttf_name = "".join(ttf_name.split())
-            
-            cmd = ["fc-list", "-f", "%{file}",
-                ":style={0}:family={1}".format(ttf_style, ttf_family)]
-            ttf_path = check_output(cmd, universal_newlines=True)
-            
-            if not ttf_path:
-                raise EnvironmentError("Missing font for: %s-%s" % \
-                    (ttf_family, ttf_style))
-            
-            registerFont(TTFont(ttf_name, ttf_path))
-            ttf_dict[ttf_style] = ttf_name
-        
-        return ttf_dict
-    
-    @staticmethod
-    def _image_aspect_ratio(filename):
-        """Calculates an image's aspect ratio
-        
-        Arguments:
-            filename: The image's path (string)
-        
-        Returns:
-            A float.
-        """
-        
-        img = ImageReader(filename)
-        w, h = img.getSize()
-        return float(h) / float(w)
-    
-    @staticmethod
-    def _ellipsize(text, font_name, font_size, width):
-        """Truncates a string so that is fits in the specified width. Adds
-        ellipsis at its end.
-        
-        Arguments:
-            text: The text to be truncated (string)
-            font_name: The font to be used (string)
-            font_size: The font size to be used (string)
-            width: The target width (float)
-        
-        Returns:
-            A string.
-        """
-        
-        while stringWidth(text, font_name, font_size) > width:
-            text = text[:-4] + "..."
-        
-        return text
-    
-    @staticmethod
-    def _split_line(text, font_name, font_size, width_list):
-        """Splits 'text' in lines of 'width'. Returns the list of lines.
-        
-        Arguments:
-            text: The text to be split (string)
-            font_name: The font to be used (string)
-            font_size: The font size to be used (integer)
-            width_list: The width for each line (float). The last value is
-                re-used for any remaining lines.
-        
-        Returns:
-            A list of strings.
-        """
-        
-        line = ""
-        line_list = []
-        width = width_list[0]
-        
-        for c in text:
-            
-            if stringWidth(line + c, font_name, font_size) > width:
-                line_list.append(line)
-                line = c
-                width = width_list[len(line_list)] \
-                    if len(line_list) < len(width_list) else width_list[-1]
-            else:
-                line += c
-        
-        line_list.append(line)
-        return line_list
-    
-    def _kv_table_prepare(self, key, value, link=False):
-        
-        line_width = self.page_width - self.cell_padding
-        key_width = stringWidth(key + 2*" ", self.sans_bold, self.font_md)
-        
-        value_lines = self._split_line(value, self.sans_regular, self.font_md,
-            [line_width-key_width, line_width-self.kv_indent])
-            
-        paragraph = "<font name='" + self.sans_bold + "'>" + key + "</font>" + \
-            2*"&nbsp;" + ("<link href='" + value + "'>" if link else "") + \
-            "\n".join(value_lines) + ("</link>" if link else "")
-        
-        return paragraph
-    
-    # Configuration
     
     pagesize = pagesizes.A4
     
@@ -169,38 +119,35 @@ class BallotBuilder(object):
     page_width -= w_margin * 2
     page_height -= h_margin * 2
     
-    img_size = page_width // 4.5
-    font_size_index = int(img_size)
-    
     kv_indent = page_width // 20
     
     table_top_gap = page_width // 15
     table_opt_gap = page_width // 50
+    
+    img_size = page_width // 4.5
     
     long_vc_split = 4
     long_vc_hyphens = int(math.ceil(conf.VOTECODE_LEN / long_vc_split)) - 1
     
     # TrueType fonts
     
-    sans_font_dict = _load_ttf_family.__func__('Liberation Sans', \
-        ['Regular', 'Bold'])
-    
-    mono_font_dict = _load_ttf_family.__func__('Liberation Mono', \
-        ['Regular', 'Bold'])
+    sans_font_dict = _load_ttf_family('Liberation Sans', ['Regular', 'Bold'])
     
     sans_regular = sans_font_dict['Regular']
     sans_bold = sans_font_dict['Bold']
     
+    mono_font_dict = _load_ttf_family('Liberation Mono', ['Regular', 'Bold'])
+    
     mono_regular = mono_font_dict['Regular']
     mono_bold = mono_font_dict['Bold']
     
-    # DemosVoting logo
+    # Logo file
     
-    logo_path = path.join(path.dirname(path.abspath(__file__)),
+    logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
         "resources/LOGO_BLACK_2_LOW.png")
     
     logo_img = Image(logo_path, width=img_size,
-        height=((img_size) * _image_aspect_ratio.__func__(logo_path)))
+        height=((img_size) * _image_aspect_ratio(logo_path)))
     
     # TableStyle definitions (main)
     
@@ -277,7 +224,7 @@ class BallotBuilder(object):
         ('ALIGN',         ( 2, 0), ( 2,-1), 'RIGHT'),
         ('VALIGN',        ( 2, 0), ( 2,-1), 'BOTTOM'),
         ('FONT',          ( 2, 0), ( 2,-1), sans_bold),
-        ('FONTSIZE',      ( 2, 0), ( 2,-1), font_size_index),
+        ('FONTSIZE',      ( 2, 0), ( 2,-1), int(img_size)),
     ])
     
     table_hlp_style = TableStyle([
@@ -312,12 +259,12 @@ class BallotBuilder(object):
     )
     
     def __init__(self, election_obj):
-        """Inits BallotBuilder and prepares common ballot data."""
+        """Inits BallotPDFCreator and prepares common ballot data."""
         
         self.election_id = election_obj['id']
-        self.vc_type = election_obj['vc_type']
         
-        questions = len(election_obj['__list_Question__'])
+        self.vc_type = election_obj['vc_type']
+        self.vc_name = ('l_' if self.vc_type == enums.VcType.LONG else '') + 'votecode'
         
         # Translatable text
         
@@ -330,22 +277,29 @@ class BallotBuilder(object):
         self.vbb_text = _("Digital Ballot Box") + ":"
         self.ballot_text = _("Ballot")
         
+        incl_index = len(election_obj['__list_Question__']) > 1
+        
         if election_obj['type'] == enums.Type.REFERENDUM:
+            
             self.opt_text = _("Option")
-            self.question_text = _("Question")
+            self.question_text = (_("Question") if not incl_index
+                else _("Question %(index)s"))
+            
         elif election_obj['type'] == enums.Type.ELECTIONS:
+            
             self.opt_text = _("Candidate")
-            self.question_text = _("Party")
+            self.question_text = (_("Party") if not incl_index
+                else _("Party %(index)s"))
         
-        self.question_text += (" %s" if questions > 1 else "") + ":"
+        self.question_text += ":"
         
-        self.help_text = _( "Please use one of the two sides to vote and the " \
+        self.help_text = _("Please use one of the two sides to vote and the "
             "other one to audit your vote")
         
         # Votecode defaults
         
         if self.vc_type == enums.VcType.SHORT:
-            vc_charset = "0123456789"
+            vc_charset = string.digits
             vc_maxchars = len(str(conf.MAX_OPTIONS - 1))
         elif self.vc_type == enums.VcType.LONG:
             vc_charset = base32cf.symbols + "-"
@@ -424,23 +378,27 @@ class BallotBuilder(object):
                 opt_width += empty
                 
                 for i in range(len(option_list)):
-                    option_list[i] = self._ellipsize(option_list[i], self.\
-                        sans_regular, self.font_sm, opt_width-self.cell_padding)
+                    
+                    option_list[i] = _ellipsize(
+                        option_list[i],
+                        self.sans_regular,
+                        self.font_sm,
+                        opt_width - self.cell_padding
+                    )
             
             # Question title table
             
-            question_text = self.question_text % \
-                ((index,) if questions > 1 else tuple())
+            question_text = self.question_text % {'index': index}
             
             que_text_width = stringWidth(question_text, self.sans_bold,
                 self.font_md) + self.cell_padding
             
             que_value_width = self.page_width - que_text_width
             
-            text = self._ellipsize(question_obj['text'], self.sans_regular,
+            text = _ellipsize(question_obj['text'], self.sans_regular,
                 self.font_md, que_value_width - self.cell_padding)
             
-            table_que = Table(data=[[question_text, text]], colWidths=\
+            table_que = Table(data=[[question_text, text]], colWidths=
                 [que_text_width, que_value_width], style=self.table_que_style
             )
             
@@ -449,17 +407,16 @@ class BallotBuilder(object):
             self.config_q_list.append((option_list, opt_width, vc_width,
                 rec_width, vc_chars, table_que, two_columns))
     
-    def pdfgen(self, ballot_obj):
+    def create(self, ballot_obj):
         """Generates a new PDF ballot and returns it as a BytesIO object"""
         
         serial = ballot_obj['serial']
-        vc_name = ('l_' if self.vc_type == enums.VcType.LONG else '')+'votecode'
         
         # Initialize PDF object, using a BytesIO object as its file
         
-        pdf_buffer = BytesIO()
+        pdfbuf = io.BytesIO()
         
-        doc = SimpleDocTemplate(pdf_buffer, pagesize=self.pagesize,
+        doc = SimpleDocTemplate(pdfbuf, pagesize=self.pagesize,
             topMargin=self.h_margin, bottomMargin=self.h_margin,
             leftMargin=self.w_margin, rightMargin=self.w_margin,
             title="%s %s" % (self.ballot_text, serial),
@@ -478,12 +435,15 @@ class BallotBuilder(object):
             
             # Generate QRCode
             
-            qr = QRCode(error_correction=constants.ERROR_CORRECT_M)
+            qr = qrcode.QRCode(
+                error_correction=qrcode.constants.ERROR_CORRECT_M
+            )
+            
             qr.add_data(vbb_url)
             qr.make(fit=True)
             qr_img = qr.make_image()
             
-            qr_buf = BytesIO()
+            qr_buf = io.BytesIO()
             qr_img.save(qr_buf, 'PNG')
             qr_buf.seek(0)
             
@@ -491,24 +451,24 @@ class BallotBuilder(object):
             
             # Create top, abb, vbb, img and hlp tables
             
-            table_top = Table([[self.serial_text, "%s" % serial,
-                "", self.security_text, part_obj['security_code']]],
+            table_top = Table([[self.serial_text, "%s" % serial, "",
+                self.security_text, part_obj['security_code']]],
                 colWidths=[self.top_text_width, self.top_value_width,
                 self.table_top_gap, self.top_text_width,
                 self.top_value_width], style=self.table_top_style
             )
             
-            text = self._kv_table_prepare(self.id_text, self.election_id)
+            text = self._kv_line_prepare(self.id_text, self.election_id)
             table_id = Table([[Paragraph(text, self.paragraph_kv_style)]],
                 colWidths=[self.page_width], style=self.table_kv_style
             )
             
-            text = self._kv_table_prepare(self.vbb_text, vbb_url, link=True)
+            text = self._kv_line_prepare(self.vbb_text, vbb_url, is_link=True)
             table_vbb = Table([[Paragraph(text, self.paragraph_kv_style)]],
                 colWidths=[self.page_width], style=self.table_kv_style
             )
             
-            text = self._kv_table_prepare(self.abb_text, abb_url, link=True)
+            text = self._kv_line_prepare(self.abb_text, abb_url, is_link=True)
             table_abb = Table([[Paragraph(text, self.paragraph_kv_style)]],
                 colWidths=[self.page_width], style=self.table_kv_style
             )
@@ -526,7 +486,7 @@ class BallotBuilder(object):
             
             # Create header and footer wrapper tables
             
-            table_hdr = Table(data=[[table_top]], colWidths=\
+            table_hdr = Table(data=[[table_top]], colWidths=
                 [self.page_width], style=self.table_header_style
             )
             
@@ -546,8 +506,8 @@ class BallotBuilder(object):
             
             # Calculate available height for options
             
-            _avail_height = self.page_height - (self.cell_padding + \
-                table_hdr.wrap(self.page_width, self.page_height)[1] + \
+            _avail_height = self.page_height - (self.cell_padding +
+                table_hdr.wrap(self.page_width, self.page_height)[1] +
                 table_ftr.wrap(self.page_width, self.page_height)[1])
             
             avail_height = _avail_height
@@ -562,7 +522,7 @@ class BallotBuilder(object):
                 rec_width, vc_chars, table_que, two_columns) \
                 in zip(part_obj['__list_Question__'], self.config_q_list):
                 
-                vc_list = [optionv_obj[vc_name] for optionv_obj
+                vc_list = [optionv_obj[self.vc_name] for optionv_obj
                     in question_obj['__list_OptionV__']]
                 
                 rec_list = [optionv_obj['receipt'] for optionv_obj
@@ -574,7 +534,7 @@ class BallotBuilder(object):
                 if self.vc_type == enums.VcType.SHORT:
                     vc_list = [str(vc).zfill(vc_chars) for vc in vc_list]
                 elif self.vc_type == enums.VcType.LONG:
-                    vc_list = [base32cf.hyphen(vc, self.long_vc_split) \
+                    vc_list = [base32cf.hyphen(vc, self.long_vc_split)
                         for vc in vc_list]
                 
                 data_list = list(zip(opt_list, vc_list, rec_list))
@@ -589,8 +549,8 @@ class BallotBuilder(object):
                     
                     # Calculate the number of rows that can fit in this page
                     
-                    inner_avail_height = avail_height - self.cell_padding - \
-                        self.spacer - (self.que_height if incl_hdr else 0)
+                    inner_avail_height = (avail_height - self.cell_padding -
+                        self.spacer - (self.que_height if incl_hdr else 0))
                     
                     avail_rows = int(inner_avail_height // self.row_height)
                     
@@ -708,5 +668,85 @@ class BallotBuilder(object):
         # Build the PDF file
         
         doc.build(element_list)
-        return pdf_buffer
+        return pdfbuf
+    
+    def sample(self):
+        """Generates a sample PDF ballot"""
+        
+        question_list = [len(option_list)
+            for option_list, _, _, _, _, _, _ in self.config_q_list]
+        
+        ballot_obj = {
+            'serial': 100,
+            '__list_Part__': [],
+        }
+        
+        for p_index in ['A', 'B']:
+            
+            part_obj = {
+                'index': p_index,
+                'vote_token': 'vote_token',
+                'security_code': base32cf.random(conf.SECURITY_CODE_LEN, False),
+                '__list_Question__': [],
+            }
+            
+            for option_cnt in question_list:
+                
+                question_obj = {
+                    '__list_OptionV__': [],
+                }
+                
+                if self.vc_type == enums.VcType.SHORT:
+                    votecode_list = list(range(1, option_cnt + 1))
+                    random.shuffle(votecode_list)
+                elif self.vc_type == enums.VcType.LONG:
+                    votecode_list=[base32cf.random(conf.VOTECODE_LEN,
+                        False) for _ in range(option_cnt)]
+                
+                for votecode in votecode_list:
+                    
+                    data_obj = {
+                        self.vc_name: votecode,
+                        'receipt': base32cf.random(conf.RECEIPT_LEN, False),
+                    }
+                    
+                    question_obj['__list_OptionV__'].append(data_obj)
+                part_obj['__list_Question__'].append(question_obj)
+            ballot_obj['__list_Part__'].append(part_obj)
+        
+        return self.create(ballot_obj)
+    
+    def _kv_line_prepare(self, key, value, is_link=False):
+        
+        line_width = self.page_width - self.cell_padding
+        
+        body_line_width = line_width - self.kv_indent
+        head_line_width = line_width - stringWidth(key + 2*" ", self.sans_bold,
+            self.font_md)
+        
+        lines = [""]
+        
+        for i, char in enumerate(value):
+            
+            max_width = head_line_width if i == 0 else body_line_width
+            cur_width = stringWidth(lines[-1] + char, self.sans_regular,
+                self.font_md)
+            
+            if cur_width > max_width:
+                lines.append(char)
+            else:
+                lines[-1] += char
+        
+        paragraph = ("<font name='" + self.sans_bold + "'>" + key +
+            "</font>" + 2 * "&nbsp;")
+        
+        if is_link:
+            paragraph += "<link href='" + value + "'>"
+        
+        paragraph += "\n".join(lines)
+        
+        if is_link:
+            paragraph += "</link>"
+        
+        return paragraph
 

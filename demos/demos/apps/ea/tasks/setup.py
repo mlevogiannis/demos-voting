@@ -68,7 +68,7 @@ def election_setup(election_obj, language):
     
     rand = random.SystemRandom()
     hasher = hashers.PBKDF2Hasher()
-    builder = pdf.BallotBuilder(election_obj)
+    pdfcreator = pdf.BallotPDFCreator(election_obj)
     
     process_pool = Pool()
     thread_pool = ThreadPool(processes=4)
@@ -383,7 +383,7 @@ def election_setup(election_obj, language):
         tarbuf = io.BytesIO()
         tar = tarfile.open(fileobj=tarbuf, mode='w:gz')
         
-        _gen_ballot_pdf_f = partial(_gen_ballot_pdf, builder=builder)
+        _gen_ballot_pdf_f = partial(_gen_ballot_pdf, pdfcreator=pdfcreator)
         pdf_list = process_pool.map(_gen_ballot_pdf_f, ballot_list)
         
         for serial, pdfbuf in pdf_list:
@@ -543,12 +543,12 @@ def _gen_ballot_crypto(q_list, number):
     return (opt_list, blk_list)
 
 
-def _gen_ballot_pdf(ballot_obj, builder):
+def _gen_ballot_pdf(ballot_obj, pdfcreator):
     
     # This function is used in a seperate process.
     
     serial = ballot_obj['serial']
-    pdfbuf = builder.pdfgen(ballot_obj)
+    pdfbuf = pdfcreator.create(ballot_obj)
     
     return (serial, pdfbuf)
 
