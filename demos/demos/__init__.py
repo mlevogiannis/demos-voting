@@ -10,8 +10,7 @@ if set(settings.DEMOS_APPS) & set(['ea', 'bds', 'abb']):
     from kombu.serialization import register
     from demos.common.utils.json import CustomJSONEncoder
     
-    register('custom-json', partial(json.dumps, cls=CustomJSONEncoder), \
-        json.loads, 'application/x-custom-json', 'utf-8')
+    register('custom-json', partial(json.dumps, cls=CustomJSONEncoder), json.loads, 'application/x-custom-json')
     
     from .celery import app as celery_app
 

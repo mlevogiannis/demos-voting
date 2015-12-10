@@ -82,12 +82,11 @@ def election_setup(election_obj, language):
     
     try:
         with open(conf.CA_CERT_PEM, 'r') as ca_file:
-            ca_cert = crypto.load_certificate(crypto.FILETYPE_PEM, \
-                ca_file.read())
+            ca_cert = crypto.load_certificate(crypto.FILETYPE_PEM, ca_file.read())
         
         with open(conf.CA_PKEY_PEM, 'r') as ca_file:
-            ca_pkey=crypto.load_privatekey(crypto.FILETYPE_PEM, \
-                ca_file.read(), force_bytes(conf.CA_PKEY_PASSPHRASE))
+            ca_pkey=crypto.load_privatekey(crypto.FILETYPE_PEM, ca_file.read(),
+                force_bytes(conf.CA_PKEY_PASSPHRASE))
         
     except (AttributeError, TypeError, IOError, OSError) as e:
         
@@ -121,10 +120,8 @@ def election_setup(election_obj, language):
     cert.set_version(3)
     cert.set_serial_number(base32cf.decode(election.id))
     
-    time_fmt = '%Y%m%d%H%M%S%z'
-    
-    cert.set_notBefore(force_bytes(election.starts_at.strftime(time_fmt)))
-    cert.set_notAfter(force_bytes(election.ends_at.strftime(time_fmt)))
+    cert.set_notBefore(force_bytes(election.starts_at.strftime('%Y%m%d%H%M%S%z')))
+    cert.set_notAfter(force_bytes(election.ends_at.strftime('%Y%m%d%H%M%S%z')))
     
     cert.set_pubkey(pkey)
     cert.sign(ca_pkey if not self_signed else pkey, str('sha256'))
@@ -138,8 +135,7 @@ def election_setup(election_obj, language):
     
     # Find the maximum number of options
     
-    max_options = max([q_obj['option_cnt'] \
-        for q_obj in election_obj['__list_Question__']])
+    max_options = max([q_obj['option_cnt'] for q_obj in election_obj['__list_Question__']])
     
     # Populate local and remote databases
     
@@ -154,18 +150,17 @@ def election_setup(election_obj, language):
     _remote_app_setup_f = partial(_remote_app_setup, data=election_obj,
         files=files, api_session=api_session, url_path='api/setup/p1/')
     
-    async_result1 = \
-        thread_pool.map_async(_remote_app_setup_f, ['abb', 'vbb', 'bds'])
+    async_result1 = thread_pool.map_async(_remote_app_setup_f, ['abb', 'vbb', 'bds'])
     
     # Generate ballots in groups of BATCH_SIZE
     
     progress = {'current': 0, 'total': election.ballot_cnt * 2}
     current_task.update_state(state='PROGRESS', meta=progress)
     
-    q_list = [(question_obj['key'], len(question_obj['__list_OptionC__']), 0) \
-        for question_obj in election_obj['__list_Question__']]
+    q_list = [(question_obj['key'], len(question_obj['__list_OptionC__']), 0)
+              for question_obj in election_obj['__list_Question__']]
     
-    async_result2 = thread_pool.apply_async(_gen_ballot_crypto, \
+    async_result2 = thread_pool.apply_async(_gen_ballot_crypto,
         (q_list, min(conf.BATCH_SIZE, election.ballot_cnt)))
     
     for lo in range(100, election.ballot_cnt + 100, conf.BATCH_SIZE):
@@ -177,7 +172,7 @@ def election_setup(election_obj, language):
         crypto_bsqo_list, _ = async_result2.get()
         
         if hi - 100 < election.ballot_cnt:
-            async_result2 = thread_pool.apply_async(_gen_ballot_crypto, \
+            async_result2 = thread_pool.apply_async(_gen_ballot_crypto,
                 (q_list, min(conf.BATCH_SIZE, election.ballot_cnt + 100 - hi)))
         
         # Generate the rest data for all ballots and parts and store them in
@@ -202,10 +197,11 @@ def election_setup(election_obj, language):
             
             for p_index, crypto_qo_list in zip(['A', 'B'], crypto_sqo_list):
                 
-                # Generate a random security code and compute its hash value and
-                # its hash's hash value. The client will use the first hash to
-                # access the votecodes (as password) and to verify the security
-                # code. The second hash uses the first hash's salt, reversed.
+                # Generate a random security code and compute its hash value
+                # and its hash's hash value. The client will use the first hash
+                # to access the votecodes (as a passphrase) and to verify the
+                # security code. The second hash uses the first hash's salt,
+                # reversed.
                 
                 security_code = base32cf.random(conf.SECURITY_CODE_LEN)
                 
@@ -288,10 +284,9 @@ def election_setup(election_obj, language):
                             hmac_obj = hmac.new(key, msg, hashlib.sha256)
                             digest = int_from_bytes(hmac_obj.digest(), 'big')
                             
-                            l_votecode = base32cf.\
-                                encode(digest)[-conf.VOTECODE_LEN:]
+                            l_votecode = base32cf.encode(digest)[-conf.VOTECODE_LEN:]
                             
-                            l_votecode_hash, _, _ = hasher.encode(l_votecode, \
+                            l_votecode_hash, _, _ = hasher.encode(l_votecode,
                                 l_votecode_salt, l_votecode_iterations, True)
                             
                             receipt_data = base32cf.decode(l_votecode)
@@ -300,10 +295,7 @@ def election_setup(election_obj, language):
                         
                         bytes = int(math.ceil(receipt_data.bit_length() / 8))
                         receipt_data = int_to_bytes(receipt_data, bytes, 'big')
-                        
-                        receipt_data = \
-                            crypto.sign(pkey, receipt_data, str('sha256'))
-                        
+                        receipt_data = crypto.sign(pkey, receipt_data, str('sha256'))
                         receipt_data = int_from_bytes(receipt_data, 'big')
                         
                         receipt_full = base32cf.encode(receipt_data)
@@ -344,8 +336,8 @@ def election_setup(election_obj, language):
                 # part's security code, bit-inversed. This is done so that the
                 # tokens of the two parts appear to be completely different.
                 
-                p1 = (serial << (index_bits + credential_bits)) | \
-                    (int_from_bytes(credential, 'big') << index_bits) | i
+                p1 = ((serial << (index_bits + credential_bits)) |
+                    (int_from_bytes(credential, 'big') << index_bits) | i)
                 
                 p2 = (~security_code) & ((1 << security_code_bits) - 1)
                 
@@ -454,9 +446,7 @@ def election_setup(election_obj, language):
             files=files, api_session=api_session, url_path='api/setup/p2/')
         
         async_result1.wait()
-        
-        async_result1 = \
-            thread_pool.map_async(_remote_app_setup_f, ['abb', 'vbb', 'bds'])
+        async_result1 = thread_pool.map_async(_remote_app_setup_f, ['abb', 'vbb', 'bds'])
     
     async_result1.wait()
     

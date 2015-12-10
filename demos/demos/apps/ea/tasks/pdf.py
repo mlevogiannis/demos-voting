@@ -21,9 +21,7 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase.pdfmetrics import registerFont, stringWidth
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.platypus import (
-    Image, PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
-)
+from reportlab.platypus import Image, PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 from demos.common.utils import base32cf, enums
 
@@ -143,11 +141,8 @@ class BallotPDFCreator(object):
     
     # Logo file
     
-    logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-        "resources/LOGO_BLACK_2_LOW.png")
-    
-    logo_img = Image(logo_path, width=img_size,
-        height=((img_size) * _image_aspect_ratio(logo_path)))
+    logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "resources/LOGO_BLACK_2_LOW.png")
+    logo_img = Image(logo_path, width=img_size, height=((img_size) * _image_aspect_ratio(logo_path)))
     
     # TableStyle definitions (main)
     
@@ -280,27 +275,22 @@ class BallotPDFCreator(object):
         incl_index = len(election_obj['__list_Question__']) > 1
         
         if election_obj['type'] == enums.Type.REFERENDUM:
-            
             self.opt_text = _("Option")
-            self.question_text = (_("Question") if not incl_index
-                else _("Question %(index)s"))
+            self.question_text = (_("Question") if not incl_index else _("Question %(index)s"))
             
         elif election_obj['type'] == enums.Type.ELECTIONS:
-            
             self.opt_text = _("Candidate")
-            self.question_text = (_("Party") if not incl_index
-                else _("Party %(index)s"))
+            self.question_text = (_("Party") if not incl_index else _("Party %(index)s"))
         
         self.question_text += ":"
-        
-        self.help_text = _("Please use one of the two sides to vote and the "
-            "other one to audit your vote")
+        self.help_text = _("Please use one of the two sides to vote and the other one to audit your vote")
         
         # Votecode defaults
         
         if self.vc_type == enums.VcType.SHORT:
             vc_charset = string.digits
             vc_maxchars = len(str(conf.MAX_OPTIONS - 1))
+            
         elif self.vc_type == enums.VcType.LONG:
             vc_charset = base32cf.symbols + "-"
             vc_maxchars = conf.VOTECODE_LEN + self.long_vc_hyphens
@@ -334,16 +324,16 @@ class BallotPDFCreator(object):
         
         self.config_q_list = []
         
-        for index, question_obj \
-            in enumerate(election_obj['__list_Question__'], start=1):
+        for index, question_obj in enumerate(election_obj['__list_Question__'], start=1):
             
             two_columns = question_obj['columns']
             
-            option_list = [optionc_obj['text'] for optionc_obj \
-                in question_obj['__list_OptionC__']]
+            option_list = question_obj['__list_OptionC__']
+            option_list = [optionc_obj['text'] for optionc_obj in option_list]
             
             if self.vc_type == enums.VcType.SHORT:
                 vc_chars = len(str(len(option_list)-1))
+                
             elif self.vc_type == enums.VcType.LONG:
                 vc_chars = conf.VOTECODE_LEN + self.long_vc_hyphens
             
@@ -399,8 +389,7 @@ class BallotPDFCreator(object):
                 self.font_md, que_value_width - self.cell_padding)
             
             table_que = Table(data=[[question_text, text]], colWidths=
-                [que_text_width, que_value_width], style=self.table_que_style
-            )
+                [que_text_width, que_value_width], style=self.table_que_style)
             
             # Pack everything in the config list
             
@@ -429,9 +418,7 @@ class BallotPDFCreator(object):
         for part_obj in ballot_obj['__list_Part__']:
             
             abb_url = urljoin(conf.URL['abb'], quote("%s/" % self.election_id))
-            
-            vbb_url = urljoin(conf.URL['vbb'], quote("%s/%s/" %
-                (self.election_id, part_obj['voter_token'])))
+            vbb_url = urljoin(conf.URL['vbb'], quote("%s/%s/" % (self.election_id, part_obj['voter_token'])))
             
             # Generate QRCode
             
@@ -455,45 +442,37 @@ class BallotPDFCreator(object):
                 self.security_text, part_obj['security_code']]],
                 colWidths=[self.top_text_width, self.top_value_width,
                 self.table_top_gap, self.top_text_width,
-                self.top_value_width], style=self.table_top_style
-            )
+                self.top_value_width], style=self.table_top_style)
             
             text = self._kv_line_prepare(self.id_text, self.election_id)
             table_id = Table([[Paragraph(text, self.paragraph_kv_style)]],
-                colWidths=[self.page_width], style=self.table_kv_style
-            )
+                colWidths=[self.page_width], style=self.table_kv_style)
             
             text = self._kv_line_prepare(self.vbb_text, vbb_url, is_link=True)
             table_vbb = Table([[Paragraph(text, self.paragraph_kv_style)]],
-                colWidths=[self.page_width], style=self.table_kv_style
-            )
+                colWidths=[self.page_width], style=self.table_kv_style)
             
             text = self._kv_line_prepare(self.abb_text, abb_url, is_link=True)
             table_abb = Table([[Paragraph(text, self.paragraph_kv_style)]],
-                colWidths=[self.page_width], style=self.table_kv_style
-            )
+                colWidths=[self.page_width], style=self.table_kv_style)
             
             table_img = Table([["", "", part_obj['index']], [qr_img,
                 self.logo_img, ""]], style=self.table_img_style,
                 colWidths=[self.page_width/3, self.page_width/3,
-                self.page_width/3], rowHeights=[0, None]
-            )
+                self.page_width/3], rowHeights=[0, None])
             
             table_hlp = Table(data=[[Paragraph(self.help_text,
                 self.paragraph_hlp_style)]], colWidths=[self.page_width],
-                style=self.table_hlp_style
-            )
+                style=self.table_hlp_style)
             
             # Create header and footer wrapper tables
             
             table_hdr = Table(data=[[table_top]], colWidths=
-                [self.page_width], style=self.table_header_style
-            )
+                [self.page_width], style=self.table_header_style)
             
             table_ftr = Table(data=[[table_id], [table_vbb], [table_abb],
                 [table_img], [table_hlp]], colWidths=[self.page_width],
-                style=self.table_footer_style
-            )
+                style=self.table_footer_style)
             
             table_s_list.append((table_hdr, table_ftr))
         
@@ -501,8 +480,7 @@ class BallotPDFCreator(object):
         
         element_list = []
         
-        for (table_hdr, table_ftr), part_obj \
-            in zip(table_s_list, ballot_obj['__list_Part__']):
+        for (table_hdr, table_ftr), part_obj in zip(table_s_list, ballot_obj['__list_Part__']):
             
             # Calculate available height for options
             
@@ -518,24 +496,23 @@ class BallotPDFCreator(object):
             
             # Iterate over part's questions
             
-            for question_obj, (opt_list, opt_width, vc_width,
-                rec_width, vc_chars, table_que, two_columns) \
-                in zip(part_obj['__list_Question__'], self.config_q_list):
+            for question_obj, (opt_list, opt_width, vc_width, rec_width, vc_chars, table_que,
+                    two_columns) in zip(part_obj['__list_Question__'], self.config_q_list):
                 
-                vc_list = [optionv_obj[self.vc_name] for optionv_obj
-                    in question_obj['__list_OptionV__']]
+                vc_list = [optionv_obj[self.vc_name]
+                    for optionv_obj in question_obj['__list_OptionV__']]
                 
-                rec_list = [optionv_obj['receipt'] for optionv_obj
-                    in question_obj['__list_OptionV__']]
+                rec_list = [optionv_obj['receipt']
+                    for optionv_obj in question_obj['__list_OptionV__']]
                 
                 col_widths = [opt_width, vc_width, rec_width]
                 title = [[self.opt_text, self.vc_text, self.rec_text]]
                 
                 if self.vc_type == enums.VcType.SHORT:
                     vc_list = [str(vc).zfill(vc_chars) for vc in vc_list]
+                    
                 elif self.vc_type == enums.VcType.LONG:
-                    vc_list = [base32cf.hyphen(vc, self.long_vc_split)
-                        for vc in vc_list]
+                    vc_list = [base32cf.hyphen(vc, self.long_vc_split) for vc in vc_list]
                 
                 data_list = list(zip(opt_list, vc_list, rec_list))
                 data_len = len(data_list)
@@ -582,7 +559,7 @@ class BallotPDFCreator(object):
                             optionv = title + optionv
                         
                         table_opt = Table(optionv, colWidths=col_widths,
-                            style=self.table_opt_style)
+                                          style=self.table_opt_style)
                         
                         if incl_hdr:
                             table_opt.setStyle(self.table_opt_extra1_style)
@@ -623,10 +600,10 @@ class BallotPDFCreator(object):
                             optionv2.append(["", "", ""])
                         
                         table_opt1 = Table(optionv1, colWidths=col_widths,
-                            style=self.table_opt_style)
+                                           style=self.table_opt_style)
                         
                         table_opt2 = Table(optionv2, colWidths=col_widths,
-                            style=self.table_opt_style)
+                                           style=self.table_opt_style)
                         
                         if incl_hdr:
                             table_opt1.setStyle(self.table_opt_extra1_style)
@@ -653,9 +630,7 @@ class BallotPDFCreator(object):
                         table_wrapper.setStyle(self.table_main_extra_style)
                     
                     element_list.append(table_wrapper)
-                    
-                    avail_height -= \
-                        table_wrapper.wrap(self.page_width, avail_height)[1]
+                    avail_height -= table_wrapper.wrap(self.page_width, avail_height)[1]
                     
                     row += opt_rows
             
@@ -673,8 +648,7 @@ class BallotPDFCreator(object):
     def sample(self):
         """Generates a sample PDF ballot"""
         
-        question_list = [len(option_list)
-            for option_list, _, _, _, _, _, _ in self.config_q_list]
+        question_list = [len(option_list) for option_list, _, _, _, _, _, _ in self.config_q_list]
         
         ballot_obj = {
             'serial': 100,
@@ -699,9 +673,9 @@ class BallotPDFCreator(object):
                 if self.vc_type == enums.VcType.SHORT:
                     votecode_list = list(range(1, option_cnt + 1))
                     random.shuffle(votecode_list)
+                    
                 elif self.vc_type == enums.VcType.LONG:
-                    votecode_list=[base32cf.random(conf.VOTECODE_LEN,
-                        False) for _ in range(option_cnt)]
+                    votecode_list=[base32cf.random(conf.VOTECODE_LEN, False) for _ in range(option_cnt)]
                 
                 for votecode in votecode_list:
                     
@@ -721,24 +695,21 @@ class BallotPDFCreator(object):
         line_width = self.page_width - self.cell_padding
         
         body_line_width = line_width - self.kv_indent
-        head_line_width = line_width - stringWidth(key + 2*" ", self.sans_bold,
-            self.font_md)
+        head_line_width = line_width - stringWidth(key + 2*" ", self.sans_bold, self.font_md)
         
         lines = [""]
         
         for i, char in enumerate(value):
             
             max_width = head_line_width if i == 0 else body_line_width
-            cur_width = stringWidth(lines[-1] + char, self.sans_regular,
-                self.font_md)
+            cur_width = stringWidth(lines[-1] + char, self.sans_regular, self.font_md)
             
             if cur_width > max_width:
                 lines.append(char)
             else:
                 lines[-1] += char
         
-        paragraph = ("<font name='" + self.sans_bold + "'>" + key +
-            "</font>" + 2 * "&nbsp;")
+        paragraph = ("<font name='" + self.sans_bold + "'>" + key + "</font>" + 2 * "&nbsp;")
         
         if is_link:
             paragraph += "<link href='" + value + "'>"

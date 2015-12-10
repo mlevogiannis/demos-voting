@@ -235,8 +235,7 @@ class OptionV(models.Model):
         return "%s" % (self.index + 1)
     
     def natural_key(self):
-        return self.part.natural_key() + \
-            self.question.natural_key()[1:] + (self.index,)
+        return self.part.natural_key() + self.question.natural_key()[1:] + (self.index,)
     
     natural_key.dependencies = ['%(app_label)s.Part', '%(app_label)s.Question']
 

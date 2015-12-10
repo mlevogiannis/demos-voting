@@ -39,11 +39,8 @@ class Part(base.Part):
     
     security_code_hash2 = models.CharField(max_length=128)
     
-    # OptionV common data
-    
     l_votecode_salt = models.CharField(max_length=128, blank=True, default='')
-    l_votecode_iterations = models.PositiveIntegerField(null=True,
-        blank=True, default=None)
+    l_votecode_iterations = models.PositiveIntegerField(null=True, blank=True, default=None)
 
 
 class OptionV(base.OptionV):

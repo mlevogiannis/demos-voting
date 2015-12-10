@@ -31,9 +31,7 @@ from django.utils.decorators import method_decorator
 from django.utils.six.moves import range, zip
 from django.views.generic import View
 
-from demos.apps.abb.models import (
-    Election, Question, Ballot, Part, OptionV, Task
-)
+from demos.apps.abb.models import Election, Question, Ballot, Part, OptionV, Task
 from demos.apps.abb.tasks import tally_protocol
 from demos.common.utils import api, base32cf, enums, hashers
 from demos.common.utils.int import int_from_bytes, int_to_bytes
@@ -74,14 +72,14 @@ class AuditView(View):
         if not election:
             return redirect(reverse('abb:home') + '?error=id')
         
-        participants = Ballot.objects.filter(election=election, \
+        participants = Ballot.objects.filter(election=election,
             part__optionv__voted=True).distinct().count() if election else 0
         
         context = {
             'election': election,
             'questions': questions,
             'participants': str(participants),
-            'VcType': { s.name: s.value for s in enums.VcType },
+            'VcType': {s.name: s.value for s in enums.VcType},
         }
         
         csrf.get_token(request)
@@ -110,7 +108,7 @@ class ResultsView(View):
         if not election:
             return redirect(reverse('abb:home') + '?error=id')
         
-        participants = Ballot.objects.filter(election=election, \
+        participants = Ballot.objects.filter(election=election,
             part__optionv__voted=True).distinct().count() if election else 0
         
         questions = questions.annotate(Sum('optionc__votes'))
@@ -246,7 +244,7 @@ class ApiVoteView(View):
             # Verify part2's security code
             
             _, salt, iterations = part2.security_code_hash2.split('$')
-            hash,_,_=hasher.encode(p2_security_code,salt[::-1],iterations,True)
+            hash, _, _= hasher.encode(p2_security_code,salt[::-1], iterations, True)
             
             if not hasher.verify(hash, part2.security_code_hash2):
                 raise Exception('Invalid part security code')
@@ -261,10 +259,8 @@ class ApiVoteView(View):
             
             if election.vc_type == enums.VcType.LONG:
                 
-                max_options = question_qs.\
-                    aggregate(Max('option_cnt'))['option_cnt__max']
-                
                 credential_int = int_from_bytes(b_credential, 'big')
+                max_options = question_qs.aggregate(Max('option_cnt'))['option_cnt__max']
                 
                 key = base32cf.decode(p2_security_code)
                 bytes = int(math.ceil(key.bit_length() / 8))
@@ -276,11 +272,8 @@ class ApiVoteView(View):
             with transaction.atomic():
                 for question in question_qs.iterator():
                     
-                    optionv_qs = OptionV.objects.\
-                        filter(part=part1, question=question)
-                    
-                    optionv2_qs = OptionV.objects.\
-                        filter(part=part2, question=question)
+                    optionv_qs = OptionV.objects.filter(part=part1, question=question)
+                    optionv2_qs = OptionV.objects.filter(part=part2, question=question)
                     
                     vc_name = 'votecode'
                     vc_list = p1_votecodes[str(question.index)]
@@ -297,9 +290,8 @@ class ApiVoteView(View):
                         
                         l_votecodes = vc_list
                         
-                        vc_list = [hasher.encode(vc, part1.l_votecode_salt, \
-                            part1.l_votecode_iterations, True)[0] \
-                            for vc in vc_list]
+                        vc_list = [hasher.encode(vc, part1.l_votecode_salt,
+                            part1.l_votecode_iterations, True)[0] for vc in vc_list]
                         
                         vc_name = 'l_' + vc_name + '_hash'
                     
@@ -338,16 +330,14 @@ class ApiVoteView(View):
                         
                         for optionv2 in optionv2_qs:
                             
-                            msg = credential_int + (question.index * \
-                                max_options) + optionv2.votecode
+                            msg = credential_int + (question.index * max_options) + optionv2.votecode
                             bytes = int(math.ceil(msg.bit_length() / 8))
                             msg = int_to_bytes(msg, bytes, 'big')
                             
                             hmac_obj = hmac.new(key, msg, hashlib.sha256)
                             digest = int_from_bytes(hmac_obj.digest(), 'big')
                             
-                            l_votecode = base32cf.\
-                                encode(digest)[-conf.VOTECODE_LEN:]
+                            l_votecode = base32cf.encode(digest)[-conf.VOTECODE_LEN:]
                             
                             optionv2.voted = False
                             optionv2.l_votecode = l_votecode

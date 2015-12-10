@@ -15,9 +15,7 @@ from django.utils.six.moves import range, zip
 
 from celery import shared_task
 
-from demos.apps.abb.models import (
-    Election, Question, Ballot, Part, OptionV, Task
-)
+from demos.apps.abb.models import Election, Question, Ballot, Part, OptionV, Task
 from demos.common.utils import api, crypto, enums
 
 logger = logging.getLogger(__name__)
@@ -41,8 +39,7 @@ def tally_protocol(election_id):
     coins = ''
     
     for ballot in ballot_qs.iterator():
-        coins += '%d' % (1 if ballot.part_set.\
-            filter(index='B', optionv__voted=True).exists() else 0)
+        coins += '%d' % (1 if ballot.part_set.filter(index='B', optionv__voted=True).exists() else 0)
     
     coins = coins.encode('ascii')
     coins = hashlib.sha256(coins).hexdigest()
@@ -69,8 +66,11 @@ def tally_protocol(election_id):
             
             # Grab all ballot parts that have options marked as 'voted'
             
-            part_qs = Part.objects.filter(ballot__election=election, \
-                ballot__serial__range=(lo,hi-1), optionv__voted=True).distinct()
+            part_qs = Part.objects.distinct().filter(
+                ballot__election=election,
+                ballot__serial__range=(lo, hi-1),
+                optionv__voted=True
+            )
             
             # Get com fields of the current ballot slice
             
@@ -78,7 +78,7 @@ def tally_protocol(election_id):
             
             for part in part_qs.iterator():
                 
-                _com_list = OptionV.objects.filter(question=question, \
+                _com_list = OptionV.objects.filter(question=question,
                     part=part, voted=True).values_list('com', flat=True)
                 
                 com_list.extend(_com_list)
@@ -97,14 +97,16 @@ def tally_protocol(election_id):
         
         # Grab all ballot parts that have options marked as 'voted'
         
-        part_qs = Part.objects.filter(ballot__election=election, \
-            optionv__voted=True).distinct()
+        part_qs = Part.objects.distinct().filter(
+            ballot__election=election,
+            optionv__voted=True
+        )
         
         # Prepare 'ballots' data structure
         
         for part in part_qs.iterator():
             
-            o_index_list = OptionV.objects.filter(question=question, \
+            o_index_list = OptionV.objects.filter(question=question,
                 part=part, voted=True).values_list('index', flat=True)
             
             ballots.append((part.ballot.serial, part.index, list(o_index_list)))
@@ -170,8 +172,10 @@ def tally_protocol(election_id):
             
             # Grab all ballot parts
                 
-            part_qs = Part.objects.filter(ballot__election=election, \
-                ballot__serial__range=(lo, hi-1)).distinct()
+            part_qs = Part.objects.distinct().filter(
+                ballot__election=election,
+                ballot__serial__range=(lo, hi-1)
+            )
             
             # Prepare 'ballots' data structure
             
@@ -179,7 +183,7 @@ def tally_protocol(election_id):
             
             for part in part_qs:
                 
-                o_iz_list = list(OptionV.objects.filter(part=part, \
+                o_iz_list = list(OptionV.objects.filter(part=part,
                     question=question).values_list('index', 'zk1'))
                 
                 ballots.append((part.ballot.serial, part.index, o_iz_list))

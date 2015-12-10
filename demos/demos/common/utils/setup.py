@@ -17,11 +17,11 @@ def insert_into_db(election_obj, app_config):
     
     Election = app_config.get_model('Election')
     
-    defaults = {field.name: election_obj[field.name] for field \
-        in Election._meta.get_fields() if field.name in election_obj}
+    defaults = {field.name: election_obj[field.name]
+                for field in Election._meta.get_fields()
+                if field.name in election_obj}
     
-    election, _ = Election.objects.\
-        get_or_create(id=defaults.pop('id'), defaults=defaults)
+    election, _ = Election.objects.get_or_create(id=defaults.pop('id'), defaults=defaults)
     
     # Insert trustees into the database
     
@@ -42,9 +42,7 @@ def insert_into_db(election_obj, app_config):
         _bulk_create(Question, election, election_obj)
         
         question_qs = Question.objects.filter(election=election)
-        
-        question_list = sorted(election_obj['__list_Question__'], \
-            key=itemgetter('index'))
+        question_list = sorted(election_obj['__list_Question__'], key=itemgetter('index'))
         
         # Model: OptionC
         
@@ -60,14 +58,10 @@ def insert_into_db(election_obj, app_config):
         Ballot = app_config.get_model('Ballot')
         _bulk_create(Ballot, election, election_obj)
         
-        b_serial_list = [ballot_obj['serial'] \
-            for ballot_obj in election_obj['__list_Ballot__']]
+        b_serial_list = [ballot_obj['serial'] for ballot_obj in election_obj['__list_Ballot__']]
         
-        ballot_qs = Ballot.objects.filter(election=election, \
-            serial__in=b_serial_list)
-        
-        ballot_list = sorted(election_obj['__list_Ballot__'], \
-            key=itemgetter('serial'))
+        ballot_qs = Ballot.objects.filter(election=election, serial__in=b_serial_list)
+        ballot_list = sorted(election_obj['__list_Ballot__'], key=itemgetter('serial'))
         
         # Model: Part
         
@@ -80,11 +74,10 @@ def insert_into_db(election_obj, app_config):
             
             # Model: Part
             
-            part_qs = Part.objects.filter(ballot__election=election, \
-                ballot__serial__in=b_serial_list)
+            part_qs = Part.objects.filter(ballot__election=election, ballot__serial__in=b_serial_list)
             
             part_list = chain.from_iterable((sorted(ballot_obj['__list_Part__'],
-                key=itemgetter('index')) for ballot_obj in ballot_list))
+                    key=itemgetter('index')) for ballot_obj in ballot_list))
             
             # Model: Question
             
@@ -100,12 +93,8 @@ def insert_into_db(election_obj, app_config):
             
             for part, part_obj in zip(part_qs.iterator(), part_list):
                 
-                extra_kwargs = { 'part': part }
-                
-                question_list = sorted(part_obj['__list_Question__'], \
-                    key=itemgetter('index'))
-                
-                _bulk_create(OptionV, question_qs, question_list, extra_kwargs)
+                question_list = sorted(part_obj['__list_Question__'], key=itemgetter('index'))
+                _bulk_create(OptionV, question_qs, question_list, {'part': part})
 
 
 def _bulk_create(model, mo_or_qs, obj_or_list, extra_kwargs={}):
@@ -138,8 +127,9 @@ def _bulk_create(model, mo_or_qs, obj_or_list, extra_kwargs={}):
         
         for this_obj in related_obj['__list_' + model.__name__ + '__']:
             
-            kwargs = {field.name: this_obj[field.name] for field \
-                in model._meta.get_fields() if field.name in this_obj}
+            kwargs = {field.name: this_obj[field.name]
+                      for field in model._meta.get_fields()
+                      if field.name in this_obj}
             
             kwargs.update(extra_kwargs)
             kwargs[relation_name] = related_mo

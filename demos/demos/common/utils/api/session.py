@@ -29,8 +29,7 @@ class ApiSession(object):
         self.url = settings.DEMOS_API_URL[remote_app]
         
         self.username = app_config.label
-        self.password = app_config.get_model('RemoteUser').\
-            objects.get(username=remote_app).password
+        self.password = app_config.get_model('RemoteUser').objects.get(username=remote_app).password
         
         self.login()
     
@@ -72,7 +71,7 @@ class ApiSession(object):
             r.raise_for_status()
             
             assert self._csrfmiddlewaretoken not in data
-            data[self._csrfmiddlewaretoken]=self.s.cookies.get(self._csrftoken)
+            data[self._csrfmiddlewaretoken] = self.s.cookies.get(self._csrftoken)
             
             r = self.s.post(url, data=data, files=files, verify=self._verify)
             r.raise_for_status()

@@ -36,6 +36,7 @@ def set_cxt_attr(parser, token):
     if not extra_context:
         raise TemplateSyntaxError("%r expected at least one variable "
                                   "assignment" % tag_name)
+    
     if tokens:
         raise TemplateSyntaxError("%r received an invalid token: %r" %
                                   (tag_name, tokens[0]))

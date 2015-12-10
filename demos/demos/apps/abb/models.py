@@ -30,8 +30,7 @@ def get_export_file_path(election, filename):
 class Election(base.Election):
     
     cert = models.FileField(upload_to=get_cert_file_path, storage=fs_root)
-    export_file = models.FileField(upload_to=get_export_file_path,
-        storage=fs_root, blank=True)
+    export_file = models.FileField(upload_to=get_export_file_path, storage=fs_root, blank=True)
     
     # Post-voting data
     
@@ -45,11 +44,8 @@ class Question(base.Question):
     
     # Post-voting data
     
-    combined_com = fields.ProtoField(cls=crypto.Com, null=True, blank=True,
-        default=None)
-    
-    combined_decom = fields.ProtoField(cls=crypto.Decom, null=True, blank=True,
-        default=None)
+    combined_com = fields.ProtoField(cls=crypto.Com, null=True, blank=True, default=None)
+    combined_decom = fields.ProtoField(cls=crypto.Decom, null=True, blank=True, default=None)
 
 
 class OptionC(base.OptionC):
@@ -66,25 +62,18 @@ class Ballot(base.Ballot):
 
 class Part(base.Part):
     
-    security_code = models.CharField(max_length=conf.SECURITY_CODE_LEN,
-        blank=True, default='')
-    
+    security_code = models.CharField(max_length=conf.SECURITY_CODE_LEN, blank=True, default='')
     security_code_hash2 = models.CharField(max_length=128)
     
-    # OptionV common data
-    
     l_votecode_salt = models.CharField(max_length=128, blank=True, default='')
-    l_votecode_iterations = models.PositiveIntegerField(null=True,
-        blank=True, default=None)
+    l_votecode_iterations = models.PositiveIntegerField(null=True, blank=True, default=None)
 
 
 class OptionV(base.OptionV):
     
     votecode = models.PositiveSmallIntegerField()
     
-    l_votecode = models.CharField(max_length=conf.VOTECODE_LEN,
-        blank=True, default='')
-    
+    l_votecode = models.CharField(max_length=conf.VOTECODE_LEN, blank=True, default='')
     l_votecode_hash = models.CharField(max_length=128, blank=True, default='')
     
     com = fields.ProtoField(cls=crypto.Com)

@@ -7,33 +7,33 @@ import re
 _masks = {
     
     'bds' : {
-        'Election': ['id', 'state', 'type', 'vc_type', 'name', 'starts_at', \
+        'Election': ['id', 'state', 'type', 'vc_type', 'name', 'starts_at',
             'ends_at', 'ballot_cnt'],
         'Ballot': ['serial'],
         'Part': ['index', 'security_code', 'voter_token'],
      },
     
     'abb' : {
-        'Election': ['id', 'state', 'type', 'vc_type', 'name', 'starts_at', \
+        'Election': ['id', 'state', 'type', 'vc_type', 'name', 'starts_at',
             'ends_at', 'ballot_cnt'],
         'Question': ['text', 'key', 'index', 'option_cnt', 'choices'],
         'OptionC': ['text', 'index'],
         'Ballot': ['serial', 'credential_hash'],
-        'Part': ['index', 'security_code_hash2', 'l_votecode_salt', \
+        'Part': ['index', 'security_code_hash2', 'l_votecode_salt',
             'l_votecode_iterations'],
-        'OptionV' : ['votecode', 'l_votecode_hash', 'com', 'zk1', 'index', \
+        'OptionV' : ['votecode', 'l_votecode_hash', 'com', 'zk1', 'index',
             'question', 'receipt_full'],
      },
     
     'vbb' : {
-        'Election': ['id', 'state', 'type', 'vc_type', 'name', 'starts_at', \
+        'Election': ['id', 'state', 'type', 'vc_type', 'name', 'starts_at',
             'ends_at', 'ballot_cnt'],
         'Question': ['text', 'index', 'option_cnt', 'columns', 'choices'],
         'OptionC': ['text', 'index'],
         'Ballot': ['serial', 'credential_hash'],
-        'Part': ['index', 'security_code_hash2', 'l_votecode_salt', \
+        'Part': ['index', 'security_code_hash2', 'l_votecode_salt',
             'l_votecode_iterations'],
-        'OptionV' : ['votecode', 'l_votecode_hash', 'receipt', 'index', \
+        'OptionV' : ['votecode', 'l_votecode_hash', 'receipt', 'index',
             'question'],
      },
 }
@@ -55,8 +55,7 @@ def _apply_mask(obj, app_mask, model_mask):
             if match:
                 model = match.group(1)
                 if model in app_mask:
-                    result[key] = [_apply_mask(_obj, app_mask, \
-                        app_mask[model]) for _obj in value]
+                    result[key] = [_apply_mask(_obj, app_mask, app_mask[model]) for _obj in value]
     
     return result
 

@@ -32,8 +32,7 @@ for app in settings.DEMOS_APPS:
     urlconf = import_module('demos.apps.%s.urls' % app)
     path = r'^' + ((app + r'/') if len(settings.DEMOS_APPS) > 1 else r'')
     
-    urlpatterns += \
-        i18n_patterns(url(path, include(urlconf, namespace=app, app_name=app)))
+    urlpatterns += i18n_patterns(url(path, include(urlconf, namespace=app, app_name=app)))
     
     urlpatterns += [
         url(path + r'api/', include(urlconf.apipatterns + [

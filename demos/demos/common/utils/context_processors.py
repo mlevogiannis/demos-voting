@@ -9,7 +9,7 @@ from demos.common.utils import enums
 _predicate = lambda cls: inspect.isclass(cls) and \
     issubclass(cls, enums.IntEnum) and cls != enums.IntEnum
 
-_enum_context = { enumName: { attr.name: attr.value for attr in enumClass } \
+_enum_context = { enumName: { attr.name: attr.value for attr in enumClass }
     for enumName, enumClass in inspect.getmembers(enums, _predicate) }
 
 def common(request):

@@ -268,8 +268,8 @@ class VoteView(View):
         
         context.update({
             'timezone_now': now,
-            'VcType': { s.name: s.value for s in enums.VcType },
-            'State': { s.name: s.value for s in VoteView.State },
+            'VcType': {s.name: s.value for s in enums.VcType},
+            'State': {s.name: s.value for s in VoteView.State},
         })
         
         csrf.get_token(request)
@@ -288,8 +288,8 @@ class VoteView(View):
         # raises a VoteView.Error exception for the first error that occurs.
         
         try:
-             election, question_qs, ballot, part_qs, credential, \
-                security_code,_ = VoteView._parse_input(election_id, voter_token)
+             election, question_qs, ballot, part_qs, credential, security_code,_ = \
+                VoteView._parse_input(election_id, voter_token)
         except VoteView.Error as e:
             return http.JsonResponse({'error': e.args[0].value}, status=422)
         
@@ -371,8 +371,7 @@ class VoteView(View):
             try:
                 for question in question_qs.iterator():
                     
-                    optionv_qs = OptionV.objects.\
-                        filter(part=part1, question=question)
+                    optionv_qs = OptionV.objects.filter(part=part1, question=question)
                     
                     vc_name = 'votecode'
                     vc_list = vote_obj[str(question.index)]
@@ -382,17 +381,14 @@ class VoteView(View):
                     if election.vc_type == enums.VcType.LONG:
                         
                         vc_list = [hasher.encode(vc, part1.l_votecode_salt, \
-                            part1.l_votecode_iterations, True)[0] \
-                            for vc in vc_list]
+                            part1.l_votecode_iterations, True)[0] for vc in vc_list]
                         
                         vc_name = 'l_' + vc_name + '_hash'
                     
                     # Get options for the requested votecodes
                     
                     vc_filter = {vc_name + '__in': vc_list}
-                    
-                    optionvs = dict(optionv_qs.filter(**vc_filter).\
-                        values_list(vc_name, 'receipt'))
+                    optionvs = dict(optionv_qs.filter(**vc_filter).values_list(vc_name, 'receipt'))
                     
                     # Return receipt list in the correct order
                     

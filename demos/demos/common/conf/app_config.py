@@ -25,14 +25,14 @@ class AppConfig(_AppConfig):
         
         Election = self.get_model('Election')
         pre_delete.connect(pre_delete_protected_handler, sender=Election,
-            dispatch_uid='election_pre_delete_protected_handler')
+                           dispatch_uid='election_pre_delete_protected_handler')
         
         # Workaround for abstract natural key dependencies. For child classes
         # that do not override their parent class' natural_key method, any
         # '%(app_label)s' contained in the natural_key's dependency list is
         # replaced by the lower-cased name of the app they are contained
-        # within. Each child class gets a proxy natural_key method that has the
-        # new dependency list as an attribute.
+        # within. Each child class gets a proxy natural_key method that has
+        # the new dependency list as an attribute.
         
         for model in self.get_models():
             
@@ -41,7 +41,7 @@ class AppConfig(_AppConfig):
                 hasattr(model.natural_key, 'dependencies'):
                 
                 dependencies = [dep % {'app_label': self.label.lower()}
-                    for dep in model.natural_key.dependencies]
+                                for dep in model.natural_key.dependencies]
                 
                 if dependencies != model.natural_key.dependencies:
                     
@@ -82,21 +82,21 @@ class ConstantsAndSettings(object):
         if name in self._settings:
             return self._settings[name]
         
-        raise AttributeError("%s instance of app with label '%s' has no "
-            "attribute '%s'" % (self.__class__.__name__, self.app_label, name))
+        raise AttributeError("%s instance of app with label '%s' has no attribute "
+                             "'%s'" % (self.__class__.__name__, self.app_label, name))
     
     def __check_settings(self):
         
         for name in ('URL', 'API_URL'):
             for key, value in self._settings[name].items():
                 if not value.endswith('/'):
-                    raise ImproperlyConfigured("The value of 'DEMOS_%s.%s' "
-                        "must end with a slash" % (name, key))
+                    raise ImproperlyConfigured("The value of 'DEMOS_%s.%s' must "
+                                               "end with a slash" % (name, key))
         
         name_clashes = set(self._constants.keys()) & set(self._settings.keys())
         
         if name_clashes:
-            raise ImproperlyConfigured("Settings in 'DEMOS_CONFIG.%s' clash "
-                "with constants of similar names from 'constants.py': %s" %
-                (self.app_label, ', '.join(name_clashes)))
+            raise ImproperlyConfigured("Settings in 'DEMOS_CONFIG.%s' clash with "
+                                       "constants of similar names from 'constants.py': "
+                                       "%s" % (self.app_label, ', '.join(name_clashes)))
 

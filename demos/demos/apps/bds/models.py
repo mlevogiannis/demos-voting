@@ -17,10 +17,6 @@ app_config = apps.get_app_config('bds')
 conf = app_config.get_constants_and_settings()
 
 
-class Election(base.Election):
-    pass
-
-
 ballot_fs = storage.PrivateTarFileStorage(
     location=os.path.join(conf.FILESYSTEM_ROOT, 'ballots'),
     tar_permissions_mode=0o600, tar_file_permissions_mode=0o600,
@@ -29,6 +25,10 @@ ballot_fs = storage.PrivateTarFileStorage(
 
 def get_ballot_file_path(ballot, filename):
     return "%s/%s" % (ballot.election.id, filename)
+
+
+class Election(base.Election):
+    pass
 
 
 class Ballot(base.Ballot):

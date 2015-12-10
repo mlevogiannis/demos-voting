@@ -2,12 +2,11 @@
 
 from __future__ import absolute_import, division, unicode_literals
 
+import datetime
 import io
 import os
 import tarfile
 import time
-
-from datetime import datetime
 
 from django.conf import settings
 from django.core.files import File
@@ -21,7 +20,7 @@ from django.utils.six.moves.urllib.parse import urljoin
 class TarFileStorage(Storage):
     
     def __init__(self, location=None, base_url=None, tar_permissions_mode=None,
-        tar_file_permissions_mode=None, tar_directory_permissions_mode=None):
+                 tar_file_permissions_mode=None, tar_directory_permissions_mode=None):
         
         # Absolute filesystem path to the directory that will hold tar files.
         
@@ -44,24 +43,21 @@ class TarFileStorage(Storage):
         # The numeric mode (i.e. 0o644) to set root tar files to.
         
         if tar_permissions_mode is None:
-            tar_permissions_mode = \
-                getattr(settings, 'TARSTORAGE_PERMISSIONS', None)
+            tar_permissions_mode = getattr(settings, 'TARSTORAGE_PERMISSIONS', None)
         
         self.tar_permissions_mode = tar_permissions_mode
         
         # The numeric mode to set files that will be added to the tar file to.
         
         if tar_file_permissions_mode is None:
-            tar_file_permissions_mode = \
-                getattr(settings, 'TARSTORAGE_FILE_PERMISSIONS', None)
+            tar_file_permissions_mode = getattr(settings, 'TARSTORAGE_FILE_PERMISSIONS', None)
         
         self.tar_file_permissions_mode = tar_file_permissions_mode
         
         # The numeric mode to apply to directories created in the tar file.
         
         if tar_directory_permissions_mode is None:
-            tar_directory_permissions_mode = \
-                getattr(settings, 'TARSTORAGE_DIRECTORY_PERMISSIONS', None)
+            tar_directory_permissions_mode = getattr(settings, 'TARSTORAGE_DIRECTORY_PERMISSIONS', None)
         
         self.tar_directory_permissions_mode = tar_directory_permissions_mode
         
@@ -178,7 +174,7 @@ class TarFileStorage(Storage):
         tar = tarfile.open(name=tarname, mode='r')
         
         tarinfo = tar.getmember(filename)
-        return datetime.fromtimestamp(tarinfo.mtime)
+        return datetime.datetime.fromtimestamp(tarinfo.mtime)
 
 
 # ------------------------------------------------------------------------------
@@ -191,12 +187,12 @@ class TarFileStorage(Storage):
 class PrivateFileSystemStorage(FileSystemStorage):
     
     def __init__(self, location, base_url=None, file_permissions_mode=None,
-        directory_permissions_mode=None):
+                 directory_permissions_mode=None):
         
         assert location is not None
         
         super(PrivateFileSystemStorage, self).__init__(location, base_url,
-            file_permissions_mode, directory_permissions_mode)
+                file_permissions_mode, directory_permissions_mode)
         
         if base_url is None:
             self.base_url = None
@@ -212,13 +208,12 @@ class PrivateFileSystemStorage(FileSystemStorage):
 class PrivateTarFileStorage(TarFileStorage):
     
     def __init__(self, location, base_url=None, tar_permissions_mode=None,
-        tar_directory_permissions_mode=None, tar_file_permissions_mode=None):
+                 tar_directory_permissions_mode=None, tar_file_permissions_mode=None):
         
         assert location is not None
         
         super(PrivateTarFileStorage, self).__init__(location, base_url,
-            tar_permissions_mode, tar_file_permissions_mode,
-            tar_directory_permissions_mode)
+                tar_permissions_mode, tar_file_permissions_mode, tar_directory_permissions_mode)
         
         if base_url is None:
             self.base_url = None

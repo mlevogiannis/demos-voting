@@ -24,9 +24,7 @@ from django.views.generic import View
 
 from celery.result import AsyncResult
 
-from demos.apps.ea.forms import (
-    ElectionForm, OptionFormSet, PartialQuestionFormSet, BaseQuestionFormSet
-)
+from demos.apps.ea.forms import ElectionForm, OptionFormSet, PartialQuestionFormSet, BaseQuestionFormSet
 from demos.apps.ea.models import Election, Question, OptionV, Task
 from demos.apps.ea.tasks import cryptotools, election_setup, pdf
 from demos.apps.ea.tasks.setup import _remote_app_update
@@ -60,8 +58,9 @@ class CreateView(View):
         QuestionFormSet = PartialQuestionFormSet(formset=BaseQuestionFormSet)
         question_formset = QuestionFormSet(prefix='question')
         
-        question_and_options_list = [(question_formset.empty_form, \
-            OptionFormSet(prefix='option__prefix__'))]
+        question_and_options_list = [
+            (question_formset.empty_form, OptionFormSet(prefix='option__prefix__'))
+        ]
         
         context = {
             'election_form': election_form,
@@ -88,8 +87,9 @@ class CreateView(View):
         
         # Get the list of option formsets, each one corresponds to a question
         
-        option_formsets = [OptionFormSet(request.POST, \
-            prefix='option' + str(i)) for i in range(questions)]
+        option_formsets = [
+            OptionFormSet(request.POST, prefix='option%s' % i) for i in range(questions)
+        ]
         
         # Get the question formset
         
@@ -140,8 +140,9 @@ class CreateView(View):
                     question_obj['__list_OptionC__'].append(option_obj)
                 election_obj['__list_Question__'].append(question_obj)
             
-            election_obj['__list_Trustee__'] = \
-                [{'email': email} for email in election_obj.pop('trustee_list')]
+            election_obj['__list_Trustee__'] = [
+                {'email': email} for email in election_obj.pop('trustee_list')
+            ]
             
             # Perform the requested action
             
@@ -179,16 +180,11 @@ class CreateView(View):
                     defaults = {f.name: election_obj[f.name] for f in
                         Election._meta.get_fields() if f.name in election_obj}
                     
-                    election = Election.objects.select_for_update().\
-                        create(id='-', **defaults)
-                    
+                    election = Election.objects.select_for_update().create(id='-', **defaults)
                     election.full_clean(exclude=['id'])
                     
-                    max_id = Election.objects.exclude(id=election.id).\
-                        aggregate(Max('id'))['id__max']
-                    
-                    election_id = '0' if max_id is None else \
-                        base32cf.encode(base32cf.decode(max_id) + 1)
+                    max_id = Election.objects.exclude(id=election.id).aggregate(Max('id'))['id__max']
+                    election_id = '0' if max_id is None else base32cf.encode(base32cf.decode(max_id) + 1)
                     
                     election.id = election_id
                     election.save(update_fields=['id'])
@@ -214,8 +210,8 @@ class CreateView(View):
             option_formsets)) + [(question_formset.empty_form,
             OptionFormSet(prefix='option__prefix__'))]
         
-        question_formset_errors = sum(int(not(question_form.is_valid() and \
-            option_formset.is_valid())) for question_form, option_formset \
+        question_formset_errors = sum(int(not(question_form.is_valid() and
+            option_formset.is_valid())) for question_form, option_formset
             in question_and_options_list[:-1])
         
         context = {
@@ -361,7 +357,7 @@ class ApiCryptoView(View):
                 
                 # Input is a list of base64-encoded 'com' fields, returns 'com'
                 
-                com_list=self._deserialize(request_obj['com_list'], crypto.Com)
+                com_list = self._deserialize(request_obj['com_list'], crypto.Com)
                 
                 # Add 'com' fields
                 
@@ -384,8 +380,8 @@ class ApiCryptoView(View):
                 
             elif command == 'add_decom':
                 
-                # Input is a list of 3-tuples: (b_serial, p_index, o_index_list)
-                # returns 'decom'
+                # Input is a list of 3-tuples: (b_serial, p_index,
+                # o_index_list), returns 'decom'
                 
                 ballots = request_obj['ballots']
                 
@@ -458,16 +454,13 @@ class ApiCryptoView(View):
                         
                         if len(zk_buf) > conf.BATCH_SIZE:
                             
-                            zk2_list.extend(cryptotools.\
-                                complete_zk(key, option_cnt, coins, zk_buf))
+                            zk2_list.extend(cryptotools.complete_zk(key, option_cnt, coins, zk_buf))
                             zk_buf = []
                 
                 # Flush non-empty buffer
                 
                 if zk_buf:
-                    
-                    zk2_list.extend(cryptotools.\
-                        complete_zk(key, option_cnt, coins, zk_buf))
+                    zk2_list.extend(cryptotools.complete_zk(key, option_cnt, coins, zk_buf))
                 
                 # Re-create input's structure
                 
@@ -494,7 +487,7 @@ class ApiCryptoView(View):
             logger.exception('CryptoToolsView: API error')
             return http.HttpResponse(status=422)
         
-        return http.JsonResponse(response,safe=False,encoder=CustomJSONEncoder)
+        return http.JsonResponse(response, safe=False, encoder=CustomJSONEncoder)
 
 
 class ApiUpdateStateView(View):
