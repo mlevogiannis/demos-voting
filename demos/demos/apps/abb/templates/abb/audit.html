@@ -82,7 +82,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for option in question.optionc_set.values %}
+                                        {% for option in question.options_c.values %}
                                         <tr>
                                             <td><button type="button" class="btn btn-info votecode"><span class="glyphicon glyphicon-lock" aria-hidden="true"></span></button></td>
                                             <td><button type="button" class="btn btn-primary option" data-content="{{ option.text }}"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span></button></d>

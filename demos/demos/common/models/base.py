@@ -62,8 +62,8 @@ class Election(models.Model):
 @python_2_unicode_compatible
 class Question(models.Model):
     
-    election = models.ForeignKey('Election')
-    part_set = models.ManyToManyField('Part')
+    election = models.ForeignKey('Election', related_name='questions', related_query_name='question')
+    parts = models.ManyToManyField('Part', related_name='questions', related_query_name='question')
     
     index = models.PositiveSmallIntegerField()
     text = models.CharField(max_length=constants.QUESTION_MAXLEN)
@@ -100,7 +100,7 @@ class Question(models.Model):
 @python_2_unicode_compatible
 class OptionC(models.Model):
     
-    question = models.ForeignKey('Question')
+    question = models.ForeignKey('Question', related_name='options_c', related_query_name='option_c')
     
     index = models.PositiveSmallIntegerField()
     text = models.CharField(max_length=constants.OPTION_MAXLEN)
@@ -111,6 +111,7 @@ class OptionC(models.Model):
         abstract = True
         ordering = ['question', 'index']
         unique_together = ['question', 'text']
+        verbose_name = 'option_c'
     
     class OptionCManager(models.Manager):
         
@@ -135,7 +136,7 @@ class OptionC(models.Model):
 @python_2_unicode_compatible
 class Ballot(models.Model):
     
-    election = models.ForeignKey('Election')
+    election = models.ForeignKey('Election', related_name='ballots', related_query_name='ballot')
     serial = models.PositiveIntegerField()
     
     # Predefined methods and meta options
@@ -168,8 +169,8 @@ class Ballot(models.Model):
 @python_2_unicode_compatible
 class Part(models.Model):
     
-    ballot = models.ForeignKey('Ballot')
     index = models.CharField(max_length=1, choices=(('A', 'A'), ('B', 'B')))
+    ballot = models.ForeignKey('Ballot', related_name='parts', related_query_name='part')
     
     # Predefined methods and meta options
     
@@ -205,8 +206,8 @@ class Part(models.Model):
 @python_2_unicode_compatible
 class OptionV(models.Model):
     
-    part = models.ForeignKey('Part')
-    question = models.ForeignKey('Question')
+    part = models.ForeignKey('Part', related_name='options', related_query_name='option')
+    question = models.ForeignKey('Question', related_name='options_v', related_query_name='option_v')
     
     index = models.PositiveSmallIntegerField()
     
@@ -216,6 +217,7 @@ class OptionV(models.Model):
         abstract = True
         ordering = ['part', 'question', 'index']
         unique_together = ['part', 'question', 'index']
+        verbose_name = 'option_v'
     
     class OptionVManager(models.Manager):
         
@@ -243,7 +245,7 @@ class OptionV(models.Model):
 @python_2_unicode_compatible
 class Trustee(models.Model):
     
-    election = models.ForeignKey('Election')
+    election = models.ForeignKey('Election', related_name='trustees', related_query_name='trustee')
     email = models.EmailField()
     
     # Predefined methods and meta options
@@ -275,7 +277,7 @@ class Trustee(models.Model):
 class Task(models.Model):
     
     task_id = models.UUIDField(unique=True)
-    election = models.ForeignKey('Election')
+    election = models.ForeignKey('Election', related_name='tasks', related_query_name='task')
     
     # Predefined methods and meta options
     

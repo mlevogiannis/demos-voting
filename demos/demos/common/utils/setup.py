@@ -85,7 +85,7 @@ def insert_into_db(election_obj, app_config):
             question_qs = Question.objects.filter(election=election)
             
             for question in question_qs:
-                question.part_set.add(*list(part_qs))
+                question.parts.add(*list(part_qs))
             
             # Model: OptionV
             

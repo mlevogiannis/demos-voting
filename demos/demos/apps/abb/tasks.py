@@ -39,7 +39,7 @@ def tally_protocol(election_id):
     coins = ''
     
     for ballot in ballot_qs.iterator():
-        coins += '%d' % (1 if ballot.part_set.filter(index='B', optionv__voted=True).exists() else 0)
+        coins += '%d' % (1 if ballot.parts.filter(index='B', optionv__voted=True).exists() else 0)
     
     coins = coins.encode('ascii')
     coins = hashlib.sha256(coins).hexdigest()
@@ -144,7 +144,7 @@ def tally_protocol(election_id):
         # Now, calculate votes
         
         ballots = election.ballot_cnt
-        optionc_qs = question.optionc_set.all()
+        optionc_qs = question.options_c.all()
         
         decom = crypto.Decom()
         decom.ParseFromString(b64decode(combined_decom))
@@ -199,7 +199,7 @@ def tally_protocol(election_id):
             
             for part, zk2_list in zip(part_qs, ballot_part_zk2_lists):
                 
-                optionv_qs = part.optionv_set.filter(question=question)
+                optionv_qs = part.options_v.filter(question=question)
                 
                 for optionv, zk2 in zip(optionv_qs, zk2_list):
                     

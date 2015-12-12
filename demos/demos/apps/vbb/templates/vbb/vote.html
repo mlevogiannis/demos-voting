@@ -77,7 +77,7 @@
             <!-- Wrapper for questions -->
             <div class="carousel-inner" role="listbox">
                 {% for question in questions %}
-                <div class="item question {% if forloop.first %}active{% endif %}" data-index="{{ question.index }}" data-choices="{{ question.choices }}" data-options="{{ question.optionc_set.values|length }}">
+                <div class="item question {% if forloop.first %}active{% endif %}" data-index="{{ question.index }}" data-choices="{{ question.choices }}" data-options="{{ question.options_c.values|length }}">
                     <div class="page-header">
                         <h3>
                             <span>
@@ -89,7 +89,7 @@
                     </div>
                     <div class="row">
                         {% with columns=question.columns|add:'1' %}
-                        {% for optionc_list in question.optionc_set.values|chunks:columns %}
+                        {% for optionc_list in question.options_c.values|chunks:columns %}
                         <div class="col-xs-12 col-sm-{{ 12|floordiv:columns }}">
                             <div class="btn-toolbar" role="toolbar">
                                 {% for optionc in optionc_list %}
