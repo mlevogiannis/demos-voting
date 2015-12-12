@@ -660,7 +660,7 @@ class BallotPDFCreator(object):
             part_obj = {
                 'index': p_index,
                 'voter_token': 'voter_token',
-                'security_code': base32cf.random(conf.SECURITY_CODE_LEN, False),
+                'security_code': base32cf.random(conf.SECURITY_CODE_LEN),
                 '__list_Question__': [],
             }
             
@@ -675,13 +675,12 @@ class BallotPDFCreator(object):
                     random.shuffle(votecode_list)
                     
                 elif self.vc_type == enums.VcType.LONG:
-                    votecode_list=[base32cf.random(conf.VOTECODE_LEN, False) for _ in range(option_cnt)]
+                    votecode_list=[base32cf.random(conf.VOTECODE_LEN) for _ in range(option_cnt)]
                 
                 for votecode in votecode_list:
-                    
                     data_obj = {
                         self.vc_name: votecode,
-                        'receipt': base32cf.random(conf.RECEIPT_LEN, False),
+                        'receipt': base32cf.random(conf.RECEIPT_LEN),
                     }
                     
                     question_obj['__list_OptionV__'].append(data_obj)

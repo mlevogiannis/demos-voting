@@ -203,7 +203,7 @@ def election_setup(election_obj, language):
                 # security code. The second hash uses the first hash's salt,
                 # reversed.
                 
-                security_code = base32cf.random(conf.SECURITY_CODE_LEN)
+                security_code = base32cf.random(conf.SECURITY_CODE_LEN, urandom=True)
                 
                 hash, salt, _ = hasher.encode(security_code, split=True)
                 security_code_hash2 = hasher.encode(hash, salt[::-1])
