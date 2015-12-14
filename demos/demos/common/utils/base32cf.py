@@ -7,7 +7,7 @@ import os
 import random as _random
 import re
 
-from demos.common.utils.int import int_from_bytes
+from demos.common.utils.int import int_from_bytes, int_to_bytes
 from django.utils.six.moves import zip_longest
 
 # Reference: http://www.crockford.com/wrmg/base32.html
@@ -113,4 +113,16 @@ def random(length, hyphens=0, urandom=False):
         number = _random.getrandbits(bits)
     
     return encode(number, length, hyphens)
+
+
+def encode_from_bytes(bytes, *args, **kwargs):
+    
+    number = int_from_bytes(bytes, 'big')
+    return encode(number, *args, **kwargs)
+
+def decode_to_bytes(*args, **kwargs):
+    
+    number = base32cf.decode(*args, **kwargs)
+    return int_to_bytes(number, int(math.ceil(number.bit_length() / 8)), 'big')
+    
 
