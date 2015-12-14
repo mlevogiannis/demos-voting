@@ -10,7 +10,7 @@ _masks = {
         'Election': ['id', 'state', 'type', 'vc_type', 'name', 'starts_at',
             'ends_at', 'ballot_cnt'],
         'Ballot': ['serial'],
-        'Part': ['index', 'security_code', 'voter_token'],
+        'Part': ['tag', 'security_code', 'voter_token'],
      },
     
     'abb' : {
@@ -19,7 +19,7 @@ _masks = {
         'Question': ['text', 'key', 'index', 'option_cnt', 'choices'],
         'OptionC': ['text', 'index'],
         'Ballot': ['serial', 'credential_hash'],
-        'Part': ['index', 'security_code_hash2', 'l_votecode_salt',
+        'Part': ['tag', 'security_code_hash2', 'l_votecode_salt',
             'l_votecode_iterations'],
         'OptionV' : ['votecode', 'l_votecode_hash', 'com', 'zk1', 'index',
             'question', 'receipt_full'],
@@ -31,7 +31,7 @@ _masks = {
         'Question': ['text', 'index', 'option_cnt', 'columns', 'choices'],
         'OptionC': ['text', 'index'],
         'Ballot': ['serial', 'credential_hash'],
-        'Part': ['index', 'security_code_hash2', 'l_votecode_salt',
+        'Part': ['tag', 'security_code_hash2', 'l_votecode_salt',
             'l_votecode_iterations'],
         'OptionV' : ['votecode', 'l_votecode_hash', 'receipt', 'index',
             'question'],

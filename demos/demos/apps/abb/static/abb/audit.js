@@ -14,7 +14,7 @@ $("#audit-button").click(function(e) {
     // Prepare the export url
     
     var b_url = e_url + "ballots/" + b_serial + "/";
-    var b_query = "?ballot=parts&part=index,security_code,questions&question=" +
+    var b_query = "?ballot=parts&part=tag,security_code,questions&question=" +
         "index,options&option=index," + (vc_type == VcType.LONG ? "l_" : "") + "votecode,voted";
     
     // Request the data from the server
@@ -33,9 +33,9 @@ $("#audit-button").click(function(e) {
                 var part = ballot.parts[p];
                 var part2 = ballot.parts[1-p];
                 
-                var p_url = b_url + "parts/" + part.index + "/";
+                var p_url = b_url + "parts/" + part.tag + "/";
                 
-                var tabpane = $("#part-" + part.index.toLowerCase() + ".tab-pane");
+                var tabpane = $("#part-" + part.tag.toLowerCase() + ".tab-pane");
                 var panels = tabpane.find(".panel.hidden").clone(true).appendTo(tabpane);
                 
                 panel_group1 = panel_group1.add(panels);
@@ -43,11 +43,11 @@ $("#audit-button").click(function(e) {
                 
                 // If a part has a security code, then the other part has been used to vote
                 
-                var p_vote = part.security_code ? part2.index : (part2.security_code ? part.index : "");
+                var p_vote = part.security_code ? part2.tag : (part2.security_code ? part.tag : "");
                 
-                if (p_vote == part.index)
+                if (p_vote == part.tag)
                     panels.find("table").addClass("vote-col");
-                else if (p_vote == part2.index)
+                else if (p_vote == part2.tag)
                     panels.find("table").addClass("text-col");
                 
                 // Decode the security code
@@ -105,15 +105,15 @@ $("#audit-button").click(function(e) {
                         var col_option = tr.find(".option");
                         var col_option_span = col_option.children("span");
                         
-                        if (p_vote == part.index) {
+                        if (p_vote == part.tag) {
                             col_option.prop("disabled", true);
                             col_option.toggleClass("hidden", !option.voted);
                         }
-                        else if (p_vote == part2.index) {
+                        else if (p_vote == part2.tag) {
                             col_option_span.removeClass();
                             col_option_span.prop("aria-hidden", false);
                             col_option_span.text(col_option.data("content"));
-                            col_option.popover({container: "#part-" + part.index.toLowerCase() + " .panel-table .table", placement: "top", trigger: "click"});
+                            col_option.popover({container: "#part-" + part.tag.toLowerCase() + " .panel-table .table", placement: "top", trigger: "click"});
                             col_option.on("show.bs.popover hide.bs.popover focusout", option_popover_handler);
                         }
                         else {

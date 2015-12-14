@@ -456,7 +456,7 @@ class BallotPDFCreator(object):
             table_abb = Table([[Paragraph(text, self.paragraph_kv_style)]],
                 colWidths=[self.page_width], style=self.table_kv_style)
             
-            table_img = Table([["", "", part_obj['index']], [qr_img,
+            table_img = Table([["", "", part_obj['tag']], [qr_img,
                 self.logo_img, ""]], style=self.table_img_style,
                 colWidths=[self.page_width/3, self.page_width/3,
                 self.page_width/3], rowHeights=[0, None])
@@ -648,17 +648,17 @@ class BallotPDFCreator(object):
     def sample(self):
         """Generates a sample PDF ballot"""
         
-        question_list = [len(option_list) for option_list, _, _, _, _, _, _ in self.config_q_list]
+        question_list = [len(config_q[0]) for config_q in self.config_q_list]
         
         ballot_obj = {
             'serial': 100,
             '__list_Part__': [],
         }
         
-        for p_index in ['A', 'B']:
+        for p_tag in ['A', 'B']:
             
             part_obj = {
-                'index': p_index,
+                'tag': p_tag,
                 'voter_token': 'voter_token',
                 'security_code': base32cf.random(conf.SECURITY_CODE_LEN),
                 '__list_Question__': [],

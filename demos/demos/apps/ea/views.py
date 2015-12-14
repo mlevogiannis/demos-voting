@@ -380,8 +380,8 @@ class ApiCryptoView(View):
                 
             elif command == 'add_decom':
                 
-                # Input is a list of 3-tuples: (b_serial, p_index,
-                # o_index_list), returns 'decom'
+                # Input is a list of 3-tuples: (b_serial, p_tag, o_index_list)
+                # returns 'decom'
                 
                 ballots = request_obj['ballots']
                 
@@ -389,11 +389,11 @@ class ApiCryptoView(View):
                 
                 decom_buf = []
                 
-                for b_serial, p_index, o_index_list in ballots:
+                for b_serial, p_tag, o_index_list in ballots:
                     
                     optionv_qs = OptionV.objects.filter(
                         part__ballot__election__id=e_id, part__ballot__serial=
-                        b_serial, question__index=q_index, part__index=p_index
+                        b_serial, question__index=q_index, part__tag=p_tag
                     )
                     
                     for lo in range(0, len(o_index_list), conf.BATCH_SIZE):
@@ -418,7 +418,7 @@ class ApiCryptoView(View):
                 
             elif command == 'complete_zk':
                 
-                # Input is a list of 3-tuples: (b_serial, p_index, o_iz_list),
+                # Input is a list of 3-tuples: (b_serial, p_tag, o_iz_list),
                 # where o_iz_list is the list of 2-tuples: (o_index, zk1).
                 # Returns a list of zk2 lists, in the same order.
                 
@@ -433,10 +433,10 @@ class ApiCryptoView(View):
                 zk_buf = []
                 zk2_list = []
                 
-                for b_serial, p_index, o_iz_list in ballots:
+                for b_serial, p_tag, o_iz_list in ballots:
                     
                     optionv_qs = OptionV.objects.filter(
-                        part__index=p_index, part__ballot__serial=b_serial
+                        tag__index=p_tag, part__ballot__serial=b_serial
                     )
                     
                     for lo in range(0, len(o_iz_list), conf.BATCH_SIZE):

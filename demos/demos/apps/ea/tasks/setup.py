@@ -57,11 +57,11 @@ def election_setup(election_obj, language):
     
     # Election-specific vote-token bit lengths
     
-    index_bits = 1
+    tag_bits = 1
     serial_bits = (election.ballot_cnt + 100).bit_length()
     credential_bits = conf.CREDENTIAL_LEN * 8
     security_code_bits = conf.SECURITY_CODE_LEN * 5
-    token_bits = serial_bits + credential_bits + index_bits + security_code_bits
+    token_bits = serial_bits + credential_bits + tag_bits + security_code_bits
     pad_bits = int(math.ceil(token_bits / 5)) * 5 - token_bits
     
     # Initialize common utilities
@@ -195,7 +195,7 @@ def election_setup(election_obj, language):
                 '__list_Part__': [],
             }
             
-            for p_index, crypto_qo_list in zip(['A', 'B'], crypto_sqo_list):
+            for p_tag, crypto_qo_list in zip(['A', 'B'], crypto_sqo_list):
                 
                 # Generate a random security code and compute its hash value
                 # and its hash's hash value. The client will use the first hash
@@ -227,7 +227,7 @@ def election_setup(election_obj, language):
                 # Pack ballot part's data
                 
                 part_obj = {
-                    'index': p_index,
+                    'tag': p_tag,
                     'security_code': security_code,
                     'security_code_hash2': security_code_hash2,
                     'l_votecode_salt': l_votecode_salt,
@@ -331,17 +331,17 @@ def election_setup(election_obj, language):
                 security_code = base32cf.decode(other_part_obj['security_code'])
                 
                 # The voter token consists of two parts. The first part is the
-                # ballot's serial number and credential and the part's index,
+                # ballot's serial number and credential and the part's tag,
                 # XORed with the second part. The second part is the other
                 # part's security code, bit-inversed. This is done so that the
                 # tokens of the two parts appear to be completely different.
                 
-                p1 = ((serial << (index_bits + credential_bits)) |
-                    (int_from_bytes(credential, 'big') << index_bits) | i)
+                p1 = ((serial << (tag_bits + credential_bits)) |
+                    (int_from_bytes(credential, 'big') << tag_bits) | i)
                 
                 p2 = (~security_code) & ((1 << security_code_bits) - 1)
                 
-                p1_len = serial_bits + credential_bits + index_bits
+                p1_len = serial_bits + credential_bits + tag_bits
                 p2_len = security_code_bits
                 
                 for i in range(0, p1_len, p2_len):

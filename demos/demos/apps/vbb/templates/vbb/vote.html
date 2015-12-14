@@ -19,7 +19,7 @@
 <div class="row">
     <div class="col-xs-12">
         {% tuple _("Election") election.id as t1 %}
-        {% tuple _("Ballot") b_serial|add:" - "|add:p_index as t2 %}
+        {% tuple _("Ballot") b_serial|add:" - "|add:p_tag as t2 %}
         {% tuple _("Questions") questions|length as t3 %}
         {% tuple t1 t2 t3 as panels %}
         {% include "common/election_box.html" with object=election now_datetime=timezone_now panels=panels %}
@@ -148,7 +148,7 @@
                         </div>
                         <div class="row" style="margin-bottom:10px;">
                             <div class="col-xs-10 col-xs-offset-1 col-sm-6 col-sm-offset-3 text-center">
-                                <h5>{% blocktrans with b_serial=b_serial p_index=p_index%}Ballot {{ b_serial }} - Side {{ p_index }}{% endblocktrans %}</h5>
+                                <h5>{% blocktrans with b_serial=b_serial p_tag=p_tag %}Ballot {{ b_serial }} - Side {{ p_tag }}{% endblocktrans %}</h5>
                                 <div class="form-group">
                                     <input type="text" autocomplete="off" id="security-code-input" class="form-control text-center" placeholder="{% trans 'Security Code' %}" maxlength="{{ sc_length|default_if_none:'' }}" data-salt="{{ sc_salt|default_if_none:'' }}" data-iterations="{{ sc_iterations|default_if_none:'' }}">
                                     <span class="glyphicon form-control-feedback hidden" aria-hidden="true"></span>

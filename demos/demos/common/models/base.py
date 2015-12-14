@@ -169,37 +169,37 @@ class Ballot(models.Model):
 @python_2_unicode_compatible
 class Part(models.Model):
     
-    index = models.CharField(max_length=1, choices=(('A', 'A'), ('B', 'B')))
     ballot = models.ForeignKey('Ballot', related_name='parts', related_query_name='part')
+    tag = models.CharField(max_length=1, choices=(('A', 'A'), ('B', 'B')))
     
     # Predefined methods and meta options
     
     class Meta:
         abstract = True
-        ordering = ['ballot', 'index']
-        unique_together = ['ballot', 'index']
+        ordering = ['ballot', 'tag']
+        unique_together = ['ballot', 'tag']
     
     class PartManager(models.Manager):
         
-        def get_by_natural_key(self, e_id, b_serial, p_index):
+        def get_by_natural_key(self, e_id, b_serial, p_tag):
             
             manager = Ballot.objects.db_manager(self.db)
             ballot = manager.get_by_natural_key(e_id, b_serial)
             
-            return self.get(ballot=ballot, index=p_index)
+            return self.get(ballot=ballot, tag=p_tag)
     
     objects = PartManager()
     
     def __str__(self):
-        return "%s" % self.index
+        return "%s" % self.tag
     
     def natural_key(self):
-        return self.ballot.natural_key() + (self.index,)
+        return self.ballot.natural_key() + (self.tag,)
     
     natural_key.dependencies = ['%(app_label)s.Ballot']
     
     def save(self, *args, **kwargs):
-        self.index = self.index.upper()
+        self.tag = self.tag.upper()
         super(Part, self).save(*args, **kwargs)
 
 
@@ -221,10 +221,10 @@ class OptionV(models.Model):
     
     class OptionVManager(models.Manager):
         
-        def get_by_natural_key(self, e_id, b_serial, p_index, q_index, o_index):
+        def get_by_natural_key(self, e_id, b_serial, p_tag, q_index, o_index):
             
             manager = Part.objects.db_manager(self.db)
-            part = manager.get_by_natural_key(e_id, b_serial, p_index)
+            part = manager.get_by_natural_key(e_id, b_serial, p_tag)
             
             manager = Question.objects.db_manager(self.db)
             question = manager.get_by_natural_key(e_id, q_index)

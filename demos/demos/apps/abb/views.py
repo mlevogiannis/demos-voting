@@ -213,7 +213,7 @@ class ApiVoteView(View):
             e_id = votedata['e_id']
             b_serial = votedata['b_serial']
             b_credential = b64decode(votedata['b_credential'].encode())
-            p1_index = votedata['p1_index']
+            p1_tag = votedata['p1_tag']
             p1_votecodes = votedata['p1_votecodes']
             p2_security_code = votedata['p2_security_code']
             
@@ -223,7 +223,7 @@ class ApiVoteView(View):
             # part1 is always the part that the client has used to vote,
             # part2 is the other part.
             
-            order = ('' if p1_index == 'A' else '-') + 'index'
+            order = ('' if p1_tag == 'A' else '-') + 'tag'
             part1, part2 = Part.objects.filter(ballot=ballot).order_by(order)
             
             question_qs = Question.objects.filter(election=election)
@@ -381,8 +381,8 @@ class ApiExportView(View):
         },
         'part': {
             'model': Part,
-            'args': [('index', '[AaBb]')],
-            'fields': ['index', 'l_votecode_iterations', 'l_votecode_salt',
+            'args': [('tag', '[AaBb]')],
+            'fields': ['tag', 'l_votecode_iterations', 'l_votecode_salt',
                 'security_code'],
             'callback': lambda o, f, v, d, _func=__post_election:
                 v or None if f in ('l_votecode_iterations', 'l_votecode_salt') \
@@ -650,10 +650,10 @@ class ApiExportView(View):
         
         url_name = request.resolver_match.url_name
         
-        # Accept case insensitive ballot part indices
+        # Accept case insensitive ballot part tags
         
-        if 'Part__index' in kwargs:
-            kwargs['Part__index'] = kwargs['Part__index'].upper()
+        if 'Part__tag' in kwargs:
+            kwargs['Part__tag'] = kwargs['Part__tag'].upper()
         
         # Ignore any namespaces before root
         
