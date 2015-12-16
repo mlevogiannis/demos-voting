@@ -95,11 +95,11 @@
                 <!-- Ballots and votecode type input -->
                 <div class="row">
                     <div class="col-xs-12 col-sm-6">
-                        <div class="form-group {% if election_form.ballot_cnt.errors %} has-error {% endif %}">
-                            <label class="sr-only" for="{{ election_form.ballot_cnt.id_for_label }}">{{ election_form.ballot_cnt.label }}</label>
+                        <div class="form-group {% if election_form.ballots_cnt.errors %} has-error {% endif %}">
+                            <label class="sr-only" for="{{ election_form.ballots_cnt.id_for_label }}">{{ election_form.ballots_cnt.label }}</label>
                             <div class="input-group input-group-spinner">
-                                <div class="input-group-addon">{{ election_form.ballot_cnt.label }}:</div>
-                                <input type="text" class="form-control input-type-number" id="{{ election_form.ballot_cnt.auto_id }}" placeholder="{% trans 'How many?' %}" value="{{ election_form.ballot_cnt.value|default_if_none:'' }}" name="{{ election_form.ballot_cnt.html_name }}" min="{{ election_form.ballot_cnt.field.min_value }}" max="{{ election_form.ballot_cnt.field.max_value }}">
+                                <div class="input-group-addon">{{ election_form.ballots_cnt.label }}:</div>
+                                <input type="text" class="form-control input-type-number" id="{{ election_form.ballots_cnt.auto_id }}" placeholder="{% trans 'How many?' %}" value="{{ election_form.ballots_cnt.value|default_if_none:'' }}" name="{{ election_form.ballots_cnt.html_name }}" min="{{ election_form.ballots_cnt.field.min_value }}" max="{{ election_form.ballots_cnt.field.max_value }}">
                                 <div class="input-group-btn">
                                     <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-triangle-top"></span></button>
                                     <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-triangle-bottom"></span></button>

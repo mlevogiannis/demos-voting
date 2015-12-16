@@ -25,7 +25,7 @@ class ElectionForm(forms.Form):
     starts_at = fields.DateTimeField(label=_('Start at'))
     ends_at = fields.DateTimeField(label=_('End at'))
     
-    ballot_cnt = forms.IntegerField(label=_('Ballots'),
+    ballots_cnt = forms.IntegerField(label=_('Ballots'),
         min_value=1, max_value=conf.MAX_BALLOTS)
     
     language = forms.ChoiceField(label=_('Language'),

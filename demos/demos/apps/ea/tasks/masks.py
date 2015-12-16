@@ -8,15 +8,15 @@ _masks = {
     
     'bds' : {
         'Election': ['id', 'state', 'type', 'vc_type', 'name', 'starts_at',
-            'ends_at', 'ballot_cnt'],
+            'ends_at'],
         'Ballot': ['serial'],
         'Part': ['tag', 'security_code', 'voter_token'],
      },
     
     'abb' : {
         'Election': ['id', 'state', 'type', 'vc_type', 'name', 'starts_at',
-            'ends_at', 'ballot_cnt'],
-        'Question': ['text', 'key', 'index', 'option_cnt', 'choices'],
+            'ends_at'],
+        'Question': ['text', 'key', 'index', 'choices'],
         'OptionC': ['text', 'index'],
         'Ballot': ['serial', 'credential_hash'],
         'Part': ['tag', 'security_code_hash2', 'l_votecode_salt',
@@ -27,8 +27,8 @@ _masks = {
     
     'vbb' : {
         'Election': ['id', 'state', 'type', 'vc_type', 'name', 'starts_at',
-            'ends_at', 'ballot_cnt'],
-        'Question': ['text', 'index', 'option_cnt', 'columns', 'choices'],
+            'ends_at'],
+        'Question': ['text', 'index', 'columns', 'choices'],
         'OptionC': ['text', 'index'],
         'Ballot': ['serial', 'credential_hash'],
         'Part': ['tag', 'security_code_hash2', 'l_votecode_salt',

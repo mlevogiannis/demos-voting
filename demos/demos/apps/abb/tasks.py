@@ -61,8 +61,8 @@ def tally_protocol(election_id):
         
         combined_com = None
         
-        for lo in range(100, election.ballot_cnt + 100, conf.BATCH_SIZE):
-            hi = lo + min(conf.BATCH_SIZE, election.ballot_cnt + 100 - lo)
+        for lo in range(100, election.ballots_cnt + 100, conf.BATCH_SIZE):
+            hi = lo + min(conf.BATCH_SIZE, election.ballots_cnt + 100 - lo)
             
             # Grab all ballot parts that have options marked as 'voted'
             
@@ -143,7 +143,6 @@ def tally_protocol(election_id):
         
         # Now, calculate votes
         
-        ballots = election.ballot_cnt
         optionc_qs = question.options_c.all()
         
         decom = crypto.Decom()
@@ -167,8 +166,8 @@ def tally_protocol(election_id):
             'coins': election.coins,
         }
         
-        for lo in range(100, election.ballot_cnt + 100, conf.BATCH_SIZE):
-            hi = lo + min(conf.BATCH_SIZE, election.ballot_cnt + 100 - lo)
+        for lo in range(100, election.ballots_cnt + 100, conf.BATCH_SIZE):
+            hi = lo + min(conf.BATCH_SIZE, election.ballots_cnt + 100 - lo)
             
             # Grab all ballot parts
                 

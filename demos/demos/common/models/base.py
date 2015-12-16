@@ -6,6 +6,7 @@ import logging
 
 from django.core import validators
 from django.db import models
+from django.db.models import Count, Max, Min
 from django.utils.encoding import python_2_unicode_compatible
 
 from demos.common.conf import constants
@@ -30,8 +31,37 @@ class Election(models.Model):
     starts_at = models.DateTimeField()
     ends_at = models.DateTimeField()
 
-    ballot_cnt = models.PositiveIntegerField()
     
+    
+    # Custom methods and properties
+    
+    @property
+    def ballots_cnt(self):
+        if not hasattr(self, '_ballots_cnt'):
+            self._ballots_cnt = self.ballots.count()
+        return self._ballots_cnt
+    
+    @property
+    def questions_cnt(self):
+        if not hasattr(self, '_questions_cnt'):
+            self._questions_cnt = self.questions.count()
+        return self._questions_cnt
+    
+    @property
+    def min_options_cnt(self):
+        if not hasattr(self, '_min_options_cnt'):
+            q = self.questions.annotate(Count('option_c'))
+            q = q.aggregate(Min('option_c__count'))
+            self._min_options_cnt = q['option_c__count__min']
+        return self._min_options_cnt
+    
+    @property
+    def max_options_cnt(self):
+        if not hasattr(self, '_max_options_cnt'):
+            q = self.questions.annotate(Count('option_c'))
+            q = q.aggregate(Max('option_c__count'))
+            self._max_options_cnt = q['option_c__count__max']
+        return self._max_options_cnt
     
     # Predefined methods and meta options
     
@@ -67,8 +97,14 @@ class Question(models.Model):
     
     index = models.PositiveSmallIntegerField()
     text = models.CharField(max_length=constants.QUESTION_MAXLEN)
-
-    option_cnt = models.PositiveSmallIntegerField()
+    
+    # Custom methods and properties
+    
+    @property
+    def options_cnt(self):
+        if not hasattr(self, '_options_cnt'):
+            self._options_cnt = self.options_c.count()
+        return self._options_cnt
     
     # Predefined methods and meta options
     

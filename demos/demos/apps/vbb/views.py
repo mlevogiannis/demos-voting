@@ -108,7 +108,7 @@ class VoteView(View):
         # Voter token bits definitions
         
         tag_bits = 1
-        serial_bits = (election.ballot_cnt + 100).bit_length()
+        serial_bits = (election.ballots_cnt + 100).bit_length()
         credential_bits = conf.CREDENTIAL_LEN * 8
         security_code_bits = conf.SECURITY_CODE_LEN * 5
         token_bits = serial_bits+credential_bits+tag_bits+security_code_bits
@@ -247,7 +247,6 @@ class VoteView(View):
         else:
             
             status = 200
-            max_options = question_qs.aggregate(Max('option_cnt'))['option_cnt__max']
             abb_url = urljoin(conf.URL['abb'], quote('%s/' % election_id))
             security_code_hash2_split = part1.security_code_hash2.split('$')
             
@@ -260,7 +259,7 @@ class VoteView(View):
                 'abb_url': abb_url,
                 'credential': credential,
                 'votecode_len': conf.VOTECODE_LEN,
-                'max_options': max_options,
+                'max_options': election.max_options_cnt,
                 'sc_iterations': security_code_hash2_split[2],
                 'sc_salt': security_code_hash2_split[1][::-1],
                 'sc_length': conf.SECURITY_CODE_LEN,
@@ -340,7 +339,7 @@ class VoteView(View):
             
             # Verify vote_obj's structure validity
             
-            q_options = dict(question_qs.values_list('index', 'option_cnt'))
+            q_options = dict(question_qs.values_list('index', 'options_cnt'))
             
             vc_type = six.integer_types if election.vc_type == \
                 enums.VcType.SHORT else six.string_types

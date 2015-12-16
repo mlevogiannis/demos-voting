@@ -58,7 +58,7 @@ def election_setup(election_obj, language):
     # Election-specific vote-token bit lengths
     
     tag_bits = 1
-    serial_bits = (election.ballot_cnt + 100).bit_length()
+    serial_bits = (election.ballots_cnt + 100).bit_length()
     credential_bits = conf.CREDENTIAL_LEN * 8
     security_code_bits = conf.SECURITY_CODE_LEN * 5
     token_bits = serial_bits + credential_bits + tag_bits + security_code_bits
@@ -133,10 +133,6 @@ def election_setup(election_obj, language):
     for question_obj in election_obj['__list_Question__']:
         question_obj['key'] = cryptotools.gen_key(conf.ECC_CURVE)
     
-    # Find the maximum number of options
-    
-    max_options = max([q_obj['option_cnt'] for q_obj in election_obj['__list_Question__']])
-    
     # Populate local and remote databases
     
     files = {
@@ -154,26 +150,26 @@ def election_setup(election_obj, language):
     
     # Generate ballots in groups of BATCH_SIZE
     
-    progress = {'current': 0, 'total': election.ballot_cnt * 2}
+    progress = {'current': 0, 'total': election.ballots_cnt * 2}
     current_task.update_state(state='PROGRESS', meta=progress)
     
     q_list = [(question_obj['key'], len(question_obj['__list_OptionC__']), 0)
               for question_obj in election_obj['__list_Question__']]
     
     async_result2 = thread_pool.apply_async(_gen_ballot_crypto,
-        (q_list, min(conf.BATCH_SIZE, election.ballot_cnt)))
+        (q_list, min(conf.BATCH_SIZE, election.ballots_cnt)))
     
-    for lo in range(100, election.ballot_cnt + 100, conf.BATCH_SIZE):
+    for lo in range(100, election.ballots_cnt + 100, conf.BATCH_SIZE):
         
-        hi = lo + min(conf.BATCH_SIZE, election.ballot_cnt + 100 - lo)
+        hi = lo + min(conf.BATCH_SIZE, election.ballots_cnt + 100 - lo)
         
         # Get current batch's crypto elements and generate the next one's
         
         crypto_bsqo_list, _ = async_result2.get()
         
-        if hi - 100 < election.ballot_cnt:
+        if hi - 100 < election.ballots_cnt:
             async_result2 = thread_pool.apply_async(_gen_ballot_crypto,
-                (q_list, min(conf.BATCH_SIZE, election.ballot_cnt + 100 - hi)))
+                (q_list, min(conf.BATCH_SIZE, election.ballots_cnt + 100 - hi)))
         
         # Generate the rest data for all ballots and parts and store them in
         # lists of dictionaries. They will be used to populate the databases.
@@ -258,7 +254,7 @@ def election_setup(election_obj, language):
                         
                         # Each part's option can be uniquely identified by:
                         
-                        optionv_id = (q_index * max_options) + votecode
+                        optionv_id = (q_index * election.max_options_cnt) + votecode
                         
                         # Prepare long votecodes (if enabled) and receipt data
                         

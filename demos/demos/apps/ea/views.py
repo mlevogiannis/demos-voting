@@ -120,7 +120,7 @@ class CreateView(View):
                 question_obj = {
                     'index': q_index,
                     'text': question_form.cleaned_data['question'],
-                    'option_cnt': len(option_formset),
+                    'options_cnt': len(option_formset),
                     'choices': question_form.cleaned_data['choices'] \
                         if election_obj['type'] == enums.Type.REFERENDUM \
                         else min(len(option_formset), election_obj['choices']),
@@ -425,8 +425,7 @@ class ApiCryptoView(View):
                 coins = request_obj['coins']
                 ballots = request_obj['ballots']
                 
-                option_cnt = Question.objects.only('option_cnt').\
-                    get(index=q_index, election__id=e_id).option_cnt
+                options_cnt = Question.objects.get(index=q_index, election__id=e_id).options_cnt
                 
                 # Compute 'zk2' fields
                 
@@ -454,13 +453,13 @@ class ApiCryptoView(View):
                         
                         if len(zk_buf) > conf.BATCH_SIZE:
                             
-                            zk2_list.extend(cryptotools.complete_zk(key, option_cnt, coins, zk_buf))
+                            zk2_list.extend(cryptotools.complete_zk(key, options_cnt, coins, zk_buf))
                             zk_buf = []
                 
                 # Flush non-empty buffer
                 
                 if zk_buf:
-                    zk2_list.extend(cryptotools.complete_zk(key, option_cnt, coins, zk_buf))
+                    zk2_list.extend(cryptotools.complete_zk(key, options_cnt, coins, zk_buf))
                 
                 # Re-create input's structure
                 

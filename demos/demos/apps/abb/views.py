@@ -260,7 +260,6 @@ class ApiVoteView(View):
             if election.vc_type == enums.VcType.LONG:
                 
                 credential_int = int_from_bytes(b_credential, 'big')
-                max_options = question_qs.aggregate(Max('option_cnt'))['option_cnt__max']
                 
                 key = base32cf.decode(p2_security_code)
                 bytes = int(math.ceil(key.bit_length() / 8))
@@ -330,7 +329,7 @@ class ApiVoteView(View):
                         
                         for optionv2 in optionv2_qs:
                             
-                            msg = credential_int + (question.index * max_options) + optionv2.votecode
+                            msg = credential_int + (question.index * election.max_options_cnt) + optionv2.votecode
                             bytes = int(math.ceil(msg.bit_length() / 8))
                             msg = int_to_bytes(msg, bytes, 'big')
                             
