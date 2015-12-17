@@ -12,6 +12,3 @@ HASHER_ALG = 'pbkdf2-hmac-sha256'
 ECC_CURVE = 0
 PKEY_BIT_LEN = 2048         # bits
 
-ELECTION_MAXLEN = 128       # chars
-QUESTION_MAXLEN = 128       # chars
-OPTION_MAXLEN = 128         # chars

@@ -26,11 +26,10 @@ class Election(models.Model):
     type = fields.IntEnumField(cls=enums.Type)
     vc_type = fields.IntEnumField(cls=enums.VcType)
     
-    name = models.CharField(max_length=constants.ELECTION_MAXLEN)
+    name = models.TextField()
     
     starts_at = models.DateTimeField()
     ends_at = models.DateTimeField()
-
     
     
     # Custom methods and properties
@@ -96,7 +95,8 @@ class Question(models.Model):
     parts = models.ManyToManyField('Part', related_name='questions', related_query_name='question')
     
     index = models.PositiveSmallIntegerField()
-    text = models.CharField(max_length=constants.QUESTION_MAXLEN)
+    
+    text = models.TextField()
     max_choices = models.PositiveSmallIntegerField()
     
     # Custom methods and properties
@@ -144,7 +144,7 @@ class OptionC(models.Model):
     question = models.ForeignKey('Question', related_name='options_c', related_query_name='option_c')
     
     index = models.PositiveSmallIntegerField()
-    text = models.CharField(max_length=constants.OPTION_MAXLEN)
+    text = models.TextField()
     
     # Predefined methods and meta options
     
