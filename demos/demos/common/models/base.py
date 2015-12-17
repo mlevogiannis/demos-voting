@@ -97,8 +97,13 @@ class Question(models.Model):
     
     index = models.PositiveSmallIntegerField()
     text = models.CharField(max_length=constants.QUESTION_MAXLEN)
+    max_choices = models.PositiveSmallIntegerField()
     
     # Custom methods and properties
+    
+    @property
+    def min_choices(self):
+        return 0 if not self.election.is_referendum else 1
     
     @property
     def options_cnt(self):

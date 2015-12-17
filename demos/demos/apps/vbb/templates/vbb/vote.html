@@ -77,13 +77,13 @@
             <!-- Wrapper for questions -->
             <div class="carousel-inner" role="listbox">
                 {% for question in questions %}
-                <div class="item question {% if forloop.first %}active{% endif %}" data-index="{{ question.index }}" data-choices="{{ question.choices }}" data-options="{{ question.options_c.values|length }}">
+                <div class="item question {% if forloop.first %}active{% endif %}" data-index="{{ question.index }}" data-choices="{{ question.max_choices }}" data-options="{{ question.options_c.values|length }}">
                     <div class="page-header">
                         <h3>
                             <span>
                                 <small>{% trans "Question" %}{% if questions|length > 1 %} {{ question.index|add:"1" }}{% endif %}:</small>
                                 <br><span class="title">{{ question.text }}</span><br>
-                                <small>{% blocktrans count choices=question.choices %}Select one option{% plural %}Select up to {{ choices }} options{% endblocktrans %}</small>
+                                <small>{% blocktrans count max_choices=question.max_choices %}Select one option{% plural %}Select up to {{ max_choices }} options{% endblocktrans %}</small>
                             </span>
                         </h3>
                     </div>

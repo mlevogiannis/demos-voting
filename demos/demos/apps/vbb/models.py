@@ -21,7 +21,6 @@ class Election(base.Election):
 
 class Question(base.Question):
     
-    choices = models.PositiveSmallIntegerField()
     columns = models.BooleanField(default=False)
 
 

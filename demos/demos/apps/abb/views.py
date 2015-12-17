@@ -277,10 +277,10 @@ class ApiVoteView(View):
                     vc_name = 'votecode'
                     vc_list = p1_votecodes[str(question.index)]
                     
-                    if len(vc_list) < 1:
+                    if len(vc_list) < question.min_choices:
                         raise Exception('Not enough votecodes')
                     
-                    if len(vc_list) > question.choices:
+                    if len(vc_list) > question.max_choices:
                         raise Exception('Too many votecodes')
                     
                     # Long votecode version: use hashes instead of votecodes

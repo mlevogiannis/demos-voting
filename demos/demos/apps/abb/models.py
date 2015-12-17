@@ -40,7 +40,6 @@ class Election(base.Election):
 class Question(base.Question):
     
     key = fields.ProtoField(cls=crypto.Key)
-    choices = models.PositiveSmallIntegerField()
     
     # Post-voting data
     

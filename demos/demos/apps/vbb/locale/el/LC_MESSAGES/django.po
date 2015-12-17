@@ -187,9 +187,9 @@ msgstr "Ερώτημα"
 #: demos/apps/vbb/templates/vbb/vote.html:85
 #, python-format
 msgid "Select one option"
-msgid_plural "Select up to %(choices)s options"
+msgid_plural "Select up to %(max_choices)s options"
 msgstr[0] "Έχετε μία επιλογή"
-msgstr[1] "Έχετε μέχρι %(choices)s επιλογές"
+msgstr[1] "Έχετε μέχρι %(max_choices)s επιλογές"
 
 #: demos/apps/vbb/templates/vbb/vote.html:120
 msgid "Previous Question"
