@@ -25,7 +25,7 @@ from django.views.generic import View
 from celery.result import AsyncResult
 
 from demos.apps.ea.forms import ElectionForm, OptionFormSet, PartialQuestionFormSet, BaseQuestionFormSet
-from demos.apps.ea.models import Election, Question, OptionV, Task
+from demos.apps.ea.models import Conf, Election, Question, OptionV, Task
 from demos.apps.ea.tasks import cryptotools, election_setup, pdf
 from demos.apps.ea.tasks.setup import _remote_app_update
 from demos.common.utils import api, base32cf, crypto, enums
@@ -177,10 +177,12 @@ class CreateView(View):
                 
                 with transaction.atomic():
                     
+                    conf = Conf.objects.get_or_create(**Conf.defaults())
+                    
                     defaults = {f.name: election_obj[f.name] for f in
                         Election._meta.get_fields() if f.name in election_obj}
                     
-                    election = Election.objects.select_for_update().create(id='-', **defaults)
+                    election = Election.objects.select_for_update().create(id='-', conf=conf, **defaults)
                     election.full_clean(exclude=['id'])
                     
                     max_id = Election.objects.exclude(id=election.id).aggregate(Max('id'))['id__max']

@@ -84,6 +84,10 @@ class OptionV(base.OptionV):
     voted = models.NullBooleanField(default=None)
 
 
+class Conf(base.Conf):
+    pass
+
+
 class Task(base.Task):
     pass
 

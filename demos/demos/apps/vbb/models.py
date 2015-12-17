@@ -51,6 +51,10 @@ class OptionV(base.OptionV):
     receipt = models.CharField(max_length=conf.RECEIPT_LEN)
 
 
+class Conf(base.Conf):
+    pass
+
+
 class Task(base.Task):
     pass
 

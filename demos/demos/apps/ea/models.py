@@ -46,6 +46,10 @@ class Trustee(base.Trustee):
     pass
 
 
+class Conf(base.Conf):
+    pass
+
+
 class Task(base.Task):
     pass
 

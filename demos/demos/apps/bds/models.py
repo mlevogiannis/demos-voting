@@ -42,6 +42,10 @@ class Part(base.Part):
     security_code = models.CharField(max_length=conf.SECURITY_CODE_LEN)
 
 
+class Conf(base.Conf):
+    pass
+
+
 class Task(base.Task):
     pass
 

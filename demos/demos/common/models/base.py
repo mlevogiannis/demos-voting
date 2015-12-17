@@ -8,6 +8,7 @@ from django.core import validators
 from django.db import models
 from django.db.models import Count, Max, Min
 from django.utils.encoding import python_2_unicode_compatible
+from django.utils.six.moves import zip
 
 from demos.common.conf import constants
 from demos.common.utils import base32cf, enums, fields
@@ -31,6 +32,7 @@ class Election(models.Model):
     starts_at = models.DateTimeField()
     ends_at = models.DateTimeField()
     
+    conf = models.ForeignKey('Conf', related_name='elections', related_query_name='election')
     
     # Custom methods and properties
     
@@ -82,6 +84,8 @@ class Election(models.Model):
     
     def natural_key(self):
         return (self.id,)
+    
+    natural_key.dependencies = ['%(app_label)s.Conf']
     
     def save(self, *args, **kwargs):
         self.id = base32cf.normalize(self.id)
@@ -315,6 +319,71 @@ class Trustee(models.Model):
     natural_key.dependencies = ['%(app_label)s.Election']
 
 
+@python_2_unicode_compatible
+class Conf(models.Model):
+    
+    # Choices definition
+    
+    VERSION_1 = '1'
+    
+    VERSION_CHOICES = (
+        (VERSION_1, '1'),
+    )
+    
+    # Model fields
+    
+    version = models.CharField(max_length=4, choices=VERSION_CHOICES, default=VERSION_1)
+    
+    receipt_len = models.PositiveSmallIntegerField(default=constants.RECEIPT_LEN)
+    votecode_len = models.PositiveSmallIntegerField(default=constants.VOTECODE_LEN)
+    security_code_len = models.PositiveSmallIntegerField(default=constants.SECURITY_CODE_LEN)
+    
+    credential_bits = models.PositiveSmallIntegerField(default=constants.CREDENTIAL_BITS)
+    
+    hmac_alg = models.CharField(max_length=32, default=constants.HMAC_ALG)
+    hasher_alg = models.CharField(max_length=32, default=constants.HASHER_ALG)
+    
+    rsa_pkey_bits = models.PositiveSmallIntegerField(default=constants.RSA_PKEY_BITS)
+    rsa_signature_alg = models.CharField(max_length=32, default=constants.RSA_SIGNATURE_ALG)
+    
+    ecc_curve = models.PositiveSmallIntegerField(default=constants.ECC_CURVE)
+    
+    # Custom methods and properties
+    
+    @classmethod
+    def defaults(cls):
+        kwargs = {}
+        for field in cls._meta.get_fields():
+            if not (field.auto_created or field.is_relation):
+                kwargs[field.name] = field.default
+        return kwargs
+    
+    # Predefined methods and meta options
+    
+    class Meta:
+        abstract = True
+        unique_together = ['version', 'receipt_len', 'votecode_len', 'security_code_len', 'credential_bits',
+                           'hmac_alg', 'hasher_alg', 'rsa_pkey_bits', 'rsa_signature_alg', 'ecc_curve']
+    
+    class ConfManager(models.Manager):
+        
+        def get_by_natural_key(self, *args, **kwargs):
+            
+            fields = self.model._meta.unique_together[0]
+            kwargs.update(dict(zip(fields, args)))
+            
+            return self.get(**kwargs)
+    
+    objects = ConfManager()
+    
+    def __str__(self):
+        return "%s" % self.version
+    
+    def natural_key(self):
+        return tuple([getattr(self, name) for name in self._meta.unique_together[0]])
+
+
+@python_2_unicode_compatible
 class Task(models.Model):
     
     task_id = models.UUIDField(unique=True)
