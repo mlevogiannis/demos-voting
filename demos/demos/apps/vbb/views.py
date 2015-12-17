@@ -109,7 +109,7 @@ class VoteView(View):
         
         tag_bits = 1
         serial_bits = (election.ballots_cnt + 100).bit_length()
-        credential_bits = conf.CREDENTIAL_LEN * 8
+        credential_bits = conf.CREDENTIAL_BITS
         security_code_bits = conf.SECURITY_CODE_LEN * 5
         token_bits = serial_bits+credential_bits+tag_bits+security_code_bits
         
@@ -149,7 +149,7 @@ class VoteView(View):
         serial = (p1 >> credential_bits + tag_bits) & ((1 << serial_bits) - 1)
         
         credential = ((p1 >> tag_bits) & ((1 << credential_bits) - 1))
-        credential = int_to_bytes(credential, conf.CREDENTIAL_LEN, 'big')
+        credential = int_to_bytes(credential, int(math.ceil(conf.CREDENTIAL_BITS / 8)), 'big')
             
         tag = 'A' if p1 & ((1 << tag_bits) - 1) == 0 else 'B'
         

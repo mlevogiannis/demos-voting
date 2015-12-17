@@ -59,7 +59,7 @@ def election_setup(election_obj, language):
     
     tag_bits = 1
     serial_bits = (election.ballots_cnt + 100).bit_length()
-    credential_bits = conf.CREDENTIAL_LEN * 8
+    credential_bits = conf.CREDENTIAL_BITS
     security_code_bits = conf.SECURITY_CODE_LEN * 5
     token_bits = serial_bits + credential_bits + tag_bits + security_code_bits
     pad_bits = int(math.ceil(token_bits / 5)) * 5 - token_bits
@@ -180,7 +180,7 @@ def election_setup(election_obj, language):
             
             # Generate a random credential and compute its hash value
             
-            credential = os.urandom(conf.CREDENTIAL_LEN)
+            credential = os.urandom(int(math.ceil(conf.CREDENTIAL_BITS / 8)))
             credential_int = int_from_bytes(credential, 'big')
             credential_hash = hasher.encode(credential)
             

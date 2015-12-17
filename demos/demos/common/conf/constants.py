@@ -1,10 +1,10 @@
 # File: constants.py
 
-RECEIPT_LEN = 10            # base32cf
-VOTECODE_LEN = 16           # base32cf
-SECURITY_CODE_LEN = 8       # base32cf
+RECEIPT_LEN = 10
+VOTECODE_LEN = 16
+SECURITY_CODE_LEN = 8
 
-CREDENTIAL_LEN = 8          # bytes
+CREDENTIAL_BITS = 64
 
 HMAC_ALG = 'hmac-sha256'
 HASHER_ALG = 'pbkdf2-hmac-sha256'
