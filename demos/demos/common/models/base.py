@@ -156,7 +156,7 @@ class OptionC(models.Model):
         abstract = True
         ordering = ['question', 'index']
         unique_together = ['question', 'text']
-        verbose_name = 'option_c'
+        verbose_name = 'option-candidate'
     
     class OptionCManager(models.Manager):
         
@@ -262,7 +262,7 @@ class OptionV(models.Model):
         abstract = True
         ordering = ['part', 'question', 'index']
         unique_together = ['part', 'question', 'index']
-        verbose_name = 'option_v'
+        verbose_name = 'option-votecode'
     
     class OptionVManager(models.Manager):
         
