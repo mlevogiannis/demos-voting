@@ -102,7 +102,7 @@ def election_setup(election_obj, language):
     # Generate a new RSA key pair
     
     pkey = crypto.PKey()
-    pkey.generate_key(crypto.TYPE_RSA, conf.PKEY_BIT_LEN)
+    pkey.generate_key(crypto.TYPE_RSA, conf.RSA_PKEY_BITS)
     
     # Generate a new X.509 certificate
     
@@ -124,7 +124,7 @@ def election_setup(election_obj, language):
     cert.set_notAfter(force_bytes(election.ends_at.strftime('%Y%m%d%H%M%S%z')))
     
     cert.set_pubkey(pkey)
-    cert.sign(ca_pkey if not self_signed else pkey, str('sha256'))
+    cert.sign(ca_pkey if not self_signed else pkey, str(conf.RSA_SIGNATURE_ALG))
     
     certbuf = io.BytesIO(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
     
@@ -291,7 +291,7 @@ def election_setup(election_obj, language):
                         
                         bytes = int(math.ceil(receipt_data.bit_length() / 8))
                         receipt_data = int_to_bytes(receipt_data, bytes, 'big')
-                        receipt_data = crypto.sign(pkey, receipt_data, str('sha256'))
+                        receipt_data = crypto.sign(pkey, receipt_data, str(conf.RSA_SIGNATURE_ALG))
                         receipt_data = int_from_bytes(receipt_data, 'big')
                         
                         receipt_full = base32cf.encode(receipt_data)
