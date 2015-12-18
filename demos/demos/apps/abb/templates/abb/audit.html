@@ -141,10 +141,10 @@
 <script src="{% static 'common/permutation.js' %}"></script>
 
 <script>
-    var vc_type = {{ election.vc_type }};
+    var vc_type = {{ election.votecode_type }};
     var e_url = "{% url 'abb-api:export:election:data' Election__id=election.id %}";
     
-    var VcType = { {% for name, value in VcType.items %} {{ name }}: {{ value }}, {% endfor %} };
+    var VcType = { {% for name, value in election.VOTECODE_TYPE_CHOICES %} {{ name }}: {{ value }}, {% endfor %} };
 </script>
 
 <script src="{% static 'abb/audit.js' %}"></script>

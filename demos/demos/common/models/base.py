@@ -9,6 +9,7 @@ from django.db import models
 from django.db.models import Count, Max, Min
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.six.moves import zip
+from django.utils.translation import ugettext_lazy as _
 
 from demos.common.conf import constants
 from demos.common.utils import base32cf, enums, fields
@@ -19,13 +20,34 @@ logger = logging.getLogger(__name__)
 @python_2_unicode_compatible
 class Election(models.Model):
     
-    id = models.CharField(db_column='e_id', unique=True, max_length=16,
+    # Choices definition
+    
+    TYPE_ELECTION = 'election'
+    TYPE_REFERENDUM = 'referendum'
+    
+    TYPE_CHOICES = (
+        (TYPE_ELECTION, _('Election')),
+        (TYPE_REFERENDUM, _('Referendum')),
+    )
+    
+    VOTECODE_TYPE_SHORT = 'short'
+    VOTECODE_TYPE_LONG = 'long'
+    
+    VOTECODE_TYPE_CHOICES = (
+        (VOTECODE_TYPE_SHORT, _('Short')),
+        (VOTECODE_TYPE_LONG, _('Long')),
+    )
+    )
+    
+    # Model fields
+    
+    id = models.CharField(db_column='election_id', unique=True, max_length=16,
         validators=[validators.RegexValidator(regex=base32cf.re_valid)])
     
     state = fields.IntEnumField(cls=enums.State)
 
-    type = fields.IntEnumField(cls=enums.Type)
-    vc_type = fields.IntEnumField(cls=enums.VcType)
+    type = models.CharField(max_length=16, choices=TYPE_CHOICES)
+    votecode_type = models.CharField(max_length=16, choices=VOTECODE_TYPE_CHOICES)
     
     name = models.TextField()
     
@@ -35,6 +57,22 @@ class Election(models.Model):
     conf = models.ForeignKey('Conf', related_name='elections', related_query_name='election')
     
     # Custom methods and properties
+    
+    @property
+    def is_election(self):
+        return self.type == self.TYPE_ELECTION
+    
+    @property
+    def is_referendum(self):
+        return self.type == self.TYPE_REFERENDUM
+    
+    @property
+    def short_votecodes(self):
+        return self.type_votecodes == self.VOTECODE_TYPE_SHORT
+    
+    @property
+    def long_votecodes(self):
+        return self.type_votecodes == self.VOTECODE_TYPE_LONG
     
     @property
     def ballots_cnt(self):

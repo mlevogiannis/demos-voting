@@ -7,14 +7,14 @@ import re
 _masks = {
     
     'bds' : {
-        'Election': ['id', 'state', 'type', 'vc_type', 'name', 'starts_at',
+        'Election': ['id', 'state', 'type', 'votecode_type', 'name', 'starts_at',
             'ends_at'],
         'Ballot': ['serial'],
         'Part': ['tag', 'security_code', 'voter_token'],
      },
     
     'abb' : {
-        'Election': ['id', 'state', 'type', 'vc_type', 'name', 'starts_at',
+        'Election': ['id', 'state', 'type', 'votecode_type', 'name', 'starts_at',
             'ends_at'],
         'Question': ['text', 'key', 'index', 'choices'],
         'OptionC': ['text', 'index'],
@@ -26,7 +26,7 @@ _masks = {
      },
     
     'vbb' : {
-        'Election': ['id', 'state', 'type', 'vc_type', 'name', 'starts_at',
+        'Election': ['id', 'state', 'type', 'votecode_type', 'name', 'starts_at',
             'ends_at'],
         'Question': ['text', 'index', 'columns', 'choices'],
         'OptionC': ['text', 'index'],

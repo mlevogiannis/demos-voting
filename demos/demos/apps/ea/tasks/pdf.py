@@ -23,7 +23,8 @@ from reportlab.pdfbase.pdfmetrics import registerFont, stringWidth
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import Image, PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
-from demos.common.utils import base32cf, enums
+from demos.apps.ea.models import Election
+from demos.common.utils import base32cf
 
 app_config = apps.get_app_config('ea')
 conf = app_config.get_constants_and_settings()
@@ -258,8 +259,8 @@ class BallotPDFCreator(object):
         
         self.election_id = election_obj['id']
         
-        self.vc_type = election_obj['vc_type']
-        self.vc_name = ('l_' if self.vc_type == enums.VcType.LONG else '') + 'votecode'
+        self.vc_type = election_obj['votecode_type']
+        self.vc_name = ('l_' if self.vc_type == Election.VOTECODE_TYPE_LONG else '') + 'votecode'
         
         # Translatable text
         
@@ -274,11 +275,11 @@ class BallotPDFCreator(object):
         
         incl_index = len(election_obj['__list_Question__']) > 1
         
-        if election_obj['type'] == enums.Type.REFERENDUM:
+        if election_obj['type'] == Election.TYPE_REFERENDUM:
             self.opt_text = _("Option")
             self.question_text = (_("Question") if not incl_index else _("Question %(index)s"))
             
-        elif election_obj['type'] == enums.Type.ELECTIONS:
+        elif election_obj['type'] == Election.TYPE_ELECTION:
             self.opt_text = _("Candidate")
             self.question_text = (_("Party") if not incl_index else _("Party %(index)s"))
         
@@ -287,11 +288,11 @@ class BallotPDFCreator(object):
         
         # Votecode defaults
         
-        if self.vc_type == enums.VcType.SHORT:
+        if self.vc_type == Election.VOTECODE_TYPE_SHORT:
             vc_charset = string.digits
             vc_maxchars = len(str(conf.MAX_OPTIONS - 1))
             
-        elif self.vc_type == enums.VcType.LONG:
+        elif self.vc_type == Election.VOTECODE_TYPE_LONG:
             vc_charset = base32cf.symbols + "-"
             vc_maxchars = conf.VOTECODE_LEN + self.long_vc_hyphens
         
@@ -331,10 +332,10 @@ class BallotPDFCreator(object):
             option_list = question_obj['__list_OptionC__']
             option_list = [optionc_obj['text'] for optionc_obj in option_list]
             
-            if self.vc_type == enums.VcType.SHORT:
+            if self.vc_type == Election.VOTECODE_TYPE_SHORT:
                 vc_chars = len(str(len(option_list)-1))
                 
-            elif self.vc_type == enums.VcType.LONG:
+            elif self.vc_type == Election.VOTECODE_TYPE_LONG:
                 vc_chars = conf.VOTECODE_LEN + self.long_vc_hyphens
             
             vc_width  = self.vc_width
@@ -508,10 +509,10 @@ class BallotPDFCreator(object):
                 col_widths = [opt_width, vc_width, rec_width]
                 title = [[self.opt_text, self.vc_text, self.rec_text]]
                 
-                if self.vc_type == enums.VcType.SHORT:
+                if self.vc_type == Election.VOTECODE_TYPE_SHORT:
                     vc_list = [str(vc).zfill(vc_chars) for vc in vc_list]
                     
-                elif self.vc_type == enums.VcType.LONG:
+                elif self.vc_type == Election.VOTECODE_TYPE_LONG:
                     vc_list = [base32cf.hyphen(vc, self.long_vc_split) for vc in vc_list]
                 
                 data_list = list(zip(opt_list, vc_list, rec_list))
@@ -670,11 +671,11 @@ class BallotPDFCreator(object):
                     '__list_OptionV__': [],
                 }
                 
-                if self.vc_type == enums.VcType.SHORT:
+                if self.vc_type == Election.VOTECODE_TYPE_SHORT:
                     votecode_list = list(range(1, options_cnt + 1))
                     random.shuffle(votecode_list)
                     
-                elif self.vc_type == enums.VcType.LONG:
+                elif self.vc_type == Election.VOTECODE_TYPE_LONG:
                     votecode_list=[base32cf.random(conf.VOTECODE_LEN) for _ in range(options_cnt)]
                 
                 for votecode in votecode_list:

@@ -26,15 +26,3 @@ class State(IntEnum):
     ERROR = 7
     TEMPLATE = 8
 
-@unique
-class Type(IntEnum):
-
-    ELECTIONS = 1
-    REFERENDUM = 2
-
-@unique
-class VcType(IntEnum):
-    
-    SHORT = 1
-    LONG = 2
-

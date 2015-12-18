@@ -23,7 +23,7 @@
         {% tuple _("Election") election.id as t1 %}
         {% tuple _("Ballots") election.ballots as t3 %}
         
-        {% if election.type == Type.ELECTIONS %}
+        {% if election.is_election %}
             {% tuple _("Type") _("Elections") as t2 %}
         {% else %}
             {% tuple _("Type") _("Referendum") as t2 %}

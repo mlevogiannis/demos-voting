@@ -122,10 +122,10 @@ class CreateView(View):
                     'text': question_form.cleaned_data['question'],
                     'options_cnt': len(option_formset),
                     'choices': question_form.cleaned_data['choices'] \
-                        if election_obj['type'] == enums.Type.REFERENDUM \
+                        if election_obj['type'] == Election.TYPE_REFERENDUM \
                         else min(len(option_formset), election_obj['choices']),
                     'columns': question_form.cleaned_data['columns'] \
-                        if election_obj['type'] == enums.Type.REFERENDUM \
+                        if election_obj['type'] == Election.TYPE_REFERENDUM \
                         else False,
                     '__list_OptionC__': [],
                 }

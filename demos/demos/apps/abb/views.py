@@ -79,7 +79,6 @@ class AuditView(View):
             'election': election,
             'questions': questions,
             'participants': str(participants),
-            'VcType': {s.name: s.value for s in enums.VcType},
         }
         
         csrf.get_token(request)
@@ -257,7 +256,7 @@ class ApiVoteView(View):
             
             # Common long votecode values
             
-            if election.vc_type == enums.VcType.LONG:
+            if election.long_votecodes:
                 
                 credential_int = int_from_bytes(b_credential, 'big')
                 
@@ -285,7 +284,7 @@ class ApiVoteView(View):
                     
                     # Long votecode version: use hashes instead of votecodes
                     
-                    if election.vc_type == enums.VcType.LONG:
+                    if election.long_votecodes:
                         
                         l_votecodes = vc_list
                         
@@ -308,13 +307,13 @@ class ApiVoteView(View):
                     
                     # Save both voted and unvoted options
                     
-                    if election.vc_type == enums.VcType.SHORT:
+                    if election.short_votecodes:
                         
                         optionv_qs.update(voted=True)
                         optionv_not_qs.update(voted=False)
                         optionv2_qs.update(voted=False)
                         
-                    elif election.vc_type == enums.VcType.LONG:
+                    elif election.long_votecodes:
                         
                         # Save the requested long votecodes
                         
@@ -366,10 +365,8 @@ class ApiExportView(View):
         'election': {
             'model': Election,
             'args': [('id', '[' + base32cf.re_valid_charset + ']+')],
-            'fields': ['cert', 'coins', 'id', 'type', 'vc_type'],
+            'fields': ['cert', 'coins', 'id', 'type', 'votecode_type'],
             'cache': lambda a: 'export_file' if not a or 'ballots' in a else '',
-            'callback': lambda o, f, v, d: getattr(o['Election'], \
-                'get_' + f + '_display')() if f in ('type', 'vc_type') else v,
             'next': ['ballot', 'question_fk'],
         },
         'ballot': {

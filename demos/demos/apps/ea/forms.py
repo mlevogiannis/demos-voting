@@ -11,7 +11,8 @@ from django.forms.formsets import BaseFormSet, formset_factory
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
-from demos.common.utils import enums, fields
+from demos.apps.ea.models import Election
+from demos.common.utils import fields
 
 app_config = apps.get_app_config('ea')
 conf = app_config.get_constants_and_settings()
@@ -113,9 +114,9 @@ class ElectionForm(forms.Form):
         if votecode_type is not None:
             
             if votecode_type == 'short':
-                cleaned_data['vc_type'] = enums.VcType.SHORT
+                cleaned_data['votecode_type'] = Election.VOTECODE_TYPE_SHORT
             elif votecode_type == 'long':
-                cleaned_data['vc_type'] = enums.VcType.LONG
+                cleaned_data['votecode_type'] = Election.VOTECODE_TYPE_LONG
         
         # 'type' depends on 'election_type'
         
@@ -124,14 +125,14 @@ class ElectionForm(forms.Form):
         if election_type is not None:
             
             if election_type == 'elections':
-                cleaned_data['type'] = enums.Type.ELECTIONS
+                cleaned_data['type'] = Election.TYPE_ELECTION
             elif election_type == 'referendum':
-                cleaned_data['type'] = enums.Type.REFERENDUM
+                cleaned_data['type'] = Election.TYPE_REFERENDUM
         
         # 'electoral_system' and 'choices' are required if and only if
         # 'election_type' is 'elections'
         
-        if cleaned_data.get('type') == enums.Type.ELECTIONS:
+        if cleaned_data.get('type') == Election.TYPE_ELECTION:
             
             for field in ('electoral_system', 'choices'):
                 if not cleaned_data.get(field):
