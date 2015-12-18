@@ -252,8 +252,20 @@ class Ballot(models.Model):
 @python_2_unicode_compatible
 class Part(models.Model):
     
+    # Choices definition
+    
+    TAG_A = 'A'
+    TAG_B = 'B'
+    
+    TAG_CHOICES = (
+        (TAG_A, 'A'),
+        (TAG_B, 'B'),
+    )
+    
+    # Model fields
+    
     ballot = models.ForeignKey('Ballot', related_name='parts', related_query_name='part')
-    tag = models.CharField(max_length=1, choices=(('A', 'A'), ('B', 'B')))
+    tag = models.CharField(max_length=1, choices=TAG_CHOICES)
     
     # Predefined methods and meta options
     
