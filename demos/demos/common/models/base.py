@@ -389,14 +389,12 @@ class Conf(models.Model):
     security_code_len = models.PositiveSmallIntegerField(default=constants.SECURITY_CODE_LEN)
     
     credential_bits = models.PositiveSmallIntegerField(default=constants.CREDENTIAL_BITS)
-    
-    hmac_alg = models.CharField(max_length=32, default=constants.HMAC_ALG)
-    hasher_alg = models.CharField(max_length=32, default=constants.HASHER_ALG)
-    
     rsa_pkey_bits = models.PositiveSmallIntegerField(default=constants.RSA_PKEY_BITS)
-    rsa_signature_alg = models.CharField(max_length=32, default=constants.RSA_SIGNATURE_ALG)
     
     ecc_curve = models.PositiveSmallIntegerField(default=constants.ECC_CURVE)
+    
+    hash_algorithm = models.CharField(max_length=32, default=constants.HASH_ALGORITHM)
+    key_derivation = models.CharField(max_length=32, default=constants.KEY_DERIVATION)
     
     # Custom methods and properties
     
@@ -413,7 +411,7 @@ class Conf(models.Model):
     class Meta:
         abstract = True
         unique_together = ['version', 'receipt_len', 'votecode_len', 'security_code_len', 'credential_bits',
-                           'hmac_alg', 'hasher_alg', 'rsa_pkey_bits', 'rsa_signature_alg', 'ecc_curve']
+                           'rsa_pkey_bits', 'ecc_curve', 'hash_algorithm', 'key_derivation']
     
     class ConfManager(models.Manager):
         

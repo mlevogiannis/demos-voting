@@ -2,53 +2,37 @@
 
 from __future__ import absolute_import, division, unicode_literals
 
-import random
-import string
-
-from django.utils.encoding import force_text
-from django.utils.six.moves import range
-
-random = random.SystemRandom()
-
 
 class BaseHasher(object):
     """
     Abstract base class for hashers
     
-    Subclasses need to override algorithm, encode() and verify().
+    Subclasses need to override algorithm, params(), salt(), encode(),
+    verify(), split() and join() and (optionally) __init__().
     """
     
     algorithm = None
-    separator = ':'
     
-    _allowed_salt_chars = string.ascii_letters + string.digits
+    def __init__(self, conf):
+        """
+        Initializes the hasher using settings from conf
+        """
     
-    def split(self, encoded):
+    def params(self):
         """
-        Splits an encoded value into options, salt and hash
+        Return hasher's default parameters (ASCII string)
         """
-        return tuple(encoded.rsplit(self.separator, 2))
+        raise NotImplementedError('subclasses of BaseHasher must provide a params() method')
     
-    def join(self, options, salt, hash):
-        """
-        Joins options, salt and hash to an encoded value
-        """
-        return self.separator.join([force_text(options), salt, hash])
-    
-    def salt(self, length=22):
+    def salt(self):
         """
         Generates a cryptographically secure nonce salt in ASCII
-        
-        The default length of 22 returns log_2((26+26+10)^22) =~ 130 bits.
         """
-        return ''.join(random.choice(self._allowed_salt_chars) for i in range(length))
+        raise NotImplementedError('subclasses of BaseHasher must provide a salt() method')
     
-    def encode(self, value, salt=None, options=None):
+    def encode(self, value, salt=None, params=None):
         """
         Creates an encoded database value
-
-        The result is formatted as "options:salt:hash", and must be fewer
-        than 128 characters.
         """
         raise NotImplementedError('subclasses of BaseHasher must provide an encode() method')
     
@@ -57,4 +41,16 @@ class BaseHasher(object):
         Checks if the given value is correct
         """
         raise NotImplementedError('subclasses of BaseHasher must provide a verify() method')
+    
+    def split(self, encoded):
+        """
+        Splits an encoded value into params, salt and hash
+        """
+        raise NotImplementedError('subclasses of BaseHasher must provide a split() method')
+    
+    def join(self, params, salt, hash):
+        """
+        Joins params, salt and hash to an encoded value
+        """
+        raise NotImplementedError('subclasses of BaseHasher must provide a join() method')
 
