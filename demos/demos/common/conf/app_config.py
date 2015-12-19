@@ -27,28 +27,32 @@ class AppConfig(_AppConfig):
         pre_delete.connect(pre_delete_protect_handler, sender=Election,
                            dispatch_uid='election_pre_delete_protect_handler')
         
-        # Workaround for abstract natural key dependencies. For child classes
-        # that do not override their parent class' natural_key method, any
-        # '%(app_label)s' contained in the natural_key's dependency list is
-        # replaced by the lower-cased name of the app they are contained
-        # within. Each child class gets a proxy natural_key method that has
-        # the new dependency list as an attribute.
+        # Abstract natural key dependencies. If the 'app_label' part of a
+        # dependency is missing (app_label.model_label), the lower-cased
+        # name of the app they are contained within is added (it works like
+        # model relationships on models that have not been defined yet).
         
         for model in self.get_models():
             
-            if hasattr(model, 'natural_key') and \
-                'natural_key' not in vars(model) and \
-                hasattr(model.natural_key, 'dependencies'):
+            if hasattr(model, 'natural_key') and hasattr(model.natural_key, 'dependencies'):
                 
-                dependencies = [dep % {'app_label': self.label.lower()}
-                                for dep in model.natural_key.dependencies]
+                dependencies = []
+                for dep in model.natural_key.dependencies:
+                    if '.' not in dep:
+                        dep = '%s.%s' % (self.label.lower(), dep)
+                    dependencies.append(dep)
                 
                 if dependencies != model.natural_key.dependencies:
                     
-                    natural_key = lazy(model.natural_key, tuple)
-                    natural_key.dependencies = dependencies
+                    if 'natural_key' in vars(model):
+                        natural_key = model.natural_key
+                    else:
+                        # Add a proxy natural_key method if the class does not
+                        # define its own method (i.e. inherits its parent's)
+                        natural_key = lazy(model.natural_key, tuple)
+                        setattr(model, 'natural_key', natural_key)
                     
-                    setattr(model, 'natural_key', natural_key)
+                    natural_key.dependencies = dependencies
     
     def get_constants_and_settings(self):
         

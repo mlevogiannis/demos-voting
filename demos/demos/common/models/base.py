@@ -124,7 +124,7 @@ class Election(models.Model):
     def natural_key(self):
         return (self.id,)
     
-    natural_key.dependencies = ['%(app_label)s.Conf']
+    natural_key.dependencies = ['Conf']
     
     def save(self, *args, **kwargs):
         self.id = base32cf.normalize(self.id)
@@ -178,7 +178,7 @@ class Question(models.Model):
     def natural_key(self):
         return self.election.natural_key() + (self.index,)
     
-    natural_key.dependencies = ['%(app_label)s.Election']
+    natural_key.dependencies = ['Election']
 
 
 @python_2_unicode_compatible
@@ -214,7 +214,7 @@ class OptionC(models.Model):
     def natural_key(self):
         return self.question.natural_key() + (self.index,)
     
-    natural_key.dependencies = ['%(app_label)s.Question']
+    natural_key.dependencies = ['Question']
 
 
 @python_2_unicode_compatible
@@ -257,7 +257,7 @@ class Ballot(models.Model):
     def natural_key(self):
         return self.election.natural_key() + (self.serial,)
     
-    natural_key.dependencies = ['%(app_label)s.Election']
+    natural_key.dependencies = ['Election']
 
 
 @python_2_unicode_compatible
@@ -308,7 +308,7 @@ class Part(models.Model):
     def natural_key(self):
         return self.ballot.natural_key() + (self.tag,)
     
-    natural_key.dependencies = ['%(app_label)s.Ballot']
+    natural_key.dependencies = ['Ballot']
 
 
 @python_2_unicode_compatible
@@ -347,7 +347,7 @@ class OptionV(models.Model):
     def natural_key(self):
         return self.part.natural_key() + self.question.natural_key()[1:] + (self.index,)
     
-    natural_key.dependencies = ['%(app_label)s.Part', '%(app_label)s.Question']
+    natural_key.dependencies = ['Part', 'Question']
 
 
 @python_2_unicode_compatible
@@ -379,7 +379,7 @@ class Trustee(models.Model):
     def natural_key(self):
         return self.election.natural_key() + (self.email,)
     
-    natural_key.dependencies = ['%(app_label)s.Election']
+    natural_key.dependencies = ['Election']
 
 
 @python_2_unicode_compatible
