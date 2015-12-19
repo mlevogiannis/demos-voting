@@ -8,7 +8,7 @@ class BaseHasher(object):
     Abstract base class for hashers
     
     Subclasses need to override algorithm, params(), salt(), encode(),
-    verify(), split() and join() and (optionally) __init__().
+    verify(), split(), join() and __init__() (optional).
     """
     
     algorithm = None
@@ -20,7 +20,7 @@ class BaseHasher(object):
     
     def params(self):
         """
-        Return hasher's default parameters (ASCII string)
+        Returns the hasher's default parameters in ASCII
         """
         raise NotImplementedError('subclasses of BaseHasher must provide a params() method')
     
