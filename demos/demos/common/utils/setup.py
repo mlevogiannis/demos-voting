@@ -15,13 +15,15 @@ def insert_into_db(election_obj, app_config):
     
     # Model: Election
     
+    Conf = app_config.get_model('Conf')
     Election = app_config.get_model('Election')
     
     defaults = {field.name: election_obj[field.name]
                 for field in Election._meta.get_fields()
                 if field.name in election_obj}
     
-    election, _ = Election.objects.get_or_create(id=defaults.pop('id'), defaults=defaults)
+    conf, _ = Conf.objects.get_or_create(**Conf.defaults())
+    election, _ = Election.objects.get_or_create(id=defaults.pop('id'), conf=conf, defaults=defaults)
     
     # Insert trustees into the database
     

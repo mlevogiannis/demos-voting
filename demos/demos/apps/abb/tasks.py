@@ -44,8 +44,8 @@ def tally_protocol(election_id):
     coins = coins.encode('ascii')
     coins = hashlib.sha256(coins).hexdigest()
     
-    election.coins = coins
-    election.save(update_fields=['coins'])
+    election.voter_coins_hash = coins
+    election.save(update_fields=['voter_coins_hash'])
     
     # Perform 'add_com', 'add_decom' and 'verify_com' tasks
     
@@ -59,7 +59,7 @@ def tally_protocol(election_id):
         
         # 'add_com' task
         
-        combined_com = None
+        com_combined = None
         
         for lo in range(100, election.ballots_cnt + 100, conf.BATCH_SIZE):
             hi = lo + min(conf.BATCH_SIZE, election.ballots_cnt + 100 - lo)
@@ -74,7 +74,7 @@ def tally_protocol(election_id):
             
             # Get com fields of the current ballot slice
             
-            com_list = [] if combined_com is None else [combined_com]
+            com_list = [] if com_combined is None else [com_combined]
             
             for part in part_qs.iterator():
                 
@@ -89,7 +89,7 @@ def tally_protocol(election_id):
             _request['com_list'] = com_list
             
             r = ea_session.post('api/crypto/add_com/', _request, json=True)
-            combined_com = r.json()
+            com_combined = r.json()
         
         # 'add_decom' task
         
@@ -117,7 +117,7 @@ def tally_protocol(election_id):
         _request['ballots'] = ballots
         
         r = ea_session.post('api/crypto/add_decom/', _request, json=True)
-        combined_decom = r.json()
+        decom_combined = r.json()
         
         # 'verify_com' task, iff at least one ballot had been cast
         # An empty decom cannot be verified (False is always returned)
@@ -125,8 +125,8 @@ def tally_protocol(election_id):
         if ballots:
         
             _request = request.copy()
-            _request['com'] = combined_com
-            _request['decom'] = combined_decom
+            _request['com'] = com_combined
+            _request['decom'] = decom_combined
             
             r = ea_session.post('api/crypto/verify_com/', _request, json=True)
             verified = r.json()
@@ -134,19 +134,19 @@ def tally_protocol(election_id):
             if not verified:
                 logger.error('verify_com failed (election id: %s)'% election.id)
         
-        # Save question's combined_com and combined_decom fields
+        # Save question's com_combined and decom_combined fields
         
-        question.combined_com = combined_com
-        question.combined_decom = combined_decom
+        question.com_combined = com_combined
+        question.decom_combined = decom_combined
         
-        question.save(update_fields=['combined_com', 'combined_decom'])
+        question.save(update_fields=['com_combined', 'decom_combined'])
         
         # Now, calculate votes
         
         optionc_qs = question.options_c.all()
         
         decom = crypto.Decom()
-        decom.ParseFromString(b64decode(combined_decom))
+        decom.ParseFromString(b64decode(decom_combined))
         
         assert len(optionc_qs) == len(decom.dp)
         

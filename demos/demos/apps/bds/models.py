@@ -28,7 +28,9 @@ def get_ballot_file_path(ballot, filename):
 
 
 class Election(base.Election):
-    pass
+    
+    distribution_started_at = models.DateTimeField(null=True, default=None)
+    distribution_finished_at = models.DateTimeField(null=True, default=None)
 
 
 class Ballot(base.Ballot):
@@ -39,7 +41,7 @@ class Ballot(base.Ballot):
 class Part(base.Part):
     
     voter_token = models.TextField()
-    security_code = models.CharField(max_length=conf.SECURITY_CODE_LEN)
+    security_code = models.CharField(max_length=32)
 
 
 class Conf(base.Conf):

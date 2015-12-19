@@ -365,7 +365,7 @@ class ApiExportView(View):
         'election': {
             'model': Election,
             'args': [('id', '[' + base32cf.re_valid_charset + ']+')],
-            'fields': ['cert', 'coins', 'id', 'type', 'votecode_type'],
+            'fields': ['cert', 'voter_coins_hash', 'id', 'type', 'votecode_type'],
             'cache': lambda a: 'export_file' if not a or 'ballots' in a else '',
             'next': ['ballot', 'question_fk'],
         },
@@ -405,7 +405,7 @@ class ApiExportView(View):
         'question_fk': {
             'model': Question,
             'args': [('index', '[0-9]+')],
-            'fields': ['combined_com', 'combined_decom', 'index', 'key'],
+            'fields': ['com_combined', 'decom_combined', 'index', 'key'],
         },
     }
     

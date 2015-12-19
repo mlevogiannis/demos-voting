@@ -12,6 +12,7 @@ from django.utils.six.moves import zip
 from django.utils.translation import ugettext_lazy as _
 
 from demos.common.conf import constants
+from demos.common.hashers import get_hasher
 from demos.common.utils import base32cf, enums, fields
 
 logger = logging.getLogger(__name__)
@@ -222,6 +223,16 @@ class Ballot(models.Model):
     election = models.ForeignKey('Election', related_name='ballots', related_query_name='ballot')
     serial = models.PositiveIntegerField()
     
+    # Custom methods and properties
+    
+    @property
+    def is_cast(self):
+        return self.cast_at is not None
+    
+    def verify_credential(self, credential):
+        hasher = get_hasher(self.election.conf)
+        return hasher.verify(credential, self.credential_hash)
+    
     # Predefined methods and meta options
     
     class Meta:
@@ -267,6 +278,12 @@ class Part(models.Model):
     ballot = models.ForeignKey('Ballot', related_name='parts', related_query_name='part')
     tag = models.CharField(max_length=1, choices=TAG_CHOICES)
     
+    # Custom methods and properties
+    
+    def verify_security_code(self, security_code):
+        hasher = get_hasher(self.ballot.election.conf)
+        return hasher.verify(security_code, self.security_code_hash)
+    
     # Predefined methods and meta options
     
     class Meta:
@@ -292,10 +309,6 @@ class Part(models.Model):
         return self.ballot.natural_key() + (self.tag,)
     
     natural_key.dependencies = ['%(app_label)s.Ballot']
-    
-    def save(self, *args, **kwargs):
-        self.tag = self.tag.upper()
-        super(Part, self).save(*args, **kwargs)
 
 
 @python_2_unicode_compatible

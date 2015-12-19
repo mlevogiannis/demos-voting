@@ -16,7 +16,9 @@ conf = app_config.get_constants_and_settings()
 
 
 class Election(base.Election):
-    pass
+    
+    voting_started_at = models.DateTimeField(null=True, default=None)
+    voting_finished_at = models.DateTimeField(null=True, default=None)
 
 
 class Question(base.Question):
@@ -30,25 +32,24 @@ class OptionC(base.OptionC):
 
 class Ballot(base.Ballot):
     
-    used = models.BooleanField(default=False)
     credential_hash = models.CharField(max_length=128)
+    cast_at = models.DateTimeField(null=True, default=None)
 
 
 class Part(base.Part):
     
-    security_code_hash2 = models.CharField(max_length=128)
+    security_code_hash = models.CharField(max_length=128)
     
-    l_votecode_salt = models.CharField(max_length=128, blank=True, default='')
-    l_votecode_iterations = models.PositiveIntegerField(null=True, blank=True, default=None)
+    votecode_hash_salt = models.CharField(max_length=24, null=True, default=None)
+    votecode_hash_params = models.CharField(max_length=16, null=True, default=None)
 
 
 class OptionV(base.OptionV):
     
-    votecode = models.PositiveSmallIntegerField()
+    votecode = models.CharField(max_length=32, null=True, default=None)
+    votecode_hash = models.CharField(max_length=128, null=True, default=None, db_column='votecode_hash')
     
-    l_votecode_hash = models.CharField(max_length=128, blank=True, default='')
-    
-    receipt = models.CharField(max_length=conf.RECEIPT_LEN)
+    receipt = models.CharField(max_length=32)
 
 
 class Conf(base.Conf):
