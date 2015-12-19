@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 # File: settings.py
 
-from __future__ import absolute_import, division, unicode_literals
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 """
 Django settings for demos project.

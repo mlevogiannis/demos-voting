@@ -1,6 +1,6 @@
 # File: pdf.py
 
-from __future__ import absolute_import, division, unicode_literals
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import io
 import math

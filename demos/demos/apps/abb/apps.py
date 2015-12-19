@@ -1,6 +1,6 @@
 # File: apps.py
 
-from __future__ import absolute_import, division, unicode_literals
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from demos.common.conf import AppConfig as _AppConfig
 from django.utils.translation import ugettext_lazy as _
