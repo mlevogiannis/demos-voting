@@ -86,8 +86,7 @@ def hyphen(encoded, hyphens):
     treated, 0 removes all hyphens, n > 0 adds a hyphen every n characters.
     ValueError is raised if 'encoded' contains non-alphabet symbols."""
     
-    if not re_valid.match(encoded):
-        raise ValueError("Non-base32cf symbol: %s", encoded)
+    encoded = normalize(encoded)
     
     if hyphens >= 0:
         encoded = encoded.replace('-', '')
