@@ -78,7 +78,7 @@ def normalize(encoded):
     except AttributeError:
         table = {ord(x): ord(y) if y else None for x, y in zip_longest('OIL-', '011')}
     
-    return encoded.upper().translate(table).lstrip('0')
+    return encoded.upper().translate(table).lstrip('0') or '0'
 
 
 def hyphen(encoded, hyphens):
