@@ -57,6 +57,8 @@ class Election(models.Model):
     
     conf = models.ForeignKey('Conf', related_name='elections', related_query_name='election')
     
+    _id = models.AutoField(db_column='id', primary_key=True)
+    
     # Custom methods and properties
     
     @property
@@ -103,20 +105,16 @@ class Election(models.Model):
             self._max_options_cnt = q['option_c__count__max']
         return self._max_options_cnt
     
-    # Predefined methods and meta options
-    
-    _id = models.AutoField(db_column='id', primary_key=True)
-    
     class Meta:
         abstract = True
         ordering = ['id']
     
-    class ElectionManager(models.Manager):
+    class Manager(models.Manager):
         
         def get_by_natural_key(self, e_id):
             return self.get(id=e_id)
     
-    objects = ElectionManager()
+    objects = Manager()
     
     def __str__(self):
         return "%s | %s" % (self.id, self.name)
@@ -154,14 +152,12 @@ class Question(models.Model):
             self._options_cnt = self.options_c.count()
         return self._options_cnt
     
-    # Predefined methods and meta options
-    
     class Meta:
         abstract = True
         ordering = ['election', 'index']
         unique_together = ['election', 'index']
     
-    class QuestionManager(models.Manager):
+    class Manager(models.Manager):
         
         def get_by_natural_key(self, e_id, q_index):
             
@@ -170,7 +166,7 @@ class Question(models.Model):
             
             return self.get(election=election, index=q_index)
     
-    objects = QuestionManager()
+    objects = Manager()
     
     def __str__(self):
         return "%s | %s" % (self.index + 1, self.text)
@@ -189,15 +185,13 @@ class OptionC(models.Model):
     index = models.PositiveSmallIntegerField()
     text = models.TextField()
     
-    # Predefined methods and meta options
-    
     class Meta:
         abstract = True
         ordering = ['question', 'index']
         unique_together = ['question', 'text']
         verbose_name = 'option-candidate'
     
-    class OptionCManager(models.Manager):
+    class Manager(models.Manager):
         
         def get_by_natural_key(self, e_id, q_index, o_index):
             
@@ -206,7 +200,7 @@ class OptionC(models.Model):
             
             return self.get(question=question, index=o_index)
     
-    objects = OptionCManager()
+    objects = Manager()
     
     def __str__(self):
         return "%s | %s" % (self.index + 1, self.text)
@@ -233,14 +227,13 @@ class Ballot(models.Model):
         hasher = get_hasher(self.election.conf)
         return hasher.verify(credential, self.credential_hash)
     
-    # Predefined methods and meta options
     
     class Meta:
         abstract = True
         ordering = ['election', 'serial']
         unique_together = ['election', 'serial']
     
-    class BallotManager(models.Manager):
+    class Manager(models.Manager):
         
         def get_by_natural_key(self, e_id, b_serial):
             
@@ -249,7 +242,7 @@ class Ballot(models.Model):
             
             return self.get(election=election, serial=b_serial)
     
-    objects = BallotManager()
+    objects = Manager()
     
     def __str__(self):
         return "%s" % self.serial
@@ -284,14 +277,13 @@ class Part(models.Model):
         hasher = get_hasher(self.ballot.election.conf)
         return hasher.verify(security_code, self.security_code_hash)
     
-    # Predefined methods and meta options
     
     class Meta:
         abstract = True
         ordering = ['ballot', 'tag']
         unique_together = ['ballot', 'tag']
     
-    class PartManager(models.Manager):
+    class Manager(models.Manager):
         
         def get_by_natural_key(self, e_id, b_serial, p_tag):
             
@@ -300,7 +292,7 @@ class Part(models.Model):
             
             return self.get(ballot=ballot, tag=p_tag)
     
-    objects = PartManager()
+    objects = Manager()
     
     def __str__(self):
         return "%s" % self.tag
@@ -319,7 +311,6 @@ class OptionV(models.Model):
     
     index = models.PositiveSmallIntegerField()
     
-    # Predefined methods and meta options
     
     class Meta:
         abstract = True
@@ -327,7 +318,7 @@ class OptionV(models.Model):
         unique_together = ['part', 'question', 'index']
         verbose_name = 'option-votecode'
     
-    class OptionVManager(models.Manager):
+    class Manager(models.Manager):
         
         def get_by_natural_key(self, e_id, b_serial, p_tag, q_index, o_index):
             
@@ -339,7 +330,7 @@ class OptionV(models.Model):
             
             return self.get(part=part, question=question, index=o_index)
     
-    objects = OptionVManager()
+    objects = Manager()
     
     def __str__(self):
         return "%s" % (self.index + 1)
@@ -356,13 +347,11 @@ class Trustee(models.Model):
     election = models.ForeignKey('Election', related_name='trustees', related_query_name='trustee')
     email = models.EmailField()
     
-    # Predefined methods and meta options
-    
     class Meta:
         abstract = True
         unique_together = ['election', 'email']
     
-    class TrusteeManager(models.Manager):
+    class Manager(models.Manager):
         
         def get_by_natural_key(self, e_id, t_email):
             
@@ -371,7 +360,7 @@ class Trustee(models.Model):
             
             return self.get(election=election, email=t_email)
     
-    objects = TrusteeManager()
+    objects = Manager()
     
     def __str__(self):
         return "%s" % self.email
@@ -419,14 +408,12 @@ class Conf(models.Model):
                 kwargs[field.name] = field.default
         return kwargs
     
-    # Predefined methods and meta options
-    
     class Meta:
         abstract = True
         unique_together = ['version', 'receipt_len', 'votecode_len', 'security_code_len', 'credential_bits',
                            'rsa_pkey_bits', 'ecc_curve', 'hash_algorithm', 'key_derivation']
     
-    class ConfManager(models.Manager):
+    class Manager(models.Manager):
         
         def get_by_natural_key(self, *args, **kwargs):
             
@@ -435,7 +422,7 @@ class Conf(models.Model):
             
             return self.get(**kwargs)
     
-    objects = ConfManager()
+    objects = Manager()
     
     def __str__(self):
         return "%s" % self.version
@@ -449,8 +436,6 @@ class Task(models.Model):
     
     task_id = models.UUIDField(unique=True)
     election = models.ForeignKey('Election', related_name='tasks', related_query_name='task')
-    
-    # Predefined methods and meta options
     
     class Meta:
         abstract = True
