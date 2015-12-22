@@ -8,6 +8,7 @@ from django.core import validators
 from django.db import models
 from django.db.models import Count, Max, Min
 from django.utils.encoding import python_2_unicode_compatible
+from django.utils.functional import cached_property
 from django.utils.six.moves import zip
 from django.utils.translation import ugettext_lazy as _
 
@@ -77,33 +78,25 @@ class Election(models.Model):
     def long_votecodes(self):
         return self.type_votecodes == self.VOTECODE_TYPE_LONG
     
-    @property
+    @cached_property
     def ballots_cnt(self):
-        if not hasattr(self, '_ballots_cnt'):
-            self._ballots_cnt = self.ballots.count()
-        return self._ballots_cnt
+        return self.ballots.count()
     
-    @property
+    @cached_property
     def questions_cnt(self):
-        if not hasattr(self, '_questions_cnt'):
-            self._questions_cnt = self.questions.count()
-        return self._questions_cnt
+        return self.questions.count()
     
-    @property
+    @cached_property
     def min_options_cnt(self):
-        if not hasattr(self, '_min_options_cnt'):
-            q = self.questions.annotate(Count('option_c'))
-            q = q.aggregate(Min('option_c__count'))
-            self._min_options_cnt = q['option_c__count__min']
-        return self._min_options_cnt
+        q = self.questions.annotate(Count('option_c'))
+        q = q.aggregate(Min('option_c__count'))
+        return q['option_c__count__min']
     
-    @property
+    @cached_property
     def max_options_cnt(self):
-        if not hasattr(self, '_max_options_cnt'):
-            q = self.questions.annotate(Count('option_c'))
-            q = q.aggregate(Max('option_c__count'))
-            self._max_options_cnt = q['option_c__count__max']
-        return self._max_options_cnt
+        q = self.questions.annotate(Count('option_c'))
+        q = q.aggregate(Max('option_c__count'))
+        return q['option_c__count__max']
     
     class Meta:
         abstract = True
@@ -146,11 +139,9 @@ class Question(models.Model):
     def min_choices(self):
         return 0 if not self.election.is_referendum else 1
     
-    @property
+    @cached_property
     def options_cnt(self):
-        if not hasattr(self, '_options_cnt'):
-            self._options_cnt = self.options_c.count()
-        return self._options_cnt
+        return self.options_c.count()
     
     class Meta:
         abstract = True
