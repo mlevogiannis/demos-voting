@@ -123,14 +123,13 @@ class Election(models.Model):
 
 
 @python_2_unicode_compatible
-class Question(models.Model):
+class QuestionC(models.Model):
     
     election = models.ForeignKey('Election', related_name='questions', related_query_name='question')
-    parts = models.ManyToManyField('Part', related_name='questions', related_query_name='question')
-    
-    index = models.PositiveSmallIntegerField()
     
     text = models.TextField()
+    index = models.PositiveSmallIntegerField()
+    
     max_choices = models.PositiveSmallIntegerField()
     
     # Custom methods and properties
@@ -171,7 +170,7 @@ class Question(models.Model):
 @python_2_unicode_compatible
 class OptionC(models.Model):
     
-    question = models.ForeignKey('Question', related_name='options_c', related_query_name='option_c')
+    question = models.ForeignKey('QuestionC', related_name='options', related_query_name='option')
     
     index = models.PositiveSmallIntegerField()
     text = models.TextField()
@@ -180,13 +179,12 @@ class OptionC(models.Model):
         abstract = True
         ordering = ['question', 'index']
         unique_together = ['question', 'text']
-        verbose_name = 'option-candidate'
     
     class Manager(models.Manager):
         
         def get_by_natural_key(self, e_id, q_index, o_index):
             
-            manager = Question.objects.db_manager(self.db)
+            manager = QuestionC.objects.db_manager(self.db)
             question = manager.get_by_natural_key(e_id, q_index)
             
             return self.get(question=question, index=o_index)
@@ -199,7 +197,7 @@ class OptionC(models.Model):
     def natural_key(self):
         return self.question.natural_key() + (self.index,)
     
-    natural_key.dependencies = ['Question']
+    natural_key.dependencies = ['QuestionC']
 
 
 @python_2_unicode_compatible
@@ -295,31 +293,36 @@ class Part(models.Model):
 
 
 @python_2_unicode_compatible
-class OptionV(models.Model):
+class QuestionV(models.Model):
     
-    part = models.ForeignKey('Part', related_name='options', related_query_name='option')
-    question = models.ForeignKey('Question', related_name='options_v', related_query_name='option_v')
+    part = models.ForeignKey('Part', related_name='questions', related_query_name='question')
+    question_c = models.ForeignKey('QuestionC', related_name='questions_v', related_query_name='question_v')
     
-    index = models.PositiveSmallIntegerField()
+    # Custom methods and properties
     
+    def __getattr__(self, name):
+        try:
+            return getattr(self.question_c, name)
+        except (AttributeError, RuntimeError):
+            # RuntimeError: infinite recursion if question_c is not set
+            raise AttributeError("'QuestionV' object has no attribute '%s'" % name)
     
     class Meta:
         abstract = True
-        ordering = ['part', 'question', 'index']
-        unique_together = ['part', 'question', 'index']
-        verbose_name = 'option-votecode'
+        ordering = ['part', 'question_c']
+        unique_together = ['part', 'question_c']
     
     class Manager(models.Manager):
         
-        def get_by_natural_key(self, e_id, b_serial, p_tag, q_index, o_index):
+        def get_by_natural_key(self, e_id, b_serial, p_tag, q_index):
             
             manager = Part.objects.db_manager(self.db)
             part = manager.get_by_natural_key(e_id, b_serial, p_tag)
             
-            manager = Question.objects.db_manager(self.db)
+            manager = QuestionC.objects.db_manager(self.db)
             question = manager.get_by_natural_key(e_id, q_index)
             
-            return self.get(part=part, question=question, index=o_index)
+            return self.get(part=part, question_c=question_c)
     
     objects = Manager()
     
@@ -327,9 +330,40 @@ class OptionV(models.Model):
         return "%s" % (self.index + 1)
     
     def natural_key(self):
-        return self.part.natural_key() + self.question.natural_key()[1:] + (self.index,)
+        return self.part.natural_key() + self.question_c.natural_key()[1:]
     
-    natural_key.dependencies = ['Part', 'Question']
+    natural_key.dependencies = ['Part', 'QuestionC']
+
+
+@python_2_unicode_compatible
+class OptionV(models.Model):
+    
+    question = models.ForeignKey('QuestionV', related_name='options', related_query_name='option')
+    index = models.PositiveSmallIntegerField()
+    
+    class Meta:
+        abstract = True
+        ordering = ['question', 'index']
+        unique_together = ['question', 'index']
+    
+    class Manager(models.Manager):
+        
+        def get_by_natural_key(self, e_id, b_serial, p_tag, q_index, o_index):
+            
+            manager = QuestionV.objects.db_manager(self.db)
+            question = manager.get_by_natural_key(e_id, b_serial, p_tag, q_index)
+            
+            return self.get(question=question, index=o_index)
+    
+    objects = Manager()
+    
+    def __str__(self):
+        return "%s" % (self.index + 1)
+    
+    def natural_key(self):
+        return self.question.natural_key() + (self.index,)
+    
+    natural_key.dependencies = ['QuestionV']
 
 
 @python_2_unicode_compatible

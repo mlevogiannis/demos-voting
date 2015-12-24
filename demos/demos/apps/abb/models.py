@@ -38,7 +38,7 @@ class Election(base.Election):
     tally_finished_at = models.DateTimeField(null=True, default=None)
 
 
-class Question(base.Question):
+class QuestionC(base.QuestionC):
     
     key = fields.ProtoField(cls=crypto.Key)
     
@@ -64,6 +64,10 @@ class Part(base.Part):
     
     votecode_hash_salt = models.CharField(max_length=24, null=True, default=None)
     votecode_hash_params = models.CharField(max_length=16, null=True, default=None)
+
+
+class QuestionV(base.QuestionV):
+    pass
 
 
 class OptionV(base.OptionV):

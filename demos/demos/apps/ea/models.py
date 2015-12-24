@@ -25,7 +25,7 @@ class Election(base.Election):
     setup_finished_at = models.DateTimeField(null=True, default=None)
 
 
-class Question(base.Question):
+class QuestionC(base.QuestionC):
     pass
 
 
@@ -38,6 +38,10 @@ class Ballot(base.Ballot):
 
 
 class Part(base.Part):
+    pass
+
+
+class QuestionV(base.QuestionV):
     pass
 
 
