@@ -2,7 +2,6 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import math
 import os
 import random as _random
 import re
@@ -103,14 +102,12 @@ def random(length, hyphens=0, urandom=False):
     characters, 'urandom' selects whether os.urandom or a pseudo-random number
     generator is used."""
     
-    bits = length * 5
+    random = _random
     
     if urandom:
-        bytes = int(math.ceil(bits / 8))
-        number = int_from_bytes(os.urandom(bytes), 'big') >> ((bytes * 8) - bits)
-    else:
-        number = _random.getrandbits(bits)
+        random = random.SystemRandom()
     
+    number = random.getrandbits(length * 5)
     return encode(number, length, hyphens)
 
 
@@ -119,9 +116,9 @@ def encode_from_bytes(bytes, *args, **kwargs):
     number = int_from_bytes(bytes, 'big')
     return encode(number, *args, **kwargs)
 
-def decode_to_bytes(*args, **kwargs):
+
+def decode_to_bytes(encoded, numbytes=0, *args, **kwargs):
     
-    number = base32cf.decode(*args, **kwargs)
-    return int_to_bytes(number, int(math.ceil(number.bit_length() / 8)), 'big')
-    
+    number = decode(encoded, *args, **kwargs)
+    return int_to_bytes(number, max([numbytes, (number.bit_length() + 7) // 8]), 'big')
 
