@@ -39,13 +39,12 @@ class Ballot(base.Ballot):
 class Part(base.Part):
     
     security_code_hash = models.CharField(max_length=128)
-    
-    votecode_hash_salt = models.CharField(max_length=24, null=True, default=None)
-    votecode_hash_params = models.CharField(max_length=16, null=True, default=None)
 
 
 class QuestionV(base.QuestionV):
-    pass
+    
+    hasher_salt = models.CharField(max_length=24, null=True, default=None)
+    hasher_params = models.CharField(max_length=16, null=True, default=None)
 
 
 class OptionV(base.OptionV):

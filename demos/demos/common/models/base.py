@@ -2,12 +2,15 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import hashlib
+import hmac
 import logging
 
 from django.core import validators
 from django.db import models
 from django.db.models import Count, Max, Min
-from django.utils.encoding import python_2_unicode_compatible
+from django.utils import six
+from django.utils.encoding import force_bytes, python_2_unicode_compatible
 from django.utils.functional import cached_property
 from django.utils.six.moves import zip
 from django.utils.translation import ugettext_lazy as _
@@ -75,11 +78,11 @@ class Election(models.Model):
     
     @property
     def short_votecodes(self):
-        return self.type_votecodes == self.VOTECODE_TYPE_SHORT
+        return self.votecode_type == self.VOTECODE_TYPE_SHORT
     
     @property
     def long_votecodes(self):
-        return self.type_votecodes == self.VOTECODE_TYPE_LONG
+        return self.votecode_type == self.VOTECODE_TYPE_LONG
     
     @cached_property
     def hasher(self):
@@ -354,6 +357,25 @@ class OptionV(models.Model):
     @cached_property
     def part(self):
         return self.question.part
+    
+    def _long_votecode(self):
+        
+        conf = self.election.conf
+        
+        width = len(six.text_type(self.election.questions_cnt))
+        question_index = six.text_type(self.question.index).zfill(width)
+        
+        width = len(six.text_type(self.question.options_cnt))
+        option_index = six.text_type(self.index).zfill(width)
+        
+        key = self.part.security_code
+        msg = self.ballot.credential + question_index + option_index
+        
+        digestmod = getattr(hashlib, conf.hash_algorithm)
+        digest = hmac.new(force_bytes(key), force_bytes(msg), digestmod).digest()
+        encoded = base32cf.encode_from_bytes(digest, ((digestmod().digest_size * 8) + 4) // 5)
+        
+        return encoded[-conf.votecode_len:]
     
     class Meta:
         abstract = True
