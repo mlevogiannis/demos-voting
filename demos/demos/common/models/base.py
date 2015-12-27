@@ -56,6 +56,9 @@ class Election(models.Model):
     starts_at = models.DateTimeField()
     ends_at = models.DateTimeField()
     
+    ballots_cnt = models.PositiveIntegerField()
+    questions_cnt = models.PositiveSmallIntegerField()
+    
     conf = models.ForeignKey('Conf', related_name='elections', related_query_name='election')
     
     _id = models.AutoField(db_column='id', primary_key=True)
@@ -79,24 +82,8 @@ class Election(models.Model):
         return self.type_votecodes == self.VOTECODE_TYPE_LONG
     
     @cached_property
-    def ballots_cnt(self):
-        return self.ballots.count()
-    
-    @cached_property
-    def questions_cnt(self):
-        return self.questions.count()
-    
-    @cached_property
-    def min_options_cnt(self):
-        q = self.questions.annotate(Count('option_c'))
-        q = q.aggregate(Min('option_c__count'))
-        return q['option_c__count__min']
-    
-    @cached_property
-    def max_options_cnt(self):
-        q = self.questions.annotate(Count('option_c'))
-        q = q.aggregate(Max('option_c__count'))
-        return q['option_c__count__max']
+    def hasher(self):
+        return get_hasher(self.conf)
     
     class Meta:
         abstract = True
@@ -130,6 +117,7 @@ class QuestionC(models.Model):
     text = models.TextField()
     index = models.PositiveSmallIntegerField()
     
+    options_cnt = models.PositiveSmallIntegerField()
     max_choices = models.PositiveSmallIntegerField()
     
     # Custom methods and properties
@@ -137,10 +125,6 @@ class QuestionC(models.Model):
     @property
     def min_choices(self):
         return 0 if not self.election.is_referendum else 1
-    
-    @cached_property
-    def options_cnt(self):
-        return self.options_c.count()
     
     class Meta:
         abstract = True
@@ -174,6 +158,8 @@ class OptionC(models.Model):
     
     index = models.PositiveSmallIntegerField()
     text = models.TextField()
+    
+    # Custom methods and properties
     
     class Meta:
         abstract = True
@@ -262,6 +248,10 @@ class Part(models.Model):
     
     # Custom methods and properties
     
+    @cached_property
+    def election(self):
+        return self.ballot.election
+    
     def verify_security_code(self, security_code):
         hasher = get_hasher(self.ballot.election.conf)
         return hasher.verify(security_code, self.security_code_hash)
@@ -300,12 +290,22 @@ class QuestionV(models.Model):
     
     # Custom methods and properties
     
-    def __getattr__(self, name):
-        try:
-            return getattr(self.question_c, name)
-        except (AttributeError, RuntimeError):
-            # RuntimeError: infinite recursion if question_c is not set
-            raise AttributeError("'QuestionV' object has no attribute '%s'" % name)
+    @cached_property
+    def index(self):
+        return self.question_c.index
+    
+    @cached_property
+    def options_cnt(self):
+        return self.question_c.options_cnt
+    
+    @cached_property
+    def election(self):
+        return self.ballot.election
+    
+    @cached_property
+    def ballot(self):
+        return self.part.ballot
+    
     
     class Meta:
         abstract = True
@@ -340,6 +340,20 @@ class OptionV(models.Model):
     
     question = models.ForeignKey('QuestionV', related_name='options', related_query_name='option')
     index = models.PositiveSmallIntegerField()
+    
+    # Custom methods and properties
+    
+    @cached_property
+    def election(self):
+        return self.ballot.election
+    
+    @cached_property
+    def ballot(self):
+        return self.part.ballot
+    
+    @cached_property
+    def part(self):
+        return self.question.part
     
     class Meta:
         abstract = True
