@@ -222,6 +222,10 @@ class Ballot(models.Model):
     
     objects = Manager()
     
+    @cached_property
+    def conf(self):
+        return self.election.conf
+    
     def __str__(self):
         return "%s" % self.serial
     
@@ -251,10 +255,6 @@ class Part(models.Model):
     
     # Custom methods and properties
     
-    @cached_property
-    def election(self):
-        return self.ballot.election
-    
     def verify_security_code(self, security_code):
         hasher = get_hasher(self.ballot.election.conf)
         return hasher.verify(security_code, self.security_code_hash)
@@ -275,6 +275,14 @@ class Part(models.Model):
             return self.get(ballot=ballot, tag=p_tag)
     
     objects = Manager()
+    
+    @cached_property
+    def election(self):
+        return self.ballot.election
+    
+    @cached_property
+    def conf(self):
+        return self.election.conf
     
     def __str__(self):
         return "%s" % self.tag
@@ -301,15 +309,6 @@ class QuestionV(models.Model):
     def options_cnt(self):
         return self.question_c.options_cnt
     
-    @cached_property
-    def election(self):
-        return self.ballot.election
-    
-    @cached_property
-    def ballot(self):
-        return self.part.ballot
-    
-    
     class Meta:
         abstract = True
         ordering = ['part', 'question_c']
@@ -329,6 +328,18 @@ class QuestionV(models.Model):
     
     objects = Manager()
     
+    @cached_property
+    def election(self):
+        return self.ballot.election
+    
+    @cached_property
+    def ballot(self):
+        return self.part.ballot
+    
+    @cached_property
+    def conf(self):
+        return self.election.conf
+    
     def __str__(self):
         return "%s" % (self.index + 1)
     
@@ -346,36 +357,20 @@ class OptionV(models.Model):
     
     # Custom methods and properties
     
-    @cached_property
-    def election(self):
-        return self.ballot.election
-    
-    @cached_property
-    def ballot(self):
-        return self.part.ballot
-    
-    @cached_property
-    def part(self):
-        return self.question.part
-    
     def _long_votecode(self):
         
-        conf = self.election.conf
-        
-        width = len(six.text_type(self.election.questions_cnt))
-        question_index = six.text_type(self.question.index).zfill(width)
-        
-        width = len(six.text_type(self.question.options_cnt))
-        option_index = six.text_type(self.index).zfill(width)
+        option_index = six.text_type(self.index).zfill(len(six.text_type(self.question.options_cnt - 1)))
+        question_index = six.text_type(self.question.index).zfill(len(six.text_type(self.election.questions_cnt - 1)))
         
         key = self.part.security_code
         msg = self.ballot.credential + question_index + option_index
         
-        digestmod = getattr(hashlib, conf.hash_algorithm)
-        digest = hmac.new(force_bytes(key), force_bytes(msg), digestmod).digest()
-        encoded = base32cf.encode_from_bytes(digest, ((digestmod().digest_size * 8) + 4) // 5)
+        digestmod = getattr(hashlib, self.conf.hash_algorithm)
         
-        return encoded[-conf.votecode_len:]
+        digest = hmac.new(force_bytes(key), force_bytes(msg), digestmod).digest()
+        encoded = base32cf.encode_from_bytes(digest, self.conf.votecode_len)
+        
+        return encoded[-self.conf.votecode_len:]
     
     class Meta:
         abstract = True
@@ -392,6 +387,22 @@ class OptionV(models.Model):
             return self.get(question=question, index=o_index)
     
     objects = Manager()
+    
+    @cached_property
+    def election(self):
+        return self.ballot.election
+    
+    @cached_property
+    def ballot(self):
+        return self.part.ballot
+    
+    @cached_property
+    def part(self):
+        return self.question.part
+    
+    @cached_property
+    def conf(self):
+        return self.election.conf
     
     def __str__(self):
         return "%s" % (self.index + 1)

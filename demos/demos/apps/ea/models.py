@@ -84,26 +84,20 @@ class Ballot(base.Ballot):
     
     def generate_credential(self):
         
-        conf = self.election.conf
-        hasher = self.election.hasher
+        randint = random.getrandbits(self.conf.credential_bits)
         
-        randint = random.getrandbits(conf.credential_bits)
-        
-        self.credential = base32cf.encode(randint, (conf.credential_bits + 4) // 5)
-        self.credential_hash = hasher.encode(self.credential)
+        self.credential = base32cf.encode(randint, (self.conf.credential_bits + 4) // 5)
+        self.credential_hash = self.election.hasher.encode(self.credential)
 
 
 class Part(base.Part):
     
     def generate_security_code(self):
         
-        conf = self.election.conf
-        hasher = self.election.hasher
+        randint = random.getrandbits(self.conf.security_code_len * 5)
         
-        randint = random.getrandbits(conf.security_code_len * 5)
-        
-        self.security_code = base32cf.encode(randint, conf.security_code_len)
-        self.security_code_hash = hasher.encode(self.security_code)
+        self.security_code = base32cf.encode(randint, self.conf.security_code_len)
+        self.security_code_hash = self.election.hasher.encode(self.security_code)
 
 
 class QuestionV(base.QuestionV):
@@ -149,13 +143,11 @@ class OptionV(base.OptionV):
     
     def generate_receipt(self):
         
-        conf = self.election.conf
-        
         data = self._long_votecode() if self.election.short_votecodes else self.votecode
-        signature = OpenSSL.crypto.sign(self.election.pkey, data, str(conf.hash_algorithm))
+        signature = OpenSSL.crypto.sign(self.election.pkey, data, str(self.conf.hash_algorithm))
         
-        self.receipt_full = base32cf.encode_from_bytes(signature, (conf.rsa_pkey_bits + 4) // 5)
-        self.receipt = self.receipt_full[-conf.receipt_len:]
+        self.receipt_full = base32cf.encode_from_bytes(signature, (self.conf.rsa_pkey_bits + 4) // 5)
+        self.receipt = self.receipt_full[-self.conf.receipt_len:]
 
 
 class Trustee(base.Trustee):
