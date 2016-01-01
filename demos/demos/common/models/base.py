@@ -202,9 +202,7 @@ class Ballot(models.Model):
         return self.cast_at is not None
     
     def verify_credential(self, credential):
-        hasher = get_hasher(self.election.conf)
-        return hasher.verify(credential, self.credential_hash)
-    
+        return self.election.hasher.verify(credential, self.credential_hash)
     
     class Meta:
         abstract = True
@@ -256,9 +254,7 @@ class Part(models.Model):
     # Custom methods and properties
     
     def verify_security_code(self, security_code):
-        hasher = get_hasher(self.ballot.election.conf)
-        return hasher.verify(security_code, self.security_code_hash)
-    
+        return self.election.hasher.verify(security_code, self.security_code_hash)
     
     class Meta:
         abstract = True
@@ -357,7 +353,7 @@ class OptionV(models.Model):
     
     # Custom methods and properties
     
-    def _long_votecode(self):
+    def _get_long_votecode(self):
         
         option_index = six.text_type(self.index).zfill(len(six.text_type(self.question.options_cnt - 1)))
         question_index = six.text_type(self.question.index).zfill(len(six.text_type(self.election.questions_cnt - 1)))
