@@ -14,7 +14,7 @@ urlpatterns = [
     
     url(r'^create/$', views.CreateView.as_view(), name='create'),
     
-    url(r'^status/(?:(?P<election_id>[' + base32cf.re_valid_charset + r']+)/)?$',
+    url(r'^status/(?:(?P<election_id>' + base32cf.regex + r'+)/)?$',
         views.StatusView.as_view(), name='status'),
     
     url(r'^center/$', views.CenterView.as_view(), name='center'),

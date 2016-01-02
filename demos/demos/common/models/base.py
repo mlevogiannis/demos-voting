@@ -6,7 +6,7 @@ import hashlib
 import hmac
 import logging
 
-from django.core import validators
+from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import Count, Max, Min
 from django.utils import six
@@ -47,7 +47,7 @@ class Election(models.Model):
     # Model fields
     
     id = models.CharField(db_column='election_id', unique=True, max_length=16,
-        validators=[validators.RegexValidator(regex=base32cf.re_valid)])
+        validators=[RegexValidator(regex=(r'^%s+$' % base32.regex))])
     
     state = fields.IntEnumField(cls=enums.State)
 

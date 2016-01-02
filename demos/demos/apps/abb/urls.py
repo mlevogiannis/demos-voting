@@ -12,10 +12,10 @@ urlpatterns = [
     
     url(r'^$', views.HomeView.as_view(), name='home'),
     
-    url(r'^audit/(?:(?P<election_id>[' + base32cf.re_valid_charset + r']+)/)?$',
+    url(r'^audit/(?:(?P<election_id>' + base32cf.regex + r'+)/)?$',
         views.AuditView.as_view(), name='audit'),
     
-    url(r'^results/(?:(?P<election_id>[' + base32cf.re_valid_charset + r']+)/)?$',
+    url(r'^results/(?:(?P<election_id>' + base32cf.regex + r'+)/)?$',
         views.ResultsView.as_view(), name='results'),
 ]
 

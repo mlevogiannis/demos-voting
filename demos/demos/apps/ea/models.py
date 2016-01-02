@@ -96,7 +96,7 @@ class Part(base.Part):
 
 class QuestionV(base.QuestionV):
     
-    def generate_salt_and_params(self):
+    def generate_common_hasher(self):
         
         if self.election.long_votecodes:
             self.hasher_salt = self.election.hasher.salt()

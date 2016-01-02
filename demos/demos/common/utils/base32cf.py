@@ -13,22 +13,19 @@ from django.utils.six.moves import zip_longest
 
 
 symbols = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
-
-re_valid_charset = '-0-9A-TV-Za-tv-z'
-re_valid = re.compile('^[' + re_valid_charset + ']*$')
-
-re_normalized_charset = '0-9A-HJKMNP-TV-Z'
-re_normalized = re.compile('^[' + re_normalized_charset + ']*$')
+regex = r'(?!-)(-?[0-9A-TV-Za-tv-z])'
 
 
 def encode(number, length=0, hyphens=0):
-    """Encode an integer to base32cf string. 'number' is the integer to
-    encode, if 'length' > 0 the resulting encoded string is padded on the
-    left with zero digits until the given length is reached, if 'hyphens' > 0
-    a hyphen is added every n characters. The encoded string is returned."""
+    """
+    Encodes an integer to a Crockford's Base32 string. 'number' is the integer
+    to encode, if 'length' > 0 the resulting encoded string is padded on the
+    left with '0' digits until the given length is reached, if 'hyphens' > 0
+    a hyphen is added every n characters. The encoded string is returned.
+    """
     
     if number < 0:
-        raise ValueError("Non-negative integer: %s" % number)
+        raise ValueError("'%d' is not a non-negative integer" % number)
     
     encoded = ''
     
@@ -49,10 +46,17 @@ def encode(number, length=0, hyphens=0):
     return encoded or '0'
 
 
+def encode_from_bytes(bytes, *args, **kwargs):
+    
+    number = int_from_bytes(bytes, 'big')
+    return encode(number, *args, **kwargs)
+
+
 def decode(encoded):
-    """Decode a base32cf encoded string. 'encoded' is the string to decode.
-    The resulting integer is returned. ValueError is raised if 'encoded'
-    contains non-alphabet symbols."""
+    """
+    Decodes a Crockford's Base32 encoded string. 'encoded' is the string to
+    decode. The resulting integer is returned.
+    """
     
     encoded = normalize(encoded)
     
@@ -63,29 +67,52 @@ def decode(encoded):
     return number
 
 
-def normalize(encoded):
-    """Normalize a base32cf encoded string by removing all hyphens, converting
-    all characters to upper-case, replacing 'I' and 'L' with '1', 'O' with '0'
-    and removing any leading '0'. 'encoded' is the string to normalize.
-    ValueError is raised if 'encoded' contains non-alphabet symbols."""
+def decode_to_bytes(encoded, numbytes=0, *args, **kwargs):
     
-    if not re_valid.match(encoded):
-        raise ValueError("Non-base32cf symbol: %s", encoded)
+    number = decode(encoded, *args, **kwargs)
+    return int_to_bytes(number, max([numbytes, (number.bit_length() + 7) // 8]), 'big')
+
+
+def validate(encoded, minlen=1, maxlen=''):
+    """
+    Validates that a string is a valid Crockford's Base32 string. 'encoded' is
+    the string to validate, 'minlen' and 'maxlen' are the desired minimum and
+    maximum lengths, respectively.
+    """
+    
+    _regex = r'^%s{%s,%s}$' % (regex, minlen, maxlen)
+    
+    if not re.match(_regex, encoded):
+        raise ValueError("'%s' is not a valid base32 string" % encoded)
+    
+    return True
+
+
+def normalize(encoded):
+    """
+    Normalizes a Crockford's Base32 encoded string by removing all hyphens,
+    converting all characters to upper-case and replacing 'I', 'L' with '1'
+    and 'O' with '0'.
+    """
+    
+    validate(encoded)
     
     try:
         table = str.maketrans('OIL', '011', '-')
     except AttributeError:
         table = {ord(x): ord(y) if y else None for x, y in zip_longest('OIL-', '011')}
     
-    return encoded.upper().translate(table).lstrip('0') or '0'
+    return encoded.upper().translate(table) or '0'
 
 
 def hyphen(encoded, hyphens):
-    """Manage hyphens in a base32cf string. 'hyphens' controls how hyphens are
-    treated, 0 removes all hyphens, n > 0 adds a hyphen every n characters.
-    ValueError is raised if 'encoded' contains non-alphabet symbols."""
+    """
+    Manages hyphens in a Crockford's Base32 string. 'hyphens' controls how
+    hyphens are treated, 0 removes all hyphens, n > 0 adds a hyphen every
+    'n' characters.
+    """
     
-    encoded = normalize(encoded)
+    validate(encoded)
     
     if hyphens >= 0:
         encoded = encoded.replace('-', '')
@@ -97,10 +124,12 @@ def hyphen(encoded, hyphens):
 
 
 def random(length, hyphens=0, urandom=False):
-    """Generate a random base32cf encoded string. 'length' is the length of
-    resulting encoded string, if 'hyphens' > 0 an hyphen is added every n
-    characters, 'urandom' selects whether os.urandom or a pseudo-random number
-    generator is used."""
+    """
+    Generates a random Crockford's Base32 encoded string. 'length' is the
+    length of resulting encoded string, if 'hyphens' > 0 an hyphen is added
+    every 'n' characters, 'urandom' selects whether os.urandom or a pseudo
+    random number generator will be used.
+    """
     
     random = _random
     
@@ -109,16 +138,4 @@ def random(length, hyphens=0, urandom=False):
     
     number = random.getrandbits(length * 5)
     return encode(number, length, hyphens)
-
-
-def encode_from_bytes(bytes, *args, **kwargs):
-    
-    number = int_from_bytes(bytes, 'big')
-    return encode(number, *args, **kwargs)
-
-
-def decode_to_bytes(encoded, numbytes=0, *args, **kwargs):
-    
-    number = decode(encoded, *args, **kwargs)
-    return int_to_bytes(number, max([numbytes, (number.bit_length() + 7) // 8]), 'big')
 
