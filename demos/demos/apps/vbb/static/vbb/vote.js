@@ -172,7 +172,7 @@ $("#security-code-input").on("input", function(e) {
     var iterations = input.data("iterations");
     
     try {
-        value = sjcl.codec.base32cf.normalize(value);
+        value = sjcl.codec.base32crockford.normalize(value);
     }
     catch (err) {
         security_code_state("error");
@@ -180,7 +180,7 @@ $("#security-code-input").on("input", function(e) {
     }
     
     var hash = sjcl.misc.pbkdf2(value, salt, iterations);
-    hash = sjcl.codec.base32cf.fromBits(hash);
+    hash = sjcl.codec.base32crockford.fromBits(hash);
     
     // request security code's verification
     
@@ -194,7 +194,7 @@ $("#security-code-input").on("input", function(e) {
             
             // parse the security code
             
-            security_code = sjcl.codec.base32cf.toBits(value);
+            security_code = sjcl.codec.base32crockford.toBits(value);
             var bits, perm = sjcl.bn.fromBits(security_code);
             
             // verify that data has the required number elements
@@ -372,13 +372,13 @@ $("#vote-submit").click(function(e) {
             var hmac = new sjcl.misc.hmac(security_code, sjcl.hash.sha256);
             hmac.update(sjcl.bn.fromBits(credential).add(msg_extra).toBits());
             
-            l_votecode = sjcl.codec.base32cf.fromBits(hmac.digest());
+            l_votecode = sjcl.codec.base32crockford.fromBits(hmac.digest());
             l_votecode = l_votecode.slice(-votecode_len);
             
             option.data("l_votecode", l_votecode);
         }
         
-        return [sjcl.codec.base32cf.hyphen(l_votecode, 4)];
+        return [sjcl.codec.base32crockford.hyphen(l_votecode, 4)];
     }
     
     prep_modal_with_q(votecode_calc, "#confirm-modal");
@@ -437,7 +437,7 @@ $("#vote-confirm").click(function(e) {
                 var receipt = data[q_index].shift();
                 
                 if (vc_type == VcType.LONG)
-                    votecode = sjcl.codec.base32cf.hyphen(votecode, 4);
+                    votecode = sjcl.codec.base32crockford.hyphen(votecode, 4);
                 
                 return [votecode, receipt];
             }

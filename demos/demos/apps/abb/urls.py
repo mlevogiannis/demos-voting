@@ -5,17 +5,17 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from django.conf.urls import include, url
 
 from demos.apps.abb import views
-from demos.common.utils import base32cf
+from demos.common.utils import base32
 
 
 urlpatterns = [
     
     url(r'^$', views.HomeView.as_view(), name='home'),
     
-    url(r'^audit/(?:(?P<election_id>' + base32cf.regex + r'+)/)?$',
+    url(r'^audit/(?:(?P<election_id>' + base32.regex + r'+)/)?$',
         views.AuditView.as_view(), name='audit'),
     
-    url(r'^results/(?:(?P<election_id>' + base32cf.regex + r'+)/)?$',
+    url(r'^results/(?:(?P<election_id>' + base32.regex + r'+)/)?$',
         views.ResultsView.as_view(), name='results'),
 ]
 

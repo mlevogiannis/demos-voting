@@ -33,7 +33,7 @@ from django.views.generic import View
 
 from demos.apps.abb.models import Election, Question, Ballot, Part, OptionV, Task
 from demos.apps.abb.tasks import tally_protocol
-from demos.common.utils import api, base32cf, enums, hashers
+from demos.common.utils import api, base32, enums, hashers
 from demos.common.utils.int import int_from_bytes, int_to_bytes
 
 logger = logging.getLogger(__name__)
@@ -58,7 +58,7 @@ class AuditView(View):
         
         election_id = kwargs.get('election_id')
         
-        normalized = base32cf.normalize(election_id)
+        normalized = base32.normalize(election_id)
         if normalized != election_id:
             return redirect('abb:audit', election_id=normalized)
         
@@ -93,7 +93,7 @@ class ResultsView(View):
         
         election_id = kwargs.get('election_id')
         
-        normalized = base32cf.normalize(election_id)
+        normalized = base32.normalize(election_id)
         if normalized != election_id:
             return redirect('abb:results', election_id=normalized)
         
@@ -260,7 +260,7 @@ class ApiVoteView(View):
                 
                 credential_int = int_from_bytes(b_credential, 'big')
                 
-                key = base32cf.decode(p2_security_code)
+                key = base32.decode(p2_security_code)
                 bytes = int(math.ceil(key.bit_length() / 8))
                 key = int_to_bytes(key, bytes, 'big')
             
@@ -335,7 +335,7 @@ class ApiVoteView(View):
                             hmac_obj = hmac.new(key, msg, hashlib.sha256)
                             digest = int_from_bytes(hmac_obj.digest(), 'big')
                             
-                            l_votecode = base32cf.encode(digest)[-conf.VOTECODE_LEN:]
+                            l_votecode = base32.encode(digest)[-conf.VOTECODE_LEN:]
                             
                             optionv2.voted = False
                             optionv2.l_votecode = l_votecode
@@ -364,7 +364,7 @@ class ApiExportView(View):
     _namespaces = {
         'election': {
             'model': Election,
-            'args': [('id', base32cf.regex + '+')],
+            'args': [('id', base32.regex + '+')],
             'fields': ['cert', 'voter_coins_hash', 'id', 'type', 'votecode_type'],
             'cache': lambda a: 'export_file' if not a or 'ballots' in a else '',
             'next': ['ballot', 'question_fk'],

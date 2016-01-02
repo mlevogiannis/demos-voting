@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from django.conf.urls import include, url
 
 from demos.apps.vbb import views
-from demos.common.utils import base32cf
+from demos.common.utils import base32
 
 
 urlpatterns = [
@@ -16,8 +16,8 @@ urlpatterns = [
     
     url(r'^qrcode/$', views.QRCodeScannerView.as_view(), name='qrcode'),
     
-    url(r'^(?P<election_id>' + base32cf.regex + r'+)/(?P<voter_token>'
-        + base32cf.regex + r'+)/$', views.VoteView.as_view(), name='vote'),
+    url(r'^(?P<election_id>' + base32.regex + r'+)/(?P<voter_token>'
+        + base32.regex + r'+)/$', views.VoteView.as_view(), name='vote'),
 ]
 
 apipatterns = [

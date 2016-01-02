@@ -28,7 +28,7 @@ from demos.apps.ea.forms import ElectionForm, OptionFormSet, PartialQuestionForm
 from demos.apps.ea.models import Conf, Election, Question, OptionV, Task
 from demos.apps.ea.tasks import cryptotools, election_setup, pdf
 from demos.apps.ea.tasks.setup import _remote_app_update
-from demos.common.utils import api, base32cf, crypto, enums
+from demos.common.utils import api, base32, crypto, enums
 from demos.common.utils.json import CustomJSONEncoder
 
 logger = logging.getLogger(__name__)
@@ -186,7 +186,7 @@ class CreateView(View):
                     election.full_clean(exclude=['id'])
                     
                     max_id = Election.objects.exclude(id=election.id).aggregate(Max('id'))['id__max']
-                    election_id = '0' if max_id is None else base32cf.encode(base32cf.decode(max_id) + 1)
+                    election_id = '0' if max_id is None else base32.encode(base32.decode(max_id) + 1)
                     
                     election.id = election_id
                     election.save(update_fields=['id'])
@@ -235,7 +235,7 @@ class StatusView(View):
         
         election_id = kwargs.get('election_id')
         
-        normalized = base32cf.normalize(election_id)
+        normalized = base32.normalize(election_id)
         if normalized != election_id:
             return redirect('ea:status', election_id=normalized)
         

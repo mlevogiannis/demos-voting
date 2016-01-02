@@ -13,7 +13,7 @@ from django.utils.encoding import force_bytes
 from django.utils.six.moves import range
 
 from demos.common.models import base
-from demos.common.utils import base32cf, crypto, fields
+from demos.common.utils import base32, crypto, fields
 
 logger = logging.getLogger(__name__)
 random = random.SystemRandom()
@@ -58,7 +58,7 @@ class Election(base.Election):
         self.cert.get_subject().CN = self.name[:64]
         self.cert.set_issuer(ca_cert.get_subject())
         self.cert.set_version(3)
-        self.cert.set_serial_number(base32cf.decode(self.id))
+        self.cert.set_serial_number(base32.decode(self.id))
         self.cert.set_notBefore(force_bytes(self.starts_at.strftime('%Y%m%d%H%M%S%z')))
         self.cert.set_notAfter(force_bytes(self.ends_at.strftime('%Y%m%d%H%M%S%z')))
         self.cert.set_pubkey(self.pkey)
@@ -80,7 +80,7 @@ class Ballot(base.Ballot):
         
         randint = random.getrandbits(self.conf.credential_bits)
         
-        self.credential = base32cf.encode(randint, (self.conf.credential_bits + 4) // 5)
+        self.credential = base32.encode(randint, (self.conf.credential_bits + 4) // 5)
         self.credential_hash = self.election.hasher.encode(self.credential)
 
 
@@ -90,7 +90,7 @@ class Part(base.Part):
         
         randint = random.getrandbits(self.conf.security_code_len * 5)
         
-        self.security_code = base32cf.encode(randint, self.conf.security_code_len)
+        self.security_code = base32.encode(randint, self.conf.security_code_len)
         self.security_code_hash = self.election.hasher.encode(self.security_code)
 
 
@@ -139,7 +139,7 @@ class OptionV(base.OptionV):
         data = self._get_long_votecode() if self.election.short_votecodes else self.votecode
         signature = OpenSSL.crypto.sign(self.election.pkey, data, str(self.conf.hash_algorithm))
         
-        self.receipt_full = base32cf.encode_from_bytes(signature, (self.conf.rsa_pkey_bits + 4) // 5)
+        self.receipt_full = base32.encode_from_bytes(signature, (self.conf.rsa_pkey_bits + 4) // 5)
         self.receipt = self.receipt_full[-self.conf.receipt_len:]
 
 

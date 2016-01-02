@@ -30,7 +30,7 @@ from celery.signals import task_failure
 from demos.apps.ea.models import Election, Task
 from demos.apps.ea.tasks import cryptotools, pdf
 from demos.apps.ea.tasks.masks import apply_mask
-from demos.common.utils import api, base32cf, enums, hashers
+from demos.common.utils import api, base32, enums, hashers
 from demos.common.utils.int import int_from_bytes, int_to_bytes
 from demos.common.utils.permutation import permute
 from demos.common.utils.setup import insert_into_db
@@ -118,7 +118,7 @@ def election_setup(election_obj, language):
         cert.set_issuer(cert.get_subject())
     
     cert.set_version(3)
-    cert.set_serial_number(base32cf.decode(election.id))
+    cert.set_serial_number(base32.decode(election.id))
     
     cert.set_notBefore(force_bytes(election.starts_at.strftime('%Y%m%d%H%M%S%z')))
     cert.set_notAfter(force_bytes(election.ends_at.strftime('%Y%m%d%H%M%S%z')))
@@ -199,7 +199,7 @@ def election_setup(election_obj, language):
                 # security code. The second hash uses the first hash's salt,
                 # reversed.
                 
-                security_code = base32cf.random(conf.SECURITY_CODE_LEN, urandom=True)
+                security_code = base32.random(conf.SECURITY_CODE_LEN, urandom=True)
                 
                 hash, salt, _ = hasher.encode(security_code, split=True)
                 security_code_hash2 = hasher.encode(hash, salt[::-1])
@@ -213,7 +213,7 @@ def election_setup(election_obj, language):
                     
                 elif election.long_votecodes:
                     
-                    key = base32cf.decode(security_code)
+                    key = base32.decode(security_code)
                     bytes = int(math.ceil(key.bit_length() / 8))
                     key = int_to_bytes(key, bytes, 'big')
                     
@@ -280,12 +280,12 @@ def election_setup(election_obj, language):
                             hmac_obj = hmac.new(key, msg, hashlib.sha256)
                             digest = int_from_bytes(hmac_obj.digest(), 'big')
                             
-                            l_votecode = base32cf.encode(digest)[-conf.VOTECODE_LEN:]
+                            l_votecode = base32.encode(digest)[-conf.VOTECODE_LEN:]
                             
                             l_votecode_hash, _, _ = hasher.encode(l_votecode,
                                 l_votecode_salt, l_votecode_iterations, True)
                             
-                            receipt_data = base32cf.decode(l_votecode)
+                            receipt_data = base32.decode(l_votecode)
                         
                         # Generate receipt (receipt_data is an integer)
                         
@@ -294,7 +294,7 @@ def election_setup(election_obj, language):
                         receipt_data = crypto.sign(pkey, receipt_data, str(conf.RSA_SIGNATURE_ALG))
                         receipt_data = int_from_bytes(receipt_data, 'big')
                         
-                        receipt_full = base32cf.encode(receipt_data)
+                        receipt_full = base32.encode(receipt_data)
                         receipt = receipt_full[-conf.RECEIPT_LEN:]
                         
                         # Pack optionv's data
@@ -324,7 +324,7 @@ def election_setup(election_obj, language):
                 # Get the other part's security_code
                 
                 other_part_obj = ballot_obj['__list_Part__'][1-i]
-                security_code = base32cf.decode(other_part_obj['security_code'])
+                security_code = base32.decode(other_part_obj['security_code'])
                 
                 # The voter token consists of two parts. The first part is the
                 # ballot's serial number and credential and the part's tag,
@@ -354,7 +354,7 @@ def election_setup(election_obj, language):
                 
                 # Encode the voter token
                 
-                voter_token = base32cf.encode(p)
+                voter_token = base32.encode(p)
                 voter_token = voter_token.zfill((token_bits + pad_bits) // 5)
                 
                 part_obj['voter_token'] = voter_token
@@ -409,7 +409,7 @@ def election_setup(election_obj, language):
                     # n is the hash of the current part's security code plus
                     # the question's index, converted back to an integer.
                     
-                    int_ = base32cf.decode(security_code) + i
+                    int_ = base32.decode(security_code) + i
                     bytes_ = int(math.ceil(int_.bit_length() / 8))
                     value = hashlib.sha256(int_to_bytes(int_, bytes_, 'big'))
                     p_index = int_from_bytes(value.digest(), 'big')

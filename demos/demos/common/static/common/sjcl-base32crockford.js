@@ -1,11 +1,11 @@
-sjcl.codec.base32cf = {
+sjcl.codec.base32crockford = {
     
     symbols: "0123456789ABCDEFGHJKMNPQRSTVWXYZ",
     
     fromBits: function(arr, hyphens) {
         
         var num = sjcl.bn.fromBits(arr);
-        var chars = sjcl.codec.base32cf.symbols;
+        var chars = sjcl.codec.base32crockford.symbols;
         var out = num ? "" : "0";
         
         if (num < 0)
@@ -37,7 +37,7 @@ sjcl.codec.base32cf = {
         }
         
         if (hyphens > 0)
-            out = sjcl.codec.base32cf.hyphen(out, hyphens);
+            out = sjcl.codec.base32crockford.hyphen(out, hyphens);
         
         return out;
     },
@@ -46,10 +46,10 @@ sjcl.codec.base32cf = {
         
         var i, c, len;
         var out = new sjcl.bn();
-        var chars = sjcl.codec.base32cf.symbols;
+        var chars = sjcl.codec.base32crockford.symbols;
         
-        str = sjcl.codec.base32cf.normalize(str);
-        str = sjcl.codec.base32cf.hyphen(str, 0);
+        str = sjcl.codec.base32crockford.normalize(str);
+        str = sjcl.codec.base32crockford.hyphen(str, 0);
         
         for (i = 0, len = str.length; i < len; i++) {
             
@@ -73,16 +73,16 @@ sjcl.codec.base32cf = {
         str = str.split("I").join("1");
         str = str.split("L").join("1");
         
-        var regex = new RegExp("^[" + sjcl.codec.base32cf.symbols + "-" + "]*$");
+        var regex = new RegExp("^[" + sjcl.codec.base32crockford.symbols + "-" + "]*$");
     
         if (!regex.test(str))
-            throw new sjcl.exception.invalid("Non-base32cf digit found");
+            throw new sjcl.exception.invalid("Non-base32crockford digit found");
         
         if (typeof hyphens === "undefined")
             hyphens = -1;
         
         if (hyphens > 0)
-            out = sjcl.codec.base32cf.hyphen(out, hyphens);
+            out = sjcl.codec.base32crockford.hyphen(out, hyphens);
         
         return str;
     },

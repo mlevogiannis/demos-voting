@@ -53,7 +53,7 @@ $("#audit-button").click(function(e) {
                 // Decode the security code
                 
                 var perm_bits, perm_index;
-                var perm = part.security_code ? sjcl.bn.fromBits(sjcl.codec.base32cf.toBits(part.security_code)) : "";
+                var perm = part.security_code ? sjcl.bn.fromBits(sjcl.codec.base32crockford.toBits(part.security_code)) : "";
                 
                 // Iterate over part's questions
                 
@@ -92,7 +92,7 @@ $("#audit-button").click(function(e) {
                         
                         var votecode = vc_type == VcType.SHORT ?
                             zfill(option.votecode, vc_chars) : 
-                            option.l_votecode ? sjcl.codec.base32cf.hyphen(option.l_votecode, 4) : "";
+                            option.l_votecode ? sjcl.codec.base32crockford.hyphen(option.l_votecode, 4) : "";
                         
                         if (votecode) {
                             col_votecode_span.removeClass();

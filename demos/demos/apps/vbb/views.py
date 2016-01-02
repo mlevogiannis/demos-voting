@@ -23,7 +23,7 @@ from django.utils.six.moves.urllib.parse import quote, urljoin
 from django.views.generic import View
 
 from demos.apps.vbb.models import Election, Question, Ballot, Part, OptionV
-from demos.common.utils import api, base32cf, enums, hashers
+from demos.common.utils import api, base32, enums, hashers
 from demos.common.utils.int import int_to_bytes
 
 logger = logging.getLogger(__name__)
@@ -128,7 +128,7 @@ class VoteView(View):
         # tokens of the two parts appear to be completely different.
         
         try:
-            p = base32cf.decode(voter_token) & ((1 << token_bits) - 1)
+            p = base32.decode(voter_token) & ((1 << token_bits) - 1)
         except (AttributeError, TypeError, ValueError):
             raise VoteView.Error(VoteView.State.INVALID_VOTER_TOKEN, *retval)
         
@@ -153,7 +153,7 @@ class VoteView(View):
             
         tag = 'A' if p1 & ((1 << tag_bits) - 1) == 0 else 'B'
         
-        security_code = base32cf.encode((~p2) & ((1 << security_code_bits) - 1))
+        security_code = base32.encode((~p2) & ((1 << security_code_bits) - 1))
         security_code = security_code.zfill(conf.SECURITY_CODE_LEN)
         
         # Get ballot object and verify credential
@@ -214,8 +214,8 @@ class VoteView(View):
         }
         
         normalized = {
-            'election_id': base32cf.normalize(election_id),
-            'voter_token': base32cf.normalize(voter_token),
+            'election_id': base32.normalize(election_id),
+            'voter_token': base32.normalize(voter_token),
         }
         
         if args != normalized:

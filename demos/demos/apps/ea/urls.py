@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from django.conf.urls import include, url
 
 from demos.apps.ea import views
-from demos.common.utils import base32cf
+from demos.common.utils import base32
 
 
 urlpatterns = [
@@ -14,7 +14,7 @@ urlpatterns = [
     
     url(r'^create/$', views.CreateView.as_view(), name='create'),
     
-    url(r'^status/(?:(?P<election_id>' + base32cf.regex + r'+)/)?$',
+    url(r'^status/(?:(?P<election_id>' + base32.regex + r'+)/)?$',
         views.StatusView.as_view(), name='status'),
     
     url(r'^center/$', views.CenterView.as_view(), name='center'),

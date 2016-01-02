@@ -24,7 +24,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import Image, PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 from demos.apps.ea.models import Election
-from demos.common.utils import base32cf
+from demos.common.utils import base32
 
 app_config = apps.get_app_config('ea')
 conf = app_config.get_constants_and_settings()
@@ -293,7 +293,7 @@ class BallotPDFCreator(object):
             vc_maxchars = len(str(conf.MAX_OPTIONS - 1))
             
         elif self.vc_type == Election.VOTECODE_TYPE_LONG:
-            vc_charset = base32cf.symbols + "-"
+            vc_charset = base32.symbols + "-"
             vc_maxchars = conf.VOTECODE_LEN + self.long_vc_hyphens
         
         # Calculate table widths
@@ -311,7 +311,7 @@ class BallotPDFCreator(object):
         
         self.rec_width = max([stringWidth(self.rec_text, self.sans_bold,
             self.font_sm), max([stringWidth(c, self.mono_regular, self.font_sm)
-            for c in base32cf.symbols])*conf.RECEIPT_LEN]) + self.cell_padding
+            for c in base32.symbols])*conf.RECEIPT_LEN]) + self.cell_padding
         
         # Calculate table heights
         
@@ -513,7 +513,7 @@ class BallotPDFCreator(object):
                     vc_list = [str(vc).zfill(vc_chars) for vc in vc_list]
                     
                 elif self.vc_type == Election.VOTECODE_TYPE_LONG:
-                    vc_list = [base32cf.hyphen(vc, self.long_vc_split) for vc in vc_list]
+                    vc_list = [base32.hyphen(vc, self.long_vc_split) for vc in vc_list]
                 
                 data_list = list(zip(opt_list, vc_list, rec_list))
                 data_len = len(data_list)
@@ -661,7 +661,7 @@ class BallotPDFCreator(object):
             part_obj = {
                 'tag': p_tag,
                 'voter_token': 'voter_token',
-                'security_code': base32cf.random(conf.SECURITY_CODE_LEN),
+                'security_code': base32.random(conf.SECURITY_CODE_LEN),
                 '__list_Question__': [],
             }
             
@@ -676,12 +676,12 @@ class BallotPDFCreator(object):
                     random.shuffle(votecode_list)
                     
                 elif self.vc_type == Election.VOTECODE_TYPE_LONG:
-                    votecode_list=[base32cf.random(conf.VOTECODE_LEN) for _ in range(options_cnt)]
+                    votecode_list=[base32.random(conf.VOTECODE_LEN) for _ in range(options_cnt)]
                 
                 for votecode in votecode_list:
                     data_obj = {
                         self.vc_name: votecode,
-                        'receipt': base32cf.random(conf.RECEIPT_LEN),
+                        'receipt': base32.random(conf.RECEIPT_LEN),
                     }
                     
                     question_obj['__list_OptionV__'].append(data_obj)

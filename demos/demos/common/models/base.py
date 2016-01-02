@@ -17,7 +17,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from demos.common.conf import constants
 from demos.common.hashers import get_hasher
-from demos.common.utils import base32cf, enums, fields
+from demos.common.utils import base32, enums, fields
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +108,7 @@ class Election(models.Model):
     natural_key.dependencies = ['Conf']
     
     def save(self, *args, **kwargs):
-        self.id = base32cf.normalize(self.id)
+        self.id = base32.normalize(self.id)
         super(Election, self).save(*args, **kwargs)
 
 
