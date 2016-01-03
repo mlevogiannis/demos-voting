@@ -3,7 +3,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 RECEIPT_LEN = 10
-VOTECODE_LEN = 16
+LONG_VOTECODE_LEN = 16
 SECURITY_CODE_LEN = 8
 
 CREDENTIAL_BITS = 64

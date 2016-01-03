@@ -364,9 +364,9 @@ class OptionV(models.Model):
         digestmod = getattr(hashlib, self.conf.hash_algorithm)
         
         digest = hmac.new(force_bytes(key), force_bytes(msg), digestmod).digest()
-        encoded = base32cf.encode_from_bytes(digest, self.conf.votecode_len)
+        encoded = base32.encode_from_bytes(digest, self.conf.long_votecode_len)
         
-        return encoded[-self.conf.votecode_len:]
+        return encoded[-self.conf.long_votecode_len:]
     
     class Meta:
         abstract = True
@@ -455,7 +455,7 @@ class Conf(models.Model):
     version = models.CharField(max_length=4, choices=VERSION_CHOICES, default=VERSION_1)
     
     receipt_len = models.PositiveSmallIntegerField(default=constants.RECEIPT_LEN)
-    votecode_len = models.PositiveSmallIntegerField(default=constants.VOTECODE_LEN)
+    long_votecode_len = models.PositiveSmallIntegerField(default=constants.LONG_VOTECODE_LEN)
     security_code_len = models.PositiveSmallIntegerField(default=constants.SECURITY_CODE_LEN)
     
     credential_bits = models.PositiveSmallIntegerField(default=constants.CREDENTIAL_BITS)
@@ -478,7 +478,7 @@ class Conf(models.Model):
     
     class Meta:
         abstract = True
-        unique_together = ['version', 'receipt_len', 'votecode_len', 'security_code_len', 'credential_bits',
+        unique_together = ['version', 'receipt_len', 'long_votecode_len', 'security_code_len', 'credential_bits',
                            'rsa_pkey_bits', 'ecc_curve', 'hash_algorithm', 'key_derivation']
     
     class Manager(models.Manager):
