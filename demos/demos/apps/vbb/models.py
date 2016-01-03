@@ -43,14 +43,14 @@ class Part(base.Part):
 
 class QuestionV(base.QuestionV):
     
-    hasher_salt = models.CharField(max_length=24, null=True, default=None)
-    hasher_params = models.CharField(max_length=16, null=True, default=None)
+    votecode_hash_salt = models.CharField(max_length=24, null=True, default=None)
+    votecode_hash_params = models.CharField(max_length=16, null=True, default=None)
 
 
 class OptionV(base.OptionV):
     
     votecode = models.CharField(max_length=32, null=True, default=None)
-    votecode_hash = models.CharField(max_length=128, null=True, default=None, db_column='votecode_hash')
+    votecode_hash = models.CharField(max_length=128, null=True, default=None)
     
     receipt = models.CharField(max_length=32)
 

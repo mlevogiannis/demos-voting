@@ -96,23 +96,14 @@ class Part(base.Part):
 
 class QuestionV(base.QuestionV):
     
-    def generate_common_hasher(self):
+    def generate_common(self):
         
         if self.election.long_votecodes:
-            self.hasher_salt = self.election.hasher.salt()
-            self.hasher_params = self.election.hasher.params()
-    
-    def _get_short_votecode(self, index):
-        
-        if not hasattr(self, '_short_votecodes'):
-            
-            votecodes = list(range(1, self.options_cnt + 1))
-            random.shuffle(votecodes)
-            
-            width = len(six.text_type(self.options_cnt))
-            self._short_votecodes = [six.text_type(vc).zfill(width) for vc in votecodes]
-        
-        return self._short_votecodes[index]
+            self.salt = self.election.hasher.salt()
+            self.params = self.election.hasher.params()
+        else:
+            self._short_votecodes = list(range(1, self.options_cnt + 1))
+            random.shuffle(self._short_votecodes)
 
 
 class OptionV(base.OptionV):
@@ -120,23 +111,34 @@ class OptionV(base.OptionV):
     decom = fields.ProtoField(cls=crypto.Decom)
     zk_state = fields.ProtoField(cls=crypto.ZKState)
     
+    def _generate_short_votecode(self):
+        
+        votecode = self.question._short_votecodes[self.index]
+        return six.text_type(votecode).zfill(self._votecode_len)
+    
     def generate_votecode(self):
         
         if self.election.long_votecodes:
             
             hasher = self.election.hasher
-            salt = self.question.hasher_salt
-            params = self.question.hasher_params
+            salt = self.question.votecode_hash_salt
+            params = self.question.votecode_hash_params
             
-            self.votecode = self._get_long_votecode()
+            self.votecode = self._generate_long_votecode()
             self.votecode_hash = hasher.split(hasher.encode(self.votecode, salt, params))[2]
             
         else:
-            self.votecode = self.question._get_short_votecode(self.index)
+            self.votecode = self._generate_short_votecode()
     
     def generate_receipt(self):
         
-        data = self._get_long_votecode() if self.election.short_votecodes else self.votecode
+        if self.election.long_votecodes:
+            data = self.votecode
+        else:
+            # A receipt is always the signature of a long votecode, but this
+            # option only has a short one. Generate its long votecode here.
+            data = self._generate_long_votecode()
+        
         signature = OpenSSL.crypto.sign(self.election.pkey, data, str(self.conf.hash_algorithm))
         
         self.receipt_full = base32.encode_from_bytes(signature, (self.conf.rsa_pkey_bits + 4) // 5)
