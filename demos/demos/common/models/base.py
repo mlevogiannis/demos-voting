@@ -320,13 +320,31 @@ class QuestionV(models.Model):
     
     # Custom methods and properties
     
-    @cached_property
+    @property
     def index(self):
         return self.question_c.index
     
-    @cached_property
+    @property
     def options_cnt(self):
         return self.question_c.options_cnt
+    
+    @property
+    def min_choices(self):
+        return self.question_c.min_choices
+    
+    @property
+    def max_choices(self):
+        return self.question_c.max_choices
+    
+    @property
+    def permutation_index(self):
+        
+        question_index = six.text_type(self.index).zfill(len(six.text_type(self.election.questions_cnt - 1)))
+        
+        data = self.part.security_code + question_index
+        digest = hashlib.new(self.conf.hash_algorithm, force_bytes(data)).digest()
+        
+        return int_from_bytes(digest, 'big')
     
     class Meta:
         abstract = True
