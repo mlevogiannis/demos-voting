@@ -18,6 +18,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from demos.common.conf import constants
 from demos.common.hashers import get_hasher
+from demos.common.models.decorators import related
 from demos.common.utils import base32, enums, fields
 
 logger = logging.getLogger(__name__)
@@ -216,6 +217,18 @@ class Ballot(models.Model):
         unique_together = ['election', 'serial']
     
     class Manager(models.Manager):
+        
+        min_serial = 100
+        
+        @property
+        @related('election')
+        def max_serial(self):
+            return self.min_serial + self.instance.ballots_cnt - 1
+        
+        @related('election')
+        def chunks(self, size):
+            for lo in range(self.min_serial, self.max_serial + 1, size):
+                yield (lo, lo + min(size - 1, self.max_serial - lo))
         
         def get_by_natural_key(self, e_id, b_serial):
             
