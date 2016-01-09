@@ -55,7 +55,7 @@ class Election(base.Election):
             ca_cert = self.cert
             ca_pkey = self.pkey
         
-        self.cert.get_subject().CN = self.name[:64]
+        self.cert.get_subject().CN = 'DemosVoting | Election ID: %s' % self.id
         self.cert.set_issuer(ca_cert.get_subject())
         self.cert.set_version(3)
         self.cert.set_serial_number(base32.decode(self.id))
