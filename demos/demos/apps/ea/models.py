@@ -98,7 +98,7 @@ class QuestionV(base.QuestionV):
     
     def generate_common(self):
         
-        if self.election.long_votecodes:
+        if self.election.votecode_type_is_long:
             self.salt = self.election.hasher.salt()
             self.params = self.election.hasher.params()
         else:
@@ -118,7 +118,7 @@ class OptionV(base.OptionV):
     
     def generate_votecode(self):
         
-        if self.election.long_votecodes:
+        if self.election.votecode_type_is_long:
             
             hasher = self.election.hasher
             salt = self.question.votecode_hash_salt
@@ -132,7 +132,7 @@ class OptionV(base.OptionV):
     
     def generate_receipt(self):
         
-        if self.election.long_votecodes:
+        if self.election.votecode_type_is_long:
             data = self.votecode
         else:
             # A receipt is always the signature of a long votecode, but this

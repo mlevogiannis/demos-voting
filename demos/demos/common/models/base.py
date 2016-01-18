@@ -103,19 +103,19 @@ class Election(models.Model):
     # Custom methods and properties
     
     @property
-    def is_election(self):
+    def type_is_election(self):
         return self.type == self.TYPE_ELECTION
     
     @property
-    def is_referendum(self):
+    def type_is_referendum(self):
         return self.type == self.TYPE_REFERENDUM
     
     @property
-    def short_votecodes(self):
+    def votecode_type_is_short(self):
         return self.votecode_type == self.VOTECODE_TYPE_SHORT
     
     @property
-    def long_votecodes(self):
+    def votecode_type_is_long(self):
         return self.votecode_type == self.VOTECODE_TYPE_LONG
     
     @cached_property
@@ -161,7 +161,7 @@ class QuestionC(models.Model):
     
     @property
     def min_choices(self):
-        return 0 if not self.election.is_referendum else 1
+        return 0 if not self.election.type_is_referendum else 1
     
     class Meta:
         abstract = True
