@@ -41,7 +41,7 @@ def encode(number, length=0, hyphens=0):
         encoded = encoded.zfill(length)
     
     if hyphens > 0:
-        encoded = hyphen(encoded, hyphens)
+        encoded = _hyphen(encoded, hyphens)
     
     return encoded or '0'
 
@@ -58,7 +58,8 @@ def decode(encoded):
     decode. The resulting integer is returned.
     """
     
-    encoded = normalize(encoded)
+    _raise_for_invalid(encoded)
+    encoded = _normalize(encoded)
     
     number = 0
     for c in encoded:
@@ -73,19 +74,20 @@ def decode_to_bytes(encoded, numbytes=0, *args, **kwargs):
     return int_to_bytes(number, max([numbytes, (number.bit_length() + 7) // 8]), 'big')
 
 
-def validate(encoded, minlen=1, maxlen=''):
-    """
-    Validates that a string is a valid Crockford's Base32 string. 'encoded' is
-    the string to validate, 'minlen' and 'maxlen' are the desired minimum and
-    maximum lengths, respectively.
-    """
-    
-    _regex = r'^%s{%s,%s}$' % (regex, minlen, maxlen)
-    
-    if not re.match(_regex, encoded):
+_validation_regex = re.compile(r'^%s+$' % regex)
+
+def _raise_for_invalid(encoded):
+    if not _validation_regex.match(encoded):
         raise ValueError("'%s' is not a valid base32 string" % encoded)
-    
-    return True
+
+
+try:
+    _normalization_table = str.maketrans('OIL', '011', '-')
+except AttributeError:
+    _normalization_table = {ord(x): ord(y) if y else None for x, y in zip_longest('OIL-', '011')}
+
+def _normalize(encoded):
+    return encoded.upper().translate(_normalization_table)
 
 
 def normalize(encoded):
@@ -95,14 +97,19 @@ def normalize(encoded):
     and 'O' with '0'.
     """
     
-    validate(encoded)
+    _raise_for_invalid(encoded)
+    return _normalize(encoded)
+
+
+def _hyphen(encoded, hyphens):
     
-    try:
-        table = str.maketrans('OIL', '011', '-')
-    except AttributeError:
-        table = {ord(x): ord(y) if y else None for x, y in zip_longest('OIL-', '011')}
+    if hyphens >= 0:
+        encoded = encoded.replace('-', '')
     
-    return encoded.upper().translate(table) or '0'
+    if hyphens > 0:
+        encoded = '-'.join(re.findall('.{,%s}' % hyphens, encoded)[:-1])
+    
+    return encoded
 
 
 def hyphen(encoded, hyphens):
@@ -112,15 +119,8 @@ def hyphen(encoded, hyphens):
     'n' characters.
     """
     
-    validate(encoded)
-    
-    if hyphens >= 0:
-        encoded = encoded.replace('-', '')
-    
-    if hyphens > 0:
-        encoded = '-'.join(re.findall('.{,%s}' % hyphens, encoded)[:-1])
-    
-    return encoded
+    _raise_for_invalid(encoded)
+    return _hyphen(encoded, hyphens)
 
 
 def random(length, hyphens=0, urandom=False):
