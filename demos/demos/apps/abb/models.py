@@ -34,8 +34,9 @@ class Election(base.Election):
     
     voter_coins_hash = models.CharField(max_length=128, null=True, default=None)
     
-    tally_started_at = models.DateTimeField(null=True, default=None)
-    tally_finished_at = models.DateTimeField(null=True, default=None)
+    tallying_started_at = models.DateTimeField(null=True, default=None)
+    tallying_ended_at = models.DateTimeField(null=True, default=None)
+    
 
 
 class QuestionC(base.QuestionC):

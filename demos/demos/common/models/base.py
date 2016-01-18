@@ -81,15 +81,17 @@ class Election(models.Model):
     id = models.CharField(db_column='election_id', unique=True, max_length=16,
         validators=[RegexValidator(regex=(r'^%s+$' % base32.regex))])
     
+    voting_starts_at = models.DateTimeField()
+    voting_ends_at = models.DateTimeField()
+    ballot_distribution_starts_at = models.DateTimeField()
+    ballot_distribution_ends_at = models.DateTimeField()
+    
     state = models.CharField(max_length=16, choices=STATE_CHOICES)
 
     type = models.CharField(max_length=16, choices=TYPE_CHOICES)
     votecode_type = models.CharField(max_length=16, choices=VOTECODE_TYPE_CHOICES)
     
     name = models.TextField()
-    
-    starts_at = models.DateTimeField()
-    ends_at = models.DateTimeField()
     
     ballots_cnt = models.PositiveIntegerField()
     questions_cnt = models.PositiveSmallIntegerField()

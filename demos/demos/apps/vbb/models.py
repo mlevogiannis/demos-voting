@@ -18,7 +18,7 @@ conf = app_config.get_constants_and_settings()
 class Election(base.Election):
     
     voting_started_at = models.DateTimeField(null=True, default=None)
-    voting_finished_at = models.DateTimeField(null=True, default=None)
+    voting_ended_at = models.DateTimeField(null=True, default=None)
 
 
 class QuestionC(base.QuestionC):

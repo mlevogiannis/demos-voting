@@ -29,8 +29,8 @@ def get_ballot_file_path(ballot, filename):
 
 class Election(base.Election):
     
-    distribution_started_at = models.DateTimeField(null=True, default=None)
-    distribution_finished_at = models.DateTimeField(null=True, default=None)
+    ballot_distribution_started_at = models.DateTimeField(null=True, default=None)
+    ballot_distribution_ended_at = models.DateTimeField(null=True, default=None)
 
 
 class Ballot(base.Ballot):

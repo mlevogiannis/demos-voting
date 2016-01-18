@@ -25,10 +25,10 @@ settings = app_config.get_constants_and_settings()
 class Election(base.Election):
     
     created_at = models.DateTimeField(auto_now_add=True)
-    modified_at = models.DateTimeField(auto_now=True)
+    last_modified_at = models.DateTimeField(auto_now=True)
     
     setup_started_at = models.DateTimeField(null=True, default=None)
-    setup_finished_at = models.DateTimeField(null=True, default=None)
+    setup_ended_at = models.DateTimeField(null=True, default=None)
     
     def generate_pkey(self):
         
