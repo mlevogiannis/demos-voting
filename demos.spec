@@ -31,7 +31,6 @@ BuildArch:      noarch
 Requires:       python-django >= 1.8
 Requires:       python-psycopg2
 Requires:       python-requests
-Requires:       python-enum34
 Requires:       gettext
 %if %{with_apache}
 %if %{_target_vendor} == mageia

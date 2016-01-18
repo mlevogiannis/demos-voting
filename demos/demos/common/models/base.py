@@ -18,7 +18,7 @@ from django.utils.translation import ugettext_lazy as _
 from demos.common.conf import constants
 from demos.common.hashers import get_hasher
 from demos.common.models.decorators import related
-from demos.common.utils import base32, enums, fields
+from demos.common.utils import base32
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +43,37 @@ class Election(models.Model):
         (VOTECODE_TYPE_SHORT, _('Short')),
         (VOTECODE_TYPE_LONG, _('Long')),
     )
+    
+    STATE_DRAFT = 'draft'
+    STATE_PENDING = 'pending'
+    STATE_SETUP_STARTED = 'setup_started'
+    STATE_SETUP_ENDED = 'setup_ended'
+    STATE_BALLOT_DISTRIBUTION_STARTED = 'ballot_distribution_started'
+    STATE_BALLOT_DISTRIBUTION_ENDED = 'ballot_distribution_ended'
+    STATE_VOTING_STARTED = 'voting_started'
+    STATE_VOTING_SUSPENDED = 'voting_suspended'
+    STATE_VOTING_ENDED = 'voting_ended'
+    STATE_TALLYING_STARTED = 'tallying_started'
+    STATE_TALLYING_ENDED = 'tallying_ended'
+    STATE_COMPLETED = 'completed'
+    STATE_FAILED = 'failed'
+    STATE_CANCELLED = 'cancelled'
+    
+    STATE_CHOICES = (
+        (STATE_DRAFT, _('Draft')),
+        (STATE_PENDING, _('Pending')),
+        (STATE_SETUP_STARTED, _('Setup started')),
+        (STATE_SETUP_ENDED, _('Setup ended')),
+        (STATE_BALLOT_DISTRIBUTION_STARTED, _('Ballot distribution started')),
+        (STATE_BALLOT_DISTRIBUTION_ENDED, _('Ballot distribution ended')),
+        (STATE_VOTING_STARTED, _('Voting started')),
+        (STATE_VOTING_SUSPENDED, _('Voting suspended')),
+        (STATE_VOTING_ENDED, _('Voting ended')),
+        (STATE_TALLYING_STARTED, _('Tallying started')),
+        (STATE_TALLYING_ENDED, _('Tallying ended')),
+        (STATE_COMPLETED, _('Completed')),
+        (STATE_FAILED, _('Failed')),
+        (STATE_CANCELLED, _('Cancelled')),
     )
     
     # Model fields
@@ -50,7 +81,7 @@ class Election(models.Model):
     id = models.CharField(db_column='election_id', unique=True, max_length=16,
         validators=[RegexValidator(regex=(r'^%s+$' % base32.regex))])
     
-    state = fields.IntEnumField(cls=enums.State)
+    state = models.CharField(max_length=16, choices=STATE_CHOICES)
 
     type = models.CharField(max_length=16, choices=TYPE_CHOICES)
     votecode_type = models.CharField(max_length=16, choices=VOTECODE_TYPE_CHOICES)

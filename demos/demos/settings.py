@@ -102,7 +102,6 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
-                'demos.common.utils.context_processors.common',
             ],
             'loaders': [
                 ('django.template.loaders.cached.Loader', [
