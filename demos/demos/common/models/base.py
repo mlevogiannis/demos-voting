@@ -140,10 +140,6 @@ class Election(models.Model):
         return (self.id,)
     
     natural_key.dependencies = ['Conf']
-    
-    def save(self, *args, **kwargs):
-        self.id = base32.normalize(self.id)
-        super(Election, self).save(*args, **kwargs)
 
 
 @python_2_unicode_compatible
