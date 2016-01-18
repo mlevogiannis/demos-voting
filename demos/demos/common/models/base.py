@@ -236,8 +236,8 @@ class Ballot(models.Model):
         hasher = self.election.hasher
         regex = r'^%s{%d}$' % (base32.regex, (self.conf.credential_bits + 4) // 5)
         
-        return (isinstance(credential, six.text_type) and re.match(regex, credential)
-            and hasher.verify(base32.normalize(credential), self.credential_hash))
+        return (re.match(regex, credential) and
+                hasher.verify(base32.normalize(credential), self.credential_hash))
     
     class Meta:
         abstract = True
@@ -305,8 +305,8 @@ class Part(models.Model):
         hasher = self.election.hasher
         regex = r'^%s{%d}$' % (base32.regex, self.conf.security_code_len)
         
-        return (isinstance(security_code, six.text_type) and re.match(regex, security_code)
-            and hasher.verify(base32.normalize(security_code), self.security_code_hash))
+        return (re.match(regex, security_code) and
+                hasher.verify(base32.normalize(security_code), self.security_code_hash))
     
     class Meta:
         abstract = True
