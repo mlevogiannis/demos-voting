@@ -429,6 +429,8 @@ class OptionV(models.Model):
     
     def _generate_long_votecode(self):
         
+        long_votecode_len = self.question.options.long_votecode_len
+        
         option_index = six.text_type(self.index).zfill(len(six.text_type(self.question.options_cnt - 1)))
         question_index = six.text_type(self.question.index).zfill(len(six.text_type(self.election.questions_cnt - 1)))
         
@@ -438,9 +440,9 @@ class OptionV(models.Model):
         digestmod = getattr(hashlib, self.conf.hash_algorithm)
         
         digest = hmac.new(force_bytes(key), force_bytes(msg), digestmod).digest()
-        encoded = base32.encode_from_bytes(digest, self.conf.long_votecode_len)
+        encoded = base32.encode_from_bytes(digest, long_votecode_len)
         
-        return encoded[-self.conf.long_votecode_len:]
+        return encoded[-long_votecode_len:]
     
     class Meta:
         abstract = True
@@ -448,6 +450,16 @@ class OptionV(models.Model):
         unique_together = ['question', 'index']
     
     class Manager(models.Manager):
+        
+        @property
+        @related('question')
+        def short_votecode_len(self):
+            return len(six.text_type(self.instance.options_cnt))
+        
+        @property
+        @related('question')
+        def long_votecode_len(self):
+            return self.instance.conf.long_votecode_len
         
         def get_by_natural_key(self, e_id, b_serial, p_tag, q_index, o_index):
             

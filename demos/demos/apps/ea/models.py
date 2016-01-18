@@ -114,7 +114,7 @@ class OptionV(base.OptionV):
     def _generate_short_votecode(self):
         
         votecode = self.question._short_votecodes[self.index]
-        return six.text_type(votecode).zfill(self._votecode_len)
+        return six.text_type(votecode).zfill(self.short_votecode_len)
     
     def generate_votecode(self):
         
