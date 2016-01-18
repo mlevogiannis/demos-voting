@@ -78,8 +78,10 @@ class Election(models.Model):
     
     # Model fields
     
-    id = models.CharField(db_column='election_id', unique=True, max_length=16,
+    id = models.CharField(unique=True, max_length=16,
         validators=[RegexValidator(regex=(r'^%s+$' % base32.regex))])
+    
+    name = models.TextField()
     
     voting_starts_at = models.DateTimeField()
     voting_ends_at = models.DateTimeField()
@@ -91,14 +93,12 @@ class Election(models.Model):
     type = models.CharField(max_length=16, choices=TYPE_CHOICES)
     votecode_type = models.CharField(max_length=16, choices=VOTECODE_TYPE_CHOICES)
     
-    name = models.TextField()
+    conf = models.ForeignKey('Conf', related_name='elections', related_query_name='election')
     
     ballots_cnt = models.PositiveIntegerField()
     questions_cnt = models.PositiveSmallIntegerField()
     
-    conf = models.ForeignKey('Conf', related_name='elections', related_query_name='election')
-    
-    _id = models.AutoField(db_column='id', primary_key=True)
+    _id = models.AutoField(primary_key=True)
     
     # Custom methods and properties
     
