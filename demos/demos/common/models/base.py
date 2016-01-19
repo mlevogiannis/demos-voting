@@ -5,14 +5,13 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import hashlib
 import hmac
 import logging
-import re
 
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import six
 from django.utils.encoding import force_bytes, python_2_unicode_compatible
 from django.utils.functional import cached_property
-from django.utils.six.moves import zip
+from django.utils.six.moves import range, zip
 from django.utils.translation import ugettext_lazy as _
 
 from demos.common.conf import constants
@@ -227,18 +226,6 @@ class Ballot(models.Model):
     
     # Custom methods and properties
     
-    @property
-    def is_cast(self):
-        return self.cast_at is not None
-    
-    def verify_credential(self, credential):
-        
-        hasher = self.election.hasher
-        regex = r'^%s{%d}$' % (base32.regex, (self.conf.credential_bits + 4) // 5)
-        
-        return (re.match(regex, credential) and
-                hasher.verify(base32.normalize(credential), self.credential_hash))
-    
     class Meta:
         abstract = True
         ordering = ['election', 'serial']
@@ -299,14 +286,6 @@ class Part(models.Model):
     tag = models.CharField(max_length=1, choices=TAG_CHOICES)
     
     # Custom methods and properties
-    
-    def verify_security_code(self, security_code):
-        
-        hasher = self.election.hasher
-        regex = r'^%s{%d}$' % (base32.regex, self.conf.security_code_len)
-        
-        return (re.match(regex, security_code) and
-                hasher.verify(base32.normalize(security_code), self.security_code_hash))
     
     class Meta:
         abstract = True
