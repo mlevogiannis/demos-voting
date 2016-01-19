@@ -6,9 +6,11 @@ import logging
 import random
 import OpenSSL
 
+from datetime import timedelta
+
 from django.apps import apps
 from django.db import models
-from django.utils import six
+from django.utils import six, timezone
 from django.utils.encoding import force_bytes
 from django.utils.six.moves import range
 
@@ -55,12 +57,14 @@ class Election(base.Election):
             ca_cert = self.cert
             ca_pkey = self.pkey
         
+        now = timezone.now()
+        
         self.cert.get_subject().CN = 'DemosVoting | Election ID: %s' % self.id
         self.cert.set_issuer(ca_cert.get_subject())
         self.cert.set_version(3)
         self.cert.set_serial_number(base32.decode(self.id))
-        self.cert.set_notBefore(force_bytes(self.starts_at.strftime('%Y%m%d%H%M%S%z')))
-        self.cert.set_notAfter(force_bytes(self.ends_at.strftime('%Y%m%d%H%M%S%z')))
+        self.cert.set_notBefore(force_bytes(now.strftime('%Y%m%d%H%M%S%z')))
+        self.cert.set_notAfter(force_bytes((now+timedelta(365)).strftime('%Y%m%d%H%M%S%z')))
         self.cert.set_pubkey(self.pkey)
         
         self.cert.sign(ca_pkey, str(self.conf.hash_algorithm))
