@@ -77,7 +77,7 @@ class Election(models.Model):
     
     # Model fields
     
-    id = models.CharField(unique=True, max_length=16,
+    id = models.CharField(unique=True, max_length=16, db_column='_id',
         validators=[RegexValidator(regex=(r'^%s+$' % base32.regex))])
     
     name = models.TextField()
@@ -97,7 +97,7 @@ class Election(models.Model):
     ballots_cnt = models.PositiveIntegerField()
     questions_cnt = models.PositiveSmallIntegerField()
     
-    _id = models.AutoField(primary_key=True)
+    _id = models.AutoField(primary_key=True, db_column='id')
     
     # Custom methods and properties
     
