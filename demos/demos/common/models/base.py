@@ -16,7 +16,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from demos.common.conf import constants
 from demos.common.hashers import get_hasher
-from demos.common.models.decorators import related
+from demos.common.models import managers
 from demos.common.utils import base32
 
 logger = logging.getLogger(__name__)
@@ -125,12 +125,7 @@ class Election(models.Model):
         abstract = True
         ordering = ['id']
     
-    class Manager(models.Manager):
-        
-        def get_by_natural_key(self, e_id):
-            return self.get(id=e_id)
-    
-    objects = Manager()
+    objects = managers.ElectionManager()
     
     def __str__(self):
         return "%s | %s" % (self.id, self.name)
@@ -163,16 +158,7 @@ class QuestionC(models.Model):
         ordering = ['election', 'index']
         unique_together = ['election', 'index']
     
-    class Manager(models.Manager):
-        
-        def get_by_natural_key(self, e_id, q_index):
-            
-            manager = Election.objects.db_manager(self.db)
-            election = manager.get_by_natural_key(e_id)
-            
-            return self.get(election=election, index=q_index)
-    
-    objects = Manager()
+    objects = managers.QuestionCManager()
     
     def __str__(self):
         return "%s | %s" % (self.index + 1, self.text)
@@ -198,16 +184,7 @@ class OptionC(models.Model):
         ordering = ['question', 'index']
         unique_together = ['question', 'text']
     
-    class Manager(models.Manager):
-        
-        def get_by_natural_key(self, e_id, q_index, o_index):
-            
-            manager = QuestionC.objects.db_manager(self.db)
-            question = manager.get_by_natural_key(e_id, q_index)
-            
-            return self.get(question=question, index=o_index)
-    
-    objects = Manager()
+    objects = managers.OptionCManager()
     
     def __str__(self):
         return "%s | %s" % (self.index + 1, self.text)
@@ -231,28 +208,7 @@ class Ballot(models.Model):
         ordering = ['election', 'serial']
         unique_together = ['election', 'serial']
     
-    class Manager(models.Manager):
-        
-        min_serial = 100
-        
-        @property
-        @related('election')
-        def max_serial(self):
-            return self.min_serial + self.instance.ballots_cnt - 1
-        
-        @related('election')
-        def chunks(self, size):
-            for lo in range(self.min_serial, self.max_serial + 1, size):
-                yield (lo, lo + min(size - 1, self.max_serial - lo))
-        
-        def get_by_natural_key(self, e_id, b_serial):
-            
-            manager = Election.objects.db_manager(self.db)
-            election = manager.get_by_natural_key(e_id)
-            
-            return self.get(election=election, serial=b_serial)
-    
-    objects = Manager()
+    objects = managers.BallotManager()
     
     @cached_property
     def conf(self):
@@ -292,16 +248,7 @@ class Part(models.Model):
         ordering = ['ballot', 'tag']
         unique_together = ['ballot', 'tag']
     
-    class Manager(models.Manager):
-        
-        def get_by_natural_key(self, e_id, b_serial, p_tag):
-            
-            manager = Ballot.objects.db_manager(self.db)
-            ballot = manager.get_by_natural_key(e_id, b_serial)
-            
-            return self.get(ballot=ballot, tag=p_tag)
-    
-    objects = Manager()
+    objects = managers.PartManager()
     
     @cached_property
     def election(self):
@@ -359,19 +306,7 @@ class QuestionV(models.Model):
         ordering = ['part', 'question_c']
         unique_together = ['part', 'question_c']
     
-    class Manager(models.Manager):
-        
-        def get_by_natural_key(self, e_id, b_serial, p_tag, q_index):
-            
-            manager = Part.objects.db_manager(self.db)
-            part = manager.get_by_natural_key(e_id, b_serial, p_tag)
-            
-            manager = QuestionC.objects.db_manager(self.db)
-            question = manager.get_by_natural_key(e_id, q_index)
-            
-            return self.get(part=part, question_c=question_c)
-    
-    objects = Manager()
+    objects = managers.QuestionVManager()
     
     @cached_property
     def election(self):
@@ -424,26 +359,7 @@ class OptionV(models.Model):
         ordering = ['question', 'index']
         unique_together = ['question', 'index']
     
-    class Manager(models.Manager):
-        
-        @property
-        @related('question')
-        def short_votecode_len(self):
-            return len(six.text_type(self.instance.options_cnt))
-        
-        @property
-        @related('question')
-        def long_votecode_len(self):
-            return self.instance.conf.long_votecode_len
-        
-        def get_by_natural_key(self, e_id, b_serial, p_tag, q_index, o_index):
-            
-            manager = QuestionV.objects.db_manager(self.db)
-            question = manager.get_by_natural_key(e_id, b_serial, p_tag, q_index)
-            
-            return self.get(question=question, index=o_index)
-    
-    objects = Manager()
+    objects = managers.OptionVManager()
     
     @cached_property
     def election(self):
@@ -480,16 +396,7 @@ class Trustee(models.Model):
         abstract = True
         unique_together = ['election', 'email']
     
-    class Manager(models.Manager):
-        
-        def get_by_natural_key(self, e_id, t_email):
-            
-            manager = Election.objects.db_manager(self.db)
-            election = manager.get_by_natural_key(e_id)
-            
-            return self.get(election=election, email=t_email)
-    
-    objects = Manager()
+    objects = managers.TrusteeManager()
     
     def __str__(self):
         return "%s" % self.email
@@ -542,16 +449,7 @@ class Conf(models.Model):
         unique_together = ['version', 'receipt_len', 'long_votecode_len', 'security_code_len', 'credential_bits',
                            'rsa_pkey_bits', 'ecc_curve', 'hash_algorithm', 'key_derivation']
     
-    class Manager(models.Manager):
-        
-        def get_by_natural_key(self, *args, **kwargs):
-            
-            fields = self.model._meta.unique_together[0]
-            kwargs.update(dict(zip(fields, args)))
-            
-            return self.get(**kwargs)
-    
-    objects = Manager()
+    objects = managers.ConfManager()
     
     def __str__(self):
         return "%s" % self.version
@@ -568,6 +466,8 @@ class Task(models.Model):
     
     class Meta:
         abstract = True
+    
+    objects = managers.TaskManager()
     
     def __str__(self):
         return "%s | %s" % (self.election.id, self.task_id)
