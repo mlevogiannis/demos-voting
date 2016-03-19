@@ -14,32 +14,28 @@ from demos.common.utils import crypto, fields, storage
 logger = logging.getLogger(__name__)
 
 app_config = apps.get_app_config('abb')
-conf = app_config.get_constants_and_settings()
+settings = app_config.get_constants_and_settings()
 
 
-fs_root = storage.PrivateFileSystemStorage(location=conf.FILESYSTEM_ROOT,
+fs_root = storage.PrivateFileSystemStorage(location=settings.FILESYSTEM_ROOT,
     file_permissions_mode=0o600, directory_permissions_mode=0o700)
 
 def get_cert_file_path(election, filename):
     return "certs/%s%s" % (election.id, os.path.splitext(filename)[-1])
 
-def get_export_file_path(election, filename):
-    return "export/%s%s" % (election.id, os.path.splitext(filename)[-1])
-
 
 class Election(base.Election):
     
     cert = models.FileField(upload_to=get_cert_file_path, storage=fs_root)
-    export_file = models.FileField(upload_to=get_export_file_path, storage=fs_root, blank=True)
-    
-    voter_coins_hash = models.CharField(max_length=128, null=True, default=None)
     
     tallying_started_at = models.DateTimeField(null=True, default=None)
     tallying_ended_at = models.DateTimeField(null=True, default=None)
     
+    coins = models.CharField(max_length=128, null=True, default=None)
+    
 
 
-class QuestionC(base.QuestionC):
+class Question(base.Question):
     
     key = fields.ProtoField(cls=crypto.Key)
     
@@ -47,7 +43,7 @@ class QuestionC(base.QuestionC):
     decom_combined = fields.ProtoField(cls=crypto.Decom, null=True, default=None)
 
 
-class OptionC(base.OptionC):
+class Option_P(base.Option_P):
     
     votes = models.PositiveIntegerField(null=True, default=None)
 
@@ -66,16 +62,16 @@ class Part(base.Part):
     security_code_hash = models.CharField(max_length=128)
 
 
-class QuestionV(base.QuestionV):
+class PartQuestion(base.PartQuestion):
     
-    votecode_hash_salt = models.CharField(max_length=24, null=True, default=None)
+    votecode_hash_salt = models.CharField(max_length=32, null=True, default=None)
     votecode_hash_params = models.CharField(max_length=16, null=True, default=None)
 
 
-class OptionV(base.OptionV):
+class Option_C(base.Option_C):
     
     votecode = models.CharField(max_length=32, null=True, default=None)
-    votecode_hash = models.CharField(max_length=128, null=True, default=None)
+    votecode_hash_value = models.CharField(max_length=128, null=True, default=None)
     
     voted = models.NullBooleanField(default=None)
     

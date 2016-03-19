@@ -14,7 +14,7 @@ from demos.common.utils import base32
 logger = logging.getLogger(__name__)
 
 app_config = apps.get_app_config('vbb')
-conf = app_config.get_constants_and_settings()
+settings = app_config.get_constants_and_settings()
 
 
 class Election(base.Election):
@@ -23,12 +23,11 @@ class Election(base.Election):
     voting_ended_at = models.DateTimeField(null=True, default=None)
 
 
-class QuestionC(base.QuestionC):
-    
-    columns = models.BooleanField(default=False)
+class Question(base.Question):
+    pass
 
 
-class OptionC(base.OptionC):
+class Option_P(base.Option_P):
     pass
 
 
@@ -63,16 +62,16 @@ class Part(base.Part):
                 hasher.verify(base32.normalize(security_code), self.security_code_hash))
 
 
-class QuestionV(base.QuestionV):
+class PartQuestion(base.PartQuestion):
     
-    votecode_hash_salt = models.CharField(max_length=24, null=True, default=None)
+    votecode_hash_salt = models.CharField(max_length=32, null=True, default=None)
     votecode_hash_params = models.CharField(max_length=16, null=True, default=None)
 
 
-class OptionV(base.OptionV):
+class Option_C(base.Option_C):
     
     votecode = models.CharField(max_length=32, null=True, default=None)
-    votecode_hash = models.CharField(max_length=128, null=True, default=None)
+    votecode_hash_value = models.CharField(max_length=128, null=True, default=None)
     
     receipt = models.CharField(max_length=32)
 

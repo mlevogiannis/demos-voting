@@ -2,24 +2,20 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from functools import wraps
-from django.db.models import Manager
+import functools
 
 
-def related(*related_fields):
+def related_attr(*fields):
     def decorator(func):
         
-        @wraps(func)
+        @functools.wraps(func)
         def wrapper(self, *args, **kwargs):
             
-            if not isinstance(self, Manager):
-                raise TypeError("'%s' must be a method of a '%s' instance" % (func.__name__, Manager.__name__))
-            
-            related_models = tuple(getattr(self.model, f).field.related_model for f in related_fields)
+            related_models = tuple(self.model._meta.get_field(f).related_model for f in fields)
             
             if not (hasattr(self, 'instance') and isinstance(self.instance, related_models)):
-                raise AttributeError("'%s' is only available to related managers of: '%s'" %
-                    (func.__name__, "' '".join(related_fields)))
+                raise AttributeError("%s is only accessible via reverse relations: %s"
+                                     % (func.__name__, "' '".join(fields)))
             
             return func(self, *args, **kwargs)
             

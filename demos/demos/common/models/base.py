@@ -25,22 +25,20 @@ logger = logging.getLogger(__name__)
 @python_2_unicode_compatible
 class Election(models.Model):
     
-    # Choices definition
-    
     TYPE_ELECTION = 'election'
     TYPE_REFERENDUM = 'referendum'
     
     TYPE_CHOICES = (
-        (TYPE_ELECTION, _('Election')),
-        (TYPE_REFERENDUM, _('Referendum')),
+        (TYPE_ELECTION, _("Election")),
+        (TYPE_REFERENDUM, _("Referendum")),
     )
     
     VOTECODE_TYPE_SHORT = 'short'
     VOTECODE_TYPE_LONG = 'long'
     
     VOTECODE_TYPE_CHOICES = (
-        (VOTECODE_TYPE_SHORT, _('Short')),
-        (VOTECODE_TYPE_LONG, _('Long')),
+        (VOTECODE_TYPE_SHORT, _("Short")),
+        (VOTECODE_TYPE_LONG, _("Long")),
     )
     
     STATE_DRAFT = 'draft'
@@ -48,6 +46,7 @@ class Election(models.Model):
     STATE_SETUP_STARTED = 'setup_started'
     STATE_SETUP_ENDED = 'setup_ended'
     STATE_BALLOT_DISTRIBUTION_STARTED = 'ballot_distribution_started'
+    STATE_BALLOT_DISTRIBUTION_SUSPENDED = 'ballot_distribution_suspended'
     STATE_BALLOT_DISTRIBUTION_ENDED = 'ballot_distribution_ended'
     STATE_VOTING_STARTED = 'voting_started'
     STATE_VOTING_SUSPENDED = 'voting_suspended'
@@ -59,45 +58,44 @@ class Election(models.Model):
     STATE_CANCELLED = 'cancelled'
     
     STATE_CHOICES = (
-        (STATE_DRAFT, _('Draft')),
-        (STATE_PENDING, _('Pending')),
-        (STATE_SETUP_STARTED, _('Setup started')),
-        (STATE_SETUP_ENDED, _('Setup ended')),
-        (STATE_BALLOT_DISTRIBUTION_STARTED, _('Ballot distribution started')),
-        (STATE_BALLOT_DISTRIBUTION_ENDED, _('Ballot distribution ended')),
-        (STATE_VOTING_STARTED, _('Voting started')),
-        (STATE_VOTING_SUSPENDED, _('Voting suspended')),
-        (STATE_VOTING_ENDED, _('Voting ended')),
-        (STATE_TALLYING_STARTED, _('Tallying started')),
-        (STATE_TALLYING_ENDED, _('Tallying ended')),
-        (STATE_COMPLETED, _('Completed')),
-        (STATE_FAILED, _('Failed')),
-        (STATE_CANCELLED, _('Cancelled')),
+        (STATE_DRAFT, _("Draft")),
+        (STATE_PENDING, _("Pending")),
+        (STATE_SETUP_STARTED, _("Setup started")),
+        (STATE_SETUP_ENDED, _("Setup ended")),
+        (STATE_BALLOT_DISTRIBUTION_STARTED, _("Ballot distribution started")),
+        (STATE_BALLOT_DISTRIBUTION_SUSPENDED, _("Ballot distribution suspended")),
+        (STATE_BALLOT_DISTRIBUTION_ENDED, _("Ballot distribution ended")),
+        (STATE_VOTING_STARTED, _("Voting started")),
+        (STATE_VOTING_SUSPENDED, _("Voting suspended")),
+        (STATE_VOTING_ENDED, _("Voting ended")),
+        (STATE_TALLYING_STARTED, _("Tallying started")),
+        (STATE_TALLYING_ENDED, _("Tallying ended")),
+        (STATE_COMPLETED, _("Completed")),
+        (STATE_FAILED, _("Failed")),
+        (STATE_CANCELLED, _("Cancelled")),
     )
-    
-    # Model fields
     
     id = models.CharField(unique=True, max_length=16, db_column='_id',
         validators=[RegexValidator(regex=(r'^%s+$' % base32.regex))])
     
     name = models.TextField()
     
-    voting_starts_at = models.DateTimeField()
-    voting_ends_at = models.DateTimeField()
     ballot_distribution_starts_at = models.DateTimeField()
     ballot_distribution_ends_at = models.DateTimeField()
+    voting_starts_at = models.DateTimeField()
+    voting_ends_at = models.DateTimeField()
     
-    state = models.CharField(max_length=16, choices=STATE_CHOICES)
+    state = models.CharField(max_length=64, choices=STATE_CHOICES)
 
     type = models.CharField(max_length=16, choices=TYPE_CHOICES)
     votecode_type = models.CharField(max_length=16, choices=VOTECODE_TYPE_CHOICES)
     
-    conf = models.ForeignKey('Conf', related_name='elections', related_query_name='election')
+    conf = models.ForeignKey('Conf')
     
-    ballots_cnt = models.PositiveIntegerField()
-    questions_cnt = models.PositiveSmallIntegerField()
+    ballot_cnt = models.PositiveIntegerField()
+    question_cnt = models.PositiveSmallIntegerField()
     
-    _id = models.AutoField(primary_key=True, db_column='id')
+    _id = models.AutoField(db_column='id', primary_key=True)
     
     # Custom methods and properties
     
@@ -121,30 +119,42 @@ class Election(models.Model):
     def hasher(self):
         return get_hasher(self.conf)
     
-    class Meta:
-        abstract = True
-        ordering = ['id']
+    # Default manager, meta options and natural key
     
     objects = managers.ElectionManager()
     
-    def __str__(self):
-        return "%s | %s" % (self.id, self.name)
+    class Meta:
+        abstract = True
+        default_related_name = 'elections'
+        ordering = ['id']
     
     def natural_key(self):
         return (self.id,)
     
     natural_key.dependencies = ['Conf']
+    
+    def __str__(self):
+        return "%s - %s" % (self.id, self.name)
 
 
 @python_2_unicode_compatible
-class QuestionC(models.Model):
+class Question(models.Model):
     
-    election = models.ForeignKey('Election', related_name='questions', related_query_name='question')
+    LAYOUT_ONE_COLUMN = 'one_column'
+    LAYOUT_TWO_COLUMN = 'two_column'
     
-    text = models.TextField()
+    LAYOUT_CHOICES = (
+        (LAYOUT_ONE_COLUMN, _("One-column")),
+        (LAYOUT_TWO_COLUMN, _("Two-column")),
+    )
+    
+    election = models.ForeignKey('Election')
+    parts = models.ManyToManyField('Part', through='PartQuestion', related_name='_questions')
+    
     index = models.PositiveSmallIntegerField()
-    
-    options_cnt = models.PositiveSmallIntegerField()
+    text = models.TextField()
+    layout = models.CharField(max_length=16, choices=LAYOUT_CHOICES)
+    option_cnt = models.PositiveSmallIntegerField()
     max_choices = models.PositiveSmallIntegerField()
     
     # Custom methods and properties
@@ -153,80 +163,113 @@ class QuestionC(models.Model):
     def min_choices(self):
         return 0 if not self.election.type_is_referendum else 1
     
-    class Meta:
-        abstract = True
-        ordering = ['election', 'index']
-        unique_together = ['election', 'index']
+    # Related object access
     
-    objects = managers.QuestionCManager()
+    @cached_property
+    def options(self):
+        if hasattr(self, '_related_part_pk'):
+            raise AttributeError
+        return self.options_p
     
-    def __str__(self):
-        return "%s | %s" % (self.index + 1, self.text)
-    
-    def natural_key(self):
-        return self.election.natural_key() + (self.index,)
-    
-    natural_key.dependencies = ['Election']
-
-
-@python_2_unicode_compatible
-class OptionC(models.Model):
-    
-    question = models.ForeignKey('QuestionC', related_name='options', related_query_name='option')
-    
-    index = models.PositiveSmallIntegerField()
-    text = models.TextField()
-    
-    # Custom methods and properties
-    
-    class Meta:
-        abstract = True
-        ordering = ['question', 'index']
-        unique_together = ['question', 'text']
-    
-    objects = managers.OptionCManager()
-    
-    def __str__(self):
-        return "%s | %s" % (self.index + 1, self.text)
-    
-    def natural_key(self):
-        return self.question.natural_key() + (self.index,)
-    
-    natural_key.dependencies = ['QuestionC']
-
-
-@python_2_unicode_compatible
-class Ballot(models.Model):
-    
-    election = models.ForeignKey('Election', related_name='ballots', related_query_name='ballot')
-    serial = models.PositiveIntegerField()
-    
-    # Custom methods and properties
-    
-    class Meta:
-        abstract = True
-        ordering = ['election', 'serial']
-        unique_together = ['election', 'serial']
-    
-    objects = managers.BallotManager()
+    @cached_property
+    def options_c(self):
+        if not hasattr(self, '_related_part_pk'):
+            raise AttributeError
+        return self.partquestions.get(part=self._related_part_pk).options_c
     
     @cached_property
     def conf(self):
         return self.election.conf
     
+    # Default manager, meta options and natural key
+    
+    objects = managers.QuestionManager()
+    
+    class Meta:
+        abstract = True
+        default_related_name = 'questions'
+        ordering = ['election', 'index']
+        unique_together = ['election', 'index']
+    
+    def natural_key(self):
+        return self.election.natural_key() + (self.index,)
+    
+    natural_key.dependencies = ['Election']
+    
     def __str__(self):
-        return "%s" % self.serial
+        return "%s - %s" % (self.index + 1, self.text)
+
+
+@python_2_unicode_compatible
+class Option_P(models.Model):
+    
+    question = models.ForeignKey('Question')
+    
+    index = models.PositiveSmallIntegerField()
+    text = models.TextField()
+    
+    # Related object access
+    
+    @cached_property
+    def election(self):
+        return self.question.election
+    
+    @cached_property
+    def conf(self):
+        return self.election.conf
+    
+    # Default manager, meta options and natural key
+    
+    objects = managers.OptionManager_P()
+    
+    class Meta:
+        abstract = True
+        default_related_name = 'options_p'
+        ordering = ['question', 'index']
+        unique_together = ['question', 'text']
+    
+    def natural_key(self):
+        return self.question.natural_key() + (self.index,)
+    
+    natural_key.dependencies = ['Question']
+    
+    def __str__(self):
+        return "%s - %s" % (self.index + 1, self.text)
+
+
+@python_2_unicode_compatible
+class Ballot(models.Model):
+    
+    election = models.ForeignKey('Election')
+    serial = models.PositiveIntegerField()
+    
+    # Related object access
+    
+    @cached_property
+    def conf(self):
+        return self.election.conf
+    
+    # Default manager, meta options and natural key
+    
+    objects = managers.BallotManager()
+    
+    class Meta:
+        abstract = True
+        default_related_name = 'ballots'
+        ordering = ['election', 'serial']
+        unique_together = ['election', 'serial']
     
     def natural_key(self):
         return self.election.natural_key() + (self.serial,)
     
     natural_key.dependencies = ['Election']
+    
+    def __str__(self):
+        return "%s" % self.serial
 
 
 @python_2_unicode_compatible
 class Part(models.Model):
-    
-    # Choices definition
     
     TAG_A = 'A'
     TAG_B = 'B'
@@ -236,81 +279,54 @@ class Part(models.Model):
         (TAG_B, 'B'),
     )
     
-    # Model fields
-    
-    ballot = models.ForeignKey('Ballot', related_name='parts', related_query_name='part')
+    ballot = models.ForeignKey('Ballot')
     tag = models.CharField(max_length=1, choices=TAG_CHOICES)
     
-    # Custom methods and properties
-    
-    class Meta:
-        abstract = True
-        ordering = ['ballot', 'tag']
-        unique_together = ['ballot', 'tag']
-    
-    objects = managers.PartManager()
+    # Related object access
     
     @cached_property
     def election(self):
         return self.ballot.election
+    
+    @property
+    def questions(self):
+        manager = self._questions
+        manager._annotate_with_related_pk(self)
+        return manager
     
     @cached_property
     def conf(self):
         return self.election.conf
     
-    def __str__(self):
-        return "%s" % self.tag
+    # Default manager, meta options and natural key
+    
+    objects = managers.PartManager()
+    
+    class Meta:
+        abstract = True
+        default_related_name = 'parts'
+        ordering = ['ballot', 'tag']
+        unique_together = ['ballot', 'tag']
     
     def natural_key(self):
         return self.ballot.natural_key() + (self.tag,)
     
     natural_key.dependencies = ['Ballot']
+    
+    def __str__(self):
+        return "%s" % self.tag
 
 
-@python_2_unicode_compatible
-class QuestionV(models.Model):
+class PartQuestion(models.Model):
     
-    part = models.ForeignKey('Part', related_name='questions', related_query_name='question')
-    question_c = models.ForeignKey('QuestionC', related_name='questions_v', related_query_name='question_v')
+    part = models.ForeignKey('Part')
+    question = models.ForeignKey('Question')
     
-    # Custom methods and properties
-    
-    @property
-    def index(self):
-        return self.question_c.index
-    
-    @property
-    def options_cnt(self):
-        return self.question_c.options_cnt
-    
-    @property
-    def min_choices(self):
-        return self.question_c.min_choices
-    
-    @property
-    def max_choices(self):
-        return self.question_c.max_choices
-    
-    @property
-    def permutation_index(self):
-        
-        question_index = six.text_type(self.index).zfill(len(six.text_type(self.election.questions_cnt - 1)))
-        
-        data = self.part.security_code + question_index
-        digest = hashlib.new(self.conf.hash_algorithm, force_bytes(data)).digest()
-        
-        return int_from_bytes(digest, 'big')
-    
-    class Meta:
-        abstract = True
-        ordering = ['part', 'question_c']
-        unique_together = ['part', 'question_c']
-    
-    objects = managers.QuestionVManager()
+    # Related object access
     
     @cached_property
     def election(self):
-        return self.ballot.election
+        return self.question.election
     
     @cached_property
     def ballot(self):
@@ -320,29 +336,52 @@ class QuestionV(models.Model):
     def conf(self):
         return self.election.conf
     
-    def __str__(self):
-        return "%s" % (self.index + 1)
+    # Default manager, meta options and natural key
+    
+    objects = managers.PartQuestionManager()
+    
+    class Meta:
+        abstract = True
+        default_related_name = 'partquestions'
+        ordering = ['part', 'question']
+        unique_together = ['part', 'question']
     
     def natural_key(self):
-        return self.part.natural_key() + self.question_c.natural_key()[1:]
+        return self.part.natural_key() + self.question.natural_key()[1:]
     
-    natural_key.dependencies = ['Part', 'QuestionC']
+    natural_key.dependencies = ['Part', 'Question']
+    
+    def __str__(self):
+        return "%s - %s" % (self.part.tag, self.question.index + 1)
 
 
 @python_2_unicode_compatible
-class OptionV(models.Model):
+class Option_C(models.Model):
     
-    question = models.ForeignKey('QuestionV', related_name='options', related_query_name='option')
+    partquestion = models.ForeignKey('PartQuestion')
     index = models.PositiveSmallIntegerField()
     
     # Custom methods and properties
     
+    @property
+    def votecode_hash(self):
+        
+        value = self.votecode_hash_value
+        
+        if not value:
+            return value
+        
+        salt = self.partquestion.votecode_hash_salt
+        params = self.partquestion.votecode_hash_params
+        
+        return self.election.hasher.join(params, salt, value)
+    
     def _generate_long_votecode(self):
         
-        long_votecode_len = self.question.options.long_votecode_len
+        long_votecode_len = self.partquestion.options_c.long_votecode_len
         
-        option_index = six.text_type(self.index).zfill(len(six.text_type(self.question.options_cnt - 1)))
-        question_index = six.text_type(self.question.index).zfill(len(six.text_type(self.election.questions_cnt - 1)))
+        option_index = six.text_type(self.index).zfill(len(six.text_type(self.question.option_cnt - 1)))
+        question_index = six.text_type(self.question.index).zfill(len(six.text_type(self.election.question_cnt - 1)))
         
         key = self.part.security_code
         msg = self.ballot.credential + question_index + option_index
@@ -354,16 +393,11 @@ class OptionV(models.Model):
         
         return encoded[-long_votecode_len:]
     
-    class Meta:
-        abstract = True
-        ordering = ['question', 'index']
-        unique_together = ['question', 'index']
-    
-    objects = managers.OptionVManager()
+    # Related object access
     
     @cached_property
     def election(self):
-        return self.ballot.election
+        return self.question.election
     
     @cached_property
     def ballot(self):
@@ -371,54 +405,43 @@ class OptionV(models.Model):
     
     @cached_property
     def part(self):
-        return self.question.part
+        return self.partquestion.part
+    
+    @cached_property
+    def question(self):
+        return self.partquestion.question
     
     @cached_property
     def conf(self):
         return self.election.conf
     
-    def __str__(self):
-        return "%s" % (self.index + 1)
+    # Default manager, meta options and natural key
     
-    def natural_key(self):
-        return self.question.natural_key() + (self.index,)
-    
-    natural_key.dependencies = ['QuestionV']
-
-
-@python_2_unicode_compatible
-class Trustee(models.Model):
-    
-    election = models.ForeignKey('Election', related_name='trustees', related_query_name='trustee')
-    email = models.EmailField()
+    objects = managers.OptionManager_C()
     
     class Meta:
         abstract = True
-        unique_together = ['election', 'email']
-    
-    objects = managers.TrusteeManager()
-    
-    def __str__(self):
-        return "%s" % self.email
+        default_related_name = 'options_c'
+        ordering = ['partquestion', 'index']
+        unique_together = ['partquestion', 'index']
     
     def natural_key(self):
-        return self.election.natural_key() + (self.email,)
+        return self._partquestion.natural_key() + (self.index,)
     
-    natural_key.dependencies = ['Election']
+    natural_key.dependencies = ['PartQuestion']
+    
+    def __str__(self):
+        return "%s" % (self.index + 1)
 
 
 @python_2_unicode_compatible
 class Conf(models.Model):
-    
-    # Choices definition
     
     VERSION_1 = '1'
     
     VERSION_CHOICES = (
         (VERSION_1, '1'),
     )
-    
-    # Model fields
     
     version = models.CharField(max_length=4, choices=VERSION_CHOICES, default=VERSION_1)
     
@@ -444,31 +467,39 @@ class Conf(models.Model):
                 kwargs[field.name] = field.default
         return kwargs
     
+    # Default manager, meta options and natural key
+    
+    objects = managers.ConfManager()
+    
     class Meta:
         abstract = True
         unique_together = ['version', 'receipt_len', 'long_votecode_len', 'security_code_len', 'credential_bits',
                            'rsa_pkey_bits', 'ecc_curve', 'hash_algorithm', 'key_derivation']
     
-    objects = managers.ConfManager()
+    def natural_key(self):
+        return tuple([getattr(self, name) for name in self._meta.unique_together[0]])
     
     def __str__(self):
         return "%s" % self.version
-    
-    def natural_key(self):
-        return tuple([getattr(self, name) for name in self._meta.unique_together[0]])
 
 
 @python_2_unicode_compatible
 class Task(models.Model):
     
     task_id = models.UUIDField(unique=True)
-    election = models.ForeignKey('Election', related_name='tasks', related_query_name='task')
+    election = models.ForeignKey('Election')
     
-    class Meta:
-        abstract = True
+    # Default manager, meta options and natural key
     
     objects = managers.TaskManager()
     
+    class Meta:
+        abstract = True
+        default_related_name = 'tasks'
+    
+    def natural_key(self):
+        return self.election.natural_key() + (self.task_id,)
+    
     def __str__(self):
-        return "%s | %s" % (self.election.id, self.task_id)
+        return "%s - %s" % (self.election.id, self.task_id)
 

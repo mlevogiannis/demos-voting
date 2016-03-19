@@ -14,11 +14,11 @@ from demos.common.utils import storage
 logger = logging.getLogger(__name__)
 
 app_config = apps.get_app_config('bds')
-conf = app_config.get_constants_and_settings()
+settings = app_config.get_constants_and_settings()
 
 
 ballot_fs = storage.PrivateTarFileStorage(
-    location=os.path.join(conf.FILESYSTEM_ROOT, 'ballots'),
+    location=os.path.join(settings.FILESYSTEM_ROOT, 'ballots'),
     tar_permissions_mode=0o600, tar_file_permissions_mode=0o600,
     tar_directory_permissions_mode=0o700
 )
@@ -40,7 +40,7 @@ class Ballot(base.Ballot):
 
 class Part(base.Part):
     
-    voter_token = models.TextField()
+    token = models.CharField(max_length=64)
     security_code = models.CharField(max_length=32)
 
 

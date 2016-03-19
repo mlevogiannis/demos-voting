@@ -3,7 +3,10 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from django.db import models
-from demos.common.models.decorators import related
+from django.utils import six
+from django.utils.six.moves import range, zip
+
+from demos.common.models.decorators import related_attr
 
 
 class ElectionManager(models.Manager):
@@ -12,7 +15,17 @@ class ElectionManager(models.Manager):
         return self.get(id=e_id)
 
 
-class QuestionCManager(models.Manager):
+class QuestionManager(models.Manager):
+    
+    @related_attr('parts')
+    def _annotate_with_related_pk(self, obj):
+        self._related_part_pk = {'_related_part_pk': models.Value(obj.pk, output_field=obj._meta.pk)}
+    
+    def get_queryset(self):
+        queryset = super(QuestionManager, self).get_queryset()
+        if hasattr(self, '_related_part_pk'):
+            queryset = queryset.annotate(**self._related_part_pk)
+        return queryset
     
     def get_by_natural_key(self, e_id, q_index):
         
@@ -23,7 +36,7 @@ class QuestionCManager(models.Manager):
         return self.get(election=election, index=q_index)
 
 
-class OptionCManager(models.Manager):
+class OptionManager_P(models.Manager):
     
     def get_by_natural_key(self, e_id, q_index, o_index):
         
@@ -35,15 +48,18 @@ class OptionCManager(models.Manager):
 
 
 class BallotManager(models.Manager):
-        
-    min_serial = 100
     
     @property
-    @related('election')
-    def max_serial(self):
-        return self.min_serial + self.instance.ballots_cnt - 1
+    @related_attr('election')
+    def min_serial(self):
+        return 100
     
-    @related('election')
+    @property
+    @related_attr('election')
+    def max_serial(self):
+        return self.min_serial + self.instance.ballot_cnt - 1
+    
+    @related_attr('election')
     def chunks(self, size):
         for lo in range(self.min_serial, self.max_serial + 1, size):
             yield (lo, lo + min(size - 1, self.max_serial - lo))
@@ -68,7 +84,7 @@ class PartManager(models.Manager):
         return self.get(ballot=ballot, tag=p_tag)
 
 
-class QuestionVManager(models.Manager):
+class PartQuestionManager(models.Manager):
     
     def get_by_natural_key(self, e_id, b_serial, p_tag, q_index):
         
@@ -80,18 +96,18 @@ class QuestionVManager(models.Manager):
         manager = model.objects.db_manager(self.db)
         question = manager.get_by_natural_key(e_id, q_index)
         
-        return self.get(part=part, question_c=question_c)
+        return self.get(part=part, question=question)
 
 
-class OptionVManager(models.Manager):
+class OptionManager_C(models.Manager):
     
     @property
-    @related('question')
+    @related_attr('partquestion')
     def short_votecode_len(self):
-        return len(six.text_type(self.instance.options_cnt))
+        return len(six.text_type(self.instance.question.option_cnt))
     
     @property
-    @related('question')
+    @related_attr('partquestion')
     def long_votecode_len(self):
         return self.instance.conf.long_votecode_len
     
@@ -102,17 +118,6 @@ class OptionVManager(models.Manager):
         question = manager.get_by_natural_key(e_id, b_serial, p_tag, q_index)
         
         return self.get(question=question, index=o_index)
-
-
-class TrusteeManager(models.Manager):
-    
-    def get_by_natural_key(self, election_id, email):
-        
-        model = self.model._meta.get_field('election').related_model
-        manager = model.objects.db_manager(self.db)
-        election = manager.get_by_natural_key(election_id)
-        
-        return self.get(election=election, email=email)
 
 
 class ConfManager(models.Manager):

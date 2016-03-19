@@ -27,8 +27,7 @@ settings = app_config.get_constants_and_settings()
 class Election(base.Election):
     
     created_at = models.DateTimeField(auto_now_add=True)
-    last_modified_at = models.DateTimeField(auto_now=True)
-    
+    modified_at = models.DateTimeField(auto_now=True)
     setup_started_at = models.DateTimeField(null=True, default=None)
     setup_ended_at = models.DateTimeField(null=True, default=None)
     
@@ -59,7 +58,7 @@ class Election(base.Election):
         
         now = timezone.now()
         
-        self.cert.get_subject().CN = 'DemosVoting | Election ID: %s' % self.id
+        self.cert.get_subject().CN = 'DemosVoting - Election ID: %s' % self.id
         self.cert.set_issuer(ca_cert.get_subject())
         self.cert.set_version(3)
         self.cert.set_serial_number(base32.decode(self.id))
@@ -70,11 +69,11 @@ class Election(base.Election):
         self.cert.sign(ca_pkey, str(self.conf.hash_algorithm))
 
 
-class QuestionC(base.QuestionC):
+class Question(base.Question):
     pass
 
 
-class OptionC(base.OptionC):
+class Option_P(base.Option_P):
     pass
 
 
@@ -98,59 +97,49 @@ class Part(base.Part):
         self.security_code_hash = self.election.hasher.encode(self.security_code)
 
 
-class QuestionV(base.QuestionV):
+class PartQuestion(base.PartQuestion):
     
     def generate_common(self):
         
         if self.election.votecode_type_is_long:
-            self.salt = self.election.hasher.salt()
-            self.params = self.election.hasher.params()
+            self.votecode_hash_salt = self.election.hasher.salt()
+            self.votecode_hash_params = self.election.hasher.params()
         else:
-            self._short_votecodes = list(range(1, self.options_cnt + 1))
-            random.shuffle(self._short_votecodes)
+            zfill = lambda votecode: six.text_type(votecode).zfill(self.options_c.short_votecode_len)
+            self.short_votecodes = list(map(zfill, range(1, self.option_cnt + 1)))
+            random.shuffle(self.short_votecodes)
 
 
-class OptionV(base.OptionV):
+class Option_C(base.Option_C):
     
     decom = fields.ProtoField(cls=crypto.Decom)
     zk_state = fields.ProtoField(cls=crypto.ZKState)
     
-    def _generate_short_votecode(self):
-        
-        votecode = self.question._short_votecodes[self.index]
-        return six.text_type(votecode).zfill(self.short_votecode_len)
-    
     def generate_votecode(self):
         
         if self.election.votecode_type_is_long:
-            
             hasher = self.election.hasher
-            salt = self.question.votecode_hash_salt
-            params = self.question.votecode_hash_params
+            
+            salt = self.partquestion.votecode_hash_salt
+            params = self.partquestion.votecode_hash_params
             
             self.votecode = self._generate_long_votecode()
-            self.votecode_hash = hasher.split(hasher.encode(self.votecode, salt, params))[2]
+            self.votecode_hash_value = hasher.split(hasher.encode(self.votecode, salt, params))[2]
             
         else:
-            self.votecode = self._generate_short_votecode()
+            self.votecode = self.partquestion.short_votecodes[self.index]
     
     def generate_receipt(self):
         
-        if self.election.votecode_type_is_long:
-            data = self.votecode
-        else:
-            # A receipt is always the signature of a long votecode, but this
-            # option only has a short one. Generate its long votecode here.
-            data = self._generate_long_votecode()
+        # The receipt is derived from the option's long votecode. If the
+        # election uses short votecodes, a temporary long votecode needs
+        # to be generated.
         
+        data = self._generate_long_votecode() if self.election.votecode_type_is_short else self.votecode
         signature = OpenSSL.crypto.sign(self.election.pkey, data, str(self.conf.hash_algorithm))
         
         self.receipt_full = base32.encode_from_bytes(signature, (self.conf.rsa_pkey_bits + 4) // 5)
         self.receipt = self.receipt_full[-self.conf.receipt_len:]
-
-
-class Trustee(base.Trustee):
-    pass
 
 
 class Conf(base.Conf):
