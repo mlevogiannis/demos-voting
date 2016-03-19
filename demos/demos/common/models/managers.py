@@ -15,38 +15,6 @@ class ElectionManager(models.Manager):
         return self.get(id=e_id)
 
 
-class QuestionManager(models.Manager):
-    
-    @related_attr('parts')
-    def _annotate_with_related_pk(self, obj):
-        self._related_part_pk = {'_related_part_pk': models.Value(obj.pk, output_field=obj._meta.pk)}
-    
-    def get_queryset(self):
-        queryset = super(QuestionManager, self).get_queryset()
-        if hasattr(self, '_related_part_pk'):
-            queryset = queryset.annotate(**self._related_part_pk)
-        return queryset
-    
-    def get_by_natural_key(self, e_id, q_index):
-        
-        model = self.model._meta.get_field('election').related_model
-        manager = model.objects.db_manager(self.db)
-        election = manager.get_by_natural_key(e_id)
-        
-        return self.get(election=election, index=q_index)
-
-
-class OptionManager_P(models.Manager):
-    
-    def get_by_natural_key(self, e_id, q_index, o_index):
-        
-        model = self.model._meta.get_field('question').related_model
-        manager = model.objects.db_manager(self.db)
-        question = manager.get_by_natural_key(e_id, q_index)
-        
-        return self.get(question=question, index=o_index)
-
-
 class BallotManager(models.Manager):
     
     @property
@@ -84,19 +52,36 @@ class PartManager(models.Manager):
         return self.get(ballot=ballot, tag=p_tag)
 
 
-class PartQuestionManager(models.Manager):
+class QuestionManager(models.Manager):
     
-    def get_by_natural_key(self, e_id, b_serial, p_tag, q_index):
+    @related_attr('parts')
+    def _annotate_with_related_pk(self, obj):
+        self._related_part_pk = {'_related_part_pk': models.Value(obj.pk, output_field=obj._meta.pk)}
+    
+    def get_queryset(self):
+        queryset = super(QuestionManager, self).get_queryset()
+        if hasattr(self, '_related_part_pk'):
+            queryset = queryset.annotate(**self._related_part_pk)
+        return queryset
+    
+    def get_by_natural_key(self, e_id, q_index):
         
-        model = self.model._meta.get_field('part').related_model
+        model = self.model._meta.get_field('election').related_model
         manager = model.objects.db_manager(self.db)
-        part = manager.get_by_natural_key(e_id, b_serial, p_tag)
+        election = manager.get_by_natural_key(e_id)
+        
+        return self.get(election=election, index=q_index)
+
+
+class OptionManager_P(models.Manager):
+    
+    def get_by_natural_key(self, e_id, q_index, o_index):
         
         model = self.model._meta.get_field('question').related_model
         manager = model.objects.db_manager(self.db)
         question = manager.get_by_natural_key(e_id, q_index)
         
-        return self.get(part=part, question=question)
+        return self.get(question=question, index=o_index)
 
 
 class OptionManager_C(models.Manager):
@@ -120,14 +105,19 @@ class OptionManager_C(models.Manager):
         return self.get(question=question, index=o_index)
 
 
-class ConfManager(models.Manager):
+class PartQuestionManager(models.Manager):
     
-    def get_by_natural_key(self, *args, **kwargs):
+    def get_by_natural_key(self, e_id, b_serial, p_tag, q_index):
         
-        fields = self.model._meta.unique_together[0]
-        kwargs.update(dict(zip(fields, args)))
+        model = self.model._meta.get_field('part').related_model
+        manager = model.objects.db_manager(self.db)
+        part = manager.get_by_natural_key(e_id, b_serial, p_tag)
         
-        return self.get(**kwargs)
+        model = self.model._meta.get_field('question').related_model
+        manager = model.objects.db_manager(self.db)
+        question = manager.get_by_natural_key(e_id, q_index)
+        
+        return self.get(part=part, question=question)
 
 
 class TaskManager(models.Manager):
@@ -139,4 +129,14 @@ class TaskManager(models.Manager):
         election = manager.get_by_natural_key(e_id)
         
         return self.get(election=election, task_id=task_id)
+
+
+class ConfManager(models.Manager):
+    
+    def get_by_natural_key(self, *args, **kwargs):
+        
+        fields = self.model._meta.unique_together[0]
+        kwargs.update(dict(zip(fields, args)))
+        
+        return self.get(**kwargs)
 

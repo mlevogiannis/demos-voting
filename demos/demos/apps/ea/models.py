@@ -69,14 +69,6 @@ class Election(base.Election):
         self.cert.sign(ca_pkey, str(self.conf.hash_algorithm))
 
 
-class Question(base.Question):
-    pass
-
-
-class Option_P(base.Option_P):
-    pass
-
-
 class Ballot(base.Ballot):
     
     def generate_credential(self):
@@ -97,17 +89,12 @@ class Part(base.Part):
         self.security_code_hash = self.election.hasher.encode(self.security_code)
 
 
-class PartQuestion(base.PartQuestion):
-    
-    def generate_common(self):
-        
-        if self.election.votecode_type_is_long:
-            self.votecode_hash_salt = self.election.hasher.salt()
-            self.votecode_hash_params = self.election.hasher.params()
-        else:
-            zfill = lambda votecode: six.text_type(votecode).zfill(self.options_c.short_votecode_len)
-            self.short_votecodes = list(map(zfill, range(1, self.option_cnt + 1)))
-            random.shuffle(self.short_votecodes)
+class Question(base.Question):
+    pass
+
+
+class Option_P(base.Option_P):
+    pass
 
 
 class Option_C(base.Option_C):
@@ -142,11 +129,24 @@ class Option_C(base.Option_C):
         self.receipt = self.receipt_full[-self.conf.receipt_len:]
 
 
-class Conf(base.Conf):
-    pass
+class PartQuestion(base.PartQuestion):
+    
+    def generate_common(self):
+        
+        if self.election.votecode_type_is_long:
+            self.votecode_hash_salt = self.election.hasher.salt()
+            self.votecode_hash_params = self.election.hasher.params()
+        else:
+            zfill = lambda votecode: six.text_type(votecode).zfill(self.options_c.short_votecode_len)
+            self.short_votecodes = list(map(zfill, range(1, self.option_cnt + 1)))
+            random.shuffle(self.short_votecodes)
 
 
 class Task(base.Task):
+    pass
+
+
+class Conf(base.Conf):
     pass
 
 

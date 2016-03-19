@@ -35,19 +35,6 @@ class Election(base.Election):
     
 
 
-class Question(base.Question):
-    
-    key = fields.ProtoField(cls=crypto.Key)
-    
-    com_combined = fields.ProtoField(cls=crypto.Com, null=True, default=None)
-    decom_combined = fields.ProtoField(cls=crypto.Decom, null=True, default=None)
-
-
-class Option_P(base.Option_P):
-    
-    votes = models.PositiveIntegerField(null=True, default=None)
-
-
 class Ballot(base.Ballot):
     
     credential = models.CharField(max_length=32, null=True, default=None)
@@ -62,10 +49,17 @@ class Part(base.Part):
     security_code_hash = models.CharField(max_length=128)
 
 
-class PartQuestion(base.PartQuestion):
+class Question(base.Question):
     
-    votecode_hash_salt = models.CharField(max_length=32, null=True, default=None)
-    votecode_hash_params = models.CharField(max_length=16, null=True, default=None)
+    key = fields.ProtoField(cls=crypto.Key)
+    
+    com_combined = fields.ProtoField(cls=crypto.Com, null=True, default=None)
+    decom_combined = fields.ProtoField(cls=crypto.Decom, null=True, default=None)
+
+
+class Option_P(base.Option_P):
+    
+    votes = models.PositiveIntegerField(null=True, default=None)
 
 
 class Option_C(base.Option_C):
@@ -82,11 +76,17 @@ class Option_C(base.Option_C):
     receipt_full = models.CharField(max_length=1024)
 
 
-class Conf(base.Conf):
-    pass
+class PartQuestion(base.PartQuestion):
+    
+    votecode_hash_salt = models.CharField(max_length=32, null=True, default=None)
+    votecode_hash_params = models.CharField(max_length=16, null=True, default=None)
 
 
 class Task(base.Task):
+    pass
+
+
+class Conf(base.Conf):
     pass
 
 

@@ -22,6 +22,22 @@ from demos.common.utils import base32
 logger = logging.getLogger(__name__)
 
 
+# ----------------------- #
+#                         #
+#        Election         #
+#       ___/  \           #
+#      /       \          #
+#   Ballot      \         #
+#     |          \        #
+#     |           \       #
+#   Part        Question  #
+#     |     ___/   |      #
+#     |    /       |      #
+#  Option_C     Option_P  #
+#                         #
+# ----------------------- #
+
+
 @python_2_unicode_compatible
 class Election(models.Model):
     
@@ -138,6 +154,86 @@ class Election(models.Model):
 
 
 @python_2_unicode_compatible
+class Ballot(models.Model):
+    
+    election = models.ForeignKey('Election')
+    serial = models.PositiveIntegerField()
+    
+    # Related object access
+    
+    @cached_property
+    def conf(self):
+        return self.election.conf
+    
+    # Default manager, meta options and natural key
+    
+    objects = managers.BallotManager()
+    
+    class Meta:
+        abstract = True
+        default_related_name = 'ballots'
+        ordering = ['election', 'serial']
+        unique_together = ['election', 'serial']
+    
+    def natural_key(self):
+        return self.election.natural_key() + (self.serial,)
+    
+    natural_key.dependencies = ['Election']
+    
+    def __str__(self):
+        return "%s" % self.serial
+
+
+@python_2_unicode_compatible
+class Part(models.Model):
+    
+    TAG_A = 'A'
+    TAG_B = 'B'
+    
+    TAG_CHOICES = (
+        (TAG_A, 'A'),
+        (TAG_B, 'B'),
+    )
+    
+    ballot = models.ForeignKey('Ballot')
+    tag = models.CharField(max_length=1, choices=TAG_CHOICES)
+    
+    # Related object access
+    
+    @cached_property
+    def election(self):
+        return self.ballot.election
+    
+    @cached_property
+    def conf(self):
+        return self.election.conf
+    
+    @property
+    def questions(self):
+        manager = self._questions
+        manager._annotate_with_related_pk(self)
+        return manager
+    
+    # Default manager, meta options and natural key
+    
+    objects = managers.PartManager()
+    
+    class Meta:
+        abstract = True
+        default_related_name = 'parts'
+        ordering = ['ballot', 'tag']
+        unique_together = ['ballot', 'tag']
+    
+    def natural_key(self):
+        return self.ballot.natural_key() + (self.tag,)
+    
+    natural_key.dependencies = ['Ballot']
+    
+    def __str__(self):
+        return "%s" % self.tag
+
+
+@python_2_unicode_compatible
 class Question(models.Model):
     
     LAYOUT_ONE_COLUMN = 'one_column'
@@ -166,20 +262,20 @@ class Question(models.Model):
     # Related object access
     
     @cached_property
+    def conf(self):
+        return self.election.conf
+    
+    @property
     def options(self):
         if hasattr(self, '_related_part_pk'):
             raise AttributeError
         return self.options_p
     
-    @cached_property
+    @property
     def options_c(self):
         if not hasattr(self, '_related_part_pk'):
             raise AttributeError
         return self.partquestions.get(part=self._related_part_pk).options_c
-    
-    @cached_property
-    def conf(self):
-        return self.election.conf
     
     # Default manager, meta options and natural key
     
@@ -235,124 +331,6 @@ class Option_P(models.Model):
     
     def __str__(self):
         return "%s - %s" % (self.index + 1, self.text)
-
-
-@python_2_unicode_compatible
-class Ballot(models.Model):
-    
-    election = models.ForeignKey('Election')
-    serial = models.PositiveIntegerField()
-    
-    # Related object access
-    
-    @cached_property
-    def conf(self):
-        return self.election.conf
-    
-    # Default manager, meta options and natural key
-    
-    objects = managers.BallotManager()
-    
-    class Meta:
-        abstract = True
-        default_related_name = 'ballots'
-        ordering = ['election', 'serial']
-        unique_together = ['election', 'serial']
-    
-    def natural_key(self):
-        return self.election.natural_key() + (self.serial,)
-    
-    natural_key.dependencies = ['Election']
-    
-    def __str__(self):
-        return "%s" % self.serial
-
-
-@python_2_unicode_compatible
-class Part(models.Model):
-    
-    TAG_A = 'A'
-    TAG_B = 'B'
-    
-    TAG_CHOICES = (
-        (TAG_A, 'A'),
-        (TAG_B, 'B'),
-    )
-    
-    ballot = models.ForeignKey('Ballot')
-    tag = models.CharField(max_length=1, choices=TAG_CHOICES)
-    
-    # Related object access
-    
-    @cached_property
-    def election(self):
-        return self.ballot.election
-    
-    @property
-    def questions(self):
-        manager = self._questions
-        manager._annotate_with_related_pk(self)
-        return manager
-    
-    @cached_property
-    def conf(self):
-        return self.election.conf
-    
-    # Default manager, meta options and natural key
-    
-    objects = managers.PartManager()
-    
-    class Meta:
-        abstract = True
-        default_related_name = 'parts'
-        ordering = ['ballot', 'tag']
-        unique_together = ['ballot', 'tag']
-    
-    def natural_key(self):
-        return self.ballot.natural_key() + (self.tag,)
-    
-    natural_key.dependencies = ['Ballot']
-    
-    def __str__(self):
-        return "%s" % self.tag
-
-
-class PartQuestion(models.Model):
-    
-    part = models.ForeignKey('Part')
-    question = models.ForeignKey('Question')
-    
-    # Related object access
-    
-    @cached_property
-    def election(self):
-        return self.question.election
-    
-    @cached_property
-    def ballot(self):
-        return self.part.ballot
-    
-    @cached_property
-    def conf(self):
-        return self.election.conf
-    
-    # Default manager, meta options and natural key
-    
-    objects = managers.PartQuestionManager()
-    
-    class Meta:
-        abstract = True
-        default_related_name = 'partquestions'
-        ordering = ['part', 'question']
-        unique_together = ['part', 'question']
-    
-    def natural_key(self):
-        return self.part.natural_key() + self.question.natural_key()[1:]
-    
-    natural_key.dependencies = ['Part', 'Question']
-    
-    def __str__(self):
-        return "%s - %s" % (self.part.tag, self.question.index + 1)
 
 
 @python_2_unicode_compatible
@@ -435,6 +413,66 @@ class Option_C(models.Model):
 
 
 @python_2_unicode_compatible
+class PartQuestion(models.Model):
+    
+    part = models.ForeignKey('Part')
+    question = models.ForeignKey('Question')
+    
+    # Related object access
+    
+    @cached_property
+    def election(self):
+        return self.question.election
+    
+    @cached_property
+    def ballot(self):
+        return self.part.ballot
+    
+    @cached_property
+    def conf(self):
+        return self.election.conf
+    
+    # Default manager, meta options and natural key
+    
+    objects = managers.PartQuestionManager()
+    
+    class Meta:
+        abstract = True
+        default_related_name = 'partquestions'
+        ordering = ['part', 'question']
+        unique_together = ['part', 'question']
+    
+    def natural_key(self):
+        return self.part.natural_key() + self.question.natural_key()[1:]
+    
+    natural_key.dependencies = ['Part', 'Question']
+    
+    def __str__(self):
+        return "%s - %s" % (self.part.tag, self.question.index + 1)
+
+
+@python_2_unicode_compatible
+class Task(models.Model):
+    
+    task_id = models.UUIDField(unique=True)
+    election = models.ForeignKey('Election')
+    
+    # Default manager, meta options and natural key
+    
+    objects = managers.TaskManager()
+    
+    class Meta:
+        abstract = True
+        default_related_name = 'tasks'
+    
+    def natural_key(self):
+        return self.election.natural_key() + (self.task_id,)
+    
+    def __str__(self):
+        return "%s - %s" % (self.election.id, self.task_id)
+
+
+@python_2_unicode_compatible
 class Conf(models.Model):
     
     VERSION_1 = '1'
@@ -481,25 +519,4 @@ class Conf(models.Model):
     
     def __str__(self):
         return "%s" % self.version
-
-
-@python_2_unicode_compatible
-class Task(models.Model):
-    
-    task_id = models.UUIDField(unique=True)
-    election = models.ForeignKey('Election')
-    
-    # Default manager, meta options and natural key
-    
-    objects = managers.TaskManager()
-    
-    class Meta:
-        abstract = True
-        default_related_name = 'tasks'
-    
-    def natural_key(self):
-        return self.election.natural_key() + (self.task_id,)
-    
-    def __str__(self):
-        return "%s - %s" % (self.election.id, self.task_id)
 

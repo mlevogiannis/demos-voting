@@ -44,11 +44,11 @@ class Part(base.Part):
     security_code = models.CharField(max_length=32)
 
 
-class Conf(base.Conf):
+class Task(base.Task):
     pass
 
 
-class Task(base.Task):
+class Conf(base.Conf):
     pass
 
 

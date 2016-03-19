@@ -23,14 +23,6 @@ class Election(base.Election):
     voting_ended_at = models.DateTimeField(null=True, default=None)
 
 
-class Question(base.Question):
-    pass
-
-
-class Option_P(base.Option_P):
-    pass
-
-
 class Ballot(base.Ballot):
     
     credential_hash = models.CharField(max_length=128)
@@ -62,10 +54,12 @@ class Part(base.Part):
                 hasher.verify(base32.normalize(security_code), self.security_code_hash))
 
 
-class PartQuestion(base.PartQuestion):
-    
-    votecode_hash_salt = models.CharField(max_length=32, null=True, default=None)
-    votecode_hash_params = models.CharField(max_length=16, null=True, default=None)
+class Question(base.Question):
+    pass
+
+
+class Option_P(base.Option_P):
+    pass
 
 
 class Option_C(base.Option_C):
@@ -76,11 +70,17 @@ class Option_C(base.Option_C):
     receipt = models.CharField(max_length=32)
 
 
-class Conf(base.Conf):
-    pass
+class PartQuestion(base.PartQuestion):
+    
+    votecode_hash_salt = models.CharField(max_length=32, null=True, default=None)
+    votecode_hash_params = models.CharField(max_length=16, null=True, default=None)
 
 
 class Task(base.Task):
+    pass
+
+
+class Conf(base.Conf):
     pass
 
 
