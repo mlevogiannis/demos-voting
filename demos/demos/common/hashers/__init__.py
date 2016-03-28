@@ -2,13 +2,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from demos.common.conf import constants
 from demos.common.hashers import base, bcrypt, pbkdf2, scrypt
-
-
-class _ConstantsConf(object):
-    def __getattr__(self, name):
-        return getattr(constants, name.upper())
 
 
 def _get_hashers(hasher):
@@ -19,9 +13,8 @@ def _get_hashers(hasher):
             yield hasher
 
 
-_constants = _ConstantsConf()
 _hashers = {hasher.algorithm: hasher for hasher in _get_hashers(base.BaseHasher)}
 
-def get_hasher(conf=_constants):
-    return _hashers[conf.key_derivation](conf)
+def get_hasher(conf):
+    return _hashers[conf.key_derivation_algorithm](conf)
 

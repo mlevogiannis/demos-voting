@@ -130,13 +130,3 @@ class TaskManager(models.Manager):
         
         return self.get(election=election, task_id=task_id)
 
-
-class ConfManager(models.Manager):
-    
-    def get_by_natural_key(self, *args, **kwargs):
-        
-        fields = self.model._meta.unique_together[0]
-        kwargs.update(dict(zip(fields, args)))
-        
-        return self.get(**kwargs)
-

@@ -1,5 +1,4 @@
 # -*- encoding: utf-8 -*-
-# File: settings.py
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -11,14 +10,8 @@ https://docs.djangoproject.com/en/1.8/topics/settings/
 
 """
 
-import os
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-
-# Quick-start development settings - unsuitable for production
+# Quick-start settings
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 ALLOWED_HOSTS = [
@@ -40,20 +33,24 @@ DEBUG = False
 DEVELOPMENT = False
 
 if DEVELOPMENT:
-    
     DEBUG = True
-    DEVELOPMENT_DIR = os.path.join(os.path.dirname(BASE_DIR), 'devel')
 
 
-# UNIX-domain sockets are placed under RUN_DIR, app data under VARLIB_DIR
+import os
+
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Runtime data (e.g. UNIX-domain sockets) are placed in RUN_DIR,
+# application data (e.g. ballots, certificates) are placed in DATA_DIR.
 
 RUN_DIR = '/run/demos-voting'
-VARLIB_DIR = '/var/lib/demos-voting'
+DATA_DIR = '/var/lib/demos-voting'
 
 if DEVELOPMENT:
-    
-    RUN_DIR = os.path.join(DEVELOPMENT_DIR, 'sockets')
-    VARLIB_DIR = os.path.join(DEVELOPMENT_DIR, 'data')
+    RUN_DIR = os.path.join(os.path.dirname(BASE_DIR), 'run')
+    DATA_DIR = os.path.join(os.path.dirname(BASE_DIR), 'data')
 
 
 # Application definition
@@ -65,7 +62,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'demos.common',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -114,7 +110,6 @@ TEMPLATES = [
 ]
 
 if DEVELOPMENT:
-    
     TEMPLATES[0]['APP_DIRS'] = True
     del TEMPLATES[0]['OPTIONS']['loaders']
 
@@ -127,9 +122,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'demos_voting',
         'USER': 'demos_voting',
-        #'PASSWORD': '',
-        #'HOST': '',
-        #'PORT': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
     }
 }
 
@@ -152,9 +147,7 @@ TIME_ZONE = 'Europe/Athens'
 USE_I18N = True
 USE_L10N = True
 
-LOCALE_PATHS = [
-    os.path.join(BASE_DIR, 'common/locale'),
-]
+LOCALE_PATHS = []
 
 
 # Static files (CSS, JavaScript, Images)
@@ -180,6 +173,29 @@ if DEVELOPMENT:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
+# Security Middleware
+# https://docs.djangoproject.com/en/1.8/ref/middleware/#module-django.middleware.security
+
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_SECONDS = 31536000
+
+if DEVELOPMENT:
+    SECURE_BROWSER_XSS_FILTER = False
+    SECURE_CONTENT_TYPE_NOSNIFF = False
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_SECONDS = 0
+
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+if DEVELOPMENT:
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
+
+
 # Logging
 # https://docs.djangoproject.com/en/1.8/topics/logging/
 
@@ -187,19 +203,20 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler'
-        },
         'syslog': {
             'level': 'INFO',
             'class': 'logging.handlers.SysLogHandler',
-            'address': '/dev/log', # Linux-specific
-        }
+            'address': '/dev/log',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'include_html': True,
+        },
     },
     'loggers': {
         'root': {
-            'handlers': ['syslog',]
+            'handlers': ['syslog']
             },
         'django': {
             'handlers': ['mail_admins', 'syslog'],
@@ -214,175 +231,113 @@ LOGGING = {
 
 if DEVELOPMENT:
     
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'handlers': {
-            'console': {
-                'level': 'DEBUG',
-                'class': 'logging.StreamHandler',
-            },
+    LOGGING['handlers'] = {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
         },
-        'loggers': {
-            'root': {
-                'handlers': ['console']
-            },
-            'django': {
-                'handlers': ['console'],
-                'level': 'DEBUG',
-            },
-            'django.request': {
-                'handlers': ['console'],
-                'level': 'DEBUG',
-            },
-            'django.db.backends': {
-                'handlers': ['console'],
-                'level': 'INFO',
-                'propagate': False,
-            },
-            'demos': {
-                'handlers': ['console'],
-                'level': 'DEBUG',
-            },
-        }
+    }
+    
+    LOGGING['loggers'] = {
+        'root': {
+            'handlers': ['console']
+        },
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'demos': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
     }
 
 
-# Security Middleware
-# https://docs.djangoproject.com/en/1.8/ref/middleware/#module-django.middleware.security
+# DEMOS Voting configuration
 
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_SECONDS = 31536000
+# DEMOS_APPS: One or more of 'ea', 'bds', 'abb', 'vbb'. Warning! The apps must
+# be isolated (with regard to data storage and access to the server), in order
+# to support voter privacy. Never use multiple apps on the same production
+# server. This feature is intended only to be used for development purposes.
 
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
+DEMOS_APPS = []
 
-if DEVELOPMENT:
-    
-    SECURE_BROWSER_XSS_FILTER = False
-    SECURE_CONTENT_TYPE_NOSNIFF = False
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
-    SECURE_HSTS_SECONDS = 0
-    
-    CSRF_COOKIE_SECURE = False
-    SESSION_COOKIE_SECURE = False
+INSTALLED_APPS += ['demos.%s' % path for path in (['common'] + ['apps.%s' % app for app in DEMOS_APPS])]
+LOCALE_PATHS += [os.path.join(BASE_DIR, '%s/locale' % p) for p in (['common'] + ['apps/%s' % a for a in DEMOS_APPS])]
 
+# DEMOS_URLS: A dictionary of strings, each one representing the URL by which
+# an app is served. Always use HTTPS URLs.
 
-# Demos-Voting configuration
-
-DEMOS_APPS = []    # one or more of: ea, bds, abb, vbb
-
-DEMOS_CONFIG = {
-    
-    'ea': {
-        
-        # Election configuration
-        
-        'MAX_BALLOTS': 100000,
-        'MAX_OPTIONS': 128,
-        'MAX_TRUSTEES': 128,
-        'MAX_QUESTIONS': 32,
-        
-        # demos-crypto connection parameters, see:
-        # https://docs.python.org/3/library/socket.html
-        
-        # CRYPTO_AF: e.g. 'AF_UNIX' or 'AF_INET' or 'AF_INET6'
-        # CRYPTO_ADDR: e.g. '/run/demos-crypto.sock' or ('127.0.0.1', 8999)
-        
-        'CRYPTO_AF': 'AF_UNIX',
-        'CRYPTO_ADDR': os.path.join(RUN_DIR, 'demos-crypto.sock'),
-        
-        # Performance settings, they affect CPU and RAM usage, etc
-        
-        'BATCH_SIZE': 128,
-        
-        'RECV_MAX': 67108864,   # 64 MB
-        'RECV_TIMEOUT': 900,   # 15 mins
-        
-        # Certificate Authority (X.509 / RSA)
-        
-        # CA_CERT_PEM: e.g. '/etc/pki/CA/cacert.pem',
-        # CA_PKEY_PEM: e.g. '/etc/pki/CA/private/cakey.pem',
-        
-        # If DEVELOPMENT is True and pem-file paths are empty or invalid,
-        # self-signed certificates will be generated
-        
-        'CA_CERT_PEM': '',
-        'CA_PKEY_PEM': '',
-        'CA_PKEY_PASSPHRASE': '',
-    },
-    
-    'bds': {
-        
-        # Performance settings, they affect CPU and RAM usage, etc
-        
-        'BATCH_SIZE': 128,
-        
-        # Absolute path to the directory that will hold machine-local files
-        
-        'FILESYSTEM_ROOT': os.path.join(VARLIB_DIR, 'bds'),
-    },
-    
-    'abb': {
-        
-        # Performance settings, they affect CPU and RAM usage, etc
-        
-        'BATCH_SIZE': 128,
-        
-        # Absolute path to the directory that will hold machine-local files
-        
-        'FILESYSTEM_ROOT': os.path.join(VARLIB_DIR, 'abb'),
-    },
-    
-    'vbb': {
-    },
-}
-
-DEMOS_URL = {
+DEMOS_URLS = {
     'ea' : 'https://www.example.org/demos/ea/',
     'bds': 'https://www.example.org/demos/bds/',
     'abb': 'https://www.example.org/demos/abb/',
     'vbb': 'https://www.example.org/demos/vbb/',
 }
 
-DEMOS_API_URL = {
-    'ea' : 'https://api.example.org/demos/ea/',
-    'bds': 'https://api.example.org/demos/bds/',
-    'abb': 'https://api.example.org/demos/abb/',
-    'vbb': 'https://api.example.org/demos/vbb/',
+# DEMOS_API_URLS: Same as DEMOS_URLS, but for the internal API. It is
+# recommended that these URLs are accessible only through a private network.
+
+DEMOS_API_URLS = {
+    'ea' : 'https://api.example.local/demos/ea/',
+    'bds': 'https://api.example.local/demos/bds/',
+    'abb': 'https://api.example.local/demos/abb/',
+    'vbb': 'https://api.example.local/demos/vbb/',
 }
 
-# In case the API URLs are SSL-enabled and use self-signed certificates,
-# their verification can be disabled to allow requests among servers
+# DEMOS_API_VERIFY_SSL: If False, the SSL certificates for API requests will
+# not be verified. Required if the servers use self-signed SSL certificates.
 # http://docs.python-requests.org/en/latest/user/advanced/#ssl-cert-verification
 
-# DEMOS_API_VERIFY = False    # the default is True
+DEMOS_API_VERIFY_SSL = True
 
+# DEMOS_BATCH_SIZE: Controls how many objects (e.g. ballots) are processed in
+# a single iteration.
 
-INSTALLED_APPS += [ 'demos.apps.%s' % app for app in DEMOS_APPS ]
-LOCALE_PATHS += [ os.path.join(BASE_DIR, 'apps/%s/locale' % app) for app in DEMOS_APPS ]
+DEMOS_BATCH_SIZE = 128
+
+# DEMOS_DATA_DIR: Absolute path to the directory that will hold local files.
+
+DEMOS_DATA_DIR = DATA_DIR
+
+# DEMOS_CRYPTO_*: (ea only) Connection parameters for demos-crypto. See:
+# https://docs.python.org/3/library/socket.html
+
+DEMOS_CRYPTO_AF = 'AF_UNIX'
+DEMOS_CRYPTO_ADDR = os.path.join(RUN_DIR, 'demos-crypto.sock')
+
+# DEMOS_CA_*: (ea only) Certificate authority configuration. If both
+# CA_CERT_FILE and CA_PKEY_FILE are empty, self-signed certificates will
+# be generated. CA_PKEY_PASSPHRASE is optional.
+
+DEMOS_CA_CERT_FILE = ''
+DEMOS_CA_PKEY_FILE = ''
+DEMOS_CA_PKEY_PASSPHRASE = ''
+
+# DEMOS_MAX_*: The maximum number of ballots, questions per referendum,
+# options per question, parties per election and candidates per party.
+
+DEMOS_MAX_BALLOTS = 10000
+DEMOS_MAX_ELECTION_PARTIES = 50
+DEMOS_MAX_ELECTION_CANDIDATES = 50
+DEMOS_MAX_REFERENDUM_QUESTIONS = 50
+DEMOS_MAX_REFERENDUM_OPTIONS = 50
 
 
 # Celery configuration
 # http://docs.celeryproject.org/en/latest/getting-started/brokers/index.html
 
-BROKER_URL = 'redis+socket://' + os.path.join(RUN_DIR, 'redis.sock')
-CELERY_RESULT_BACKEND = BROKER_URL
+INSTALLED_APPS += ['kombu.transport.django']
+
+BROKER_URL = 'django://'
+CELERY_RESULT_BACKEND = 'db+postgresql://%(USER)s:%(PASSWORD)s@%(HOST)s:%(PORT)s/%(NAME)s' % DATABASES['default']
 
 CELERY_TASK_SERIALIZER = 'custom-json'
 CELERY_RESULT_SERIALIZER = 'custom-json'
 CELERY_ACCEPT_CONTENT = ['custom-json', 'json', 'msgpack']
-
-if DEVELOPMENT and False:
-    
-    # Alternative config, only using Django + existing db
-    # Note: introduces dependency on python-SQLAlchemy
-    
-    INSTALLED_APPS += [ 'kombu.transport.django' ]
-    
-    BROKER_URL = 'django://'
-    CELERY_RESULT_BACKEND = 'db+postgresql://%(USER)s:%(PASSWORD)s@' \
-        '%(HOST)s:%(PORT)s/%(NAME)s' % DATABASES['default']
 

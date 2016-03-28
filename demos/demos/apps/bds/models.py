@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import logging
 import os
 
-from django.apps import apps
+from django.conf import settings
 from django.db import models
 
 from demos.common.models import base
@@ -13,12 +13,9 @@ from demos.common.utils import storage
 
 logger = logging.getLogger(__name__)
 
-app_config = apps.get_app_config('bds')
-settings = app_config.get_constants_and_settings()
-
 
 ballot_fs = storage.PrivateTarFileStorage(
-    location=os.path.join(settings.FILESYSTEM_ROOT, 'ballots'),
+    location=os.path.join(settings.DEMOS_DATA_DIR, 'bds/ballots'),
     tar_permissions_mode=0o600, tar_file_permissions_mode=0o600,
     tar_directory_permissions_mode=0o700
 )
@@ -45,10 +42,6 @@ class Part(base.Part):
 
 
 class Task(base.Task):
-    pass
-
-
-class Conf(base.Conf):
     pass
 
 

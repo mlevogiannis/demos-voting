@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import logging
 import os
 
-from django.apps import apps
+from django.conf import settings
 from django.db import models
 
 from demos.common.models import base
@@ -13,11 +13,8 @@ from demos.common.utils import crypto, fields, storage
 
 logger = logging.getLogger(__name__)
 
-app_config = apps.get_app_config('abb')
-settings = app_config.get_constants_and_settings()
 
-
-fs_root = storage.PrivateFileSystemStorage(location=settings.FILESYSTEM_ROOT,
+fs_root = storage.PrivateFileSystemStorage(location=settings.DEMOS_DATA_DIR,
     file_permissions_mode=0o600, directory_permissions_mode=0o700)
 
 def get_cert_file_path(election, filename):
@@ -83,10 +80,6 @@ class PartQuestion(base.PartQuestion):
 
 
 class Task(base.Task):
-    pass
-
-
-class Conf(base.Conf):
     pass
 
 

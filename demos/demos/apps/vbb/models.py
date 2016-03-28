@@ -5,7 +5,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import logging
 import re
 
-from django.apps import apps
 from django.db import models
 
 from demos.common.models import base
@@ -13,8 +12,6 @@ from demos.common.utils import base32
 
 logger = logging.getLogger(__name__)
 
-app_config = apps.get_app_config('vbb')
-settings = app_config.get_constants_and_settings()
 
 
 class Election(base.Election):
@@ -77,10 +74,6 @@ class PartQuestion(base.PartQuestion):
 
 
 class Task(base.Task):
-    pass
-
-
-class Conf(base.Conf):
     pass
 
 

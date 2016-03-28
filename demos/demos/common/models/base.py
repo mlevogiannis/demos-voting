@@ -14,9 +14,8 @@ from django.utils.functional import cached_property
 from django.utils.six.moves import range, zip
 from django.utils.translation import ugettext_lazy as _
 
-from demos.common.conf import constants
 from demos.common.hashers import get_hasher
-from demos.common.models import managers
+from demos.common.models import fields, managers
 from demos.common.utils import base32
 
 logger = logging.getLogger(__name__)
@@ -106,10 +105,16 @@ class Election(models.Model):
     type = models.CharField(max_length=16, choices=TYPE_CHOICES)
     votecode_type = models.CharField(max_length=16, choices=VOTECODE_TYPE_CHOICES)
     
-    conf = models.ForeignKey('Conf')
-    
     ballot_cnt = models.PositiveIntegerField()
     question_cnt = models.PositiveSmallIntegerField()
+    
+    _conf = fields.JSONField(db_column='conf', default={
+        'credential_bits': 64,
+        'long_votecode_len': 16,
+        'receipt_len': 10,
+        'security_code_len': 8,
+        'hash_algorithm': 'sha256',
+    })
     
     _id = models.AutoField(db_column='id', primary_key=True)
     
@@ -130,6 +135,10 @@ class Election(models.Model):
     @property
     def votecode_type_is_long(self):
         return self.votecode_type == self.VOTECODE_TYPE_LONG
+    
+    @cached_property
+    def conf(self):
+        return type(str('Conf'), (object,), self._conf)()
     
     @cached_property
     def hasher(self):
@@ -470,53 +479,4 @@ class Task(models.Model):
     
     def __str__(self):
         return "%s - %s" % (self.election.id, self.task_id)
-
-
-@python_2_unicode_compatible
-class Conf(models.Model):
-    
-    VERSION_1 = '1'
-    
-    VERSION_CHOICES = (
-        (VERSION_1, '1'),
-    )
-    
-    version = models.CharField(max_length=4, choices=VERSION_CHOICES, default=VERSION_1)
-    
-    receipt_len = models.PositiveSmallIntegerField(default=constants.RECEIPT_LEN)
-    long_votecode_len = models.PositiveSmallIntegerField(default=constants.LONG_VOTECODE_LEN)
-    security_code_len = models.PositiveSmallIntegerField(default=constants.SECURITY_CODE_LEN)
-    
-    credential_bits = models.PositiveSmallIntegerField(default=constants.CREDENTIAL_BITS)
-    rsa_pkey_bits = models.PositiveSmallIntegerField(default=constants.RSA_PKEY_BITS)
-    
-    ecc_curve = models.PositiveSmallIntegerField(default=constants.ECC_CURVE)
-    
-    hash_algorithm = models.CharField(max_length=32, default=constants.HASH_ALGORITHM)
-    key_derivation = models.CharField(max_length=32, default=constants.KEY_DERIVATION)
-    
-    # Custom methods and properties
-    
-    @classmethod
-    def defaults(cls):
-        kwargs = {}
-        for field in cls._meta.get_fields():
-            if not (field.auto_created or field.is_relation):
-                kwargs[field.name] = field.default
-        return kwargs
-    
-    # Default manager, meta options and natural key
-    
-    objects = managers.ConfManager()
-    
-    class Meta:
-        abstract = True
-        unique_together = ['version', 'receipt_len', 'long_votecode_len', 'security_code_len', 'credential_bits',
-                           'rsa_pkey_bits', 'ecc_curve', 'hash_algorithm', 'key_derivation']
-    
-    def natural_key(self):
-        return tuple([getattr(self, name) for name in self._meta.unique_together[0]])
-    
-    def __str__(self):
-        return "%s" % self.version
 

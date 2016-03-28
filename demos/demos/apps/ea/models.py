@@ -8,7 +8,7 @@ import OpenSSL
 
 from datetime import timedelta
 
-from django.apps import apps
+from django.conf import settings
 from django.db import models
 from django.utils import six, timezone
 from django.utils.encoding import force_bytes
@@ -20,8 +20,6 @@ from demos.common.utils import base32, crypto, fields
 logger = logging.getLogger(__name__)
 random = random.SystemRandom()
 
-app_config = apps.get_app_config('ea')
-settings = app_config.get_constants_and_settings()
 
 
 class Election(base.Election):
@@ -34,19 +32,24 @@ class Election(base.Election):
     def generate_pkey(self):
         
         self.pkey = OpenSSL.crypto.PKey()
-        self.pkey.generate_key(OpenSSL.crypto.TYPE_RSA, self.conf.rsa_pkey_bits)
+        self.pkey.generate_key(OpenSSL.crypto.TYPE_RSA, 2048)
     
     def generate_cert(self):
         
         self.cert = OpenSSL.crypto.X509()
         
-        if settings.CA_PKEY_PEM or settings.CA_CERT_PEM:
+        ca_pkey_path = getattr(settings, 'DEMOS_CA_PKEY_FILE', '')
+        ca_cert_path = getattr(settings, 'DEMOS_CA_CERT_FILE', '')
+        
+        if ca_pkey_path or ca_cert_path:
             
-            with open(settings.CA_PKEY_PEM, 'r') as ca_pkey_file:
+            ca_pkey_passphrase = getattr(settings, 'DEMOS_CA_PKEY_PASSPHRASE', '')
+            
+            with open(ca_pkey_path, 'r') as ca_pkey_file:
                 ca_pkey = OpenSSL.crypto.load_privatekey(OpenSSL.crypto.FILETYPE_PEM, ca_pkey_file.read(),
-                                                         force_bytes(settings.CA_PKEY_PASSPHRASE))
+                                                         force_bytes(ca_pkey_passphrase))
             
-            with open(settings.CA_CERT_PEM, 'r') as ca_cert_file:
+            with open(ca_cert_path, 'r') as ca_cert_file:
                 ca_cert = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, ca_cert_file.read())
             
             self.cert.set_subject(ca_cert.get_subject())
@@ -65,7 +68,6 @@ class Election(base.Election):
         self.cert.set_notBefore(force_bytes(now.strftime('%Y%m%d%H%M%S%z')))
         self.cert.set_notAfter(force_bytes((now+timedelta(365)).strftime('%Y%m%d%H%M%S%z')))
         self.cert.set_pubkey(self.pkey)
-        
         self.cert.sign(ca_pkey, str(self.conf.hash_algorithm))
 
 
@@ -125,7 +127,7 @@ class Option_C(base.Option_C):
         data = self._generate_long_votecode() if self.election.votecode_type_is_short else self.votecode
         signature = OpenSSL.crypto.sign(self.election.pkey, data, str(self.conf.hash_algorithm))
         
-        self.receipt_full = base32.encode_from_bytes(signature, (self.conf.rsa_pkey_bits + 4) // 5)
+        self.receipt_full = base32.encode_from_bytes(signature, (self.election.pkey.bits() + 4) // 5)
         self.receipt = self.receipt_full[-self.conf.receipt_len:]
 
 
@@ -143,10 +145,6 @@ class PartQuestion(base.PartQuestion):
 
 
 class Task(base.Task):
-    pass
-
-
-class Conf(base.Conf):
     pass
 
 

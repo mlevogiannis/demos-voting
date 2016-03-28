@@ -19,14 +19,14 @@ class ApiSession(object):
     _csrftoken = settings.CSRF_COOKIE_NAME
     _csrfmiddlewaretoken = 'csrfmiddlewaretoken'
     
-    _verify = getattr(settings, 'DEMOS_API_VERIFY', True)
+    _verify = getattr(settings, 'DEMOS_API_VERIFY_SSL', True)
     
     def __init__(self, remote_app, app_config, logger=logger):
         
         self.s = requests.Session()
         
         self.logger = logger
-        self.url = settings.DEMOS_API_URL[remote_app]
+        self.url = settings.DEMOS_API_URLS[remote_app]
         
         self.username = app_config.label
         self.password = app_config.get_model('RemoteUser').objects.get(username=remote_app).password
