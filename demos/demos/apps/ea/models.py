@@ -12,6 +12,7 @@ from django.db import models
 from django.utils import six
 from django.utils.encoding import force_bytes
 from django.utils.six.moves import range
+from django.utils.translation import ugettext_lazy as _
 
 from demos.common.models import base
 from demos.common.utils import base32, crypto, fields
@@ -23,10 +24,10 @@ random = random.SystemRandom()
 
 class Election(base.Election):
     
-    created_at = models.DateTimeField(auto_now_add=True)
-    modified_at = models.DateTimeField(auto_now=True)
-    setup_started_at = models.DateTimeField(null=True, default=None)
-    setup_ended_at = models.DateTimeField(null=True, default=None)
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    modified_at = models.DateTimeField(_("modified at"), auto_now=True)
+    setup_started_at = models.DateTimeField(_("setup started at"), null=True, default=None)
+    setup_ended_at = models.DateTimeField(_("setup ended at"), null=True, default=None)
     
     def generate_key(self):
         
@@ -124,9 +125,9 @@ class Option_C(base.Option_C):
         # to be generated.
         
         data = self._generate_long_votecode() if self.election.votecode_type_is_short else self.votecode
-        signature = OpenSSL.crypto.sign(self.election.pkey, data, str(self.conf.hash_algorithm))
+        signature = OpenSSL.crypto.sign(self.election.key, data, str(self.conf.hash_algorithm))
         
-        self.receipt_full = base32.encode_from_bytes(signature, (self.election.pkey.bits() + 4) // 5)
+        self.receipt_full = base32.encode_from_bytes(signature, (self.election.key.bits() + 4) // 5)
         self.receipt = self.receipt_full[-self.conf.receipt_len:]
 
 

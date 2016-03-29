@@ -12,7 +12,7 @@ from django.utils import six
 from django.utils.encoding import force_bytes, python_2_unicode_compatible
 from django.utils.functional import cached_property
 from django.utils.six.moves import range, zip
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import pgettext_lazy, ugettext_lazy as _
 
 from demos.common.hashers import get_hasher
 from demos.common.models import fields, managers
@@ -44,8 +44,8 @@ class Election(models.Model):
     TYPE_REFERENDUM = 'referendum'
     
     TYPE_CHOICES = (
-        (TYPE_ELECTION, _("Election")),
-        (TYPE_REFERENDUM, _("Referendum")),
+        (TYPE_ELECTION, pgettext_lazy("type", "Election")),
+        (TYPE_REFERENDUM, pgettext_lazy("type", "Referendum")),
     )
     
     VOTECODE_TYPE_SHORT = 'short'
@@ -90,23 +90,23 @@ class Election(models.Model):
         (STATE_CANCELLED, _("Cancelled")),
     )
     
-    id = models.CharField(unique=True, max_length=16, db_column='_id',
+    id = models.CharField(_("id"), unique=True, max_length=16, db_column='_id',
         validators=[RegexValidator(regex=(r'^%s+$' % base32.regex))])
     
-    name = models.TextField()
+    name = models.TextField(_("name"))
     
-    ballot_distribution_starts_at = models.DateTimeField()
-    ballot_distribution_ends_at = models.DateTimeField()
-    voting_starts_at = models.DateTimeField()
-    voting_ends_at = models.DateTimeField()
+    ballot_distribution_starts_at = models.DateTimeField(_("ballot distribution starts at"))
+    ballot_distribution_ends_at = models.DateTimeField(_("ballot distribution ends at"))
+    voting_starts_at = models.DateTimeField(_("voting starts at"))
+    voting_ends_at = models.DateTimeField(_("voting ends at"))
     
-    state = models.CharField(max_length=64, choices=STATE_CHOICES)
+    state = models.CharField(_("state"), max_length=64, choices=STATE_CHOICES)
 
-    type = models.CharField(max_length=16, choices=TYPE_CHOICES)
-    votecode_type = models.CharField(max_length=16, choices=VOTECODE_TYPE_CHOICES)
+    type = models.CharField(_("type"), max_length=16, choices=TYPE_CHOICES)
+    votecode_type = models.CharField(_("vote-code type"), max_length=16, choices=VOTECODE_TYPE_CHOICES)
     
-    ballot_cnt = models.PositiveIntegerField()
-    question_cnt = models.PositiveSmallIntegerField()
+    ballot_cnt = models.PositiveIntegerField(_("number of ballots"))
+    question_cnt = models.PositiveSmallIntegerField(_("number of questions"))
     
     _conf = fields.JSONField(db_column='conf', default={
         'credential_bits': 64,
@@ -152,6 +152,8 @@ class Election(models.Model):
         abstract = True
         default_related_name = 'elections'
         ordering = ['id']
+        verbose_name = pgettext_lazy("process", "election")
+        verbose_name_plural = pgettext_lazy("process", "elections")
     
     def natural_key(self):
         return (self.id,)
@@ -166,7 +168,7 @@ class Election(models.Model):
 class Ballot(models.Model):
     
     election = models.ForeignKey('Election')
-    serial = models.PositiveIntegerField()
+    serial = models.PositiveIntegerField(_("serial number"))
     
     # Related object access
     
@@ -183,6 +185,8 @@ class Ballot(models.Model):
         default_related_name = 'ballots'
         ordering = ['election', 'serial']
         unique_together = ['election', 'serial']
+        verbose_name = _("ballot")
+        verbose_name_plural = _("ballots")
     
     def natural_key(self):
         return self.election.natural_key() + (self.serial,)
@@ -205,7 +209,7 @@ class Part(models.Model):
     )
     
     ballot = models.ForeignKey('Ballot')
-    tag = models.CharField(max_length=1, choices=TAG_CHOICES)
+    tag = models.CharField(_("tag"), max_length=1, choices=TAG_CHOICES)
     
     # Related object access
     
@@ -232,6 +236,8 @@ class Part(models.Model):
         default_related_name = 'parts'
         ordering = ['ballot', 'tag']
         unique_together = ['ballot', 'tag']
+        verbose_name = _("sheet")
+        verbose_name_plural = _("sheets")
     
     def natural_key(self):
         return self.ballot.natural_key() + (self.tag,)
@@ -256,11 +262,11 @@ class Question(models.Model):
     election = models.ForeignKey('Election')
     parts = models.ManyToManyField('Part', through='PartQuestion', related_name='_questions')
     
-    index = models.PositiveSmallIntegerField()
-    text = models.TextField()
-    layout = models.CharField(max_length=16, choices=LAYOUT_CHOICES)
-    option_cnt = models.PositiveSmallIntegerField()
-    max_choices = models.PositiveSmallIntegerField()
+    index = models.PositiveSmallIntegerField(_("index"))
+    text = models.TextField(_("question"))
+    layout = models.CharField(_("layout"), max_length=16, choices=LAYOUT_CHOICES)
+    option_cnt = models.PositiveSmallIntegerField(_("number of options"))
+    max_choices = models.PositiveSmallIntegerField(_("maximum number of choices"))
     
     # Custom methods and properties
     
@@ -295,6 +301,8 @@ class Question(models.Model):
         default_related_name = 'questions'
         ordering = ['election', 'index']
         unique_together = ['election', 'index']
+        verbose_name = _("question")
+        verbose_name_plural = _("questions")
     
     def natural_key(self):
         return self.election.natural_key() + (self.index,)
@@ -310,8 +318,8 @@ class Option_P(models.Model):
     
     question = models.ForeignKey('Question')
     
-    index = models.PositiveSmallIntegerField()
-    text = models.TextField()
+    index = models.PositiveSmallIntegerField(_("index"))
+    text = models.TextField(_("option"))
     
     # Related object access
     
@@ -332,6 +340,8 @@ class Option_P(models.Model):
         default_related_name = 'options_p'
         ordering = ['question', 'index']
         unique_together = ['question', 'text']
+        verbose_name = _("option")
+        verbose_name_plural = _("options")
     
     def natural_key(self):
         return self.question.natural_key() + (self.index,)
@@ -346,7 +356,7 @@ class Option_P(models.Model):
 class Option_C(models.Model):
     
     partquestion = models.ForeignKey('PartQuestion')
-    index = models.PositiveSmallIntegerField()
+    index = models.PositiveSmallIntegerField(_("index"))
     
     # Custom methods and properties
     
@@ -411,6 +421,8 @@ class Option_C(models.Model):
         default_related_name = 'options_c'
         ordering = ['partquestion', 'index']
         unique_together = ['partquestion', 'index']
+        verbose_name = _("option")
+        verbose_name_plural = _("options")
     
     def natural_key(self):
         return self._partquestion.natural_key() + (self.index,)
@@ -463,7 +475,7 @@ class PartQuestion(models.Model):
 @python_2_unicode_compatible
 class Task(models.Model):
     
-    task_id = models.UUIDField(unique=True)
+    task_id = models.UUIDField(_("id"), unique=True)
     election = models.ForeignKey('Election')
     
     # Default manager, meta options and natural key
@@ -473,6 +485,8 @@ class Task(models.Model):
     class Meta:
         abstract = True
         default_related_name = 'tasks'
+        verbose_name = _("task")
+        verbose_name_plural = _("tasks")
     
     def natural_key(self):
         return self.election.natural_key() + (self.task_id,)

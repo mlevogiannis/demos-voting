@@ -5,7 +5,9 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import logging
 import re
 
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
 
 from demos.common.models import base
 from demos.common.utils import base32
@@ -13,17 +15,16 @@ from demos.common.utils import base32
 logger = logging.getLogger(__name__)
 
 
-
 class Election(base.Election):
     
-    voting_started_at = models.DateTimeField(null=True, default=None)
-    voting_ended_at = models.DateTimeField(null=True, default=None)
+    voting_started_at = models.DateTimeField(_("voting started at"), null=True, default=None)
+    voting_ended_at = models.DateTimeField(_("voting ended at"), null=True, default=None)
 
 
 class Ballot(base.Ballot):
     
-    credential_hash = models.CharField(max_length=128)
-    cast_at = models.DateTimeField(null=True, default=None)
+    credential_hash = models.CharField(_("credential hash value"), max_length=128)
+    cast_at = models.DateTimeField(_("cast at"), null=True, default=None)
     
     @property
     def is_cast(self):
@@ -40,7 +41,7 @@ class Ballot(base.Ballot):
 
 class Part(base.Part):
     
-    security_code_hash = models.CharField(max_length=128)
+    security_code_hash = models.CharField(_("security code hash value"), max_length=128)
     
     def verify_security_code(self, security_code):
         
@@ -61,10 +62,10 @@ class Option_P(base.Option_P):
 
 class Option_C(base.Option_C):
     
-    votecode = models.CharField(max_length=32, null=True, default=None)
-    votecode_hash_value = models.CharField(max_length=128, null=True, default=None)
+    votecode = models.CharField(_("vote-code"), max_length=32, null=True, default=None)
+    votecode_hash_value = models.CharField(_("vote-code hash value"), max_length=128, null=True, default=None)
     
-    receipt = models.CharField(max_length=32)
+    receipt = models.CharField(_("receipt"), max_length=32)
 
 
 class PartQuestion(base.PartQuestion):

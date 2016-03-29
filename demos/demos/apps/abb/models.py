@@ -7,6 +7,7 @@ import os
 
 from django.conf import settings
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
 
 from demos.common.models import base
 from demos.common.utils import crypto, fields, storage
@@ -23,27 +24,27 @@ def get_cert_file_path(election, filename):
 
 class Election(base.Election):
     
-    cert = models.FileField(upload_to=get_cert_file_path, storage=fs_root)
+    cert = models.FileField(_("certificate"), upload_to=get_cert_file_path, storage=fs_root)
     
-    tallying_started_at = models.DateTimeField(null=True, default=None)
-    tallying_ended_at = models.DateTimeField(null=True, default=None)
+    tallying_started_at = models.DateTimeField(_("tallying started at"), null=True, default=None)
+    tallying_ended_at = models.DateTimeField(_("tallying ended at"), null=True, default=None)
     
-    coins = models.CharField(max_length=128, null=True, default=None)
+    coins = models.CharField(_("coins"), max_length=128, null=True, default=None)
     
 
 
 class Ballot(base.Ballot):
     
-    credential = models.CharField(max_length=32, null=True, default=None)
-    credential_hash = models.CharField(max_length=128)
+    credential = models.CharField(_("credential"), max_length=32, null=True, default=None)
+    credential_hash = models.CharField(_("credential hash value"), max_length=128)
     
-    cast_at = models.DateTimeField(null=True, default=None)
+    cast_at = models.DateTimeField(_("cast at"), null=True, default=None)
 
 
 class Part(base.Part):
     
-    security_code = models.CharField(max_length=32, null=True, default=None)
-    security_code_hash = models.CharField(max_length=128)
+    security_code = models.CharField(_("security code"), max_length=32, null=True, default=None)
+    security_code_hash = models.CharField(_("security code hash value"), max_length=128)
 
 
 class Question(base.Question):
@@ -56,21 +57,21 @@ class Question(base.Question):
 
 class Option_P(base.Option_P):
     
-    votes = models.PositiveIntegerField(null=True, default=None)
+    votes = models.PositiveIntegerField(_("number of votes"), null=True, default=None)
 
 
 class Option_C(base.Option_C):
     
-    votecode = models.CharField(max_length=32, null=True, default=None)
-    votecode_hash_value = models.CharField(max_length=128, null=True, default=None)
+    votecode = models.CharField(_("vote-code"), max_length=32, null=True, default=None)
+    votecode_hash_value = models.CharField(_("vote-code hash value"), max_length=128, null=True, default=None)
     
-    voted = models.NullBooleanField(default=None)
+    voted = models.NullBooleanField(_("marked as voted"), default=None)
     
     com = fields.ProtoField(cls=crypto.Com)
     zk1 = fields.ProtoField(cls=crypto.ZK1)
     zk2 = fields.ProtoField(cls=crypto.ZK2, null=True, default=None)
     
-    receipt_full = models.CharField(max_length=1024)
+    receipt_full = models.CharField(_("full receipt"), max_length=1024)
 
 
 class PartQuestion(base.PartQuestion):

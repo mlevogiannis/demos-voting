@@ -7,6 +7,7 @@ import os
 
 from django.conf import settings
 from django.db import models
+from django.utils.translation import ugettext_lazy as _
 
 from demos.common.models import base
 from demos.common.utils import storage
@@ -26,19 +27,19 @@ def get_ballot_file_path(ballot, filename):
 
 class Election(base.Election):
     
-    ballot_distribution_started_at = models.DateTimeField(null=True, default=None)
-    ballot_distribution_ended_at = models.DateTimeField(null=True, default=None)
+    ballot_distribution_started_at = models.DateTimeField(_("ballot distribution started at"), null=True, default=None)
+    ballot_distribution_ended_at = models.DateTimeField(_("ballot distribution ended at"), null=True, default=None)
 
 
 class Ballot(base.Ballot):
     
-    pdf = models.FileField(upload_to=get_ballot_file_path, storage=ballot_fs)
+    pdf = models.FileField(_("PDF file"), upload_to=get_ballot_file_path, storage=ballot_fs)
 
 
 class Part(base.Part):
     
-    token = models.CharField(max_length=64)
-    security_code = models.CharField(max_length=32)
+    token = models.CharField(_("token"), max_length=64)
+    security_code = models.CharField(_("security code"), max_length=32)
 
 
 class Task(base.Task):
