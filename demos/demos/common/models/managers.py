@@ -17,21 +17,6 @@ class ElectionManager(models.Manager):
 
 class BallotManager(models.Manager):
     
-    @property
-    @related_attr('election')
-    def min_serial(self):
-        return 100
-    
-    @property
-    @related_attr('election')
-    def max_serial(self):
-        return self.min_serial + self.instance.ballot_cnt - 1
-    
-    @related_attr('election')
-    def chunks(self, size):
-        for lo in range(self.min_serial, self.max_serial + 1, size):
-            yield (lo, lo + min(size - 1, self.max_serial - lo))
-    
     def get_by_natural_key(self, e_id, b_serial):
         
         model = self.model._meta.get_field('election').related_model
@@ -85,16 +70,6 @@ class OptionManager_P(models.Manager):
 
 
 class OptionManager_C(models.Manager):
-    
-    @property
-    @related_attr('partquestion')
-    def short_votecode_len(self):
-        return len(six.text_type(self.instance.question.option_cnt))
-    
-    @property
-    @related_attr('partquestion')
-    def long_votecode_len(self):
-        return self.instance.conf.long_votecode_len
     
     def get_by_natural_key(self, e_id, b_serial, p_tag, q_index, o_index):
         

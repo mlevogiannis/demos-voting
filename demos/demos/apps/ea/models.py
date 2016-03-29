@@ -139,7 +139,8 @@ class PartQuestion(base.PartQuestion):
             self.votecode_hash_salt = self.election.hasher.salt()
             self.votecode_hash_params = self.election.hasher.params()
         else:
-            zfill = lambda votecode: six.text_type(votecode).zfill(self.options_c.short_votecode_len)
+            short_votecode_len = len(six.text_type(self.instance.question.option_cnt))
+            zfill = lambda votecode: six.text_type(votecode).zfill(short_votecode_len)
             self.short_votecodes = list(map(zfill, range(1, self.option_cnt + 1)))
             random.shuffle(self.short_votecodes)
 

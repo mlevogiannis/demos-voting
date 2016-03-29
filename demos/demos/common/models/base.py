@@ -375,20 +375,19 @@ class Option_C(models.Model):
     
     def _generate_long_votecode(self):
         
-        long_votecode_len = self.partquestion.options_c.long_votecode_len
+        key = "%s" % (self.part.security_code,)
         
         option_index = six.text_type(self.index).zfill(len(six.text_type(self.question.option_cnt - 1)))
         question_index = six.text_type(self.question.index).zfill(len(six.text_type(self.election.question_cnt - 1)))
         
-        key = self.part.security_code
-        msg = self.ballot.credential + question_index + option_index
+        msg = "%s%s%s" % (self.ballot.credential, question_index, option_index)
         
         digestmod = getattr(hashlib, self.conf.hash_algorithm)
-        
         digest = hmac.new(force_bytes(key), force_bytes(msg), digestmod).digest()
-        encoded = base32.encode_from_bytes(digest, long_votecode_len)
+        long_votecode_len = self.conf.long_votecode_len
+        long_votecode = base32.encode_from_bytes(digest, long_votecode_len)[-long_votecode_len:]
         
-        return encoded[-long_votecode_len:]
+        return long_votecode
     
     # Related object access
     
