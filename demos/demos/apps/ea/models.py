@@ -2,15 +2,14 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import datetime
 import logging
 import random
 import OpenSSL
 
-from datetime import timedelta
-
 from django.conf import settings
 from django.db import models
-from django.utils import six, timezone
+from django.utils import six
 from django.utils.encoding import force_bytes
 from django.utils.six.moves import range
 
@@ -29,10 +28,10 @@ class Election(base.Election):
     setup_started_at = models.DateTimeField(null=True, default=None)
     setup_ended_at = models.DateTimeField(null=True, default=None)
     
-    def generate_pkey(self):
+    def generate_key(self):
         
-        self.pkey = OpenSSL.crypto.PKey()
-        self.pkey.generate_key(OpenSSL.crypto.TYPE_RSA, 2048)
+        self.key = OpenSSL.crypto.PKey()
+        self.key.generate_key(OpenSSL.crypto.TYPE_RSA, 2048)
     
     def generate_cert(self):
         
@@ -46,8 +45,8 @@ class Election(base.Election):
             ca_pkey_passphrase = getattr(settings, 'DEMOS_CA_PKEY_PASSPHRASE', '')
             
             with open(ca_pkey_path, 'r') as ca_pkey_file:
-                ca_pkey = OpenSSL.crypto.load_privatekey(OpenSSL.crypto.FILETYPE_PEM, ca_pkey_file.read(),
-                                                         force_bytes(ca_pkey_passphrase))
+                ca_key = OpenSSL.crypto.load_privatekey(OpenSSL.crypto.FILETYPE_PEM, ca_pkey_file.read(),
+                                                        force_bytes(ca_pkey_passphrase))
             
             with open(ca_cert_path, 'r') as ca_cert_file:
                 ca_cert = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, ca_cert_file.read())
@@ -56,19 +55,19 @@ class Election(base.Election):
             
         else: # self-signed certificate
             
+            ca_key = self.key
             ca_cert = self.cert
-            ca_pkey = self.pkey
         
-        now = timezone.now()
+        validity_period = datetime.timedelta(365)
         
-        self.cert.get_subject().CN = 'DemosVoting - Election ID: %s' % self.id
+        self.cert.get_subject().CN = "DEMOS Voting - Election ID: %s" % self.id
         self.cert.set_issuer(ca_cert.get_subject())
         self.cert.set_version(3)
         self.cert.set_serial_number(base32.decode(self.id))
-        self.cert.set_notBefore(force_bytes(now.strftime('%Y%m%d%H%M%S%z')))
-        self.cert.set_notAfter(force_bytes((now+timedelta(365)).strftime('%Y%m%d%H%M%S%z')))
-        self.cert.set_pubkey(self.pkey)
-        self.cert.sign(ca_pkey, str(self.conf.hash_algorithm))
+        self.cert.set_notBefore(force_bytes(self.setup_started_at.strftime('%Y%m%d%H%M%S%z')))
+        self.cert.set_notAfter(force_bytes((self.setup_started_at+validity_period).strftime('%Y%m%d%H%M%S%z')))
+        self.cert.set_pubkey(self.key)
+        self.cert.sign(ca_key, str(self.conf.hash_algorithm))
 
 
 class Ballot(base.Ballot):
