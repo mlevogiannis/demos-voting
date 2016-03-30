@@ -21,7 +21,6 @@ logger = logging.getLogger(__name__)
 random = random.SystemRandom()
 
 
-
 class Election(base.Election):
     
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
@@ -83,12 +82,67 @@ class Ballot(base.Ballot):
 
 class Part(base.Part):
     
+    @property
+    def _other_part(self): # assumes that both parts have been prefetched
+        index = (Part.TAG_A, Part.TAG_B).index(self.tag)
+        return self.ballot.parts.all()[1 - index]
+    
     def generate_security_code(self):
         
-        randint = random.getrandbits(self.conf.security_code_len * 5)
+        security_code2 = getattr(self._other_part, 'security_code', None)
+        self.security_code = security_code2
         
-        self.security_code = base32.encode(randint, self.conf.security_code_len)
+        while self.security_code == security_code2:
+            randint = random.getrandbits(self.conf.security_code_len * 5)
+            self.security_code = base32.encode(randint, self.conf.security_code_len)
+        
         self.security_code_hash = self.election.hasher.encode(self.security_code)
+    
+    def generate_token(self):
+        
+        # Calculate the number of bits for each field in the token
+        
+        serial_bits = (100 + self.election.ballot_cnt - 1).bit_length()
+        tag_bits = 1
+        credential_bits = self.conf.credential_bits
+        security_code_bits = self.conf.security_code_len * 5
+        
+        token_bits = serial_bits + tag_bits + credential_bits + security_code_bits
+        token_len = (token_bits + 4) // 5
+        
+        padding_bits = (token_len * 5) - token_bits
+        
+        # Decode all fields to integers
+        
+        serial = self.ballot.serial
+        tag = (Part.TAG_A, Part.TAG_B).index(self.tag)
+        credential = base32.decode(self.ballot.credential)
+        security_code = base32.decode(self._other_part.security_code)
+        
+        # The voter's token is made up of of two parts. The first part
+        # encodes the ballot's serial number, the voting part's tag and
+        # the ballot's credential, XORed with the second part. The second
+        # part encodes the auditing part's security code, bit-inversed.
+        
+        p1_len = serial_bits + credential_bits + tag_bits
+        p2_len = security_code_bits
+        
+        p1 = (credential | (tag << credential_bits) | (serial << (tag_bits + credential_bits)))
+        p2 = (~security_code) & ((1 << security_code_bits) - 1)
+        
+        for i in range(0, p1_len, p2_len):
+            p1 ^= p2 << i
+        
+        p1 &= (1 << p1_len) - 1
+        
+        # Add random padding and encode the token
+        
+        t = (p1 << p2_len) | p2
+        
+        if padding_bits > 0:
+            t |= (random.getrandbits(padding_bits) << token_bits)
+        
+        self.token = base32.encode(t, token_len)
 
 
 class Question(base.Question):
