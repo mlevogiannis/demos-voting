@@ -9,19 +9,19 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from demos.common.models import base
+from demos.common.models import Election, Ballot, Part, Question, Option_P, Option_C, PartQuestion, Task
 from demos.common.utils import base32
 
 logger = logging.getLogger(__name__)
 
 
-class Election(base.Election):
+class Election(Election):
     
     voting_started_at = models.DateTimeField(_("voting started at"), null=True, default=None)
     voting_ended_at = models.DateTimeField(_("voting ended at"), null=True, default=None)
 
 
-class Ballot(base.Ballot):
+class Ballot(Ballot):
     
     credential_hash = models.CharField(_("credential hash value"), max_length=128)
     cast_at = models.DateTimeField(_("cast at"), null=True, default=None)
@@ -39,7 +39,7 @@ class Ballot(base.Ballot):
                 hasher.verify(base32.normalize(credential), self.credential_hash))
 
 
-class Part(base.Part):
+class Part(Part):
     
     security_code_hash = models.CharField(_("security code hash value"), max_length=128)
     
@@ -52,15 +52,15 @@ class Part(base.Part):
                 hasher.verify(base32.normalize(security_code), self.security_code_hash))
 
 
-class Question(base.Question):
+class Question(Question):
     pass
 
 
-class Option_P(base.Option_P):
+class Option_P(Option_P):
     pass
 
 
-class Option_C(base.Option_C):
+class Option_C(Option_C):
     
     votecode = models.CharField(_("vote-code"), max_length=32, null=True, default=None)
     votecode_hash_value = models.CharField(_("vote-code hash value"), max_length=128, null=True, default=None)
@@ -68,13 +68,13 @@ class Option_C(base.Option_C):
     receipt = models.CharField(_("receipt"), max_length=32)
 
 
-class PartQuestion(base.PartQuestion):
+class PartQuestion(PartQuestion):
     
     votecode_hash_salt = models.CharField(max_length=32, null=True, default=None)
     votecode_hash_params = models.CharField(max_length=16, null=True, default=None)
 
 
-class Task(base.Task):
+class Task(Task):
     pass
 
 

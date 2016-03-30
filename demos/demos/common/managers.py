@@ -6,7 +6,7 @@ from django.db import models
 from django.utils import six
 from django.utils.six.moves import range, zip
 
-from demos.common.models.decorators import related_attr
+from demos.common.decorators import related_attr
 
 
 class ElectionManager(models.Manager):

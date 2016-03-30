@@ -14,14 +14,14 @@ from django.utils.encoding import force_bytes
 from django.utils.six.moves import range
 from django.utils.translation import ugettext_lazy as _
 
-from demos.common.models import base
+from demos.common.models import Election, Ballot, Part, Question, Option_P, Option_C, PartQuestion, Task
 from demos.common.utils import base32, crypto, fields
 
 logger = logging.getLogger(__name__)
 random = random.SystemRandom()
 
 
-class Election(base.Election):
+class Election(Election):
     
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
     modified_at = models.DateTimeField(_("modified at"), auto_now=True)
@@ -70,7 +70,7 @@ class Election(base.Election):
         self.cert.sign(ca_key, str(self.conf.hash_algorithm))
 
 
-class Ballot(base.Ballot):
+class Ballot(Ballot):
     
     def generate_credential(self):
         
@@ -80,7 +80,7 @@ class Ballot(base.Ballot):
         self.credential_hash = self.election.hasher.encode(self.credential)
 
 
-class Part(base.Part):
+class Part(Part):
     
     @property
     def _other_part(self): # assumes that both parts have been prefetched
@@ -145,15 +145,15 @@ class Part(base.Part):
         self.token = base32.encode(t, token_len)
 
 
-class Question(base.Question):
+class Question(Question):
     pass
 
 
-class Option_P(base.Option_P):
+class Option_P(Option_P):
     pass
 
 
-class Option_C(base.Option_C):
+class Option_C(Option_C):
     
     decom = fields.ProtoField(cls=crypto.Decom)
     zk_state = fields.ProtoField(cls=crypto.ZKState)
@@ -185,7 +185,7 @@ class Option_C(base.Option_C):
         self.receipt = self.receipt_full[-self.conf.receipt_len:]
 
 
-class PartQuestion(base.PartQuestion):
+class PartQuestion(PartQuestion):
     
     def generate_common(self):
         
@@ -199,7 +199,7 @@ class PartQuestion(base.PartQuestion):
             random.shuffle(self.short_votecodes)
 
 
-class Task(base.Task):
+class Task(Task):
     pass
 
 

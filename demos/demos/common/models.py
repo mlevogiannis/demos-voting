@@ -1,4 +1,4 @@
-# File: base.py
+# File: models.py
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -14,8 +14,8 @@ from django.utils.functional import cached_property
 from django.utils.six.moves import range, zip
 from django.utils.translation import pgettext_lazy, ugettext_lazy as _
 
+from demos.common import fields, managers
 from demos.common.hashers import get_hasher
-from demos.common.models import fields, managers
 from demos.common.utils import base32
 
 logger = logging.getLogger(__name__)

@@ -6,7 +6,7 @@ from django.apps import AppConfig
 from django.db.models.signals import pre_delete
 from django.utils.functional import lazy
 
-from demos.common.models.signals import pre_delete_protect_handler
+from demos.common.signals import pre_delete_protect_handler
 
 
 class AppConfig(AppConfig):
