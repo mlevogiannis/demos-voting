@@ -9,8 +9,9 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from demos.common import fields
 from demos.common.models import Election, Ballot, Part, Question, Option_P, Option_C, PartQuestion, Task
-from demos.common.utils import crypto, fields, storage
+from demos.common.utils import storage
 
 logger = logging.getLogger(__name__)
 
@@ -48,10 +49,10 @@ class Part(Part):
 
 class Question(Question):
     
-    key = fields.ProtoField(cls=crypto.Key)
+    key = fields.JSONField()
     
-    com_combined = fields.ProtoField(cls=crypto.Com, null=True, default=None)
-    decom_combined = fields.ProtoField(cls=crypto.Decom, null=True, default=None)
+    com_combined = fields.JSONField(null=True, default=None)
+    decom_combined = fields.JSONField(null=True, default=None)
 
 
 class Option_P(Option_P):
@@ -66,9 +67,9 @@ class Option_C(Option_C):
     
     voted = models.NullBooleanField(_("marked as voted"), default=None)
     
-    com = fields.ProtoField(cls=crypto.Com)
-    zk1 = fields.ProtoField(cls=crypto.ZK1)
-    zk2 = fields.ProtoField(cls=crypto.ZK2, null=True, default=None)
+    com = fields.JSONField()
+    zk1 = fields.JSONField()
+    zk2 = fields.JSONField(null=True, default=None)
     
     receipt_full = models.CharField(_("full receipt"), max_length=1024)
 

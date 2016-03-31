@@ -339,5 +339,5 @@ CELERY_RESULT_BACKEND = 'db+postgresql://%(USER)s:%(PASSWORD)s@%(HOST)s:%(PORT)s
 
 CELERY_TASK_SERIALIZER = 'custom-json'
 CELERY_RESULT_SERIALIZER = 'custom-json'
-CELERY_ACCEPT_CONTENT = ['custom-json', 'json', 'msgpack']
+CELERY_ACCEPT_CONTENT = ['custom-json']
 

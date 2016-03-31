@@ -14,8 +14,11 @@ from django.utils.encoding import force_bytes
 from django.utils.six.moves import range
 from django.utils.translation import ugettext_lazy as _
 
+from demos.common import fields
 from demos.common.models import Election, Ballot, Part, Question, Option_P, Option_C, PartQuestion, Task
-from demos.common.utils import base32, crypto, fields
+from demos.common.utils import base32
+
+from demos.apps.ea import crypto
 
 logger = logging.getLogger(__name__)
 random = random.SystemRandom()
@@ -155,8 +158,8 @@ class Option_P(Option_P):
 
 class Option_C(Option_C):
     
-    decom = fields.ProtoField(cls=crypto.Decom)
-    zk_state = fields.ProtoField(cls=crypto.ZKState)
+    decom = fields.JSONField()
+    zk_state = fields.JSONField()
     
     def generate_votecode(self):
         

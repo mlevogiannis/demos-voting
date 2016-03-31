@@ -4,80 +4,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import re
 
-from base64 import b64encode, b64decode
-
 from django import forms
 from django.core import validators
-from django.core.exceptions import ValidationError
-from django.db import models
 from django.utils import six
 from django.utils.dateparse import parse_datetime
-
-
-# Model fields -----------------------------------------------------------------
-
-class ProtoField(models.BinaryField):
-    
-    description = "ProtoField"
-    
-    def __init__(self, *args, **kwargs):
-        
-        self.cls = kwargs.pop('cls')
-        super(ProtoField, self).__init__(*args, **kwargs)
-    
-    def deconstruct(self):
-        
-        name, path, args, kwargs = super(ProtoField, self).deconstruct()
-        kwargs['cls'] = self.cls
-        return name, path, args, kwargs
-    
-    def from_db_value(self, value, expression, connection, context):
-        
-        if value is None:
-            return value
-        
-        pb = self.cls()
-        
-        try:
-            pb.ParseFromString(value)
-        except Exception as e:
-            raise ValidationError(e, code='invalid')
-        
-        return pb
-    
-    def to_python(self, value):
-        
-        if value is None or isinstance(value, self.cls):
-            return value
-        
-        pb = self.cls()
-        
-        try:
-            value = b64decode(value.encode('ascii'))
-            pb.ParseFromString(value)
-        except Exception as e:
-            raise ValidationError(e, code='invalid')
-        
-        return pb
-    
-    def get_prep_value(self, value):
-        
-        if value is None:
-            return value
-        
-        try:
-            if isinstance(value, six.string_types):
-                value = b64decode(value.encode('ascii'))
-            elif isinstance(value, self.cls):
-                value = value.SerializeToString()
-        except Exception as e:
-            raise ValidationError(e, code='invalid')
-        
-        return value
-    
-    def value_to_string(self, obj):
-        
-        return b64encode(obj).decode('ascii')
 
 
 # Form fields -----------------------------------------------------------------

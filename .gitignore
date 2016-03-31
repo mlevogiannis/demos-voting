@@ -57,6 +57,7 @@ target/
 # demos
 /devel/
 /demos/devel/
+/demos/demos/apps/ea/crypto/crypto_pb2.py
 
 # demos-crypto
 /demos-crypto/src/demos-crypto
