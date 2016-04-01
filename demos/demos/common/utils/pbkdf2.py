@@ -10,12 +10,10 @@ from django.utils.crypto import constant_time_compare, pbkdf2
 from django.utils.encoding import force_text
 from django.utils.six.moves import range
 
-from demos.common.hashers.base import BaseHasher
-
 random = random.SystemRandom()
 
 
-class PBKDF2Hasher(BaseHasher):
+class PBKDF2Hasher(object):
     """
     Secure hashing using the PBKDF2-HMAC algorithm
     """
@@ -28,8 +26,8 @@ class PBKDF2Hasher(BaseHasher):
     salt_length = 22
     salt_charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
     
-    def __init__(self, conf):
-        self.digest = getattr(hashlib, conf.hash_algorithm)
+    def __init__(self, hash_algorithm):
+        self.digestmod = getattr(hashlib, hash_algorithm)
     
     def params(self):
         return force_text(self.iterations)
@@ -47,16 +45,14 @@ class PBKDF2Hasher(BaseHasher):
         assert value is not None
         assert self.separator not in salt
         
-        hash = pbkdf2(value, salt, iterations, digest=self.digest)
+        hash = pbkdf2(value, salt, iterations, digest=self.digestmod)
         hash = base64.b64encode(hash).decode('ascii')
         
         return self.join(params, salt, hash)
     
     def verify(self, value, encoded):
-        
-        iterations, salt, hash  = self.split(encoded)
-        encoded2 = self.encode(value, salt, iterations)
-        
+        params, salt, _  = self.split(encoded)
+        encoded2 = self.encode(value, salt, params)
         return constant_time_compare(encoded, encoded2)
     
     def split(self, encoded):

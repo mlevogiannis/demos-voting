@@ -15,8 +15,7 @@ from django.utils.six.moves import range, zip
 from django.utils.translation import pgettext_lazy, ugettext_lazy as _
 
 from demos.common import fields, managers
-from demos.common.hashers import get_hasher
-from demos.common.utils import base32
+from demos.common.utils import base32, pbkdf2
 
 logger = logging.getLogger(__name__)
 
@@ -142,7 +141,7 @@ class Election(models.Model):
     
     @cached_property
     def hasher(self):
-        return get_hasher(self.conf)
+        return pbkdf2.PBKDF2Hasher(self.conf.hash_algorithm)
     
     # Default manager, meta options and natural key
     
