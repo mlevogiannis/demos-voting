@@ -17,6 +17,12 @@ class ElectionManager(models.Manager):
 
 class BallotManager(models.Manager):
     
+    def count(self):
+        try:
+            return self.instance.ballot_cnt
+        except AttributeError:
+            return super(BallotManager, self).count()
+    
     def get_by_natural_key(self, e_id, b_serial):
         
         model = self.model._meta.get_field('election').related_model

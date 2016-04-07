@@ -105,7 +105,6 @@ class Election(models.Model):
     votecode_type = models.CharField(_("vote-code type"), max_length=16, choices=VOTECODE_TYPE_CHOICES)
     
     ballot_cnt = models.PositiveIntegerField(_("number of ballots"))
-    question_cnt = models.PositiveSmallIntegerField(_("number of questions"))
     
     _conf = fields.JSONField(db_column='conf', default={
         'credential_bits': 64,
@@ -264,7 +263,7 @@ class Question(models.Model):
     index = models.PositiveSmallIntegerField(_("index"))
     text = models.TextField(_("question"))
     layout = models.CharField(_("layout"), max_length=16, choices=LAYOUT_CHOICES)
-    option_cnt = models.PositiveSmallIntegerField(_("number of options"))
+    
     max_choices = models.PositiveSmallIntegerField(_("maximum number of choices"))
     
     # Custom methods and properties
@@ -360,6 +359,10 @@ class Option_C(models.Model):
     # Custom methods and properties
     
     @property
+    def index_as_text(self):
+        return six.text_type(self.index).zfill(len(six.text_type(self.partquestion.options_c.count() - 1)))
+    
+    @property
     def votecode_hash(self):
         
         value = self.votecode_hash_value
@@ -375,11 +378,7 @@ class Option_C(models.Model):
     def _generate_long_votecode(self):
         
         key = "%s" % (self.part.security_code,)
-        
-        option_index = six.text_type(self.index).zfill(len(six.text_type(self.question.option_cnt - 1)))
-        question_index = six.text_type(self.question.index).zfill(len(six.text_type(self.election.question_cnt - 1)))
-        
-        msg = "%s%s%s" % (self.ballot.credential, question_index, option_index)
+        msg = "%s%s%s" % (self.ballot.credential, self.partquestion.index_as_text, self.index_as_text)
         
         digestmod = getattr(hashlib, self.conf.hash_algorithm)
         digest = hmac.new(force_bytes(key), force_bytes(msg), digestmod).digest()
@@ -392,7 +391,7 @@ class Option_C(models.Model):
     
     @cached_property
     def election(self):
-        return self.question.election
+        return self.ballot.election
     
     @cached_property
     def ballot(self):
@@ -437,11 +436,17 @@ class PartQuestion(models.Model):
     part = models.ForeignKey('Part')
     question = models.ForeignKey('Question')
     
+    # Custom methods and properties
+    
+    @property
+    def index_as_text(self):
+        return six.text_type(self.question.index).zfill(len(six.text_type(self.part.partquestions.count() - 1)))
+    
     # Related object access
     
     @cached_property
     def election(self):
-        return self.question.election
+        return self.ballot.election
     
     @cached_property
     def ballot(self):
