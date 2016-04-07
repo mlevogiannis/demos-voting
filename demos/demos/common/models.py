@@ -106,13 +106,11 @@ class Election(models.Model):
     
     ballot_cnt = models.PositiveIntegerField(_("number of ballots"))
     
-    _conf = fields.JSONField(db_column='conf', default={
-        'credential_bits': 64,
-        'long_votecode_len': 16,
-        'receipt_len': 10,
-        'security_code_len': 8,
-        'hash_algorithm': 'sha256',
-    })
+    credential_bits = models.PositiveIntegerField(_("credential bits"), default=64)
+    long_votecode_length = models.PositiveIntegerField(_("long votecode length"), default=16)
+    receipt_length = models.PositiveIntegerField(_("receipt length"), default=10)
+    security_code_length = models.PositiveIntegerField(_("security code length"), default=8)
+    hash_algorithm = models.CharField(_("hash algorithm"), max_length=16, default='sha256')
     
     _id = models.AutoField(db_column='id', primary_key=True)
     
@@ -135,12 +133,8 @@ class Election(models.Model):
         return self.votecode_type == self.VOTECODE_TYPE_LONG
     
     @cached_property
-    def conf(self):
-        return type(str('Conf'), (object,), self._conf)()
-    
-    @cached_property
     def hasher(self):
-        return pbkdf2.PBKDF2Hasher(self.conf.hash_algorithm)
+        return pbkdf2.PBKDF2Hasher(self.hash_algorithm)
     
     # Default manager, meta options and natural key
     
@@ -156,8 +150,6 @@ class Election(models.Model):
     def natural_key(self):
         return (self.id,)
     
-    natural_key.dependencies = ['Conf']
-    
     def __str__(self):
         return "%s - %s" % (self.id, self.name)
 
@@ -167,12 +159,6 @@ class Ballot(models.Model):
     
     election = models.ForeignKey('Election')
     serial = models.PositiveIntegerField(_("serial number"))
-    
-    # Related object access
-    
-    @cached_property
-    def conf(self):
-        return self.election.conf
     
     # Default manager, meta options and natural key
     
@@ -214,10 +200,6 @@ class Part(models.Model):
     @cached_property
     def election(self):
         return self.ballot.election
-    
-    @cached_property
-    def conf(self):
-        return self.election.conf
     
     @property
     def questions(self):
@@ -274,10 +256,6 @@ class Question(models.Model):
     
     # Related object access
     
-    @cached_property
-    def conf(self):
-        return self.election.conf
-    
     @property
     def options(self):
         if hasattr(self, '_related_part_pk'):
@@ -324,10 +302,6 @@ class Option_P(models.Model):
     @cached_property
     def election(self):
         return self.question.election
-    
-    @cached_property
-    def conf(self):
-        return self.election.conf
     
     # Default manager, meta options and natural key
     
@@ -380,10 +354,10 @@ class Option_C(models.Model):
         key = "%s" % (self.part.security_code,)
         msg = "%s%s%s" % (self.ballot.credential, self.partquestion.index_as_text, self.index_as_text)
         
-        digestmod = getattr(hashlib, self.conf.hash_algorithm)
+        digestmod = getattr(hashlib, self.election.hash_algorithm)
         digest = hmac.new(force_bytes(key), force_bytes(msg), digestmod).digest()
-        long_votecode_len = self.conf.long_votecode_len
-        long_votecode = base32.encode_from_bytes(digest, long_votecode_len)[-long_votecode_len:]
+        long_votecode_length = self.election.long_votecode_length
+        long_votecode = base32.encode_from_bytes(digest, long_votecode_length)[-long_votecode_length:]
         
         return long_votecode
     
@@ -404,10 +378,6 @@ class Option_C(models.Model):
     @cached_property
     def question(self):
         return self.partquestion.question
-    
-    @cached_property
-    def conf(self):
-        return self.election.conf
     
     # Default manager, meta options and natural key
     
@@ -451,10 +421,6 @@ class PartQuestion(models.Model):
     @cached_property
     def ballot(self):
         return self.part.ballot
-    
-    @cached_property
-    def conf(self):
-        return self.election.conf
     
     # Default manager, meta options and natural key
     

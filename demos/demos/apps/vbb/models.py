@@ -33,7 +33,7 @@ class Ballot(Ballot):
     def verify_credential(self, credential):
         
         hasher = self.election.hasher
-        regex = r'^%s{%d}$' % (base32.regex, (self.conf.credential_bits + 4) // 5)
+        regex = r'^%s{%d}$' % (base32.regex, (self.election.credential_bits + 4) // 5)
         
         return (re.match(regex, credential) and
                 hasher.verify(base32.normalize(credential), self.credential_hash))
@@ -46,7 +46,7 @@ class Part(Part):
     def verify_security_code(self, security_code):
         
         hasher = self.election.hasher
-        regex = r'^%s{%d}$' % (base32.regex, self.conf.security_code_len)
+        regex = r'^%s{%d}$' % (base32.regex, self.election.security_code_length)
         
         return (re.match(regex, security_code) and
                 hasher.verify(base32.normalize(security_code), self.security_code_hash))

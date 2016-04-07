@@ -5,6 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import datetime
 import logging
 import random
+
 import OpenSSL
 
 from django.conf import settings
@@ -70,16 +71,14 @@ class Election(Election):
         self.cert.set_notBefore(force_bytes(self.setup_started_at.strftime('%Y%m%d%H%M%S%z')))
         self.cert.set_notAfter(force_bytes((self.setup_started_at+validity_period).strftime('%Y%m%d%H%M%S%z')))
         self.cert.set_pubkey(self.key)
-        self.cert.sign(ca_key, str(self.conf.hash_algorithm))
+        self.cert.sign(ca_key, str(self.hash_algorithm))
 
 
 class Ballot(Ballot):
     
     def generate_credential(self):
-        
-        randint = random.getrandbits(self.conf.credential_bits)
-        
-        self.credential = base32.encode(randint, (self.conf.credential_bits + 4) // 5)
+        randint = random.getrandbits(self.election.credential_bits)
+        self.credential = base32.encode(randint, (self.election.credential_bits + 4) // 5)
         self.credential_hash = self.election.hasher.encode(self.credential)
 
 
@@ -96,8 +95,8 @@ class Part(Part):
         self.security_code = security_code2
         
         while self.security_code == security_code2:
-            randint = random.getrandbits(self.conf.security_code_len * 5)
-            self.security_code = base32.encode(randint, self.conf.security_code_len)
+            randint = random.getrandbits(self.election.security_code_length * 5)
+            self.security_code = base32.encode(randint, self.election.security_code_length)
         
         self.security_code_hash = self.election.hasher.encode(self.security_code)
     
@@ -107,8 +106,8 @@ class Part(Part):
         
         serial_bits = (100 + self.election.ballot_cnt - 1).bit_length()
         tag_bits = 1
-        credential_bits = self.conf.credential_bits
-        security_code_bits = self.conf.security_code_len * 5
+        credential_bits = self.election.credential_bits
+        security_code_bits = self.election.security_code_length * 5
         
         token_bits = serial_bits + tag_bits + credential_bits + security_code_bits
         token_len = (token_bits + 4) // 5
@@ -182,10 +181,10 @@ class Option_C(Option_C):
         # to be generated.
         
         data = self._generate_long_votecode() if self.election.votecode_type_is_short else self.votecode
-        signature = OpenSSL.crypto.sign(self.election.key, data, str(self.conf.hash_algorithm))
+        signature = OpenSSL.crypto.sign(self.election.key, data, str(self.election.hash_algorithm))
         
         self.receipt_full = base32.encode_from_bytes(signature, (self.election.key.bits() + 4) // 5)
-        self.receipt = self.receipt_full[-self.conf.receipt_len:]
+        self.receipt = self.receipt_full[-self.election.receipt_length:]
 
 
 class PartQuestion(PartQuestion):
