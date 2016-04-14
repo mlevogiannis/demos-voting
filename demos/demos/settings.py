@@ -267,9 +267,6 @@ if DEVELOPMENT:
 
 DEMOS_APPS = []
 
-INSTALLED_APPS += ['demos.%s' % path for path in (['common'] + ['apps.%s' % app for app in DEMOS_APPS])]
-LOCALE_PATHS += [os.path.join(BASE_DIR, '%s/locale' % p) for p in (['common'] + ['apps/%s' % a for a in DEMOS_APPS])]
-
 # DEMOS_URLS: A dictionary of strings, each one representing the URL by which
 # an app is served. Always use HTTPS URLs.
 
@@ -280,21 +277,22 @@ DEMOS_URLS = {
     'vbb': 'https://www.example.org/demos/vbb/',
 }
 
-# DEMOS_API_URLS: Same as DEMOS_URLS, but for the internal API. It is
+# DEMOS_PRIVATE_API_URLS: Same as DEMOS_URLS, but for the private API. It is
 # recommended that these URLs are accessible only through a private network.
 
-DEMOS_API_URLS = {
+DEMOS_PRIVATE_API_URLS = {
     'ea' : 'https://api.example.local/demos/ea/',
     'bds': 'https://api.example.local/demos/bds/',
     'abb': 'https://api.example.local/demos/abb/',
     'vbb': 'https://api.example.local/demos/vbb/',
 }
 
-# DEMOS_API_VERIFY_SSL: If False, the SSL certificates for API requests will
-# not be verified. Required if the servers use self-signed SSL certificates.
+# DEMOS_PRIVATE_API_VERIFY_SSL: If False, the SSL certificates for private API
+# requests will not be verified. Required if the servers use self-signed
+# certificates.
 # http://docs.python-requests.org/en/latest/user/advanced/#ssl-cert-verification
 
-DEMOS_API_VERIFY_SSL = True
+DEMOS_PRIVATE_API_VERIFY_SSL = True
 
 # DEMOS_BATCH_SIZE: Controls how many objects (e.g. ballots) are processed in
 # a single iteration.
@@ -327,6 +325,12 @@ DEMOS_MAX_ELECTION_PARTIES = 50
 DEMOS_MAX_ELECTION_CANDIDATES = 50
 DEMOS_MAX_REFERENDUM_QUESTIONS = 50
 DEMOS_MAX_REFERENDUM_OPTIONS = 50
+
+
+INSTALLED_APPS += ['demos.%s' % path for path in (['common'] + ['apps.%s' % app for app in DEMOS_APPS])]
+LOCALE_PATHS += [os.path.join(BASE_DIR, '%s/locale' % p) for p in (['common'] + ['apps/%s' % a for a in DEMOS_APPS])]
+
+MIDDLEWARE_CLASSES += ['demos.common.middleware.PrivateApiMiddleware']
 
 
 # Celery configuration

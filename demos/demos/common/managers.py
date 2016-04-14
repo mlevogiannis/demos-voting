@@ -111,3 +111,9 @@ class TaskManager(models.Manager):
         
         return self.get(election=election, task_id=task_id)
 
+
+class PrivateApiUserManager(models.Manager):
+    
+    def get_by_natural_key(self, app_label):
+        return self.get(app_label=app_label)
+

@@ -16,7 +16,10 @@ from django.utils.six.moves import range
 from django.utils.translation import ugettext_lazy as _
 
 from demos.common import fields
-from demos.common.models import Election, Ballot, Part, Question, Option_P, Option_C, PartQuestion, Task
+from demos.common.models import (
+    Election, Ballot, Part, Question, Option_P, Option_C, PartQuestion, Task,
+    PrivateApiUser
+)
 from demos.common.utils import base32
 
 from demos.apps.ea import crypto
@@ -204,10 +207,6 @@ class Task(Task):
     pass
 
 
-# Common models ----------------------------------------------------------------
-
-from demos.common.utils.api import RemoteUserBase
-
-class RemoteUser(RemoteUserBase):
+class PrivateApiUser(PrivateApiUser):
     pass
 

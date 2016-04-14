@@ -463,3 +463,42 @@ class Task(models.Model):
     def __str__(self):
         return "%s - %s" % (self.election.id, self.task_id)
 
+
+@python_2_unicode_compatible
+class PrivateApiUser(models.Model):
+    
+    APP_DEPENDENCIES = {
+        'ea':  ['bds', 'abb', 'vbb'],
+        'bds': ['ea'],
+        'abb': ['ea', 'vbb'],
+        'vbb': ['ea', 'abb'],
+    }
+    
+    APP_LABEL_CHOICES = (
+        ('ea',  _("Election Authority")),
+        ('bds', _("Ballot Distribution Server")),
+        ('abb', _("Audit Bulletin Board")),
+        ('vbb', _("Virtual Ballot Box")),
+    )
+    
+    app_label = models.CharField(_("application label"), max_length=4, unique=True, choices=APP_LABEL_CHOICES)
+    preshared_key = models.CharField(_("pre-shared-key"), max_length=128)
+    sent_nonces = fields.JSONField(default=[])
+    received_nonces = fields.JSONField(default=[])
+    
+    # Default manager, meta options and natural key
+    
+    objects = managers.PrivateApiUserManager()
+    
+    class Meta:
+        abstract = True
+        default_related_name = 'users'
+        verbose_name = _("private API user")
+        verbose_name_plural = _("private API user")
+    
+    def natural_key(self):
+        return self.app_label
+    
+    def __str__(self):
+        return "%s" % self.app_label
+

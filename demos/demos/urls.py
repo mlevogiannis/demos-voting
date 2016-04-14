@@ -24,8 +24,6 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.i18n import i18n_patterns
 
-from demos.common.utils import api
-
 
 urlpatterns = []
 
@@ -35,13 +33,5 @@ for app in settings.DEMOS_APPS:
     path = r'^' + ((app + r'/') if len(settings.DEMOS_APPS) > 1 else r'')
     
     urlpatterns += i18n_patterns(url(path, include(urlconf, namespace=app, app_name=app)))
-    
-    urlpatterns += [
-        url(path + r'api/', include(urlconf.apipatterns + [
-            url(r'^auth/', include([
-                url(r'^login/$', api.login, name='login'),
-                url(r'^logout/$', api.logout, name='logout'),
-            ], namespace='auth')),
-        ], namespace='%s-api' % app, app_name=app))
-    ]
+    urlpatterns += [url(path + r'api/', include(urlconf.api_urlpatterns, namespace='%s-api' % app, app_name=app))]
 
