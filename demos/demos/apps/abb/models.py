@@ -9,26 +9,27 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from demos.common import fields
+from demos.common import fields, storage
 from demos.common.models import (
     Election, Ballot, Part, Question, Option_P, Option_C, PartQuestion, Task,
     PrivateApiUser
 )
-from demos.common.utils import storage
 
 logger = logging.getLogger(__name__)
 
 
-fs_root = storage.PrivateFileSystemStorage(location=settings.DEMOS_DATA_DIR,
-    file_permissions_mode=0o600, directory_permissions_mode=0o700)
+cert_fs = storage.FileSystemStorage(
+    location=os.path.join(settings.DEMOS_DATA_DIR, 'abb/certs'),
+    file_permissions_mode=0o600, directory_permissions_mode=0o700
+)
 
-def get_cert_file_path(election, filename):
-    return "certs/%s%s" % (election.id, os.path.splitext(filename)[-1])
+def cert_directory_path(election, filename):
+    return "%s%s" % (election.id, os.path.splitext(filename)[-1])
 
 
 class Election(Election):
     
-    cert = models.FileField(_("certificate"), upload_to=get_cert_file_path, storage=fs_root)
+    cert = models.FileField(_("certificate"), storage=cert_fs, upload_to=cert_directory_path)
     
     tallying_started_at = models.DateTimeField(_("tallying started at"), null=True, default=None)
     tallying_ended_at = models.DateTimeField(_("tallying ended at"), null=True, default=None)

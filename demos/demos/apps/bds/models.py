@@ -9,19 +9,18 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from demos.common import storage
 from demos.common.models import Election, Ballot, Part, Task, PrivateApiUser
-from demos.common.utils import storage
 
 logger = logging.getLogger(__name__)
 
 
-ballot_fs = storage.PrivateTarFileStorage(
+ballot_fs = storage.TarFileStorage(
     location=os.path.join(settings.DEMOS_DATA_DIR, 'bds/ballots'),
-    tar_permissions_mode=0o600, tar_file_permissions_mode=0o600,
-    tar_directory_permissions_mode=0o700
+    tar_permissions_mode=0o600, tar_file_permissions_mode=0o600, tar_directory_permissions_mode=0o700
 )
 
-def get_ballot_file_path(ballot, filename):
+def ballot_directory_path(ballot, filename):
     return "%s/%s" % (ballot.election.id, filename)
 
 
@@ -33,7 +32,7 @@ class Election(Election):
 
 class Ballot(Ballot):
     
-    pdf = models.FileField(_("PDF file"), upload_to=get_ballot_file_path, storage=ballot_fs)
+    pdf = models.FileField(_("PDF file"), storage=ballot_fs, upload_to=ballot_directory_path)
 
 
 class Part(Part):
