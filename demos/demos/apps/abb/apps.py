@@ -2,11 +2,14 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from demos.common.conf import AppConfig as _AppConfig
+from django.apps import AppConfig
 from django.utils.translation import ugettext_lazy as _
 
+from demos.common.apps import CommonMixin
 
-class AppConfig(_AppConfig):
+
+class AppConfig(CommonMixin, AppConfig):
     
     name = 'demos.apps.abb'
-    verbose_name = _('Audit and Results')
+    verbose_name = _("Audit and Results")
+
