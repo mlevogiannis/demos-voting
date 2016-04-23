@@ -341,7 +341,7 @@ INSTALLED_APPS += ['kombu.transport.django']
 BROKER_URL = 'django://'
 CELERY_RESULT_BACKEND = 'db+postgresql://%(USER)s:%(PASSWORD)s@%(HOST)s:%(PORT)s/%(NAME)s' % DATABASES['default']
 
-CELERY_TASK_SERIALIZER = 'custom-json'
-CELERY_RESULT_SERIALIZER = 'custom-json'
-CELERY_ACCEPT_CONTENT = ['custom-json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ['json']
 

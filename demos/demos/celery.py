@@ -1,21 +1,21 @@
-# -*- encoding: utf-8 -*-
 # File: celery.py
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import functools
+import json
 import os
 
-from celery import Celery
+from django.conf import settings
+from django.core.serializers.json import DjangoJSONEncoder
 
-# set the default Django settings module for the 'celery' program.
+from celery import Celery
+from kombu.serialization import register
+
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'demos.settings')
 
-from django.conf import settings
-
 app = Celery('demos')
-
-# Using a string here means the worker will not have to
-# pickle the object when using Windows.
 app.config_from_object('django.conf:settings')
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
@@ -23,4 +23,13 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 @app.task(bind=True)
 def debug_task(self):
     print('Request: {0!r}'.format(self.request))
+
+
+register(
+    name='json',
+    encoder=functools.partial(json.dumps, cls=DjangoJSONEncoder),
+    decoder=json.loads,
+    content_type='application/json',
+    content_encoding='utf-8',
+)
 
