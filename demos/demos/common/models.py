@@ -193,6 +193,8 @@ class Part(models.Model):
     )
     
     ballot = models.ForeignKey('Ballot')
+    questions = models.ManyToManyField('Question', through='PartQuestion')
+    
     tag = models.CharField(_("tag"), max_length=1, choices=TAG_CHOICES)
     
     # Related object access
@@ -200,12 +202,6 @@ class Part(models.Model):
     @cached_property
     def election(self):
         return self.ballot.election
-    
-    @property
-    def questions(self):
-        manager = self._questions
-        manager._annotate_with_related_pk(self)
-        return manager
     
     # Default manager, meta options and natural key
     
@@ -240,7 +236,6 @@ class Question(models.Model):
     )
     
     election = models.ForeignKey('Election')
-    parts = models.ManyToManyField('Part', through='PartQuestion', related_name='_questions')
     
     index = models.PositiveSmallIntegerField(_("index"))
     text = models.TextField(_("question"))
@@ -253,20 +248,6 @@ class Question(models.Model):
     @property
     def min_choices(self):
         return 0 if not self.election.type_is_referendum else 1
-    
-    # Related object access
-    
-    @property
-    def options(self):
-        if hasattr(self, '_related_part_pk'):
-            raise AttributeError
-        return self.options_p
-    
-    @property
-    def options_c(self):
-        if not hasattr(self, '_related_part_pk'):
-            raise AttributeError
-        return self.partquestions.get(part=self._related_part_pk).options_c
     
     # Default manager, meta options and natural key
     

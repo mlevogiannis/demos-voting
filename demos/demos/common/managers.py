@@ -2,11 +2,8 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from django.apps import apps
 from django.db import models
-from django.utils import six
-from django.utils.six.moves import range, zip
-
-from demos.common.decorators import related_attr
 
 
 class ElectionManager(models.Manager):
@@ -22,6 +19,23 @@ class BallotManager(models.Manager):
             return self.instance.ballot_cnt
         except AttributeError:
             return super(BallotManager, self).count()
+    
+    def get_queryset(self):
+        
+        app_config = apps.get_app_config(self.model._meta.app_label)
+        
+        Question = app_config.get_model('Question')
+        PartQuestion = app_config.get_model('PartQuestion')
+        
+        partquestion_qs = PartQuestion.objects.select_related('question').defer(
+            *['question__%s' % f.name for f in Question._meta.get_fields() if f.name != 'index']
+        )
+        
+        ballot_qs = super(BallotManager, self).get_queryset().prefetch_related(
+            models.Prefetch('parts__partquestions', partquestion_qs), 'parts__partquestions__options_c'
+        )
+        
+        return ballot_qs
     
     def get_by_natural_key(self, e_id, b_serial):
         
@@ -45,15 +59,8 @@ class PartManager(models.Manager):
 
 class QuestionManager(models.Manager):
     
-    @related_attr('parts')
-    def _annotate_with_related_pk(self, obj):
-        self._related_part_pk = {'_related_part_pk': models.Value(obj.pk, output_field=obj._meta.pk)}
-    
     def get_queryset(self):
-        queryset = super(QuestionManager, self).get_queryset()
-        if hasattr(self, '_related_part_pk'):
-            queryset = queryset.annotate(**self._related_part_pk)
-        return queryset
+        return super(QuestionManager, self).get_queryset().prefetch_related('options_p')
     
     def get_by_natural_key(self, e_id, q_index):
         
