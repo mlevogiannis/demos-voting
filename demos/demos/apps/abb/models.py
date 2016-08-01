@@ -72,7 +72,7 @@ class Option_C(Option_C):
     zk1 = fields.JSONField()
     zk2 = fields.JSONField(null=True, default=None)
     
-    receipt_full = models.CharField(_("full receipt"), max_length=1024)
+    receipt = models.CharField(_("receipt"), max_length=1024)
 
 
 class PartQuestion(PartQuestion):

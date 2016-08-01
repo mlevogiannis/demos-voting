@@ -228,15 +228,13 @@ class Option_C(Option_C):
     
     def generate_receipt(self):
         
-        # The receipt is derived from the option's long votecode. If the
-        # election uses short votecodes, a temporary long votecode needs
-        # to be generated.
-        
-        data = self._generate_long_votecode() if self.election.votecode_type_is_short else self.votecode
-        signature = OpenSSL.crypto.sign(self.election.key, data, str(self.election.hash_algorithm))
-        
-        self.receipt_full = base32.encode_from_bytes(signature, (self.election.key.bits() + 4) // 5)
-        self.receipt = self.receipt_full[-self.election.receipt_length:]
+        if self.election.votecode_type_is_long:
+            length = (self.election.key.bits() + 4) // 5
+            signature = OpenSSL.crypto.sign(self.election.key, self.votecode, str(self.election.hash_algorithm))
+            self.receipt = base32.encode_from_bytes(signature, length)
+        else:
+            randomness = random.getrandbits(self.election.receipt_length * 5)
+            self.receipt = base32.encode(randomness, self.election.receipt_length)
 
 
 class PartQuestion(PartQuestion):

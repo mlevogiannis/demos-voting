@@ -124,7 +124,7 @@ class Election(models.Model):
     
     credential_bits = models.PositiveIntegerField(_("credential bits"), default=128)
     long_votecode_length = models.PositiveIntegerField(_("long votecode length"), default=16)
-    receipt_length = models.PositiveIntegerField(_("receipt length"), default=10)
+    receipt_length = models.PositiveIntegerField(_("receipt length"), default=8)
     security_code_length = models.PositiveIntegerField(_("security code length"), null=True)
     hash_algorithm = models.CharField(_("hash algorithm"), max_length=16, default='sha256')
     

@@ -56,7 +56,7 @@ class Option_C(Option_C):
     votecode = models.CharField(_("vote-code"), max_length=32, null=True, default=None)
     votecode_hash_value = models.CharField(_("vote-code hash value"), max_length=128, null=True, default=None)
     
-    receipt = models.CharField(_("receipt"), max_length=32)
+    receipt = models.CharField(_("receipt"), max_length=1024)
 
 
 class PartQuestion(PartQuestion):
