@@ -4,6 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import datetime
 import logging
+import math
 import random
 
 import OpenSSL
@@ -11,7 +12,7 @@ import OpenSSL
 from django.conf import settings
 from django.db import models
 from django.utils import six
-from django.utils.encoding import force_bytes
+from django.utils.encoding import force_bytes, force_text
 from django.utils.six.moves import range
 from django.utils.translation import ugettext_lazy as _
 
@@ -21,7 +22,6 @@ from demos.common.models import (
     PrivateApiUser
 )
 from demos.common.utils import base32
-
 from demos.apps.ea import crypto
 
 logger = logging.getLogger(__name__)
@@ -75,79 +75,127 @@ class Election(Election):
         self.cert.set_notAfter(force_bytes((self.setup_started_at+validity_period).strftime('%Y%m%d%H%M%S%z')))
         self.cert.set_pubkey(self.key)
         self.cert.sign(ca_key, str(self.hash_algorithm))
+    
+    def generate_security_code_length(self):
+        
+        if self.security_code_type_is_none:
+            self.security_code_length = None
+        else:
+            self.security_code_length = max(
+                self.SECURITY_CODE_MIN_LENGTH, min(
+                    self.SECURITY_CODE_MAX_LENGTH, self._security_code_full_length
+                )
+            )
 
 
 class Ballot(Ballot):
-    
-    def generate_credential(self):
-        randint = random.getrandbits(self.election.credential_bits)
-        self.credential = base32.encode(randint, (self.election.credential_bits + 4) // 5)
-        self.credential_hash = self.election.hasher.encode(self.credential)
+    pass
 
 
 class Part(Part):
     
-    @property
-    def _other_part(self): # assumes that both parts have been prefetched
-        index = (Part.TAG_A, Part.TAG_B).index(self.tag)
-        return self.ballot.parts.all()[1 - index]
+    def generate_credential(self):
+        
+        hasher = self.election.hasher
+        length = (self.election.credential_bits + 4) // 5
+        randint = random.getrandbits(self.election.credential_bits)
+        
+        self.credential = base32.encode(randint, length)
+        self.credential_hash = hasher.encode(self.credential)
     
     def generate_security_code(self):
         
-        security_code2 = getattr(self._other_part, 'security_code', None)
-        self.security_code = security_code2
-        
-        while self.security_code == security_code2:
-            randint = random.getrandbits(self.election.security_code_length * 5)
-            self.security_code = base32.encode(randint, self.election.security_code_length)
-        
-        self.security_code_hash = self.election.hasher.encode(self.security_code)
+        if self.election.security_code_type_is_none:
+            self.security_code = None
+        else:
+            
+            # Split options into groups, one for each security code's block.
+            
+            if self.election.type_is_election:
+                
+                # The first group is always the party list, followed by one
+                # group for each party's candidates. Candidate lists have a
+                # special structure by grouping the options that correspond
+                # to the same party (all parties always have the same number
+                # of candidates, including the blank ones).
+                
+                parties = self.election.questions.all()[0].options_p.all()
+                candidates = self.election.questions.all()[1].options_p.all()
+                
+                groups = [list(parties)] + [
+                    list(options) for options in zip(*([iter(candidates)] * (len(candidates) // len(parties))))
+                ]
+                
+            elif self.election.type_is_referendum:
+                groups = [list(question.options_p.all()) for question in self.election.questions.all()]
+            
+            # If the security code has enough bits to cover all permutations
+            # for all groups, then we generate a random permutation index for
+            # each one of them. Otherwise, the randomness extractor will take
+            # the security code and the group's index as source and generate
+            # a "long" pseudo-random permutation index. In that case, the
+            # security code will be a random value.
+            
+            s = 0
+            s_max = 0
+            
+            if self.election.security_code_length >= self.election._security_code_full_length:
+                
+                for group in groups:
+                    p_max = math.factorial(len(group)) - 1
+                    
+                    p = None
+                    while p is None or p > p_max:
+                        p = random.getrandbits(p_max.bit_length())
+                    
+                    s |= (p << s_max.bit_length())
+                    s_max |= (p_max << s_max.bit_length())
+            
+            # Fill (the remainder of) the security code with random bits.
+            
+            base = 10 if self.election.security_code_type_is_numeric else 32
+            s_enc_max = sum(base ** i for i in range(self.election.security_code_length)) * (base - 1)
+            
+            r_max = (s_enc_max - s_max) >> s_max.bit_length()
+            
+            if r_max > 0:
+                r = None
+                while r is None or r > r_max:
+                    r = random.getrandbits(r_max.bit_length())
+                s |= (r << s_max.bit_length())
+            
+            # Finally, encode the security code.
+            
+            security_code_length = self.election.security_code_length
+            
+            if self.election.security_code_type_is_numeric:
+                security_code = force_text(s).zfill(security_code_length)
+            elif self.election.security_code_type_is_alphanumeric:
+                security_code = base32.encode(s, security_code_length)
+            
+            self.security_code = security_code[-security_code_length:]
     
     def generate_token(self):
         
-        # Calculate the number of bits for each field in the token
-        
-        serial_bits = (100 + self.election.ballot_cnt - 1).bit_length()
+        serial_bits = (100 + self.election.ballots.count() - 1).bit_length()
         tag_bits = 1
         credential_bits = self.election.credential_bits
-        security_code_bits = self.election.security_code_length * 5
-        
-        token_bits = serial_bits + tag_bits + credential_bits + security_code_bits
-        token_len = (token_bits + 4) // 5
-        
-        padding_bits = (token_len * 5) - token_bits
-        
-        # Decode all fields to integers
         
         serial = self.ballot.serial
         tag = (Part.TAG_A, Part.TAG_B).index(self.tag)
-        credential = base32.decode(self.ballot.credential)
-        security_code = base32.decode(self._other_part.security_code)
+        credential = base32.decode(self.credential)
         
-        # The voter's token is made up of of two parts. The first part
-        # encodes the ballot's serial number, the voting part's tag and
-        # the ballot's credential, XORed with the second part. The second
-        # part encodes the auditing part's security code, bit-inversed.
+        t = (credential | (tag << credential_bits) | (serial << (tag_bits + credential_bits)))
         
-        p1_len = serial_bits + credential_bits + tag_bits
-        p2_len = security_code_bits
+        token_bits = serial_bits + tag_bits + credential_bits
+        token_length = (token_bits + 4) // 5
         
-        p1 = (credential | (tag << credential_bits) | (serial << (tag_bits + credential_bits)))
-        p2 = (~security_code) & ((1 << security_code_bits) - 1)
-        
-        for i in range(0, p1_len, p2_len):
-            p1 ^= p2 << i
-        
-        p1 &= (1 << p1_len) - 1
-        
-        # Add random padding and encode the token
-        
-        t = (p1 << p2_len) | p2
+        padding_bits = (token_length * 5) - token_bits
         
         if padding_bits > 0:
             t |= (random.getrandbits(padding_bits) << token_bits)
         
-        self.token = base32.encode(t, token_len)
+        self.token = base32.encode(t, token_length)
 
 
 class Question(Question):
@@ -166,8 +214,8 @@ class Option_C(Option_C):
     def generate_votecode(self):
         
         if self.election.votecode_type_is_long:
-            hasher = self.election.hasher
             
+            hasher = self.election.hasher
             salt = self.partquestion.votecode_hash_salt
             params = self.partquestion.votecode_hash_params
             
@@ -175,7 +223,8 @@ class Option_C(Option_C):
             self.votecode_hash_value = hasher.split(hasher.encode(self.votecode, salt, params))[2]
             
         else:
-            self.votecode = self.partquestion.short_votecodes[self.index]
+            self.votecode = self.partquestion._short_votecodes[self.index]
+            self.votecode_hash_value = None
     
     def generate_receipt(self):
         
@@ -192,15 +241,14 @@ class Option_C(Option_C):
 
 class PartQuestion(PartQuestion):
     
-    def generate_common(self):
+    def generate_common_votecode_data(self):
         
         if self.election.votecode_type_is_long:
             self.votecode_hash_salt = self.election.hasher.salt()
             self.votecode_hash_params = self.election.hasher.params()
         else:
-            zfill = lambda votecode: six.text_type(votecode).zfill(len(six.text_type(self.options_c.count())))
-            self.short_votecodes = list(map(zfill, range(1, self.options_c.count() + 1)))
-            random.shuffle(self.short_votecodes)
+            self._short_votecodes = [force_text(i) for i in range(1, self.options_c.count() + 1)]
+            random.shuffle(self._short_votecodes)
 
 
 class Task(Task):

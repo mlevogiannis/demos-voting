@@ -26,33 +26,21 @@ class Election(Election):
 
 class Ballot(Ballot):
     
-    credential_hash = models.CharField(_("credential hash value"), max_length=128)
     cast_at = models.DateTimeField(_("cast at"), null=True, default=None)
     
     @property
     def is_cast(self):
         return self.cast_at is not None
-    
-    def verify_credential(self, credential):
-        
-        hasher = self.election.hasher
-        regex = r'^%s{%d}$' % (base32.regex, (self.election.credential_bits + 4) // 5)
-        
-        return (re.match(regex, credential) and
-                hasher.verify(base32.normalize(credential), self.credential_hash))
 
 
 class Part(Part):
     
-    security_code_hash = models.CharField(_("security code hash value"), max_length=128)
+    credential_hash = models.CharField(_("credential hash value"), max_length=128)
     
-    def verify_security_code(self, security_code):
-        
+    def verify_credential(self, credential):
         hasher = self.election.hasher
-        regex = r'^%s{%d}$' % (base32.regex, self.election.security_code_length)
-        
-        return (re.match(regex, security_code) and
-                hasher.verify(base32.normalize(security_code), self.security_code_hash))
+        regex = r'^%s{%d}$' % (base32.regex, (self.election.credential_bits + 4) // 5)
+        return (re.match(regex, credential) and hasher.verify(base32.normalize(credential), self.credential_hash))
 
 
 class Question(Question):

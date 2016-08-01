@@ -39,16 +39,13 @@ class Election(Election):
 
 class Ballot(Ballot):
     
-    credential = models.CharField(_("credential"), max_length=32, null=True, default=None)
-    credential_hash = models.CharField(_("credential hash value"), max_length=128)
-    
     cast_at = models.DateTimeField(_("cast at"), null=True, default=None)
 
 
 class Part(Part):
     
-    security_code = models.CharField(_("security code"), max_length=32, null=True, default=None)
-    security_code_hash = models.CharField(_("security code hash value"), max_length=128)
+    credential = models.CharField(_("credential"), max_length=32, null=True, default=None)
+    credential_hash = models.CharField(_("credential hash value"), max_length=128)
 
 
 class Question(Question):
