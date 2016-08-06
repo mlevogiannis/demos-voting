@@ -75,7 +75,7 @@ class Election(Election):
         self.cert.set_notBefore(force_bytes(self.setup_started_at.strftime('%Y%m%d%H%M%S%z')))
         self.cert.set_notAfter(force_bytes((self.setup_started_at+validity_period).strftime('%Y%m%d%H%M%S%z')))
         self.cert.set_pubkey(self.key)
-        self.cert.sign(ca_key, str(self.hash_algorithm))
+        self.cert.sign(ca_key, str('sha256'))
     
     def generate_security_code_length(self):
         
@@ -228,7 +228,7 @@ class Option_C(Option_C):
         
         if self.election.votecode_type_is_long:
             length = (self.election.key.bits() + 4) // 5
-            signature = OpenSSL.crypto.sign(self.election.key, self.votecode, str(self.election.hash_algorithm))
+            signature = OpenSSL.crypto.sign(self.election.key, self.votecode, str('sha256'))
             self.receipt = base32.encode_from_bytes(signature, length)
         else:
             randomness = random.getrandbits(self.election.receipt_length * 5)

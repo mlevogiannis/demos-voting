@@ -128,7 +128,6 @@ class Election(models.Model):
     long_votecode_length = models.PositiveIntegerField(_("long votecode length"), default=16)
     receipt_length = models.PositiveIntegerField(_("receipt length"), default=8)
     security_code_length = models.PositiveIntegerField(_("security code length"), null=True)
-    hash_algorithm = models.CharField(_("hash algorithm"), max_length=16, default='sha256')
     
     _id = models.AutoField(db_column='id', primary_key=True)
     
@@ -381,7 +380,7 @@ class Option_C(models.Model):
         
         long_votecode_length = self.election.long_votecode_length
         
-        digest = hmac.new(key, msg, getattr(hashlib, self.election.hash_algorithm)).digest()
+        digest = hmac.new(key, msg, hashlib.sha256).digest()
         return base32.encode_from_bytes(digest, long_votecode_length)[-long_votecode_length:]
     
     # Related object access
@@ -480,7 +479,7 @@ class PartQuestion(models.Model):
             def _randomness_extractor(index, option_cnt):
                 key = force_bytes("%s" % self.part.credential)
                 msg = force_bytes("%s%0*d" % (self.part.security_code or '', len(six.text_type(option_cnt-1)), index))
-                digest = hmac.new(key, msg, getattr(hashlib, self.election.hash_algorithm)).digest()
+                digest = hmac.new(key, msg, hashlib.sha512).digest()
                 return int_from_bytes(digest, byteorder='big') % math.factorial(option_cnt)
             
             if question_is_candidate_list:
