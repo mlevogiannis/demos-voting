@@ -14,6 +14,7 @@ from demos.common.models import (
     PrivateApiUser
 )
 from demos.common.utils import base32
+from demos.common.utils.hashers import get_hasher, identify_hasher
 
 logger = logging.getLogger(__name__)
 
@@ -35,10 +36,10 @@ class Ballot(Ballot):
 
 class Part(Part):
     
-    credential_hash = models.CharField(_("credential hash value"), max_length=128)
+    credential_hash = models.CharField(_("credential hash"), max_length=255)
     
     def verify_credential(self, credential):
-        hasher = self.election.hasher
+        hasher = get_hasher(identify_hasher(self.credential_hash))
         regex = r'^%s{%d}$' % (base32.regex, (self.election.credential_bits + 4) // 5)
         return (re.match(regex, credential) and hasher.verify(base32.normalize(credential), self.credential_hash))
 
@@ -54,15 +55,13 @@ class Option_P(Option_P):
 class Option_C(Option_C):
     
     votecode = models.CharField(_("vote-code"), max_length=32, null=True, default=None)
-    votecode_hash_value = models.CharField(_("vote-code hash value"), max_length=128, null=True, default=None)
+    votecode_hash = models.CharField(_("vote-code hash"), max_length=255, null=True, default=None)
     
     receipt = models.CharField(_("receipt"), max_length=1024)
 
 
 class PartQuestion(PartQuestion):
-    
-    votecode_hash_salt = models.CharField(max_length=32, null=True, default=None)
-    votecode_hash_params = models.CharField(max_length=16, null=True, default=None)
+    pass
 
 
 class Task(Task):

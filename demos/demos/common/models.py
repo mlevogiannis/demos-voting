@@ -16,7 +16,7 @@ from django.utils.six.moves import range, zip
 from django.utils.translation import pgettext_lazy, ugettext_lazy as _
 
 from demos.common import fields, managers
-from demos.common.utils import base32, pbkdf2
+from demos.common.utils import base32
 from demos.common.utils.int import int_from_bytes
 
 logger = logging.getLogger(__name__)
@@ -104,6 +104,8 @@ class Election(models.Model):
         (STATE_CANCELLED, _("Cancelled")),
     )
     
+    DEFAULT_HASHER_IDENTIFIER = 'pbkdf2-sha512'
+    
     id = models.CharField(_("id"), unique=True, max_length=16, db_column='_id',
         validators=[RegexValidator(regex=(r'^%s+$' % base32.regex))])
     
@@ -188,10 +190,6 @@ class Election(models.Model):
             security_code = base32.encode(s_max)
         
         return len(security_code)
-    
-    @cached_property
-    def hasher(self):
-        return pbkdf2.PBKDF2Hasher(self.hash_algorithm)
     
     # Default manager, meta options and natural key
     
@@ -369,19 +367,6 @@ class Option_C(models.Model):
     index = models.PositiveSmallIntegerField(_("index"))
     
     # Custom methods and properties
-    
-    @property
-    def votecode_hash(self):
-        
-        value = self.votecode_hash_value
-        
-        if not value:
-            return value
-        
-        salt = self.partquestion.votecode_hash_salt
-        params = self.partquestion.votecode_hash_params
-        
-        return self.election.hasher.join(params, salt, value)
     
     def _generate_long_votecode(self):
         

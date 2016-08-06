@@ -22,6 +22,7 @@ from demos.common.models import (
     PrivateApiUser
 )
 from demos.common.utils import base32
+from demos.common.utils.hashers import get_hasher
 from demos.apps.ea import crypto
 
 logger = logging.getLogger(__name__)
@@ -96,12 +97,12 @@ class Part(Part):
     
     def generate_credential(self):
         
-        hasher = self.election.hasher
         length = (self.election.credential_bits + 4) // 5
         randint = random.getrandbits(self.election.credential_bits)
+        hasher = get_hasher(self.election.DEFAULT_HASHER_IDENTIFIER)
         
         self.credential = base32.encode(randint, length)
-        self.credential_hash = hasher.encode(self.credential)
+        self.credential_hash = hasher.hash(self.credential)
     
     def generate_security_code(self):
         
@@ -214,17 +215,14 @@ class Option_C(Option_C):
     def generate_votecode(self):
         
         if self.election.votecode_type_is_long:
-            
-            hasher = self.election.hasher
-            salt = self.partquestion.votecode_hash_salt
-            params = self.partquestion.votecode_hash_params
-            
+            reuse_salt = settings.DEMOS_LONG_VOTECODE_HASH_REUSE_SALT
+            hasher = get_hasher(self.election.DEFAULT_HASHER_IDENTIFIER)
+            config = hasher.config() if not reuse_salt else self.partquestion._long_votecode_hash_config
             self.votecode = self._generate_long_votecode()
-            self.votecode_hash_value = hasher.split(hasher.encode(self.votecode, salt, params))[2]
-            
+            self.votecode_hash = hasher.hash(self.votecode, config)
         else:
             self.votecode = self.partquestion._short_votecodes[self.index]
-            self.votecode_hash_value = None
+            self.votecode_hash = None
     
     def generate_receipt(self):
         
@@ -242,8 +240,9 @@ class PartQuestion(PartQuestion):
     def generate_common_votecode_data(self):
         
         if self.election.votecode_type_is_long:
-            self.votecode_hash_salt = self.election.hasher.salt()
-            self.votecode_hash_params = self.election.hasher.params()
+            if settings.DEMOS_LONG_VOTECODE_HASH_REUSE_SALT:
+                hasher = get_hasher(self.election.DEFAULT_HASHER_IDENTIFIER)
+                self._long_votecode_hash_config = hasher.config()
         else:
             self._short_votecodes = [force_text(i) for i in range(1, self.options_c.count() + 1)]
             random.shuffle(self._short_votecodes)

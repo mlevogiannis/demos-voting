@@ -45,7 +45,7 @@ class Ballot(Ballot):
 class Part(Part):
     
     credential = models.CharField(_("credential"), max_length=32, null=True, default=None)
-    credential_hash = models.CharField(_("credential hash value"), max_length=128)
+    credential_hash = models.CharField(_("credential hash"), max_length=255)
 
 
 class Question(Question):
@@ -64,7 +64,7 @@ class Option_P(Option_P):
 class Option_C(Option_C):
     
     votecode = models.CharField(_("vote-code"), max_length=32, null=True, default=None)
-    votecode_hash_value = models.CharField(_("vote-code hash value"), max_length=128, null=True, default=None)
+    votecode_hash = models.CharField(_("vote-code hash"), max_length=255, null=True, default=None)
     
     voted = models.NullBooleanField(_("marked as voted"), default=None)
     
@@ -76,9 +76,7 @@ class Option_C(Option_C):
 
 
 class PartQuestion(PartQuestion):
-    
-    votecode_hash_salt = models.CharField(max_length=32, null=True, default=None)
-    votecode_hash_params = models.CharField(max_length=16, null=True, default=None)
+    pass
 
 
 class Task(Task):

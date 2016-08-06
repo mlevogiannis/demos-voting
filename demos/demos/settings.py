@@ -317,6 +317,12 @@ DEMOS_CA_CERT_FILE = ''
 DEMOS_CA_PKEY_FILE = ''
 DEMOS_CA_PKEY_PASSPHRASE = ''
 
+# DEMOS_LONG_VOTECODE_HASH_REUSE_SALT: (ea only) Use the same salt for the
+# long votecode hashes of each ballot part's question. This can greatly
+# improve vbb's performance for questions with many options.
+
+DEMOS_LONG_VOTECODE_HASH_REUSE_SALT = False
+
 # DEMOS_MAX_*: The maximum number of ballots, questions per referendum,
 # options per question, parties per election and candidates per party.
 
