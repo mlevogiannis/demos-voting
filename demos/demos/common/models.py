@@ -124,7 +124,7 @@ class Election(models.Model):
     
     ballot_cnt = models.PositiveIntegerField(_("number of ballots"))
     
-    credential_bits = models.PositiveIntegerField(_("credential bits"), default=128)
+    credential_length = models.PositiveIntegerField(_("credential length"), default=16)
     long_votecode_length = models.PositiveIntegerField(_("long votecode length"), default=16)
     receipt_length = models.PositiveIntegerField(_("receipt length"), default=8)
     security_code_length = models.PositiveIntegerField(_("security code length"), null=True)

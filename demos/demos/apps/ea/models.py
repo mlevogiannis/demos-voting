@@ -5,6 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import datetime
 import logging
 import math
+import os
 import random
 
 import OpenSSL
@@ -97,11 +98,11 @@ class Part(Part):
     
     def generate_credential(self):
         
-        length = (self.election.credential_bits + 4) // 5
-        randint = random.getrandbits(self.election.credential_bits)
-        hasher = get_hasher(self.election.DEFAULT_HASHER_IDENTIFIER)
+        bytes = os.urandom(self.election.credential_length)
+        length = (self.election.credential_length * 8 + 4) // 5
+        self.credential = base32.encode_from_bytes(bytes, length)
         
-        self.credential = base32.encode(randint, length)
+        hasher = get_hasher(self.election.DEFAULT_HASHER_IDENTIFIER)
         self.credential_hash = hasher.hash(self.credential)
     
     def generate_security_code(self):
@@ -180,7 +181,7 @@ class Part(Part):
         
         serial_bits = (100 + self.election.ballots.count() - 1).bit_length()
         tag_bits = 1
-        credential_bits = self.election.credential_bits
+        credential_bits = self.election.credential_length * 8
         
         serial = self.ballot.serial
         tag = (Part.TAG_A, Part.TAG_B).index(self.tag)

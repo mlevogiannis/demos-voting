@@ -40,7 +40,7 @@ class Part(Part):
     
     def verify_credential(self, credential):
         hasher = get_hasher(identify_hasher(self.credential_hash))
-        regex = r'^%s{%d}$' % (base32.regex, (self.election.credential_bits + 4) // 5)
+        regex = r'^%s{%d}$' % (base32.regex, (self.election.credential_length * 8 + 4) // 5)
         return (re.match(regex, credential) and hasher.verify(base32.normalize(credential), self.credential_hash))
 
 
