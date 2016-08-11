@@ -17,7 +17,7 @@ from django.utils.translation import pgettext_lazy, ugettext_lazy as _
 
 from demos.common import fields, managers
 from demos.common.utils import base32
-from demos.common.utils.int import int_from_bytes
+from demos.common.utils.int import int_from_bytes, int_to_bytes
 
 logger = logging.getLogger(__name__)
 
@@ -251,6 +251,28 @@ class Part(models.Model):
     
     tag = models.CharField(_("tag"), max_length=1, choices=TAG_CHOICES)
     
+    # Custom methods and properties
+    
+    @cached_property
+    def _credential_bytes(self):
+        return base32.decode_to_bytes(self.credential, self.election.credential_length)
+    
+    @cached_property
+    def _security_code_bytes(self):
+        
+        if self.election.security_code_type_is_none:
+            return b''
+        else:
+            if self.election.security_code_type_is_numeric:
+                base = 10
+                s = int(self.security_code)
+            elif self.election.security_code_type_is_alphanumeric:
+                base = 32
+                s = base32.decode(self.security_code)
+            
+            s_enc_max = (sum(base ** i for i in range(self.election.security_code_length)) * (base - 1))
+            return int_to_bytes(s, length=((s_enc_max.bit_length() + 7) // 8), byteorder='big')
+    
     # Related object access
     
     @cached_property
@@ -372,15 +394,19 @@ class Option_C(models.Model):
         if not (self.part.security_code or self.election.security_code_type_is_none):
             raise AttributeError
         
-        question_id = "%0*d" % (len(six.text_type(self.part.partquestions.count() - 1)), self.question.index)
-        option_id = "%0*d" % (len(six.text_type(self.partquestion.options_c.count() - 1)), self.index)
+        byte_length = lambda n: (n.bit_length() + 7) // 8
         
-        key = force_bytes("%s" % self.part.credential)
-        msg = force_bytes("%s%s%s" % (self.part.security_code or '', question_id, option_id))
+        option_cnt = self.partquestion.options_c.count()
+        option_index_bytes = int_to_bytes(self.index, byte_length(option_cnt - 1), byteorder='big')
+        question_cnt = self.part.partquestions.count()
+        question_index_bytes = int_to_bytes(self.question.index, byte_length(question_cnt - 1), byteorder='big')
         
-        long_votecode_length = self.election.long_votecode_length
+        key = self.part._credential_bytes
+        msg = self.part._security_code_bytes + question_index_bytes + option_index_bytes
         
         digest = hmac.new(key, msg, hashlib.sha256).digest()
+        
+        long_votecode_length = self.election.long_votecode_length
         return base32.encode_from_bytes(digest, long_votecode_length)[-long_votecode_length:]
     
     # Related object access
@@ -477,8 +503,11 @@ class PartQuestion(models.Model):
                 s >>= p_bits
         else:
             def _randomness_extractor(index, option_cnt):
-                key = force_bytes("%s" % self.part.credential)
-                msg = force_bytes("%s%0*d" % (self.part.security_code or '', len(six.text_type(option_cnt-1)), index))
+                group_index_bytes = int_to_bytes(index, (((option_cnt - 1).bit_length() + 7) // 8), byteorder='big')
+                
+                key = self.part._credential_bytes
+                msg = self.part._security_code_bytes + group_index_bytes
+                
                 digest = hmac.new(key, msg, hashlib.sha512).digest()
                 return int_from_bytes(digest, byteorder='big') % math.factorial(option_cnt)
             
