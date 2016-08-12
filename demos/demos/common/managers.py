@@ -37,22 +37,22 @@ class BallotManager(models.Manager):
         
         return ballot_qs
     
-    def get_by_natural_key(self, e_id, b_serial):
+    def get_by_natural_key(self, e_id, b_serial_number):
         
         model = self.model._meta.get_field('election').related_model
         manager = model.objects.db_manager(self.db)
         election = manager.get_by_natural_key(e_id)
         
-        return self.get(election=election, serial=b_serial)
+        return self.get(election=election, serial_number=b_serial_number)
 
 
 class PartManager(models.Manager):
     
-    def get_by_natural_key(self, e_id, b_serial, p_tag):
+    def get_by_natural_key(self, e_id, b_serial_number, p_tag):
         
         model = self.model._meta.get_field('ballot').related_model
         manager = model.objects.db_manager(self.db)
-        ballot = manager.get_by_natural_key(e_id, b_serial)
+        ballot = manager.get_by_natural_key(e_id, b_serial_number)
         
         return self.get(ballot=ballot, tag=p_tag)
 
@@ -84,22 +84,22 @@ class OptionManager_P(models.Manager):
 
 class OptionManager_C(models.Manager):
     
-    def get_by_natural_key(self, e_id, b_serial, p_tag, q_index, o_index):
+    def get_by_natural_key(self, e_id, b_serial_number, p_tag, q_index, o_index):
         
         model = self.model._meta.get_field('question').related_model
         manager = model.objects.db_manager(self.db)
-        question = manager.get_by_natural_key(e_id, b_serial, p_tag, q_index)
+        question = manager.get_by_natural_key(e_id, b_serial_number, p_tag, q_index)
         
         return self.get(question=question, index=o_index)
 
 
 class PartQuestionManager(models.Manager):
     
-    def get_by_natural_key(self, e_id, b_serial, p_tag, q_index):
+    def get_by_natural_key(self, e_id, b_serial_number, p_tag, q_index):
         
         model = self.model._meta.get_field('part').related_model
         manager = model.objects.db_manager(self.db)
-        part = manager.get_by_natural_key(e_id, b_serial, p_tag)
+        part = manager.get_by_natural_key(e_id, b_serial_number, p_tag)
         
         model = self.model._meta.get_field('question').related_model
         manager = model.objects.db_manager(self.db)

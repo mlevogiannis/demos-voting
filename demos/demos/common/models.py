@@ -212,7 +212,7 @@ class Election(models.Model):
 class Ballot(models.Model):
     
     election = models.ForeignKey('Election')
-    serial = models.PositiveIntegerField(_("serial number"))
+    serial_number = models.PositiveIntegerField(_("serial number"))
     
     # Default manager, meta options and natural key
     
@@ -221,18 +221,18 @@ class Ballot(models.Model):
     class Meta:
         abstract = True
         default_related_name = 'ballots'
-        ordering = ['election', 'serial']
-        unique_together = ['election', 'serial']
+        ordering = ['election', 'serial_number']
+        unique_together = ['election', 'serial_number']
         verbose_name = _("ballot")
         verbose_name_plural = _("ballots")
     
     def natural_key(self):
-        return self.election.natural_key() + (self.serial,)
+        return self.election.natural_key() + (self.serial_number,)
     
     natural_key.dependencies = ['Election']
     
     def __str__(self):
-        return "%s" % self.serial
+        return "%s" % self.serial_number
 
 
 @python_2_unicode_compatible
