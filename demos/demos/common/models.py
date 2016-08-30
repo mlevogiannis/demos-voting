@@ -314,7 +314,7 @@ class Question(models.Model):
     election = models.ForeignKey('Election')
     
     index = models.PositiveSmallIntegerField(_("index"))
-    text = models.TextField(_("question"))
+    name = models.TextField(_("name"))
     layout = models.CharField(_("layout"), max_length=16, choices=LAYOUT_CHOICES)
     
     max_choices = models.PositiveSmallIntegerField(_("maximum number of choices"))
@@ -343,7 +343,7 @@ class Question(models.Model):
     natural_key.dependencies = ['Election']
     
     def __str__(self):
-        return "%s - %s" % (self.index + 1, self.text)
+        return "%s - %s" % (self.index + 1, self.name)
 
 
 @python_2_unicode_compatible
@@ -352,7 +352,7 @@ class Option_P(models.Model):
     question = models.ForeignKey('Question')
     
     index = models.PositiveSmallIntegerField(_("index"))
-    text = models.TextField(_("option"))
+    name = models.TextField(_("name"))
     
     # Related object access
     
@@ -368,7 +368,7 @@ class Option_P(models.Model):
         abstract = True
         default_related_name = 'options_p'
         ordering = ['question', 'index']
-        unique_together = ['question', 'text']
+        unique_together = ['question', 'index']
         verbose_name = _("option")
         verbose_name_plural = _("options")
     
@@ -378,7 +378,7 @@ class Option_P(models.Model):
     natural_key.dependencies = ['Question']
     
     def __str__(self):
-        return "%s - %s" % (self.index + 1, self.text)
+        return "%s - %s" % (self.index + 1, self.name)
 
 
 @python_2_unicode_compatible
