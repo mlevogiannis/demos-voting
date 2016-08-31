@@ -7,21 +7,16 @@ import os
 
 from django.conf import settings
 from django.db import models
+from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
-from demos.common import storage
-from demos.common.models import Election, Ballot, Part, Task, PrivateApiUser
+from demos.common.models import (
+    Election, Ballot, Part, Question, Option_P, Option_C, PartQuestion, Task,
+    PrivateApiUser
+)
+from demos.common.utils import base32
 
 logger = logging.getLogger(__name__)
-
-
-ballot_fs = storage.TarFileStorage(
-    location=os.path.join(settings.DEMOS_DATA_DIR, 'bds/ballots'),
-    tar_permissions_mode=0o600, tar_file_permissions_mode=0o600, tar_directory_permissions_mode=0o700
-)
-
-def ballot_directory_path(ballot, filename):
-    return "%s/%s" % (ballot.election.id, filename)
 
 
 class Election(Election):
@@ -31,14 +26,54 @@ class Election(Election):
 
 
 class Ballot(Ballot):
-    
-    pdf = models.FileField(_("PDF file"), storage=ballot_fs, upload_to=ballot_directory_path)
+    pass
 
 
 class Part(Part):
     
-    token = models.CharField(_("token"), max_length=64)
-    security_code = models.CharField(_("security code"), max_length=32)
+    credential = models.CharField(_("credential"), max_length=32)
+    security_code = models.CharField(_("security code"), max_length=32, null=True)
+    
+    @cached_property
+    def token(self):
+        
+        serial_number_bits = (100 + self.election.ballots.count() - 1).bit_length()
+        tag_bits = 1
+        credential_bits = self.election.credential_length * 8
+        
+        serial_number = self.ballot.serial_number
+        tag = (Part.TAG_A, Part.TAG_B).index(self.tag)
+        credential = base32.decode(self.credential)
+        
+        t = (credential | (tag << credential_bits) | (serial_number << (tag_bits + credential_bits)))
+        
+        token_bits = serial_number_bits + tag_bits + credential_bits
+        token_length = (token_bits + 4) // 5
+        
+        padding_bits = (token_length * 5) - token_bits
+        
+        if padding_bits > 0:
+            t |= (random.getrandbits(padding_bits) << token_bits)
+        
+        return base32.encode(t, token_length)
+
+
+class Question(Question):
+    pass
+
+
+class Option_P(Option_P):
+    pass
+
+
+class Option_C(Option_C):
+    
+    votecode = models.CharField(_("vote-code"), max_length=32)
+    receipt = models.CharField(_("receipt"), max_length=1024)
+
+
+class PartQuestion(PartQuestion):
+    pass
 
 
 class Task(Task):

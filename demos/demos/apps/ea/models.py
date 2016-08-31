@@ -176,28 +176,6 @@ class Part(Part):
                 security_code = base32.encode(s, security_code_length)
             
             self.security_code = security_code[-security_code_length:]
-    
-    def generate_token(self):
-        
-        serial_number_bits = (100 + self.election.ballots.count() - 1).bit_length()
-        tag_bits = 1
-        credential_bits = self.election.credential_length * 8
-        
-        serial_number = self.ballot.serial_number
-        tag = (Part.TAG_A, Part.TAG_B).index(self.tag)
-        credential = base32.decode(self.credential)
-        
-        t = (credential | (tag << credential_bits) | (serial_number << (tag_bits + credential_bits)))
-        
-        token_bits = serial_number_bits + tag_bits + credential_bits
-        token_length = (token_bits + 4) // 5
-        
-        padding_bits = (token_length * 5) - token_bits
-        
-        if padding_bits > 0:
-            t |= (random.getrandbits(padding_bits) << token_bits)
-        
-        self.token = base32.encode(t, token_length)
 
 
 class Question(Question):

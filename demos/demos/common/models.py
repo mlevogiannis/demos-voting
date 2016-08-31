@@ -288,8 +288,8 @@ class Part(models.Model):
         default_related_name = 'parts'
         ordering = ['ballot', 'tag']
         unique_together = ['ballot', 'tag']
-        verbose_name = _("sheet")
-        verbose_name_plural = _("sheets")
+        verbose_name = _("part")
+        verbose_name_plural = _("parts")
     
     def natural_key(self):
         return self.ballot.natural_key() + (self.tag,)
@@ -314,16 +314,22 @@ class Question(models.Model):
     election = models.ForeignKey('Election')
     
     index = models.PositiveSmallIntegerField(_("index"))
-    name = models.TextField(_("name"))
-    layout = models.CharField(_("layout"), max_length=16, choices=LAYOUT_CHOICES)
+    name = models.TextField(_("name"), null=True)
     
+    min_choices = models.PositiveSmallIntegerField(_("minimum number of choices"))
     max_choices = models.PositiveSmallIntegerField(_("maximum number of choices"))
+    
+    layout = models.CharField(_("layout"), max_length=16, choices=LAYOUT_CHOICES)
     
     # Custom methods and properties
     
     @property
-    def min_choices(self):
-        return 0 if not self.election.type_is_referendum else 1
+    def layout_is_one_column(self):
+        return self.layout == self.LAYOUT_ONE_COLUMN
+    
+    @property
+    def layout_is_two_column(self):
+        return self.layout == self.LAYOUT_TWO_COLUMN
     
     # Default manager, meta options and natural key
     
@@ -352,7 +358,7 @@ class Option_P(models.Model):
     question = models.ForeignKey('Question')
     
     index = models.PositiveSmallIntegerField(_("index"))
-    name = models.TextField(_("name"))
+    name = models.TextField(_("name"), null=True)
     
     # Related object access
     
