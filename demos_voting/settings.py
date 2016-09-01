@@ -305,12 +305,6 @@ DEMOS_VOTING_BATCH_SIZE = 128
 
 DEMOS_VOTING_DATA_DIR = DATA_DIR
 
-# DEMOS_VOTING_CRYPTO_*: (ea only) Connection parameters for demos-crypto.
-# See: https://docs.python.org/3/library/socket.html
-
-DEMOS_VOTING_CRYPTO_AF = 'AF_UNIX'
-DEMOS_VOTING_CRYPTO_ADDR = os.path.join(RUN_DIR, 'demos-crypto.sock')
-
 # DEMOS_VOTING_CA_*: (ea only) Certificate authority configuration. If both
 # CA_CERT_FILE and CA_PKEY_FILE are not provided, self-signed certificates
 # will be generated. CA_PKEY_PASSPHRASE is optional.

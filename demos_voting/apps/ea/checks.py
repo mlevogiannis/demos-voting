@@ -2,41 +2,11 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import socket
-
-import requests
 import OpenSSL
 
 from django.conf import settings
 from django.core import checks
 from django.utils.encoding import force_bytes
-
-from demos_voting.apps.ea.crypto import af, addr, recv_timeout
-
-
-def crypto_connectivity_check(app_configs, **kwargs):
-    """Tests basic socket connectivity with demos-crypto service"""
-    
-    messages = []
-    
-    try:
-        sock = socket.socket(af)
-        sock.settimeout(recv_timeout)
-        sock.connect(addr)
-        
-        sock.sendall('')  # test +w flag on socket
-        
-        sock.shutdown(socket.SHUT_RDWR)
-        sock.close()
-        
-    except Exception as e:
-        messages.append(
-            checks.Error("Could not connect to demos-crypto service: %s" % e,
-                         hint="Ensure that demos-crypto service is properly configured and running.",
-                         id='ea.E001')
-        )
-    
-    return messages
 
 
 def ca_config_check(app_configs, **kwargs):

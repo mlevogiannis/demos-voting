@@ -9,7 +9,7 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from demos_voting.common import fields, storage
+from demos_voting.common import storage
 from demos_voting.common.models import (Election, Ballot, Part, Question,
     Option_P, Option_C, PartQuestion, Task, PrivateApiUser)
 
@@ -47,11 +47,7 @@ class Part(Part):
 
 
 class Question(Question):
-    
-    key = fields.JSONField()
-    
-    com_combined = fields.JSONField(null=True, default=None)
-    decom_combined = fields.JSONField(null=True, default=None)
+    pass
 
 
 class Option_P(Option_P):
@@ -61,14 +57,10 @@ class Option_P(Option_P):
 
 class Option_C(Option_C):
     
-    votecode = models.CharField(_("vote-code"), max_length=32, null=True, default=None)
-    votecode_hash = models.CharField(_("vote-code hash"), max_length=255, null=True, default=None)
-    
     voted = models.NullBooleanField(_("marked as voted"), default=None)
     
-    com = fields.JSONField()
-    zk1 = fields.JSONField()
-    zk2 = fields.JSONField(null=True, default=None)
+    votecode = models.CharField(_("vote-code"), max_length=32, null=True, default=None)
+    votecode_hash = models.CharField(_("vote-code hash"), max_length=255, null=True, default=None)
     
     receipt = models.CharField(_("receipt"), max_length=1024)
 

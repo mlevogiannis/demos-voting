@@ -17,7 +17,6 @@ from django.utils.encoding import force_bytes, force_text
 from django.utils.six.moves import range
 from django.utils.translation import ugettext_lazy as _
 
-from demos_voting.common import fields
 from demos_voting.common.models import (Election, Ballot, Part, Question,
     Option_P, Option_C, PartQuestion, Task, PrivateApiUser)
 from demos_voting.common.utils import base32
@@ -184,9 +183,6 @@ class Option_P(Option_P):
 
 
 class Option_C(Option_C):
-    
-    decom = fields.JSONField()
-    zk_state = fields.JSONField()
     
     def generate_votecode(self):
         

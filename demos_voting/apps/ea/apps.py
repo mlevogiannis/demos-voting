@@ -6,7 +6,7 @@ from django.apps import AppConfig
 from django.core import checks
 from django.utils.translation import ugettext_lazy as _
 
-from demos_voting.apps.ea.checks import ca_config_check, crypto_connectivity_check
+from demos_voting.apps.ea.checks import ca_config_check
 from demos_voting.common.apps import CommonMixin
 
 
@@ -17,6 +17,5 @@ class AppConfig(CommonMixin, AppConfig):
     
     def ready(self):
         checks.register(ca_config_check, deploy=True)
-        checks.register(crypto_connectivity_check, deploy=True)
         super(AppConfig, self).ready()
 
