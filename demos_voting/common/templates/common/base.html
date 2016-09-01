@@ -1,0 +1,202 @@
+{% load i18n %}
+{% load l10n %}
+{% load staticfiles %}
+
+{% get_current_language as current_language %}
+
+<!DOCTYPE html>
+<html lang="{{ current_language }}">
+    
+    <head>
+        
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        
+        {% block title %}
+        <title>{{ title }} | DEMOS Voting</title>
+        {% endblock title %}
+        
+        <!-- bootstrap.css -->
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+        
+        <!-- fonts -->
+        <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Roboto&subset=latin,greek'>
+        <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300&subset=latin,greek'>
+        
+        <!-- base.css -->
+        <link rel="stylesheet" href="{% static 'common/base.css' %}">
+        
+        {% block css %}
+        {% endblock css %}
+        
+    </head>
+    
+    <body>
+        
+        {% block header %}
+        <header>
+            <div class="container">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <a href="{{ url }}">
+                            <div><img src="{% static 'common/images/logos/LOGO_FINAL_1.png' %}"></div>
+                            <div><!--vertical separator--></div>
+                            <div class="text-lowercase"><h2>{{ title }}</h2></div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+        {% endblock header %}
+        
+        {% block navbar %}
+        <nav class="navbar navbar-inverse">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                </div>
+                
+                <div class="collapse navbar-collapse text-center" id="navbar-collapse">
+                    <ul class="nav navbar-nav">
+                    {% for link in links %}
+                        {% url link.0 as url_path %}
+                        <li class="{% if request.resolver_match.view_name == link.0 %}active{% endif %}">
+                            <a class="{% if link.2 %}election-id-input{% endif %}" href="{{ url_path }}">
+                                {{ link.1 }} {% if request.resolver_match.view_name == link.0 %}<span class="sr-only">({% trans "current" %})</span>{% endif %}
+                            </a>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        {% endblock navbar %}
+        
+        <main>
+            <div class="container">
+                {% block main %}
+                {% endblock main %}
+            </div>
+        </main>
+        
+        <footer>
+            <div class="container">
+                <div class="text-center">
+                    {% trans "Developed by the" %} <a target="_blank" href="http://www{% if current_language != 'el' %}-en{% endif %}.demos-voting.org/research-team">{% blocktrans with demos_voting="DEMOS Voting" %}{{ demos_voting }} Research Team{% endblocktrans %}</a>
+                </div>
+                <div class="vertical-separator"></div>
+                <div class="text-center">
+                    {% blocktrans with license='<a target="_blank" href="https://www.apache.org/licenses/LICENSE-2.0">Apache License v2.0</a>' %}Code licensed under {{ license }}{% endblocktrans %}
+                    <span class="hidden-xs">&middot;</span><br class="hidden-sm hidden-md hidden-lg">
+                    {% blocktrans with license='<a target="_blank" href="http://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>' %}Documentation licensed under {{ license }}{% endblocktrans %}
+                </div>
+                <div class="vertical-separator hidden-sm hidden-md hidden-lg"></div>
+                <div class="text-center">
+                    <a target="_blank" href="http://www{% if current_language != 'el' %}-en{% endif %}.demos-voting.org/">{% trans "Learn More" %}</a> &middot;
+                    <a target="_blank" href="https://github.com/levmarios/demos-voting">GitHub Project</a>
+                </div>
+                <div class="vertical-separator"></div>
+                <div class="text-center">
+                    <a target="_blank" href="http://di.uoa.gr/">{% trans "Department of Informatics and Telecommunications" %}</a>
+                    <span class="hidden-xs">&middot;</span><br class="hidden-sm hidden-md hidden-lg">
+                    <a target="_blank" href="http://www.uoa.gr/">{% trans "National and Kapodistrian University of Athens" %}</a>
+                </div>
+            </div>
+        </footer>
+        
+        <div id="election-id-modal" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="election-id-modal-label">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="{% trans 'Close' %}"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="election-id-modal-label"></h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row" style="margin-bottom:10px;">
+                            <div class="col-xs-12 text-center">
+                                <h5>{% trans "Please enter the Election ID" %}:</h5>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-bottom:10px;">
+                            <div class="col-xs-10 col-xs-offset-1 col-sm-6 col-sm-offset-3 text-center">
+                                <div class="form-group" style="margin-bottom:0px;">
+                                    <input type="text" autocomplete="off" class="form-control text-center">
+                                    <span class="glyphicon glyphicon-warning-sign form-control-feedback hidden" aria-hidden="true"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row hidden" style="margin-top:20px;">
+                            <div class="col-xs-12 text-center">
+                                <div class="progress" style="margin-bottom:0px;">
+                                    <div class="progress-bar progress-bar-striped active" role="progressbar" style="width:100%">{% trans "Redirecting..." %}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="xs-sm-align">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Cancel" %}</button>
+                            <button type="button" class="btn btn-primary">{% trans "Submit" %}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="media-query-test" class="hidden"></div>
+        
+        <!-- jquery.js -->
+        <script src="//code.jquery.com/jquery-2.1.3.min.js"></script>
+        <script> window.jQuery || document.write("<script src='{% static 'common/libs/jquery/2.1.3/jquery.min.js' %}'><\/script>") </script>
+        
+        <!-- bootstrap.css fallback -->
+        <div id="bootstrap-css-test" class="hidden"></div>
+        <script>
+            (function($) {
+                $(function() {
+                    var elem = $("#bootstrap-css-test");
+                    
+                    if (elem.is(":visible")) {
+                        $("head").prepend('<link rel="stylesheet" href="{% static "common/libs/bootstrap/3.3.5/css/bootstrap-theme.min.css" %}">');
+                        $("head").prepend('<link rel="stylesheet" href="{% static "common/libs/bootstrap/3.3.5/css/bootstrap.min.css" %}">');
+                    }
+                    
+                    elem.remove();
+                });
+            })(window.jQuery);
+        </script>
+        
+        <!-- bootstrap.js -->
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <script> window.jQuery.fn.modal || document.write("<script src='{% static 'common/libs/bootstrap/3.3.5/js/bootstrap.min.js' %}'><\/script>") </script>
+        
+        <!-- moment.js -->
+        <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+        <script> window.moment || document.write("<script src='{% static 'common/libs/moment.js/2.10.6/moment.min.js' %}'><\/script>") </script>
+        
+        {% if current_language != "en" %}
+        <!-- {{ current_language }}.js -->
+        <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/locale/{{ current_language }}.js"></script>
+        <script> (moment().locale("{{ current_language }}").locale() == "{{ current_language }}") || document.write("<script src='{% static 'common/libs/moment.js/2.10.6/locale/'|add:current_language|add:'.js' %}'><\/script>") </script>
+        {% endif %}
+        
+        <!-- spin.js -->
+        <script src="//cdnjs.cloudflare.com/ajax/libs/spin.js/2.3.2/spin.min.js"></script>
+        <script> typeof Spinner != "undefined" || document.write("<script src='{% static 'common/libs/spin.js/2.3.2/spin.min.js' %}'><\/script>") </script>
+        
+        <!-- base.js -->
+        <script src="{% static 'common/base.js' %}"></script>
+        
+        {% block script %}
+        {% endblock script %}
+    </body>
+    
+</html>
+
