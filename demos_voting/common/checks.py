@@ -25,7 +25,7 @@ def private_api_check(app_configs, **kwargs):
                 r = requests.get(
                     url=urljoin(settings.DEMOS_VOTING_API_URLS[remote_app], 'api/_private/test/'),
                     verify=getattr(settings, 'DEMOS_VOTING_PRIVATE_API_VERIFY_SSL', True),
-                    auth=PrivateApiAuth(local_app, remote_app)
+                    auth=PrivateApiAuth(local_app)
                 )
                 r.raise_for_status()
             

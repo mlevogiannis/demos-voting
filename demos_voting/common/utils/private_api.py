@@ -12,6 +12,7 @@ import time
 import requests
 
 from django.apps import apps
+from django.conf import settings
 from django.db import transaction
 from django.utils.encoding import force_bytes, force_str, force_text
 
@@ -26,31 +27,35 @@ PRIVATE_API_AUTHORIZATION_HEADER = (
 
 class PrivateApiAuth(requests.auth.AuthBase):
     
-    def __init__(self, local_app_label, remote_app_label):
+    def __init__(self, local_app_label):
         
         self.local_app_label = local_app_label
-        self.remote_app_label = remote_app_label
+        self.PrivateApiUser = apps.get_app_config(local_app_label).get_model('PrivateApiUser')
     
     def __call__(self, r):
         
-        # Get remote app's user object.
+        # Get remote app's label from the request URL.
         
-        app_config = apps.get_app_config(self.local_app_label)
-        PrivateApiUser = app_config.get_model('PrivateApiUser')
+        urls = settings.DEMOS_VOTING_PRIVATE_API_URLS
+        
+        try:
+            remote_app_label = next(
+                app_label for app_label, url in urls.items() if force_text(r.url).startswith(force_text(url))
+            )
+        except StopIteration:
+            raise ValueError("Request URL not in DEMOS_VOTING_PRIVATE_API_URLS: %s" % r.url)
+        
+        # Generate a unique nonce - timestamp pair.
         
         with transaction.atomic():
             
-            user = PrivateApiUser.objects.select_for_update().get(app_label=self.remote_app_label)
+            user = self.PrivateApiUser.objects.select_for_update().get(app_label=remote_app_label)
             
-            # Get the current timestamp after locking the user object.
-            
+            # Get the current timestamp only after locking the user object.
             timestamp = int(time.time())
             
             # Remove expired nonces.
-            
             user.sent_nonces = [(n, t) for (n, t) in user.sent_nonces if t >= timestamp]
-            
-            # Generate a unique nonce - timestamp pair.
             
             nonce = None
             while nonce is None or (nonce, timestamp) in user.sent_nonces:
