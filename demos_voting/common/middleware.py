@@ -10,13 +10,14 @@ import time
 
 from django.apps import apps
 from django.contrib import auth
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.http import HttpResponse
 from django.utils.crypto import constant_time_compare
 from django.utils.encoding import force_bytes, force_text
 
 from demos_voting.common.views import PrivateApiView
-from demos_voting.common.utils.private_api import PRIVATE_API_AUTHORIZATION_HEADER
+from demos_voting.common.utils.private_api import PRIVATE_API_AUTH_PARAMS, PRIVATE_API_AUTH_SCHEME
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ class PrivateApiMiddleware(object):
     
     def __init__(self):
         
-        self.authorization_header_re = re.compile(PRIVATE_API_AUTHORIZATION_HEADER % {
+        self.credentials_re = re.compile(PRIVATE_API_AUTH_SCHEME + ' ' + PRIVATE_API_AUTH_PARAMS % {
             'app_label': r'(?P<app_label>ea|bds|abb|vbb)',
             'timestamp': r'(?P<timestamp>[0-9]+)',
             'nonce': r'(?P<nonce>[0-9a-f]{16})',
@@ -42,7 +43,14 @@ class PrivateApiMiddleware(object):
         if hasattr(request, 'user') and request.user.is_authenticated():
             auth.logout(request)
         
-        return self._authenticate(request)
+        try:
+            user = self._authenticate(request)
+        except PermissionDenied:
+            response = HttpResponse(status=401)
+            response['WWW-Authenticate'] = PRIVATE_API_AUTH_SCHEME
+            return response
+        
+        request.user = user
     
     @transaction.atomic
     def _authenticate(self, request):
@@ -56,31 +64,30 @@ class PrivateApiMiddleware(object):
         
         # Read the HTTP Authorization header.
         
-        m = self.authorization_header_re.match(request.META.get('HTTP_AUTHORIZATION', ''))
-        
+        m = self.credentials_re.match(request.META.get('HTTP_AUTHORIZATION', ''))
         if m is None:
-            return HttpResponse(status=400)
+            raise PermissionDenied
         
-        authorization_header = m.groupdict()
+        credentials = m.groupdict()
         
         # Validate timestamp.
         
-        timestamp = int(authorization_header['timestamp'])
+        timestamp = int(credentials['timestamp'])
         
         if timestamp < min_timestamp or timestamp > max_timestamp:
-            return HttpResponse(status=401)
+            raise PermissionDenied
         
         # Get remote app's user object.
         
         local_app_label = request.resolver_match.app_name
-        remote_app_label = force_text(authorization_header['app_label'])
+        remote_app_label = force_text(credentials['app_label'])
         
         PrivateApiUser = apps.get_app_config(local_app_label).get_model('PrivateApiUser')
         
         try:
             user = PrivateApiUser.objects.select_for_update().get(app_label=remote_app_label)
         except PrivateApiUser.DoesNotExist:
-            return HttpResponse(status=401)
+            raise PermissionDenied
         
         # Remove expired nonces.
         
@@ -88,10 +95,10 @@ class PrivateApiMiddleware(object):
         
         # Validate nonce.
         
-        nonce = force_text(authorization_header['nonce'])
+        nonce = force_text(credentials['nonce'])
         
         if (nonce, timestamp) in user.received_nonces:
-            return HttpResponse(status=401)
+            raise PermissionDenied
         
         # Validate digest.
         
@@ -109,18 +116,16 @@ class PrivateApiMiddleware(object):
         for e in elements:
             h.update(force_bytes(e))
         
-        digest1 = force_text(authorization_header['digest'])
+        digest1 = force_text(credentials['digest'])
         digest2 = force_text(h.hexdigest())
         
         if not constant_time_compare(digest1, digest2):
-            return HttpResponse(status=401)
+            raise PermissionDenied
         
         # Update the list of received nonces.
         
         user.received_nonces.append((nonce, timestamp))
         user.save(update_fields=['received_nonces'])
         
-        # Authenticate the user.
-        
-        request.user = user
+        return user
 

@@ -18,11 +18,8 @@ from django.utils.encoding import force_bytes, force_str, force_text
 
 logger = logging.getLogger(__name__)
 
-
-PRIVATE_API_AUTHORIZATION_HEADER = (
-    'DEMOS_VOTING_PRIVATE_API '
-    'app_label="%(app_label)s",timestamp="%(timestamp)s",nonce="%(nonce)s",digest="%(digest)s"'
-)
+PRIVATE_API_AUTH_SCHEME = 'DEMOS_VOTING_PRIVATE_API'
+PRIVATE_API_AUTH_PARAMS = 'app_label="%(app_label)s",timestamp="%(timestamp)s",nonce="%(nonce)s",digest="%(digest)s"'
 
 
 class PrivateApiAuth(requests.auth.AuthBase):
@@ -88,7 +85,7 @@ class PrivateApiAuth(requests.auth.AuthBase):
         
         # Prepare the HTTP Authorization header.
         
-        r.headers[force_str('Authorization')] = force_str(PRIVATE_API_AUTHORIZATION_HEADER % {
+        r.headers[force_str('Authorization')] = force_str(PRIVATE_API_AUTH_SCHEME + ' ' + PRIVATE_API_AUTH_PARAMS % {
             'app_label': self.local_app_label,
             'timestamp': timestamp,
             'nonce': nonce,
