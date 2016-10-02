@@ -9,11 +9,13 @@ import re
 import time
 
 from django.apps import apps
+from django.contrib import auth
 from django.db import transaction
 from django.http import HttpResponse
 from django.utils.crypto import constant_time_compare
 from django.utils.encoding import force_bytes, force_text
 
+from demos_voting.common.views import PrivateApiView
 from demos_voting.common.utils.private_api import PRIVATE_API_AUTHORIZATION_HEADER
 
 logger = logging.getLogger(__name__)
@@ -34,11 +36,13 @@ class PrivateApiMiddleware(object):
     
     def process_view(self, request, view_func, view_args, view_kwargs):
         
-        app_name = request.resolver_match.app_name
-        namespaces = request.resolver_match.namespaces
+        if not issubclass(getattr(view_func, 'view_class', None), PrivateApiView):
+            return None
         
-        if len(namespaces) >= 2 and namespaces[0] == '%s-api' % app_name and namespaces[1] == 'private':
-            return self._authenticate(request)
+        if hasattr(request, 'user') and request.user.is_authenticated():
+            auth.logout(request)
+        
+        return self._authenticate(request)
     
     @transaction.atomic
     def _authenticate(self, request):
