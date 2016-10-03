@@ -52,6 +52,13 @@ class PrivateApiMiddleware(object):
         
         request.user = user
     
+    def process_exception(self, request, exception):
+        
+        if not issubclass(getattr(request.resolver_match.func, 'view_class', None), PrivateApiView):
+            return None
+        
+        return HttpResponse(status=422)
+    
     @transaction.atomic
     def _authenticate(self, request):
         
