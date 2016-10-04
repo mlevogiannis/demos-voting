@@ -27,7 +27,6 @@ class PrivateApiAuth(requests.auth.AuthBase):
     def __init__(self, local_app_label):
         
         self.local_app_label = local_app_label
-        self.PrivateApiUser = apps.get_app_config(local_app_label).get_model('PrivateApiUser')
     
     def __call__(self, r):
         
@@ -44,22 +43,25 @@ class PrivateApiAuth(requests.auth.AuthBase):
         
         # Generate a unique nonce - timestamp pair.
         
+        app_config = apps.get_app_config(self.local_app_label)
+        
+        PrivateApiUser = app_config.get_model('PrivateApiUser')
+        PrivateApiNonce = app_config.get_model('PrivateApiNonce')
+        
         with transaction.atomic():
             
-            user = self.PrivateApiUser.objects.select_for_update().get(app_label=remote_app_label)
+            user = PrivateApiUser.objects.select_for_update().get(app_label=remote_app_label)
+            nonces = user.nonces.filter(type=PrivateApiNonce.TYPE_LOCAL)
             
             # Get the current timestamp only after locking the user object.
             timestamp = int(time.time())
             
-            # Remove expired nonces.
-            user.sent_nonces = [(n, t) for (n, t) in user.sent_nonces if t >= timestamp]
+            # Remove expired local nonces.
+            nonces.filter(timestamp__lt=timestamp).delete()
             
             nonce = None
-            while nonce is None or (nonce, timestamp) in user.sent_nonces:
-                nonce = force_text(binascii.hexlify(os.urandom(8)))
-            
-            user.sent_nonces.append((nonce, timestamp))
-            user.save(update_fields=['sent_nonces'])
+            while nonce is None or nonces.filter(nonce=nonce, timestamp=timestamp).exists():
+                nonce = force_text(binascii.hexlify(os.urandom(16)))
         
         # Compute the request's digest.
         

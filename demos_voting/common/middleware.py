@@ -24,14 +24,14 @@ logger = logging.getLogger(__name__)
 
 class PrivateApiMiddleware(object):
     
-    NONCE_TIMEOUT = 120
+    NONCE_TIMEOUT = 300
     
     def __init__(self):
         
         self.credentials_re = re.compile(PRIVATE_API_AUTH_SCHEME + ' ' + PRIVATE_API_AUTH_PARAMS % {
             'app_label': r'(?P<app_label>ea|bds|abb|vbb)',
             'timestamp': r'(?P<timestamp>[0-9]+)',
-            'nonce': r'(?P<nonce>[0-9a-f]{16})',
+            'nonce': r'(?P<nonce>[0-9a-f]{32})',
             'digest': r'(?P<digest>[0-9a-f]{128})',
         })
     
@@ -84,27 +84,32 @@ class PrivateApiMiddleware(object):
         if timestamp < min_timestamp or timestamp > max_timestamp:
             raise PermissionDenied
         
-        # Get remote app's user object.
+        # Get remote app's user and nonces.
         
         local_app_label = request.resolver_match.app_name
         remote_app_label = force_text(credentials['app_label'])
         
-        PrivateApiUser = apps.get_app_config(local_app_label).get_model('PrivateApiUser')
+        app_config = apps.get_app_config(local_app_label)
+        
+        PrivateApiUser = app_config.get_model('PrivateApiUser')
+        PrivateApiNonce = app_config.get_model('PrivateApiNonce')
         
         try:
             user = PrivateApiUser.objects.select_for_update().get(app_label=remote_app_label)
         except PrivateApiUser.DoesNotExist:
             raise PermissionDenied
         
-        # Remove expired nonces.
+        nonces = user.nonces.filter(type=PrivateApiNonce.TYPE_REMOTE)
         
-        user.received_nonces = [(n, t) for (n, t) in user.received_nonces if t >= min_timestamp]
+        # Remove expired remote nonces.
+        
+        nonces.filter(timestamp__lt=min_timestamp).delete()
         
         # Validate nonce.
         
         nonce = force_text(credentials['nonce'])
         
-        if (nonce, timestamp) in user.received_nonces:
+        if nonces.filter(nonce=nonce, timestamp=timestamp).exists():
             raise PermissionDenied
         
         # Validate digest.
@@ -129,10 +134,9 @@ class PrivateApiMiddleware(object):
         if not constant_time_compare(digest1, digest2):
             raise PermissionDenied
         
-        # Update the list of received nonces.
+        # Update remote nonces.
         
-        user.received_nonces.append((nonce, timestamp))
-        user.save(update_fields=['received_nonces'])
+        user.nonces.create(nonce=nonce, timestamp=timestamp, type=PrivateApiNonce.TYPE_REMOTE)
         
         return user
 

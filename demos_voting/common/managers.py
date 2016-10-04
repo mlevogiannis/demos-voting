@@ -124,3 +124,14 @@ class PrivateApiUserManager(models.Manager):
     def get_by_natural_key(self, app_label):
         return self.get(app_label=app_label)
 
+
+class PrivateApiNonceManager(models.Manager):
+    
+    def get_by_natural_key(self, app_label, nonce, timestamp, type):
+        
+        model = self.model._meta.get_field('user').related_model
+        manager = model.objects.db_manager(self.db)
+        user = manager.get_by_natural_key(app_label)
+        
+        return self.get(user=user, nonce=nonce, timestamp=timestamp, type=type)
+

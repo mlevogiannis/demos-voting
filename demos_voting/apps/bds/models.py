@@ -10,8 +10,8 @@ from django.db import models
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
-from demos_voting.common.models import (Election, Ballot, Part, Question,
-    Option_P, Option_C, PartQuestion, Task, PrivateApiUser)
+from demos_voting.common.models import (Election, Ballot, Part, Question, Option_P, Option_C, PartQuestion, Task,
+    PrivateApiUser, PrivateApiNonce)
 from demos_voting.common.utils import base32
 
 logger = logging.getLogger(__name__)
@@ -79,5 +79,9 @@ class Task(Task):
 
 
 class PrivateApiUser(PrivateApiUser):
+    pass
+
+
+class PrivateApiNonce(PrivateApiNonce):
     pass
 

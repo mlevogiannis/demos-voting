@@ -15,7 +15,7 @@ from django.utils.functional import cached_property
 from django.utils.six.moves import range, zip
 from django.utils.translation import pgettext_lazy, ugettext_lazy as _
 
-from demos_voting.common import fields, managers
+from demos_voting.common import managers
 from demos_voting.common.utils import base32
 from demos_voting.common.utils.int import int_from_bytes, int_to_bytes
 
@@ -581,8 +581,6 @@ class PrivateApiUser(models.Model):
     
     app_label = models.CharField(_("application label"), max_length=4, unique=True, choices=APP_LABEL_CHOICES)
     preshared_key = models.CharField(_("pre-shared-key"), max_length=128)
-    sent_nonces = fields.JSONField(default=[])
-    received_nonces = fields.JSONField(default=[])
     
     # Default manager, meta options and natural key
     
@@ -595,8 +593,44 @@ class PrivateApiUser(models.Model):
         verbose_name_plural = _("private API user")
     
     def natural_key(self):
-        return self.app_label
+        return (self.app_label,)
     
     def __str__(self):
         return "%s" % self.app_label
+
+
+@python_2_unicode_compatible
+class PrivateApiNonce(models.Model):
+    
+    TYPE_LOCAL = 'local'
+    TYPE_REMOTE = 'remote'
+    
+    TYPE_CHOICES = (
+        (TYPE_LOCAL, _("local")),
+        (TYPE_REMOTE, _("remote")),
+    )
+    
+    user = models.ForeignKey('PrivateApiUser')
+    
+    nonce = models.CharField(_("nonce"), max_length=32)
+    timestamp = models.BigIntegerField(_("timestamp"))
+    
+    type = models.CharField(_("type"), max_length=8, choices=TYPE_CHOICES)
+    
+    # Default manager, meta options and natural key
+    
+    objects = managers.PrivateApiNonceManager()
+    
+    class Meta:
+        abstract = True
+        default_related_name = 'nonces'
+        unique_together = ['user', 'nonce', 'timestamp', 'type']
+        verbose_name = _("private API nonce")
+        verbose_name_plural = _("private API nonce")
+    
+    def natural_key(self):
+        return self.user.natural_key() + (self.nonce, self.timestamp, self.type)
+    
+    def __str__(self):
+        return "%s - %s - %s" % (self.nonce, self.timestamp, self.type)
 
