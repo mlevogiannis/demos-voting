@@ -9,6 +9,7 @@ import re
 import time
 
 from django.apps import apps
+from django.conf import settings
 from django.contrib import auth
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
@@ -24,8 +25,6 @@ logger = logging.getLogger(__name__)
 
 class PrivateApiMiddleware(object):
     
-    NONCE_TIMEOUT = 300
-    
     def __init__(self):
         
         self.credentials_re = re.compile(PRIVATE_API_AUTH_SCHEME + ' ' + PRIVATE_API_AUTH_PARAMS % {
@@ -34,6 +33,8 @@ class PrivateApiMiddleware(object):
             'nonce': r'(?P<nonce>[0-9a-f]{32})',
             'digest': r'(?P<digest>[0-9a-f]{128})',
         })
+        
+        self.nonce_timeout = getattr(settings, 'DEMOS_VOTING_PRIVATE_API_NONCE_TIMEOUT', 300)
     
     def process_view(self, request, view_func, view_args, view_kwargs):
         
@@ -66,8 +67,8 @@ class PrivateApiMiddleware(object):
         
         now_timestamp = int(time.time())
         
-        min_timestamp = now_timestamp - self.NONCE_TIMEOUT
-        max_timestamp = now_timestamp + self.NONCE_TIMEOUT
+        min_timestamp = now_timestamp - self.nonce_timeout
+        max_timestamp = now_timestamp + self.nonce_timeout
         
         # Read the HTTP Authorization header.
         

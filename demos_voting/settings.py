@@ -295,6 +295,13 @@ DEMOS_VOTING_PRIVATE_API_URLS = {
 
 DEMOS_VOTING_PRIVATE_API_VERIFY_SSL = True
 
+# DEMOS_VOTING_PRIVATE_API_NONCE_TIMEOUT: To avoid the need to retain an
+# infinite number of nonces, restrict the time period after which a request
+# with an old timestamp is rejected. The client's and server's clocks must
+# be synchronized. The value is in seconds.
+
+DEMOS_VOTING_PRIVATE_API_NONCE_TIMEOUT = 300
+
 # DEMOS_VOTING_BATCH_SIZE: Controls how many objects (e.g. ballots) are
 # processed in a single iteration.
 
