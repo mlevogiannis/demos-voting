@@ -1,70 +1,25 @@
-# Byte-compiled / optimized / DLL files
+# Byte-compiled / optimized files
 __pycache__/
-*.py[cod]
+*.py[co]
+*$py.class
 
 # C extensions
-*.a
-*.o
 *.so
-
-# Distribution / packaging
-.Python
-/env/
-/build/
-/develop-eggs/
-/dist/
-/downloads/
-/eggs/
-/lib/
-/lib64/
-/parts/
-/sdist/
-/var/
-/*.egg-info/
-.installed.cfg
-/*.egg
-
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.cache
-nosetests.xml
-coverage.xml
 
 # Translations
 *.mo
 *.pot
 
-# Django stuff:
-*.log
+# Virtualenv
+/env/
+/venv/
 
-# Sphinx documentation
-/docs/_build/
+# Django
+/media/
+/static/
+local_settings.py
 
-# PyBuilder
-target/
-
-# demos
-/devel/
-/demos/devel/
-/demos/demos/apps/ea/crypto/crypto_pb2.py
-
-# demos-crypto
-/demos-crypto/src/demos-crypto
-/demos-crypto/src/protobuf/crypto.pb.cc
-/demos-crypto/src/protobuf/crypto.pb.h
-/demos-crypto/src/miracl/mirdef.h
-/demos-crypto/src/miracl/mrmuldv.c
-
-# Other
+# Backups
 *~
+*.orig
+
