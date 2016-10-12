@@ -19,7 +19,7 @@ urlpatterns = [
         views.ResultsView.as_view(), name='results'),
 ]
 
-apipatterns = [
+urlpatterns_api = [
     
     url(r'^setup/(?P<phase>p1|p2)/$', views.ApiSetupView.as_view(), name='setup'),
     
@@ -29,4 +29,6 @@ apipatterns = [
     
     url(r'^export/', include(views.ApiExportView.as_patterns(), namespace='export')),
 ]
+
+urlpatterns_media = []
 

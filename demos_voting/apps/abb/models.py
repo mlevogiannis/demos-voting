@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 cert_fs = storage.FileSystemStorage(
-    location=os.path.join(settings.DEMOS_VOTING_DATA_DIR, 'abb/certs'),
+    location=os.path.join(settings.MEDIA_ROOT, 'abb/certs'),
     file_permissions_mode=0o600, directory_permissions_mode=0o700
 )
 

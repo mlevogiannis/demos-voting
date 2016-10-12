@@ -20,8 +20,10 @@ urlpatterns = [
     url(r'^center/$', views.CenterView.as_view(), name='center'),
 ]
 
-apipatterns = [
+api_urlpatterns = [
     
     url(r'^updatestate/$', views.ApiUpdateStateView.as_view(), name='updatestate'),
 ]
+
+urlpatterns_media = []
 

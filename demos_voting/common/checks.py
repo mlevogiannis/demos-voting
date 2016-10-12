@@ -45,7 +45,7 @@ def file_storage_check(app_configs, **kwargs):
     messages = []
     
     try:
-        with tempfile.TemporaryFile(dir=settings.DEMOS_VOTING_DATA_DIR):
+        with tempfile.TemporaryFile(dir=settings.MEDIA_ROOT):
             pass
     except Exception as e:
         messages.append(

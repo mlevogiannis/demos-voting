@@ -20,10 +20,12 @@ urlpatterns = [
         + base32.regex + r'+)/$', views.VoteView.as_view(), name='vote'),
 ]
 
-apipatterns = [
+urlpatterns_api = [
     
     url(r'^setup/(?P<phase>p1|p2)/$', views.ApiSetupView.as_view(), name='setup'),
     
     url(r'^update/$', views.ApiUpdateView.as_view(), name='update'),
 ]
+
+urlpatterns_media = []
 
