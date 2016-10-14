@@ -18,10 +18,10 @@ def ca_config_check(app_configs, **kwargs):
     ca_pkey_path = getattr(settings, 'DEMOS_VOTING_CA_PKEY_FILE', '')
     ca_pkey_passphrase = getattr(settings, 'DEMOS_VOTING_CA_PKEY_PASSPHRASE', '')
     
-    if not (ca_cert_path and ca_pkey_path):
+    if not (ca_pkey_path or ca_cert_path):
         messages.append(
             checks.Warning("CA is not configured, issued certificates will be self-signed.",
-                           id='ea.W001')
+                           id='ea.I001')
         )
     
     else:
@@ -32,7 +32,7 @@ def ca_config_check(app_configs, **kwargs):
         except Exception as e:
             messages.append(
                 checks.Error("Cannot load CA private key file %s: %s" % (ca_pkey_path, e),
-                             id='ea.E002')
+                             id='ea.E001')
             )
         
         try:
@@ -41,7 +41,7 @@ def ca_config_check(app_configs, **kwargs):
         except Exception as e:
             messages.append(
                 checks.Error("Cannot load CA certificate file %s: %s" % (ca_cert_path, e),
-                             id='ea.E003')
+                             id='ea.E002')
             )
     
     return messages
