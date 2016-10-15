@@ -1,0 +1,15 @@
+[Unit]
+Description=Celery service for DEMOS Voting
+After=network.target
+
+[Service]
+Type=simple
+User=celery
+Group=celery
+WorkingDirectory=/usr/local/share/demos-voting/
+ExecStart=/usr/bin/celery worker -A demos_voting --pidfile=/run/demos-voting/celery.pid --loglevel=INFO --quiet
+ExecStop=/usr/bin/pkill --signal=TERM --pidfile=/run/demos-voting/celery.pid
+
+[Install]
+WantedBy=multi-user.target
+
