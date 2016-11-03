@@ -11,7 +11,7 @@ from demos_voting.common.utils import base32
 
 
 class Base32TestCase(TestCase):
-    
+
     def test(self):
         number = int.from_bytes(urandom(4), 'big')
         encoded_number = base32.encode(number)

@@ -1,7 +1,7 @@
 sjcl.bn.prototype.divmod = function(that, _mod) {
-    
+
     // Source: "Big Integer Library v. 5.5", Leemon Baird, www.leemon.com
-    
+
     //globals
     var bpe=0;				 //bits stored per array element
     var mask=0;				//AND this with an array element to chop it down to bpe bits
@@ -16,7 +16,7 @@ sjcl.bn.prototype.divmod = function(that, _mod) {
     mask=(1<<bpe)-1;					 //AND the mask with an integer to get its bpe least significant bits
     radix=mask+1;							//2^bpe.	a single 1 bit to the left of the first bit of mask
 
-    //the following global variables are scratchpad memory to 
+    //the following global variables are scratchpad memory to
     //reduce dynamic memory allocation in the inner loop
     var t=new Array(0);
     var ss=t;			 //used in mult_()
@@ -34,10 +34,10 @@ sjcl.bn.prototype.divmod = function(that, _mod) {
         copy_(r,x);
         for (ky=y.length;y[ky-1]==0;ky--) {}; //ky is number of elements in y, not including leading zeros
 
-        //normalize: ensure the most significant element of y has its highest bit set	
+        //normalize: ensure the most significant element of y has its highest bit set
         b=y[ky-1];
         for (a=0; b; a++)
-        b>>=1;	
+        b>>=1;
         a=bpe-a;	//a is how many bits to shift so that the high order bit of y is leftmost in its array element
         leftShift_(y,a);	//multiply both by 1<<a now, then divide both by that at the end
         leftShift_(r,a);
@@ -55,13 +55,13 @@ sjcl.bn.prototype.divmod = function(that, _mod) {
         if (r[i]==y[ky-1])
             q[i-ky]=mask;
         else
-            q[i-ky]=Math.floor((r[i]*radix+r[i-1])/y[ky-1]);	
+            q[i-ky]=Math.floor((r[i]*radix+r[i-1])/y[ky-1]);
 
-        //The following for(;;) loop is equivalent to the commented while loop, 
+        //The following for(;;) loop is equivalent to the commented while loop,
         //except that the uncommented version avoids overflow.
         //The commented loop comes from HAC, which assumes r[-1]==y[-1]==0
         //	while (q[i-ky]*(y[ky-1]*radix+y[ky-2]) > r[i]*radix*radix+r[i-1]*radix+r[i-2])
-        //		q[i-ky]--;		
+        //		q[i-ky]--;
         for (;;) {
             y2=(ky>1 ? y[ky-2] : 0)*q[i-ky];
             c=y2>>bpe;
@@ -70,7 +70,7 @@ sjcl.bn.prototype.divmod = function(that, _mod) {
             c=y1>>bpe;
             y1=y1 & mask;
 
-            if (c==r[i] ? y1==r[i-1] ? y2>(i>1 ? r[i-2] : 0) : y1>r[i-1] : c>r[i]) 
+            if (c==r[i] ? y1==r[i-1] ? y2>(i>1 ? r[i-2] : 0) : y1>r[i-1] : c>r[i])
             q[i-ky]--;
             else
             break;
@@ -108,7 +108,7 @@ sjcl.bn.prototype.divmod = function(that, _mod) {
         x[i]=0;
     }
 
-    //do x=y on bigInt x and integer y.	
+    //do x=y on bigInt x and integer y.
     function copyInt_(x,n) {
         var i,c;
         for (c=n,i=0;i<x.length;i++) {
@@ -130,7 +130,7 @@ sjcl.bn.prototype.divmod = function(that, _mod) {
         for (i=x.length; i>=k; i--) //left shift x by k elements
             x[i]=x[i-k];
         for (;i>=0;i--)
-            x[i]=0;	
+            x[i]=0;
         n%=bpe;
         }
         if (!n)
@@ -218,7 +218,7 @@ sjcl.bn.prototype.divmod = function(that, _mod) {
     function greaterShift(x,y,shift) {
         var i, kx=x.length, ky=y.length;
         var k=((kx+shift)<ky) ? (kx+shift) : ky;
-        for (i=ky-1-shift; i<kx && i>=0; i++) 
+        for (i=ky-1-shift; i<kx && i>=0; i++)
             if (x[i]>0)
                 return 1; //if there are nonzeros in x to the left of the first column of y, then x is bigger
         for (i=kx-1+shift; i<ky; i++)
@@ -235,7 +235,7 @@ sjcl.bn.prototype.divmod = function(that, _mod) {
     function bigInt2str(x,base) {
         var i,t,s="";
 
-        if (s6.length!=x.length) 
+        if (s6.length!=x.length)
         s6=dup(x);
         else
         copy_(s6,x);
@@ -273,7 +273,7 @@ sjcl.bn.prototype.divmod = function(that, _mod) {
         return 1;
     }
 
-    //return the bigInt given a string representation in a given base.	
+    //return the bigInt given a string representation in a given base.
     //Pad the array with leading zeros so that it has at least minSize elements.
     //If base=-1, then it reads in a space-separated list of array elements in decimal.
     //The array will always have at least one leading zero, unless base=-1.
@@ -289,7 +289,7 @@ sjcl.bn.prototype.divmod = function(that, _mod) {
             y[0]=parseInt(s,10);
             x=y;
             d=s.indexOf(',',0);
-            if (d<1) 
+            if (d<1)
             break;
             s=s.substring(d+1);
             if (s.length==0)
@@ -366,7 +366,7 @@ sjcl.bn.prototype.divmod = function(that, _mod) {
         }
     }
 
-    function int2bigInt(t,bits,minSize) {	 
+    function int2bigInt(t,bits,minSize) {
         var i,k;
         k=Math.ceil(bits/bpe)+1;
         k=minSize>k ? minSize : k;
@@ -380,45 +380,45 @@ sjcl.bn.prototype.divmod = function(that, _mod) {
         copy_(ans,x);
         return ans;
     }
-    
+
     var q, r;
-    
+
     var this_ = this.toString().replace(/^0x/, "");
     this_ = str2bigInt(this_, 16, 4*this_.length, 0);
-    
+
     if (typeof that === 'number') {
-        
+
         r = divInt_(this_, that);
         q = bigInt2str(this_, 16);
-        
+
     } else {
-        
+
         that = new sjcl.bn(that);
-        
+
         var that_ = that.toString().replace(/^0x/, "");
         that_ = str2bigInt(that_, 16, 4*that_.length, 0);
-        
+
         if (that_.length < 2)
             that_ = expand(that_, 2);
-        
+
         if (this_.length < that_.length)
             this_ = expand(this_, that_.length);
-        
+
         this_ = expand(this_, this_.length + 1);
-            
+
         var q_ = expand([], this_.length);
         var r_ = expand([], this_.length);
-        
+
         divide_(this_, that_, q_, r_);
-        
+
         q = bigInt2str(q_, 16);
         r = bigInt2str(r_, 16);
     }
-    
+
     if (typeof _mod !== "undefined") {
         _mod.limbs = (new sjcl.bn(r)).limbs;
     }
-    
+
     return new sjcl.bn(q);
 },
 

@@ -17,29 +17,29 @@
 
 <div class="row">
     <div class="col-xs-12">
-        
+
         {% tuple _("Election") election.id as t1 %}
         {% tuple _("Participants") participants as t2 %}
         {% tuple t1 t2 as panels %}
         {% include "common/election_box.html" with object=election panels=panels %}
-        
+
         <div class="row">
             <div class="col-xs-12 col-sm-6 col-sm-push-6">
-                
+
                 <div class="main-header-small">
                     <h3>{% trans "Export Data" %}</h3>
                 </div>
-                
+
                 <a class="btn btn-default" href="{% url 'abb-api:export:election:data' Election__id=election.id %}" role="button">{% trans "Export ballot data" %}</a>
                 <a class="btn btn-default" href="{% url 'abb-api:export:election:data' Election__id=election.id %}?election=cert" role="button">{% trans "Export certificate" %}</a>
-                
+
             </div>
             <div class="col-xs-12 col-sm-6 col-sm-pull-6">
-                
+
                 <div class="main-header-small">
                     <h3>{% trans "Audit Ballot" %}</h3>
                 </div>
-                
+
                 <div class="panel panel-default panel-input">
                     <div class="panel-body">
                         <div class="input-group">
@@ -52,7 +52,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div id="audit-panel" class="panel with-nav-tabs panel-default">
             <div class="panel-heading">
                 <ul class="nav nav-tabs nav-justified">
@@ -143,7 +143,7 @@
 <script>
     var vc_type = {{ election.votecode_type }};
     var e_url = "{% url 'abb-api:export:election:data' Election__id=election.id %}";
-    
+
     var VcType = { {% for name, value in election.VOTECODE_TYPE_CHOICES %} {{ name }}: {{ value }}, {% endfor %} };
 </script>
 

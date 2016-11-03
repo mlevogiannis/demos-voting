@@ -26,22 +26,22 @@ def cert_directory_path(election, filename):
 
 
 class Election(Election):
-    
+
     cert = models.FileField(_("certificate"), storage=cert_fs, upload_to=cert_directory_path)
-    
+
     tallying_started_at = models.DateTimeField(_("tallying started at"), null=True, default=None)
     tallying_ended_at = models.DateTimeField(_("tallying ended at"), null=True, default=None)
-    
+
     coins = models.CharField(_("coins"), max_length=128, null=True, default=None)
 
 
 class Ballot(Ballot):
-    
+
     cast_at = models.DateTimeField(_("cast at"), null=True, default=None)
 
 
 class Part(Part):
-    
+
     credential = models.CharField(_("credential"), max_length=32, null=True, default=None)
     credential_hash = models.CharField(_("credential hash"), max_length=255)
 
@@ -51,17 +51,17 @@ class Question(Question):
 
 
 class Option_P(Option_P):
-    
+
     votes = models.PositiveIntegerField(_("number of votes"), null=True, default=None)
 
 
 class Option_C(Option_C):
-    
+
     voted = models.NullBooleanField(_("marked as voted"), default=None)
-    
+
     votecode = models.CharField(_("vote-code"), max_length=32, null=True, default=None)
     votecode_hash = models.CharField(_("vote-code hash"), max_length=255, null=True, default=None)
-    
+
     receipt = models.CharField(_("receipt"), max_length=1024)
 
 

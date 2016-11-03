@@ -2,19 +2,19 @@ body {
     display: -webkit-flex;
     display: -ms-flexbox;
     display: flex;
-    
+
     -webkit-flex-direction: column;
     -moz-flex-direction: column;
     -ms-flex-direction: column;
     flex-direction: column;
-    
+
     min-height: 100vh;
-    
+
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
     background-attachment: fixed;
-    
+
     font-family: Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
@@ -71,7 +71,7 @@ header {
         -webkit-align-items: center;
         align-items: center;
     }
-    
+
     header a > div:first-child,
     header a > div:last-child {
         -webkit-flex: auto;
@@ -79,24 +79,24 @@ header {
         -ms-flex: auto;
         flex: auto;
     }
-    
+
     header a > div:first-child {
         text-align: right;
         padding-right: 32px;
     }
-    
+
     header a > div:last-child {
         text-align: left;
         padding-left: 32px;
     }
-    
+
     header a > div:nth-child(2) {
         -webkit-flex: 0;
         -moz-flex: 0;
         -ms-flex: 0;
         flex: 0;
     }
-    
+
     header a > div:nth-child(2):after,
     header a > div:nth-child(2):before {
         content: "";
@@ -105,7 +105,7 @@ header {
         width: 1px;
         height: 50%;
     }
-    
+
     header a > div:nth-child(2):after {
         top: 0;
         background: #666;
@@ -114,7 +114,7 @@ header {
         background: -o-linear-gradient(bottom, #666 0%, transparent 100%);
         background: linear-gradient(to top, #666 0%, transparent 100%);
     }
-    
+
     header a > div:nth-child(2):before {
         bottom: 0;
         background: #666;
@@ -129,7 +129,7 @@ header {
     header a > div {
         text-align: center;
     }
-    
+
     header a > div:last-child {
         margin-top: 12px;
     }
@@ -180,7 +180,7 @@ header h2 {
         vertical-align: top;
         display: inline-block;
     }
-    
+
     .navbar .navbar-collapse {
         text-align: center;
     }
@@ -225,7 +225,7 @@ main > .container > .row > div > .page-header:first-child {
         -moz-box-sizing: border-box;
         box-sizing: border-box;
     }
-    
+
     main > .container {
         -webkit-box-shadow: 0 4px 6px 1px rgba(50, 50, 50, 0.25);
         -moz-box-shadow: 0 4px 6px 1px rgba(50, 50, 50, 0.25);

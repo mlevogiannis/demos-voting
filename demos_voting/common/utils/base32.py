@@ -23,31 +23,31 @@ def encode(number, length=0, hyphens=0):
     left with '0' digits until the given length is reached, if 'hyphens' > 0
     a hyphen is added every n characters. The encoded string is returned.
     """
-    
+
     if number < 0:
         raise ValueError("'%d' is not a non-negative integer" % number)
-    
+
     encoded = ''
-    
+
     while number:
-        
+
         d = number >> 5
         m = number - (d << 5)
-        
+
         encoded = symbols[m] + encoded
         number = d
-    
+
     if length > 0:
         encoded = encoded.zfill(length)
-    
+
     if hyphens > 0:
         encoded = _hyphen(encoded, hyphens)
-    
+
     return encoded or '0'
 
 
 def encode_from_bytes(bytes, *args, **kwargs):
-    
+
     number = int_from_bytes(bytes, 'big')
     return encode(number, *args, **kwargs)
 
@@ -57,19 +57,19 @@ def decode(encoded):
     Decodes a Crockford's Base32 encoded string. 'encoded' is the string to
     decode. The resulting integer is returned.
     """
-    
+
     _raise_for_invalid(encoded)
     encoded = _normalize(encoded)
-    
+
     number = 0
     for c in encoded:
         number = symbols.index(c) + (number << 5)
-    
+
     return number
 
 
 def decode_to_bytes(encoded, numbytes=0, *args, **kwargs):
-    
+
     number = decode(encoded, *args, **kwargs)
     return int_to_bytes(number, max([numbytes, (number.bit_length() + 7) // 8]), 'big')
 
@@ -96,19 +96,19 @@ def normalize(encoded):
     converting all characters to upper-case and replacing 'I', 'L' with '1'
     and 'O' with '0'.
     """
-    
+
     _raise_for_invalid(encoded)
     return _normalize(encoded)
 
 
 def _hyphen(encoded, hyphens):
-    
+
     if hyphens >= 0:
         encoded = encoded.replace('-', '')
-    
+
     if hyphens > 0:
         encoded = '-'.join(re.findall('.{,%s}' % hyphens, encoded)[:-1])
-    
+
     return encoded
 
 
@@ -118,7 +118,7 @@ def hyphen(encoded, hyphens):
     hyphens are treated, 0 removes all hyphens, n > 0 adds a hyphen every
     'n' characters.
     """
-    
+
     _raise_for_invalid(encoded)
     return _hyphen(encoded, hyphens)
 
@@ -130,12 +130,12 @@ def random(length, hyphens=0, urandom=False):
     every 'n' characters, 'urandom' selects whether os.urandom or a pseudo
     random number generator will be used.
     """
-    
+
     random = _random
-    
+
     if urandom:
         random = random.SystemRandom()
-    
+
     number = random.getrandbits(length * 5)
     return encode(number, length, hyphens)
 

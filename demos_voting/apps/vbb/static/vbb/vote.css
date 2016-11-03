@@ -91,7 +91,7 @@
     #carousel .carousel-control {
         width: 100px;
     }
-    
+
     #carousel .item {
         padding-left: 100px;
         padding-right: 100px;
@@ -102,32 +102,32 @@
     #carousel .carousel-control {
         width: 45px;
     }
-    
+
     #carousel .item {
         padding-left: 45px;
         padding-right: 45px;
     }
-    
+
     #carousel .page-header {
         padding-left: 60px;
         padding-right: 60px;
     }
-    
+
     #carousel .carousel-control > .glyphicon {
         font-size: 30px;
         margin-top: 0px;
     }
-    
+
     #carousel .carousel-control > .glyphicon {
         top: 64px;
         bottom: auto;
     }
-    
+
     #carousel .carousel-control.left > .glyphicon {
         left: 55px;
         right: auto;
     }
-    
+
     #carousel .carousel-control.right > .glyphicon {
         left: auto;
         right: 55px;
@@ -138,32 +138,32 @@
     #carousel .carousel-control {
         width: 16px;
     }
-    
+
     #carousel .item {
         padding-left: 16px;
         padding-right: 16px;
     }
-    
+
     #carousel .page-header {
         padding-left: 40px;
         padding-right: 40px;
     }
-    
+
     #carousel .carousel-control > .glyphicon {
         font-size: 25px;
         margin-top: 0px;
     }
-    
+
     #carousel .carousel-control > .glyphicon {
         top: 64px;
         bottom: auto;
     }
-    
+
     #carousel .carousel-control.left > .glyphicon {
         left: 28px;
         right: auto;
     }
-    
+
     #carousel .carousel-control.right > .glyphicon {
         left: auto;
         right: 28px;
@@ -272,7 +272,7 @@
     -moz-animation: spin 1s infinite linear;
     -o-animation: spin 1s infinite linear;
     animation: spin 1s infinite linear;
-    
+
     -webkit-transform-origin: 51% 47%;
     -moz-transform-origin: 51% 47%;
     -ms-transform-origin: 51% 47%;

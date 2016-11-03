@@ -40,12 +40,12 @@
 }
 
 @media (max-width: 479px) {
-    
+
     .modal-footer,
     .option-add-wrapper {
         text-align: center;
     }
-    
+
     .option-add-wrapper {
         margin-top: 24px;
     }
@@ -182,7 +182,7 @@
 }
 
 .material-switch > div > input[type="checkbox"] {
-    display: none;   
+    display: none;
 }
 
 .material-switch > div > label {

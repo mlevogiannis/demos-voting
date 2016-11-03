@@ -21,61 +21,61 @@ from django.utils.encoding import force_bytes
 
 
 class BaseHasher(object):
-    
+
     identifier = None
-    
+
     @classmethod
     def hash(cls, secret, config=None):
         raise NotImplementedError
-    
+
     @classmethod
     def verify(cls, secret, hash):
         raise NotImplementedError
-    
+
     @classmethod
     def config(cls):
         raise NotImplementedError
-    
+
     @classmethod
     def digest(cls, secret, config):
         raise NotImplementedError
-    
+
     @classmethod
     def identify(cls, hash_or_config):
         raise NotImplementedError
-    
+
     @classmethod
     def split(cls, hash):
         raise NotImplementedError
-    
+
     @classmethod
     def join(cls, config, digest):
         raise NotImplementedError
 
 
 class PBKDF2SHA512Hasher(BaseHasher):
-    
+
     identifier = 'pbkdf2-sha512'
     algorithm = hashlib.sha512
     iterations = 100000
     salt_length = 16
-    
+
     @classmethod
     def hash(cls, secret, config=None):
         config = config or cls.config()
         return cls.join(config, cls.digest(secret, config))
-    
+
     @classmethod
     def verify(cls, secret, hash):
         config, digest = cls.split(hash)
         hash2 = cls.hash(secret, config)
         return constant_time_compare(hash, hash2)
-    
+
     @classmethod
     def config(cls):
         salt = cls._b64encode(os.urandom(cls.salt_length))
         return '$%s$%d$%s' % (cls.identifier, cls.iterations, salt)
-    
+
     @classmethod
     def digest(cls, secret, config):
         if not cls.identify(config):
@@ -85,23 +85,23 @@ class PBKDF2SHA512Hasher(BaseHasher):
         salt = cls._b64decode(force_bytes(salt))
         iterations = int(iterations)
         return cls._b64encode(pbkdf2(secret, salt, iterations, digest=cls.algorithm))
-    
+
     @classmethod
     def identify(cls, hash_or_config):
         return hash_or_config.startswith('$%s$' % cls.identifier)
-    
+
     @classmethod
     def split(cls, hash):
         raise hash.rsplit('$', 1)
-    
+
     @classmethod
     def join(cls, config, digest):
         return '%s$%s' % (config, digest)
-    
+
     @staticmethod
     def _b64encode(s):
         return base64.b64encode(s, b'./').rstrip(b'=')
-    
+
     @staticmethod
     def _b64decode(s):
         return base64.b64decode(s + b'=' * (-len(s) % 4), b'./')

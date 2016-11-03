@@ -256,14 +256,14 @@ LOGGING = {
 }
 
 if DEVELOPMENT:
-    
+
     LOGGING['handlers'] = {
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
         },
     }
-    
+
     LOGGING['loggers'] = {
         'root': {
             'handlers': ['console']

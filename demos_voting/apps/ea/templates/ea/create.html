@@ -19,24 +19,24 @@
 
 <div class="row">
     <div class="col-xs-12">
-        
+
         <div class="page-header text-center">
             <h2>{% trans "Create Election" %}</h2>
         </div>
-        
+
         <form action="{% url 'ea:create' %}" method="post">
             {% csrf_token %}
-            
+
             {% trans "General" as general %}
             {% trans "The following errors where detected" as following_errors_detected %}
-            
+
             <div id="election" class="group-wrapper">
-                
+
                 <div class="main-header-small">
                     <h3>{% trans "Election" %}</h3>
                     <h5 class="text-muted">({% trans "all fields are required" %})</h5>
                 </div>
-                
+
                 <div class="alert-wrapper">
                     {% if election_form.errors or election_form.non_field_errors %}
                     <div class="alert alert-danger alert-dismissible fade in" role="alert">
@@ -54,7 +54,7 @@
                     </div>
                     {% endif %}
                 </div>
-                
+
                 <!-- Name input -->
                 <div class="form-group {% if election_form.name.errors %} has-error {% endif %}">
                     <label class="sr-only" for="{{ election_form.name.id_for_label }}">{{ election_form.name.label }}</label>
@@ -63,9 +63,9 @@
                         <input type="text" class="form-control" id="{{ election_form.name.auto_id }}" placeholder="{% trans 'Type the election name here' %}" value="{{ election_form.name.value|default_if_none:'' }}" name="{{ election_form.name.html_name }}" maxlength="{{ election_form.name.field.max_length }}">
                     </div>
                 </div>
-                
+
                 {% trans "Date and time picker" as datetime_picker %}
-                
+
                 <!-- Start/end date and time input -->
                 <div class="row">
                     <div class="col-xs-12 col-sm-6">
@@ -91,7 +91,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Ballots and votecode type input -->
                 <div class="row">
                     <div class="col-xs-12 col-sm-6">
@@ -185,7 +185,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Trustee input -->
                 <div class="form-group {% if election_form.trustee_list.errors %} has-error {% endif %} hidden">
                     <label class="sr-only" for="{{ election_form.trustee_list.id_for_label }}">{{ election_form.trustee_list.label }}</label>
@@ -195,14 +195,14 @@
                     </div>
                 </div>
             </div>
-            
+
             <div id="question-table" class="group-wrapper">
-                
+
                 <div class="main-header-small">
                     <h3><span class="ctrl-referendum">{% trans "Questions" %}</span><span class="ctrl-elections">{% trans "Parties" %}</span></h3>
                     <h5 class="text-muted"><span class="ctrl-referendum">({% trans "drag and drop to rearrange the questions" %})</span><span class="ctrl-elections">({% trans "drag and drop to rearrange the parties" %})</span></h5>
                 </div>
-                
+
                 <div class="alert-wrapper">
                     {% if question_formset_errors or question_formset.non_form_errors %}
                     <div class="alert alert-danger alert-dismissible fade in" role="alert">
@@ -224,9 +224,9 @@
                     </div>
                     {% endif %}
                 </div>
-                
+
                 <table class="table table-hover">
-                    
+
                     <thead>
                         <tr>
                             <th>#</th>
@@ -234,7 +234,7 @@
                             <th class="text-center">{% trans "Action" %}</th>
                         </tr>
                     </thead>
-                    
+
                     <tbody>
                         {% for question_form, option_formset in question_and_options_list %}
                         <tr class="question-entry {% if question_form.errors or option_formset.total_error_count %} danger {% endif %} {% if forloop.last %} hidden {% endif %}" data-index="{% if not forloop.last %}{{ forloop.counter0 }}{% else %}__prefix__{% endif %}">
@@ -244,7 +244,7 @@
                         </tr>
                         {% endfor %}
                     </tbody>
-                    
+
                     <tfoot>
                         <tr>
                             <th></th>
@@ -252,7 +252,7 @@
                             <td class="text-center"><button type="button" id="question-add" class="btn btn-default btn-sm elections-or-referendum" data-toggle="tooltip" data-container="body" data-title-referendum="{% trans 'Add new question' %}" data-title-elections="{% trans 'Add new party' %}"><span class="glyphicon glyphicon-plus"></span></button></td>
                         </tr>
                     </tfoot>
-                    
+
                 </table>
             </div>
 
@@ -264,24 +264,24 @@
                     <button type="submit" class="btn btn-default">{% trans "Create Election" %}</button>
                 </div>
             </div>
-            
+
             {{ question_formset.management_form }}
-            
+
             {% for question_form, option_formset in question_and_options_list %}
-            
+
             {% if forloop.last %}
         </form> {# exclude formset's empty_form from the actual form #}
             {% endif %}
-            
+
             <div class="question hidden" data-index="{% if not forloop.last %}{{ forloop.counter0 }}{% else %}__prefix__{% endif %}">
-                
+
                 <div class="group-wrapper">
-                    
+
                     <div class="modal-header-small">
                         <h3><span class="ctrl-referendum">{% trans "Question" %}</span><span class="ctrl-elections">{% trans "Party" %}</span></h3>
                         <h5 class="text-muted">({% trans "all fields are required" %})</h5>
                     </div>
-                    
+
                     <div class="alert-wrapper">
                         {% if question_form.errors or question_form.non_field_errors %}
                         <div class="alert alert-danger alert-dismissible fade in" role="alert">
@@ -299,7 +299,7 @@
                         </div>
                         {% endif %}
                     </div>
-                    
+
                     <!-- Question input -->
                     <div class="form-group {% if question_form.question.errors %} has-error {% endif %}">
                         <label class="sr-only" for="{{ question_form.question.id_for_label }}">{{ question_form.question.label }}</label>
@@ -308,7 +308,7 @@
                             <input type="text" class="form-control" id="{{ question_form.question.auto_id }}" placeholder="{% trans 'Type it here' %}" value="{{ question_form.question.value|default_if_none:'' }}" name="{{ question_form.question.html_name }}" maxlength="{{ question_form.question.field.max_length }}">
                         </div>
                     </div>
-                    
+
                     <!-- Multiple choices and columns input -->
                     <div class="row" id="qed">
                         <div class="col-xs-12 col-sm-6">
@@ -340,14 +340,14 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="group-wrapper">
-                    
+
                     <div class="modal-header-small">
                         <h3><span class="ctrl-referendum">{% trans "Options" %}</span><span class="ctrl-elections">{% trans "Candidates" %}</span></h3>
                         <h5 class="text-muted"><span class="ctrl-referendum">({% trans "drag and drop to rearrange the options" %})</span><span class="ctrl-elections">({% trans "drag and drop to rearrange the candidates" %})</span></h5>
                     </div>
-                    
+
                     <div class="alert-wrapper">
                         {% if option_formset.total_error_count or option_formset.non_form_errors %}
                         <div class="alert alert-danger alert-dismissible fade in" role="alert">
@@ -378,13 +378,13 @@
                         </div>
                         {% endif %}
                     </div>
-                    
+
                     {{ option_formset.management_form }}
-                    
+
                     <ul class="list-unstyled option-list">
                         {% for option_form in option_formset %}
                         <li class="option">
-                            
+
                             <!-- Option input -->
                             <div class="form-group {% if option_form.text.errors or option_form.non_field_errors %} has-error {% endif %}">
                                 <label class="sr-only" for="{{ option_form.text.id_for_label }}">{% trans "Option" %}/{% trans "Candidate" %} {{ forloop.counter }}</label>
@@ -394,17 +394,17 @@
                                     <div class="input-group-addon option-remove elections-or-referendum" data-toggle="tooltip" data-container="body" data-title-referendum="{% trans 'Remove this option' %}" data-title-elections="{% trans 'Remove this candidate' %}"><span class="glyphicon glyphicon-trash"></span></div>
                                 </div>
                             </div>
-                            
+
                         </li>
                         {% endfor %}
                     </ul>
-                    
+
                     <div class="option-add-wrapper">
                         <button type="button" class="btn btn-default option-add"><span class="glyphicon glyphicon-plus"></span> <span class="ctrl-referendum">{% trans "Add new option" %}</span><span class="ctrl-elections">{% trans "Add new candidate" %}</span></button>
                     </div>
-                    
+
                 </div>
-                
+
             </div>
             {% endfor %}
     </div>
@@ -456,7 +456,7 @@
         </div>
     </div>
 </div>
- 
+
 {% endblock main %}
 
 

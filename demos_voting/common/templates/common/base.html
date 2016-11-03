@@ -6,35 +6,35 @@
 
 <!DOCTYPE html>
 <html lang="{{ current_language }}">
-    
+
     <head>
-        
+
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        
+
         {% block title %}
         <title>{{ title }} | DEMOS Voting</title>
         {% endblock title %}
-        
+
         <!-- bootstrap.css -->
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
-        
+
         <!-- fonts -->
         <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Roboto&subset=latin,greek'>
         <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300&subset=latin,greek'>
-        
+
         <!-- base.css -->
         <link rel="stylesheet" href="{% static 'common/base.css' %}">
-        
+
         {% block css %}
         {% endblock css %}
-        
+
     </head>
-    
+
     <body>
-        
+
         {% block header %}
         <header>
             <div class="container">
@@ -50,7 +50,7 @@
             </div>
         </header>
         {% endblock header %}
-        
+
         {% block navbar %}
         <nav class="navbar navbar-inverse">
             <div class="container">
@@ -62,7 +62,7 @@
                         <span class="icon-bar"></span>
                     </button>
                 </div>
-                
+
                 <div class="collapse navbar-collapse text-center" id="navbar-collapse">
                     <ul class="nav navbar-nav">
                     {% for link in links %}
@@ -78,14 +78,14 @@
             </div>
         </nav>
         {% endblock navbar %}
-        
+
         <main>
             <div class="container">
                 {% block main %}
                 {% endblock main %}
             </div>
         </main>
-        
+
         <footer>
             <div class="container">
                 <div class="text-center">
@@ -110,7 +110,7 @@
                 </div>
             </div>
         </footer>
-        
+
         <div id="election-id-modal" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" aria-labelledby="election-id-modal-label">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
@@ -149,54 +149,54 @@
                 </div>
             </div>
         </div>
-        
+
         <div id="media-query-test" class="hidden"></div>
-        
+
         <!-- jquery.js -->
         <script src="//code.jquery.com/jquery-2.1.3.min.js"></script>
         <script> window.jQuery || document.write("<script src='{% static 'common/libs/jquery/2.1.3/jquery.min.js' %}'><\/script>") </script>
-        
+
         <!-- bootstrap.css fallback -->
         <div id="bootstrap-css-test" class="hidden"></div>
         <script>
             (function($) {
                 $(function() {
                     var elem = $("#bootstrap-css-test");
-                    
+
                     if (elem.is(":visible")) {
                         $("head").prepend('<link rel="stylesheet" href="{% static "common/libs/bootstrap/3.3.5/css/bootstrap-theme.min.css" %}">');
                         $("head").prepend('<link rel="stylesheet" href="{% static "common/libs/bootstrap/3.3.5/css/bootstrap.min.css" %}">');
                     }
-                    
+
                     elem.remove();
                 });
             })(window.jQuery);
         </script>
-        
+
         <!-- bootstrap.js -->
         <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
         <script> window.jQuery.fn.modal || document.write("<script src='{% static 'common/libs/bootstrap/3.3.5/js/bootstrap.min.js' %}'><\/script>") </script>
-        
+
         <!-- moment.js -->
         <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
         <script> window.moment || document.write("<script src='{% static 'common/libs/moment.js/2.10.6/moment.min.js' %}'><\/script>") </script>
-        
+
         {% if current_language != "en" %}
         <!-- {{ current_language }}.js -->
         <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/locale/{{ current_language }}.js"></script>
         <script> (moment().locale("{{ current_language }}").locale() == "{{ current_language }}") || document.write("<script src='{% static 'common/libs/moment.js/2.10.6/locale/'|add:current_language|add:'.js' %}'><\/script>") </script>
         {% endif %}
-        
+
         <!-- spin.js -->
         <script src="//cdnjs.cloudflare.com/ajax/libs/spin.js/2.3.2/spin.min.js"></script>
         <script> typeof Spinner != "undefined" || document.write("<script src='{% static 'common/libs/spin.js/2.3.2/spin.min.js' %}'><\/script>") </script>
-        
+
         <!-- base.js -->
         <script src="{% static 'common/base.js' %}"></script>
-        
+
         {% block script %}
         {% endblock script %}
     </body>
-    
+
 </html>
 

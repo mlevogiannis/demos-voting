@@ -18,19 +18,19 @@
 
 <div class="row">
     <div class="col-xs-12">
-        
+
         {% tuple _("Election") election.id as t1 %}
         {% tuple _("Participants") participants as t2 %}
         {% tuple t1 t2 as panels %}
         {% include "common/election_box.html" with object=election panels=panels %}
-        
+
         {% if election.state != State.COMPLETED %}
         <div class="alert alert-warning text-center" role="alert">
             {% trans "The results will be announced after the election has ended." %}
         </div>
-        
+
         {% else %}
-        
+
         {% for question in questions %}
         <div class="panel panel-default">
             <div class="panel-heading">{% trans "Question" %}{% if questions|length > 1 %} {{ question.index|add:"1" }}{% endif %}: {{ question.text }}</div>
@@ -41,7 +41,7 @@
             </div>
         </div>
         {% endfor %}
-        
+
         {% endif %}
     </div>
 </div>

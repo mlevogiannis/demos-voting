@@ -23,7 +23,7 @@
         {% tuple _("Questions") questions|length as t3 %}
         {% tuple t1 t2 t3 as panels %}
         {% include "common/election_box.html" with object=election now_datetime=timezone_now panels=panels %}
-        
+
         {% trans "The election ID you specified is not valid." as invalid_election_id_msg %}
         {% trans "The voter token you specified is not valid." as invalid_voter_token_msg %}
         {% trans "The election starts on" as election_not_started_msg %}
@@ -36,18 +36,18 @@
         {% trans "An unexpected error occurred." as unexpected_error_msg %}
         {% trans "Please make sure that the web address matches the link in your ballot." as invalid_url_msg %}
         {% trans "Your vote has been accepted" as vote_accepted %}
-        
+
         <div class="alert alert-warning fade in text-center {% if state != State.NO_ERROR %}hidden{% endif %}" role="alert">
             <p>{% trans "Please wait..." %}</p>
         </div>
-    
+
         <div class="alert alert-success fade in hidden" role="alert">
             <span>
                 <span><strong>{% trans "Success" %}!</strong> {{ vote_accepted }}.</span>
                 <span class="glyphicon glyphicon-check"></span>
             </span>
         </div>
-        
+
         <div class="alert alert-danger alert-dismissible fade in {% if state == State.NO_ERROR %}hidden{% endif %}" role="alert" aria-hidden="{% if state == State.NO_ERROR %}true{% else %}false{% endif %}">
             <p>
                 <strong>{% trans "Error" %}:</strong>
@@ -62,7 +62,7 @@
                 <span data-state="{{ State.CONNECTION_ERROR }}" class="{% if state != State.CONNECTION_ERROR %}hidden{% endif %}">{{ connection_error_msg }} {{ try_again_later_msg }}</span>
             </p>
         </div>
-        
+
         {% if election and questions %}
         <div id="carousel" class="carousel slide {% if state == not State.NO_ERROR %}disabled{% endif %}" data-ride="carousel" data-interval="false" data-wrap="false">
             {% if questions|length > 1 %}
@@ -73,7 +73,7 @@
                 {% endfor %}
             </ol>
             {% endif %}
-            
+
             <!-- Wrapper for questions -->
             <div class="carousel-inner" role="listbox">
                 {% for question in questions %}
@@ -113,7 +113,7 @@
                 </div>
                 {% endfor %}
             </div>
-        
+
             {% if questions|length > 1 %}
             <!-- Controls -->
             <a class="left carousel-control" href="#carousel" role="button" data-slide="prev">
@@ -126,12 +126,12 @@
             </a>
             {% endif %}
         </div>
-            
+
         <div class="xs-sm-align">
             <button id="vote-submit" class="btn btn-success" data-toggle="tooltip" title="{% trans 'Please fill in all questions' %}" disabled>{% trans "Submit vote" %}</button>
         </div>
         {% endif %}
-        
+
         {% if state == State.NO_ERROR %}
         <!-- Security Code Modal -->
         <div id="security-code-modal" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="security-code-modal-label">
@@ -175,7 +175,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Confirm Modal -->
         <div id="confirm-modal" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="confirm-modal-label">
             <div class="modal-dialog" role="document">
@@ -210,7 +210,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Receipt Modal -->
         <div id="receipt-modal" class="modal fade" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="receipt-modal-label">
             <div class="modal-dialog" role="document">
@@ -248,7 +248,7 @@
             </div>
         </div>
         {% endif %}
-        
+
     </div>
 </div>
 
@@ -269,7 +269,7 @@
     var votecode_len = {{ votecode_len|default:'null' }};
     var credential = sjcl.codec.base64.toBits("{{ credential|default:'' }}");
     var vc_type = {{ election.votecode_type }};
-    
+
     var VcType = { {% for name, value in election.VOTECODE_TYPE_CHOICES %} {{ name }}: {{ value }}, {% endfor %} };
     var State = { {% for name, value in State.items %} {{ name }}: {{ value }}, {% endfor %} };
 </script>

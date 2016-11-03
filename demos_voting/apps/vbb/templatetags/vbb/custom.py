@@ -22,17 +22,17 @@ def floordiv(value, arg):
 
 @register.filter
 def chunks(lst, n):
-    
+
     try:
         lst = list(lst)
         n = int(n)
     except (ValueError, TypeError):
         return ''
-    
+
     l = len(lst)
     i = 0
     r = []
-    
+
     for _ in range(n):
         d = int(math.ceil(float(l) / n))
         c = lst[i: i+d]
@@ -40,6 +40,6 @@ def chunks(lst, n):
         n -= 1
         l -= len(c)
         i += d
-    
+
     return r
 

@@ -11,10 +11,10 @@ from demos_voting.common.apps import CommonMixin
 
 
 class AppConfig(CommonMixin, AppConfig):
-    
+
     name = 'demos_voting.apps.ea'
     verbose_name = _("Election Authority")
-    
+
     def ready(self):
         checks.register(ca_config_check, deploy=True)
         super(AppConfig, self).ready()

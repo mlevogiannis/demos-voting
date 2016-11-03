@@ -9,7 +9,7 @@ from demos_voting.common.apps import CommonMixin
 
 
 class AppConfig(CommonMixin, AppConfig):
-    
+
     name = 'demos_voting.apps.vbb'
     verbose_name = _("Virtual Ballot Box")
 

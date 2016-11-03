@@ -9,7 +9,7 @@ from demos_voting.common.apps import CommonMixin
 
 
 class AppConfig(CommonMixin, AppConfig):
-    
+
     name = 'demos_voting.apps.bds'
     verbose_name = _("Ballot Distribution Server")
 

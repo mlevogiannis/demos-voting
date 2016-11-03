@@ -18,24 +18,24 @@ logger = logging.getLogger(__name__)
 
 
 class Election(Election):
-    
+
     voting_started_at = models.DateTimeField(_("voting started at"), null=True, default=None)
     voting_ended_at = models.DateTimeField(_("voting ended at"), null=True, default=None)
 
 
 class Ballot(Ballot):
-    
+
     cast_at = models.DateTimeField(_("cast at"), null=True, default=None)
-    
+
     @property
     def is_cast(self):
         return self.cast_at is not None
 
 
 class Part(Part):
-    
+
     credential_hash = models.CharField(_("credential hash"), max_length=255)
-    
+
     def verify_credential(self, credential):
         hasher = get_hasher(identify_hasher(self.credential_hash))
         regex = r'^%s{%d}$' % (base32.regex, (self.election.credential_length * 8 + 4) // 5)
@@ -51,10 +51,10 @@ class Option_P(Option_P):
 
 
 class Option_C(Option_C):
-    
+
     votecode = models.CharField(_("vote-code"), max_length=32, null=True, default=None)
     votecode_hash = models.CharField(_("vote-code hash"), max_length=255, null=True, default=None)
-    
+
     receipt = models.CharField(_("receipt"), max_length=1024)
 
 

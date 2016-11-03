@@ -28,10 +28,10 @@ from django.conf.urls.i18n import i18n_patterns
 urlpatterns = []
 
 for app in settings.DEMOS_VOTING_APPS:
-    
+
     urlconf = import_module('demos_voting.apps.%s.urls' % app)
     path = r'^' + ((app + r'/') if len(settings.DEMOS_VOTING_APPS) > 1 else r'')
-    
+
     urlpatterns += i18n_patterns(url(path, include((urlconf, app, app))))
     urlpatterns += [url(path + r'api/', include((urlconf.urlpatterns_api, app, '%s-api' % app)))]
     urlpatterns += [url(path + r'media/', include((urlconf.urlpatterns_media, app, '%s-media' % app)))]

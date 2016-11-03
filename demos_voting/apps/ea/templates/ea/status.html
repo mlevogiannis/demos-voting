@@ -19,29 +19,29 @@
 
 <div class="row">
     <div class="col-xs-12">
-        
+
         {% tuple _("Election") election.id as t1 %}
         {% tuple _("Ballots") election.ballots as t3 %}
-        
+
         {% if election.is_election %}
             {% tuple _("Type") _("Elections") as t2 %}
         {% else %}
             {% tuple _("Type") _("Referendum") as t2 %}
         {% endif %}
-        
+
         {% tuple t1 t2 t3 as panels %}
         {% include "common/election_box.html" with object=election panels=panels %}
-        
+
         <div id="main-wrapper">
-            
+
             <div class="alert alert-warning fade in text-center hidden" role="alert">
                 <p>{% trans "Unable to fetch election state, retrying..." %}</p>
             </div>
-            
+
             <div class="alert alert-dnager fade in hidden" role="alert">
                 <p>{% trans "The election was stopped due to a fatal error." %}</p>
             </div>
-            
+
             <div class="list-group">
                 <a class="list-group-item" data-state="{{ State.DRAFT }}">
                     {% trans "Election defined" %}
@@ -77,18 +77,18 @@
                     <span class="glyphicon pull-right hidden"></span>
                 </a>
             </div>
-            
+
             <div class="main-header-small">
                 <h5>{% trans "Ballot management" %}:</h5>
             </div>
             <pre><a target="_blank" href="{{ bds_url }}">{{ bds_url }}</a></pre>
-            
+
             <div class="main-header-small">
                 <h5>{% trans "Election results" %}:</h5>
             </div>
             <pre><a target="_blank" href="{{ abb_url }}">{{ abb_url }}</a></pre>
         </div>
-        
+
     </div>
 </div>
 
