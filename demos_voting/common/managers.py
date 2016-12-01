@@ -20,22 +20,39 @@ class BallotManager(models.Manager):
         except AttributeError:
             return super(BallotManager, self).count()
 
-    def get_queryset(self):
+    def prefetch_related(self, *lookups):
 
-        app_config = apps.get_app_config(self.model._meta.app_label)
+        lookups = list(lookups)
 
-        Question = app_config.get_model('Question')
-        PartQuestion = app_config.get_model('PartQuestion')
+        for i, lookup in enumerate(lookups):
+            if lookup.startswith('parts__partquestions'):
+                app_config = apps.get_app_config(self.model._meta.app_label)
 
-        partquestion_qs = PartQuestion.objects.select_related('question').defer(
-            *['question__%s' % f.name for f in Question._meta.get_fields() if f.name != 'index']
-        )
+                Question = app_config.get_model('Question')
+                PartQuestion = app_config.get_model('PartQuestion')
 
-        ballot_qs = super(BallotManager, self).get_queryset().prefetch_related(
-            models.Prefetch('parts__partquestions', partquestion_qs), 'parts__partquestions__options_c'
-        )
+                partquestion_qs = PartQuestion.objects.select_related('question').defer(
+                    *['question__%s' % f.name for f in Question._meta.get_fields() if f.name != 'index']
+                )
 
-        return ballot_qs
+                lookups.insert(i, models.Prefetch('parts__partquestions', partquestion_qs))
+                break
+
+        for lookup in list(lookups):
+            if lookup.startswith('parts__partquestions'):
+                app_config = apps.get_app_config(self.model._meta.app_label)
+
+                Question = app_config.get_model('Question')
+                PartQuestion = app_config.get_model('PartQuestion')
+
+                partquestion_qs = PartQuestion.objects.select_related('question').defer(
+                    *['question__%s' % f.name for f in Question._meta.get_fields() if f.name != 'index']
+                )
+
+                lookups += (models.Prefetch('parts__partquestions', partquestion_qs),)
+                break
+
+        return super(BallotManager, self).prefetch_related(*lookups)
 
     def get_by_natural_key(self, e_id, b_serial_number):
 
@@ -58,9 +75,6 @@ class PartManager(models.Manager):
 
 
 class QuestionManager(models.Manager):
-
-    def get_queryset(self):
-        return super(QuestionManager, self).get_queryset().prefetch_related('options_p')
 
     def get_by_natural_key(self, e_id, q_index):
 
