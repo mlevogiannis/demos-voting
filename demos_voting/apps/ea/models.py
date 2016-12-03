@@ -14,6 +14,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import six
 from django.utils.encoding import force_bytes, force_text
+from django.utils.functional import cached_property
 from django.utils.six.moves import range
 from django.utils.translation import ugettext_lazy as _
 
@@ -184,15 +185,16 @@ class Part(Part):
 
 class PQuestion(PQuestion):
 
-    def generate_common_votecode_data(self):
+    @cached_property
+    def _long_votecode_hash_config(self):
+        if settings.DEMOS_VOTING_LONG_VOTECODE_HASH_REUSE_SALT:
+            return get_hasher(self.election.DEFAULT_HASHER_IDENTIFIER).config()
 
-        if self.election.votecode_type_is_long:
-            if settings.DEMOS_VOTING_LONG_VOTECODE_HASH_REUSE_SALT:
-                hasher = get_hasher(self.election.DEFAULT_HASHER_IDENTIFIER)
-                self._long_votecode_hash_config = hasher.config()
-        else:
-            self._short_votecodes = [force_text(i) for i in range(1, self.options.count() + 1)]
-            random.shuffle(self._short_votecodes)
+    @cached_property
+    def _short_votecodes(self):
+        short_votecodes = [force_text(i) for i in range(1, self.options.count() + 1)]
+        random.shuffle(short_votecodes)
+        return short_votecodes
 
 
 class POption(POption):
