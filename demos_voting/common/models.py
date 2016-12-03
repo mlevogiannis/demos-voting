@@ -154,11 +154,11 @@ class Election(models.Model):
         if self.type_is_election:
             parties = self.questions.all()[0].options.all()
             candidates = self.questions.all()[1].options.all()
-            groups = [list(parties)] + [
-                list(options) for options in zip(*([iter(candidates)] * (len(candidates) // len(parties))))
+            groups = [tuple(parties)] + [
+                options for options in zip(*([iter(candidates)] * (len(candidates) // len(parties))))
             ]
         elif self.type_is_referendum:
-            groups = [list(question.options.all()) for question in self.questions.all()]
+            groups = [tuple(question.options.all()) for question in self.questions.all()]
 
         # Calculate the security code's length required to encode all
         # possible permutation indices for all option groups.
@@ -390,11 +390,11 @@ class PQuestion(models.Model):
         if self.election.type_is_election:
             parties = self.election.questions.all()[0].options.all()
             candidates = self.election.questions.all()[1].options.all()
-            groups = [list(parties)] + [
-                list(options) for options in zip(*([iter(candidates)] * (len(candidates) // len(parties))))
+            groups = [tuple(parties)] + [
+                options for options in zip(*([iter(candidates)] * (len(candidates) // len(parties))))
             ]
         elif self.election.type_is_referendum:
-            groups = [list(question.options.all()) for question in self.election.questions.all()]
+            groups = [tuple(question.options.all()) for question in self.election.questions.all()]
 
         # Due to the candidate list's special structure we have to return a
         # list of permutation indices, one for each party's candidates.

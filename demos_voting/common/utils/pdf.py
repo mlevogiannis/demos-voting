@@ -317,9 +317,9 @@ def generate(*ballots):
     if election.type_is_election:
         parties = election.questions.all()[0].options.all()
         candidates = election.questions.all()[1].options.all()
-        groups = [list(options) for options in zip(*([iter(candidates)] * (len(candidates) // len(parties))))]
+        groups = [options for options in zip(*([iter(candidates)] * (len(candidates) // len(parties))))]
     elif election.type_is_referendum:
-        groups = [list(question.options.all()) for question in election.questions.all()]
+        groups = [tuple(question.options.all()) for question in election.questions.all()]
 
     for i, options in enumerate(groups):
 
@@ -435,7 +435,7 @@ def generate(*ballots):
                 candidates = part.questions.all()[1].options.all()
                 groups = [p_options for p_options in zip(*([iter(candidates)] * (len(candidates) // len(parties))))]
             elif election.type_is_referendum:
-                groups = [list(p_question.options.all()) for p_question in part.questions.all()]
+                groups = [tuple(p_question.options.all()) for p_question in part.questions.all()]
 
             for i, (p_options, (options, option_table_column_widths)) in enumerate(zip(groups, _option_table_data)):
 

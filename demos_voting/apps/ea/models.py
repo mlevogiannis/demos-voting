@@ -129,12 +129,12 @@ class Part(Part):
                 parties = self.election.questions.all()[0].options.all()
                 candidates = self.election.questions.all()[1].options.all()
 
-                groups = [list(parties)] + [
-                    list(options) for options in zip(*([iter(candidates)] * (len(candidates) // len(parties))))
+                groups = [tuple(parties)] + [
+                    options for options in zip(*([iter(candidates)] * (len(candidates) // len(parties))))
                 ]
 
             elif self.election.type_is_referendum:
-                groups = [list(question.options.all()) for question in self.election.questions.all()]
+                groups = [tuple(question.options.all()) for question in self.election.questions.all()]
 
             # If the security code has enough bits to cover all permutations
             # for all groups, then we generate a random permutation index for
