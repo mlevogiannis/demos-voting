@@ -10,7 +10,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from demos_voting.common import storage
-from demos_voting.common.models import (Election, Ballot, Part, Question, Option_P, Option_C, PartQuestion, Task,
+from demos_voting.common.models import (Election, Ballot, Part, Question, Option, POption, PQuestion, Task,
     PrivateApiUser, PrivateApiNonce)
 
 logger = logging.getLogger(__name__)
@@ -50,12 +50,12 @@ class Question(Question):
     pass
 
 
-class Option_P(Option_P):
+class Option(Option):
 
     votes = models.PositiveIntegerField(_("number of votes"), null=True, default=None)
 
 
-class Option_C(Option_C):
+class POption(POption):
 
     voted = models.NullBooleanField(_("marked as voted"), default=None)
 
@@ -65,7 +65,7 @@ class Option_C(Option_C):
     receipt = models.CharField(_("receipt"), max_length=1024)
 
 
-class PartQuestion(PartQuestion):
+class PQuestion(PQuestion):
     pass
 
 

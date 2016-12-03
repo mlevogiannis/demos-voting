@@ -17,7 +17,7 @@ from django.utils.encoding import force_bytes, force_text
 from django.utils.six.moves import range
 from django.utils.translation import ugettext_lazy as _
 
-from demos_voting.common.models import (Election, Ballot, Part, Question, Option_P, Option_C, PartQuestion, Task,
+from demos_voting.common.models import (Election, Ballot, Part, Question, Option, POption, PQuestion, Task,
     PrivateApiUser, PrivateApiNonce)
 from demos_voting.common.utils import base32
 from demos_voting.common.utils.hashers import get_hasher
@@ -117,15 +117,15 @@ class Part(Part):
                 # to the same party (all parties always have the same number
                 # of candidates, including the blank ones).
 
-                parties = self.election.questions.all()[0].options_p.all()
-                candidates = self.election.questions.all()[1].options_p.all()
+                parties = self.election.questions.all()[0].options.all()
+                candidates = self.election.questions.all()[1].options.all()
 
                 groups = [list(parties)] + [
                     list(options) for options in zip(*([iter(candidates)] * (len(candidates) // len(parties))))
                 ]
 
             elif self.election.type_is_referendum:
-                groups = [list(question.options_p.all()) for question in self.election.questions.all()]
+                groups = [list(question.options.all()) for question in self.election.questions.all()]
 
             # If the security code has enough bits to cover all permutations
             # for all groups, then we generate a random permutation index for
@@ -178,22 +178,22 @@ class Question(Question):
     pass
 
 
-class Option_P(Option_P):
+class Option(Option):
     pass
 
 
-class Option_C(Option_C):
+class POption(POption):
 
     def generate_votecode(self):
 
         if self.election.votecode_type_is_long:
             reuse_salt = settings.DEMOS_VOTING_LONG_VOTECODE_HASH_REUSE_SALT
             hasher = get_hasher(self.election.DEFAULT_HASHER_IDENTIFIER)
-            config = hasher.config() if not reuse_salt else self.partquestion._long_votecode_hash_config
+            config = hasher.config() if not reuse_salt else self.question._long_votecode_hash_config
             self.votecode = self._generate_long_votecode()
             self.votecode_hash = hasher.hash(self.votecode, config)
         else:
-            self.votecode = self.partquestion._short_votecodes[self.index]
+            self.votecode = self.question._short_votecodes[self.index]
             self.votecode_hash = None
 
     def generate_receipt(self):
@@ -207,7 +207,7 @@ class Option_C(Option_C):
             self.receipt = base32.encode(randomness, self.election.receipt_length)
 
 
-class PartQuestion(PartQuestion):
+class PQuestion(PQuestion):
 
     def generate_common_votecode_data(self):
 
@@ -216,7 +216,7 @@ class PartQuestion(PartQuestion):
                 hasher = get_hasher(self.election.DEFAULT_HASHER_IDENTIFIER)
                 self._long_votecode_hash_config = hasher.config()
         else:
-            self._short_votecodes = [force_text(i) for i in range(1, self.options_c.count() + 1)]
+            self._short_votecodes = [force_text(i) for i in range(1, self.options.count() + 1)]
             random.shuffle(self._short_votecodes)
 
 

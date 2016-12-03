@@ -152,13 +152,13 @@ class Election(models.Model):
         # See `ea:Part.generate_security_code` for details.
 
         if self.type_is_election:
-            parties = self.questions.all()[0].options_p.all()
-            candidates = self.questions.all()[1].options_p.all()
+            parties = self.questions.all()[0].options.all()
+            candidates = self.questions.all()[1].options.all()
             groups = [list(parties)] + [
                 list(options) for options in zip(*([iter(candidates)] * (len(candidates) // len(parties))))
             ]
         elif self.type_is_referendum:
-            groups = [list(question.options_p.all()) for question in self.questions.all()]
+            groups = [list(question.options.all()) for question in self.questions.all()]
 
         # Calculate the security code's length required to encode all
         # possible permutation indices for all option groups.
@@ -231,8 +231,6 @@ class Part(models.Model):
     )
 
     ballot = models.ForeignKey('Ballot')
-    questions = models.ManyToManyField('Question', through='PartQuestion')
-
     tag = models.CharField(_("tag"), max_length=1, choices=TAG_CHOICES)
 
     # Custom methods and properties
@@ -337,7 +335,7 @@ class Question(models.Model):
 
 
 @python_2_unicode_compatible
-class Option_P(models.Model):
+class Option(models.Model):
 
     question = models.ForeignKey('Question')
 
@@ -352,11 +350,11 @@ class Option_P(models.Model):
 
     # Default manager, meta options and natural key
 
-    objects = managers.OptionManager_P()
+    objects = managers.OptionManager()
 
     class Meta:
         abstract = True
-        default_related_name = 'options_p'
+        default_related_name = 'options'
         ordering = ['question', 'index']
         unique_together = ['question', 'index']
         verbose_name = _("option")
@@ -372,9 +370,9 @@ class Option_P(models.Model):
 
 
 @python_2_unicode_compatible
-class Option_C(models.Model):
+class POption(models.Model):
 
-    partquestion = models.ForeignKey('PartQuestion')
+    question = models.ForeignKey('PQuestion')
     index = models.PositiveSmallIntegerField(_("index"))
 
     # Custom methods and properties
@@ -386,9 +384,9 @@ class Option_C(models.Model):
 
         byte_length = lambda n: (n.bit_length() + 7) // 8
 
-        option_cnt = self.partquestion.options_c.count()
+        option_cnt = self.question.options.count()
         option_index_bytes = int_to_bytes(self.index, byte_length(option_cnt - 1), byteorder='big')
-        question_cnt = self.part.partquestions.count()
+        question_cnt = self.part.questions.count()
         question_index_bytes = int_to_bytes(self.question.index, byte_length(question_cnt - 1), byteorder='big')
 
         key = self.part._credential_bytes
@@ -411,40 +409,40 @@ class Option_C(models.Model):
 
     @cached_property
     def part(self):
-        return self.partquestion.part
-
-    @cached_property
-    def question(self):
-        return self.partquestion.question
+        return self.question.part
 
     # Default manager, meta options and natural key
 
-    objects = managers.OptionManager_C()
+    objects = managers.POptionManager()
 
     class Meta:
         abstract = True
-        default_related_name = 'options_c'
-        ordering = ['partquestion', 'index']
-        unique_together = ['partquestion', 'index']
+        default_related_name = 'options'
+        ordering = ['question', 'index']
+        unique_together = ['question', 'index']
         verbose_name = _("option")
         verbose_name_plural = _("options")
 
     def natural_key(self):
-        return self._partquestion.natural_key() + (self.index,)
+        return self.question.natural_key() + (self.index,)
 
-    natural_key.dependencies = ['PartQuestion']
+    natural_key.dependencies = ['PQuestion']
 
     def __str__(self):
         return "%s" % (self.index + 1)
 
 
 @python_2_unicode_compatible
-class PartQuestion(models.Model):
+class PQuestion(models.Model):
 
     part = models.ForeignKey('Part')
     question = models.ForeignKey('Question')
 
     # Custom methods and properties
+
+    @cached_property
+    def index(self):
+        return self.question.index
 
     @cached_property
     def permutation_index(self):
@@ -453,13 +451,13 @@ class PartQuestion(models.Model):
         # See `Part.generate_security_code` for details.
 
         if self.election.type_is_election:
-            parties = self.election.questions.all()[0].options_p.all()
-            candidates = self.election.questions.all()[1].options_p.all()
+            parties = self.election.questions.all()[0].options.all()
+            candidates = self.election.questions.all()[1].options.all()
             groups = [list(parties)] + [
                 list(options) for options in zip(*([iter(candidates)] * (len(candidates) // len(parties))))
             ]
         elif self.election.type_is_referendum:
-            groups = [list(question.options_p.all()) for question in self.election.questions.all()]
+            groups = [list(question.options.all()) for question in self.election.questions.all()]
 
         # Due to the candidate list's special structure we have to return a
         # list of permutation indices, one for each party's candidates.
@@ -522,11 +520,11 @@ class PartQuestion(models.Model):
 
     # Default manager, meta options and natural key
 
-    objects = managers.PartQuestionManager()
+    objects = managers.PQuestionManager()
 
     class Meta:
         abstract = True
-        default_related_name = 'partquestions'
+        default_related_name = 'questions'
         ordering = ['part', 'question']
         unique_together = ['part', 'question']
 

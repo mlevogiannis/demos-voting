@@ -293,7 +293,7 @@ def generate(*ballots):
         if election.type_is_referendum:
             max_options = settings.DEMOS_VOTING_MAX_REFERENDUM_OPTIONS
         elif election.type_is_election:
-            max_options = election.questions.all()[1].options_p.count()
+            max_options = election.questions.all()[1].options.count()
         votecode_length = len(force_text(max_options - 1))
     elif election.votecode_type_is_long:
         votecode_chars = base32.symbols + '-'
@@ -315,13 +315,13 @@ def generate(*ballots):
     _option_table_data = []
 
     if election.type_is_election:
-        parties = election.questions.all()[0].options_p.all()
-        candidates = election.questions.all()[1].options_p.all()
+        parties = election.questions.all()[0].options.all()
+        candidates = election.questions.all()[1].options.all()
         groups = [list(options) for options in zip(*([iter(candidates)] * (len(candidates) // len(parties))))]
     elif election.type_is_referendum:
-        groups = [list(question.options_p.all()) for question in election.questions.all()]
+        groups = [list(question.options.all()) for question in election.questions.all()]
 
-    for i, options_p in enumerate(groups):
+    for i, options in enumerate(groups):
 
         if election.type_is_election:
             question = election.questions.all()[1]
@@ -329,10 +329,10 @@ def generate(*ballots):
             question = election.questions.all()[i]
 
         options = [
-            Paragraph(option_p.name, option_paragraph_style)
-                if option_p.name is not None else
+            Paragraph(option.name, option_paragraph_style)
+                if option.name is not None else
             Paragraph(blank_text, blank_paragraph_style)
-                for option_p in options_p
+                for option in options
         ]
 
         option_column_width = h_padding + max(
@@ -431,28 +431,30 @@ def generate(*ballots):
             # grouped by party. Otherwise, the groups are the questions.
 
             if election.type_is_election:
-                parties = part.partquestions.all()[0].options_c.all()
-                candidates = part.partquestions.all()[1].options_c.all()
-                groups = [list(options) for options in zip(*([iter(candidates)] * (len(candidates) // len(parties))))]
+                parties = part.questions.all()[0].options.all()
+                candidates = part.questions.all()[1].options.all()
+                groups = [p_options for p_options in zip(*([iter(candidates)] * (len(candidates) // len(parties))))]
             elif election.type_is_referendum:
-                groups = [list(partquestion.options_c.all()) for partquestion in part.partquestions.all()]
+                groups = [list(p_question.options.all()) for p_question in part.questions.all()]
 
-            for i, (options_c, (options_p, option_table_column_widths)) in enumerate(zip(groups, _option_table_data)):
+            for i, (p_options, (options, option_table_column_widths)) in enumerate(zip(groups, _option_table_data)):
 
                 # Prepare question table's data.
 
                 if election.type_is_election:
-                    party_p = election.questions.all()[0].options_p.all()[i]
-                    party_c = part.partquestions.all()[0].options_c.all()[i]
+                    party_option = election.questions.all()[0].options.all()[i]
+                    party_p_option = part.questions.all()[0].options.all()[i]
 
-                    votecode = party_c.votecode
+                    name = party_option.name
+                    votecode = party_p_option.votecode
+                    receipt = party_p_option.receipt
+
                     if election.votecode_type_is_long:
                         votecode = base32.hyphen(votecode, long_votecode_chunk_length)
-
-                    receipt = party_c.receipt[-election.receipt_length:]
+                        receipt = receipt[-election.receipt_length:]
 
                     question_table_rows = [
-                        [_kv_paragraph(question_text, party_p.name, mode='t')],
+                        [_kv_paragraph(question_text, name, mode='t')],
                         [_kv_paragraph(votecode_text, votecode, mode='d')],
                         [_kv_paragraph(receipt_text, receipt, mode='d')]
                     ]
@@ -470,13 +472,13 @@ def generate(*ballots):
 
                 option_table_header_row = [option_text, votecode_text, receipt_text]
 
-                votecodes = [option_c.votecode for option_c in options_c]
-                receipts = [option_c.receipt[-election.receipt_length:] for option_c in options_c]
+                votecodes = [p_option.votecode for p_option in p_options]
+                receipts = [p_option.receipt[-election.receipt_length:] for p_option in p_options]
 
                 if election.votecode_type_is_long:
                     votecodes = [base32.hyphen(votecode, long_votecode_chunk_length) for votecode in votecodes]
 
-                option_rows = [list(row) for row in zip(options_p, votecodes, receipts)]
+                option_rows = [list(row) for row in zip(options, votecodes, receipts)]
                 option_row_cnt = len(option_rows)
 
                 option_table_row_height = Table([[""]], style=option_table_style).wrap(page_width, page_height)[1]

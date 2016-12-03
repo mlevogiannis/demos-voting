@@ -25,31 +25,17 @@ class BallotManager(models.Manager):
         lookups = list(lookups)
 
         for i, lookup in enumerate(lookups):
-            if lookup.startswith('parts__partquestions'):
+            if lookup.startswith('parts__questions'):
                 app_config = apps.get_app_config(self.model._meta.app_label)
 
                 Question = app_config.get_model('Question')
-                PartQuestion = app_config.get_model('PartQuestion')
+                PQuestion = app_config.get_model('PQuestion')
 
-                partquestion_qs = PartQuestion.objects.select_related('question').defer(
+                p_question_qs = PQuestion.objects.select_related('question').defer(
                     *['question__%s' % f.name for f in Question._meta.get_fields() if f.name != 'index']
                 )
 
-                lookups.insert(i, models.Prefetch('parts__partquestions', partquestion_qs))
-                break
-
-        for lookup in list(lookups):
-            if lookup.startswith('parts__partquestions'):
-                app_config = apps.get_app_config(self.model._meta.app_label)
-
-                Question = app_config.get_model('Question')
-                PartQuestion = app_config.get_model('PartQuestion')
-
-                partquestion_qs = PartQuestion.objects.select_related('question').defer(
-                    *['question__%s' % f.name for f in Question._meta.get_fields() if f.name != 'index']
-                )
-
-                lookups += (models.Prefetch('parts__partquestions', partquestion_qs),)
+                lookups.insert(i, models.Prefetch('parts__questions', p_question_qs))
                 break
 
         return super(BallotManager, self).prefetch_related(*lookups)
@@ -85,7 +71,7 @@ class QuestionManager(models.Manager):
         return self.get(election=election, index=q_index)
 
 
-class OptionManager_P(models.Manager):
+class OptionManager(models.Manager):
 
     def get_by_natural_key(self, e_id, q_index, o_index):
 
@@ -96,7 +82,7 @@ class OptionManager_P(models.Manager):
         return self.get(question=question, index=o_index)
 
 
-class OptionManager_C(models.Manager):
+class POptionManager(models.Manager):
 
     def get_by_natural_key(self, e_id, b_serial_number, p_tag, q_index, o_index):
 
@@ -107,7 +93,7 @@ class OptionManager_C(models.Manager):
         return self.get(question=question, index=o_index)
 
 
-class PartQuestionManager(models.Manager):
+class PQuestionManager(models.Manager):
 
     def get_by_natural_key(self, e_id, b_serial_number, p_tag, q_index):
 
@@ -148,4 +134,3 @@ class PrivateApiNonceManager(models.Manager):
         user = manager.get_by_natural_key(app_label)
 
         return self.get(user=user, nonce=nonce, timestamp=timestamp, type=type)
-

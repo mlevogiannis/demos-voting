@@ -10,7 +10,7 @@ from django.db import models
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
-from demos_voting.common.models import (Election, Ballot, Part, Question, Option_P, Option_C, PartQuestion, Task,
+from demos_voting.common.models import (Election, Ballot, Part, Question, Option, POption, PQuestion, Task,
     PrivateApiUser, PrivateApiNonce)
 from demos_voting.common.utils import base32
 
@@ -60,17 +60,17 @@ class Question(Question):
     pass
 
 
-class Option_P(Option_P):
+class Option(Option):
     pass
 
 
-class Option_C(Option_C):
+class POption(POption):
 
     votecode = models.CharField(_("vote-code"), max_length=32)
     receipt = models.CharField(_("receipt"), max_length=1024)
 
 
-class PartQuestion(PartQuestion):
+class PQuestion(PQuestion):
     pass
 
 
