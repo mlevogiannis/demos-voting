@@ -10,7 +10,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from demos_voting.common import storage
-from demos_voting.common.models import (Election, Ballot, Part, Question, Option, POption, PQuestion, Task,
+from demos_voting.common.models import (Election, Question, Option, Ballot, Part, PQuestion, POption, Task,
     PrivateApiUser, PrivateApiNonce)
 
 logger = logging.getLogger(__name__)
@@ -35,6 +35,15 @@ class Election(Election):
     coins = models.CharField(_("coins"), max_length=128, null=True, default=None)
 
 
+class Question(Question):
+    pass
+
+
+class Option(Option):
+
+    votes = models.PositiveIntegerField(_("number of votes"), null=True, default=None)
+
+
 class Ballot(Ballot):
 
     cast_at = models.DateTimeField(_("cast at"), null=True, default=None)
@@ -46,13 +55,8 @@ class Part(Part):
     credential_hash = models.CharField(_("credential hash"), max_length=255)
 
 
-class Question(Question):
+class PQuestion(PQuestion):
     pass
-
-
-class Option(Option):
-
-    votes = models.PositiveIntegerField(_("number of votes"), null=True, default=None)
 
 
 class POption(POption):
@@ -63,10 +67,6 @@ class POption(POption):
     votecode_hash = models.CharField(_("vote-code hash"), max_length=255, null=True, default=None)
 
     receipt = models.CharField(_("receipt"), max_length=1024)
-
-
-class PQuestion(PQuestion):
-    pass
 
 
 class Task(Task):

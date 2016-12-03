@@ -17,7 +17,7 @@ from django.utils.encoding import force_bytes, force_text
 from django.utils.six.moves import range
 from django.utils.translation import ugettext_lazy as _
 
-from demos_voting.common.models import (Election, Ballot, Part, Question, Option, POption, PQuestion, Task,
+from demos_voting.common.models import (Election, Question, Option, Ballot, Part, PQuestion, POption, Task,
     PrivateApiUser, PrivateApiNonce)
 from demos_voting.common.utils import base32
 from demos_voting.common.utils.hashers import get_hasher
@@ -32,6 +32,17 @@ class Election(Election):
     modified_at = models.DateTimeField(_("modified at"), auto_now=True)
     setup_started_at = models.DateTimeField(_("setup started at"), null=True, default=None)
     setup_ended_at = models.DateTimeField(_("setup ended at"), null=True, default=None)
+
+    def generate_security_code_length(self):
+
+        if self.security_code_type_is_none:
+            self.security_code_length = None
+        else:
+            self.security_code_length = max(
+                self.SECURITY_CODE_MIN_LENGTH, min(
+                    self.SECURITY_CODE_MAX_LENGTH, self._security_code_full_length
+                )
+            )
 
     def generate_key(self):
 
@@ -74,16 +85,13 @@ class Election(Election):
         self.cert.set_pubkey(self.key)
         self.cert.sign(ca_key, str('sha256'))
 
-    def generate_security_code_length(self):
 
-        if self.security_code_type_is_none:
-            self.security_code_length = None
-        else:
-            self.security_code_length = max(
-                self.SECURITY_CODE_MIN_LENGTH, min(
-                    self.SECURITY_CODE_MAX_LENGTH, self._security_code_full_length
-                )
-            )
+class Question(Question):
+    pass
+
+
+class Option(Option):
+    pass
 
 
 class Ballot(Ballot):
@@ -174,12 +182,17 @@ class Part(Part):
             self.security_code = security_code[-security_code_length:]
 
 
-class Question(Question):
-    pass
+class PQuestion(PQuestion):
 
+    def generate_common_votecode_data(self):
 
-class Option(Option):
-    pass
+        if self.election.votecode_type_is_long:
+            if settings.DEMOS_VOTING_LONG_VOTECODE_HASH_REUSE_SALT:
+                hasher = get_hasher(self.election.DEFAULT_HASHER_IDENTIFIER)
+                self._long_votecode_hash_config = hasher.config()
+        else:
+            self._short_votecodes = [force_text(i) for i in range(1, self.options.count() + 1)]
+            random.shuffle(self._short_votecodes)
 
 
 class POption(POption):
@@ -207,19 +220,6 @@ class POption(POption):
             self.receipt = base32.encode(randomness, self.election.receipt_length)
 
 
-class PQuestion(PQuestion):
-
-    def generate_common_votecode_data(self):
-
-        if self.election.votecode_type_is_long:
-            if settings.DEMOS_VOTING_LONG_VOTECODE_HASH_REUSE_SALT:
-                hasher = get_hasher(self.election.DEFAULT_HASHER_IDENTIFIER)
-                self._long_votecode_hash_config = hasher.config()
-        else:
-            self._short_votecodes = [force_text(i) for i in range(1, self.options.count() + 1)]
-            random.shuffle(self._short_votecodes)
-
-
 class Task(Task):
     pass
 
@@ -230,4 +230,3 @@ class PrivateApiUser(PrivateApiUser):
 
 class PrivateApiNonce(PrivateApiNonce):
     pass
-

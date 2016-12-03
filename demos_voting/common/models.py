@@ -193,96 +193,6 @@ class Election(models.Model):
 
 
 @python_2_unicode_compatible
-class Ballot(models.Model):
-
-    election = models.ForeignKey('Election')
-    serial_number = models.PositiveIntegerField(_("serial number"))
-
-    # Default manager, meta options and natural key
-
-    objects = managers.BallotManager()
-
-    class Meta:
-        abstract = True
-        default_related_name = 'ballots'
-        ordering = ['election', 'serial_number']
-        unique_together = ['election', 'serial_number']
-        verbose_name = _("ballot")
-        verbose_name_plural = _("ballots")
-
-    def natural_key(self):
-        return self.election.natural_key() + (self.serial_number,)
-
-    natural_key.dependencies = ['Election']
-
-    def __str__(self):
-        return "%s" % self.serial_number
-
-
-@python_2_unicode_compatible
-class Part(models.Model):
-
-    TAG_A = 'A'
-    TAG_B = 'B'
-
-    TAG_CHOICES = (
-        (TAG_A, 'A'),
-        (TAG_B, 'B'),
-    )
-
-    ballot = models.ForeignKey('Ballot')
-    tag = models.CharField(_("tag"), max_length=1, choices=TAG_CHOICES)
-
-    # Custom methods and properties
-
-    @cached_property
-    def _credential_bytes(self):
-        return base32.decode_to_bytes(self.credential, self.election.credential_length)
-
-    @cached_property
-    def _security_code_bytes(self):
-
-        if self.election.security_code_type_is_none:
-            return b''
-        else:
-            if self.election.security_code_type_is_numeric:
-                base = 10
-                s = int(self.security_code)
-            elif self.election.security_code_type_is_alphanumeric:
-                base = 32
-                s = base32.decode(self.security_code)
-
-            s_enc_max = (sum(base ** i for i in range(self.election.security_code_length)) * (base - 1))
-            return int_to_bytes(s, length=((s_enc_max.bit_length() + 7) // 8), byteorder='big')
-
-    # Related object access
-
-    @cached_property
-    def election(self):
-        return self.ballot.election
-
-    # Default manager, meta options and natural key
-
-    objects = managers.PartManager()
-
-    class Meta:
-        abstract = True
-        default_related_name = 'parts'
-        ordering = ['ballot', 'tag']
-        unique_together = ['ballot', 'tag']
-        verbose_name = _("part")
-        verbose_name_plural = _("parts")
-
-    def natural_key(self):
-        return self.ballot.natural_key() + (self.tag,)
-
-    natural_key.dependencies = ['Ballot']
-
-    def __str__(self):
-        return "%s" % self.tag
-
-
-@python_2_unicode_compatible
 class Question(models.Model):
 
     LAYOUT_ONE_COLUMN = 'one_column'
@@ -370,32 +280,67 @@ class Option(models.Model):
 
 
 @python_2_unicode_compatible
-class POption(models.Model):
+class Ballot(models.Model):
 
-    question = models.ForeignKey('PQuestion')
-    index = models.PositiveSmallIntegerField(_("index"))
+    election = models.ForeignKey('Election')
+    serial_number = models.PositiveIntegerField(_("serial number"))
+
+    # Default manager, meta options and natural key
+
+    objects = managers.BallotManager()
+
+    class Meta:
+        abstract = True
+        default_related_name = 'ballots'
+        ordering = ['election', 'serial_number']
+        unique_together = ['election', 'serial_number']
+        verbose_name = _("ballot")
+        verbose_name_plural = _("ballots")
+
+    def natural_key(self):
+        return self.election.natural_key() + (self.serial_number,)
+
+    natural_key.dependencies = ['Election']
+
+    def __str__(self):
+        return "%s" % self.serial_number
+
+
+@python_2_unicode_compatible
+class Part(models.Model):
+
+    TAG_A = 'A'
+    TAG_B = 'B'
+
+    TAG_CHOICES = (
+        (TAG_A, 'A'),
+        (TAG_B, 'B'),
+    )
+
+    ballot = models.ForeignKey('Ballot')
+    tag = models.CharField(_("tag"), max_length=1, choices=TAG_CHOICES)
 
     # Custom methods and properties
 
-    def _generate_long_votecode(self):
+    @cached_property
+    def _credential_bytes(self):
+        return base32.decode_to_bytes(self.credential, self.election.credential_length)
 
-        if not (self.part.security_code or self.election.security_code_type_is_none):
-            raise AttributeError
+    @cached_property
+    def _security_code_bytes(self):
 
-        byte_length = lambda n: (n.bit_length() + 7) // 8
+        if self.election.security_code_type_is_none:
+            return b''
+        else:
+            if self.election.security_code_type_is_numeric:
+                base = 10
+                s = int(self.security_code)
+            elif self.election.security_code_type_is_alphanumeric:
+                base = 32
+                s = base32.decode(self.security_code)
 
-        option_cnt = self.question.options.count()
-        option_index_bytes = int_to_bytes(self.index, byte_length(option_cnt - 1), byteorder='big')
-        question_cnt = self.part.questions.count()
-        question_index_bytes = int_to_bytes(self.question.index, byte_length(question_cnt - 1), byteorder='big')
-
-        key = self.part._credential_bytes
-        msg = self.part._security_code_bytes + question_index_bytes + option_index_bytes
-
-        digest = hmac.new(key, msg, hashlib.sha256).digest()
-
-        long_votecode_length = self.election.long_votecode_length
-        return base32.encode_from_bytes(digest, long_votecode_length)[-long_votecode_length:]
+            s_enc_max = (sum(base ** i for i in range(self.election.security_code_length)) * (base - 1))
+            return int_to_bytes(s, length=((s_enc_max.bit_length() + 7) // 8), byteorder='big')
 
     # Related object access
 
@@ -403,33 +348,25 @@ class POption(models.Model):
     def election(self):
         return self.ballot.election
 
-    @cached_property
-    def ballot(self):
-        return self.part.ballot
-
-    @cached_property
-    def part(self):
-        return self.question.part
-
     # Default manager, meta options and natural key
 
-    objects = managers.POptionManager()
+    objects = managers.PartManager()
 
     class Meta:
         abstract = True
-        default_related_name = 'options'
-        ordering = ['question', 'index']
-        unique_together = ['question', 'index']
-        verbose_name = _("option")
-        verbose_name_plural = _("options")
+        default_related_name = 'parts'
+        ordering = ['ballot', 'tag']
+        unique_together = ['ballot', 'tag']
+        verbose_name = _("part")
+        verbose_name_plural = _("parts")
 
     def natural_key(self):
-        return self.question.natural_key() + (self.index,)
+        return self.ballot.natural_key() + (self.tag,)
 
-    natural_key.dependencies = ['PQuestion']
+    natural_key.dependencies = ['Ballot']
 
     def __str__(self):
-        return "%s" % (self.index + 1)
+        return "%s" % self.tag
 
 
 @python_2_unicode_compatible
@@ -538,6 +475,69 @@ class PQuestion(models.Model):
 
 
 @python_2_unicode_compatible
+class POption(models.Model):
+
+    question = models.ForeignKey('PQuestion')
+    index = models.PositiveSmallIntegerField(_("index"))
+
+    # Custom methods and properties
+
+    def _generate_long_votecode(self):
+
+        if not (self.part.security_code or self.election.security_code_type_is_none):
+            raise AttributeError
+
+        byte_length = lambda n: (n.bit_length() + 7) // 8
+
+        option_cnt = self.question.options.count()
+        option_index_bytes = int_to_bytes(self.index, byte_length(option_cnt - 1), byteorder='big')
+        question_cnt = self.part.questions.count()
+        question_index_bytes = int_to_bytes(self.question.index, byte_length(question_cnt - 1), byteorder='big')
+
+        key = self.part._credential_bytes
+        msg = self.part._security_code_bytes + question_index_bytes + option_index_bytes
+
+        digest = hmac.new(key, msg, hashlib.sha256).digest()
+
+        long_votecode_length = self.election.long_votecode_length
+        return base32.encode_from_bytes(digest, long_votecode_length)[-long_votecode_length:]
+
+    # Related object access
+
+    @cached_property
+    def election(self):
+        return self.ballot.election
+
+    @cached_property
+    def ballot(self):
+        return self.part.ballot
+
+    @cached_property
+    def part(self):
+        return self.question.part
+
+    # Default manager, meta options and natural key
+
+    objects = managers.POptionManager()
+
+    class Meta:
+        abstract = True
+        default_related_name = 'options'
+        ordering = ['question', 'index']
+        unique_together = ['question', 'index']
+        verbose_name = _("option")
+        verbose_name_plural = _("options")
+
+    def natural_key(self):
+        return self.question.natural_key() + (self.index,)
+
+    natural_key.dependencies = ['PQuestion']
+
+    def __str__(self):
+        return "%s" % (self.index + 1)
+
+
+@python_2_unicode_compatible
 class Task(models.Model):
 
     task_id = models.UUIDField(_("id"), unique=True)
@@ -631,4 +631,3 @@ class PrivateApiNonce(models.Model):
 
     def __str__(self):
         return "%s - %s - %s" % (self.nonce, self.timestamp, self.type)
-

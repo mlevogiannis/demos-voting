@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from demos_voting.common.models import (Election, Ballot, Part, Question, Option, POption, PQuestion, Task,
+from demos_voting.common.models import (Election, Question, Option, Ballot, Part, PQuestion, POption, Task,
     PrivateApiUser, PrivateApiNonce)
 from demos_voting.common.utils import base32
 from demos_voting.common.utils.hashers import get_hasher, identify_hasher
@@ -21,6 +21,14 @@ class Election(Election):
 
     voting_started_at = models.DateTimeField(_("voting started at"), null=True, default=None)
     voting_ended_at = models.DateTimeField(_("voting ended at"), null=True, default=None)
+
+
+class Question(Question):
+    pass
+
+
+class Option(Option):
+    pass
 
 
 class Ballot(Ballot):
@@ -42,11 +50,7 @@ class Part(Part):
         return (re.match(regex, credential) and hasher.verify(base32.normalize(credential), self.credential_hash))
 
 
-class Question(Question):
-    pass
-
-
-class Option(Option):
+class PQuestion(PQuestion):
     pass
 
 
@@ -56,10 +60,6 @@ class POption(POption):
     votecode_hash = models.CharField(_("vote-code hash"), max_length=255, null=True, default=None)
 
     receipt = models.CharField(_("receipt"), max_length=1024)
-
-
-class PQuestion(PQuestion):
-    pass
 
 
 class Task(Task):
@@ -72,4 +72,3 @@ class PrivateApiUser(PrivateApiUser):
 
 class PrivateApiNonce(PrivateApiNonce):
     pass
-

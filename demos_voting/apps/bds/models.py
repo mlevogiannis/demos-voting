@@ -10,7 +10,7 @@ from django.db import models
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
-from demos_voting.common.models import (Election, Ballot, Part, Question, Option, POption, PQuestion, Task,
+from demos_voting.common.models import (Election, Question, Option, Ballot, Part, PQuestion, POption, Task,
     PrivateApiUser, PrivateApiNonce)
 from demos_voting.common.utils import base32
 
@@ -21,6 +21,14 @@ class Election(Election):
 
     ballot_distribution_started_at = models.DateTimeField(_("ballot distribution started at"), null=True, default=None)
     ballot_distribution_ended_at = models.DateTimeField(_("ballot distribution ended at"), null=True, default=None)
+
+
+class Question(Question):
+    pass
+
+
+class Option(Option):
+    pass
 
 
 class Ballot(Ballot):
@@ -56,11 +64,7 @@ class Part(Part):
         return base32.encode(t, token_length)
 
 
-class Question(Question):
-    pass
-
-
-class Option(Option):
+class PQuestion(PQuestion):
     pass
 
 
@@ -68,10 +72,6 @@ class POption(POption):
 
     votecode = models.CharField(_("vote-code"), max_length=32)
     receipt = models.CharField(_("receipt"), max_length=1024)
-
-
-class PQuestion(PQuestion):
-    pass
 
 
 class Task(Task):
@@ -84,4 +84,3 @@ class PrivateApiUser(PrivateApiUser):
 
 class PrivateApiNonce(PrivateApiNonce):
     pass
-
