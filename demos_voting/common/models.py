@@ -17,7 +17,7 @@ from django.utils.translation import pgettext_lazy, ugettext_lazy as _
 
 from demos_voting.common import managers
 from demos_voting.common.utils import base32
-from demos_voting.common.utils.int import int_from_bytes, int_to_bytes
+from demos_voting.common.utils.int import int_from_bytes
 
 logger = logging.getLogger(__name__)
 
@@ -320,28 +320,6 @@ class Part(models.Model):
     ballot = models.ForeignKey('Ballot')
     tag = models.CharField(_("tag"), max_length=1, choices=TAG_CHOICES)
 
-    # Custom methods and properties
-
-    @cached_property
-    def _credential_bytes(self):
-        return base32.decode_to_bytes(self.credential, self.election.credential_length)
-
-    @cached_property
-    def _security_code_bytes(self):
-
-        if self.election.security_code_type_is_none:
-            return b''
-        else:
-            if self.election.security_code_type_is_numeric:
-                base = 10
-                s = int(self.security_code)
-            elif self.election.security_code_type_is_alphanumeric:
-                base = 32
-                s = base32.decode(self.security_code)
-
-            s_enc_max = (sum(base ** i for i in range(self.election.security_code_length)) * (base - 1))
-            return int_to_bytes(s, length=((s_enc_max.bit_length() + 7) // 8), byteorder='big')
-
     # Related object access
 
     @cached_property
@@ -428,12 +406,12 @@ class PQuestion(models.Model):
                 s >>= p_bits
         else:
             def _randomness_extractor(index, option_cnt):
-                group_index_bytes = int_to_bytes(index, (((option_cnt - 1).bit_length() + 7) // 8), byteorder='big')
+                group_index = force_text(index).zfill(len(force_text(option_cnt - 1)))
 
-                key = self.part._credential_bytes
-                msg = self.part._security_code_bytes + group_index_bytes
+                key = self.part.credential
+                msg = self.part.security_code + group_index
 
-                digest = hmac.new(key, msg, hashlib.sha512).digest()
+                digest = hmac.new(force_bytes(key), force_bytes(msg), hashlib.sha512).digest()
                 return int_from_bytes(digest, byteorder='big') % math.factorial(option_cnt)
 
             if question_is_candidate_list:
@@ -487,17 +465,13 @@ class POption(models.Model):
         if not (self.part.security_code or self.election.security_code_type_is_none):
             raise AttributeError
 
-        byte_length = lambda n: (n.bit_length() + 7) // 8
+        option_index = force_text(self.index).zfill(len(force_text(self.question.options.count() - 1)))
+        question_index = force_text(self.question.index).zfill(len(force_text(self.part.questions.count() - 1)))
 
-        option_cnt = self.question.options.count()
-        option_index_bytes = int_to_bytes(self.index, byte_length(option_cnt - 1), byteorder='big')
-        question_cnt = self.part.questions.count()
-        question_index_bytes = int_to_bytes(self.question.index, byte_length(question_cnt - 1), byteorder='big')
+        key = self.part.credential
+        msg = self.part.security_code + question_index + option_index
 
-        key = self.part._credential_bytes
-        msg = self.part._security_code_bytes + question_index_bytes + option_index_bytes
-
-        digest = hmac.new(key, msg, hashlib.sha256).digest()
+        digest = hmac.new(force_bytes(key), force_bytes(msg), hashlib.sha256).digest()
 
         long_votecode_length = self.election.long_votecode_length
         return base32.encode_from_bytes(digest, long_votecode_length)[-long_votecode_length:]
