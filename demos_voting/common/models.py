@@ -59,10 +59,8 @@ class Election(models.Model):
     STATE_SETUP_STARTED = 'setup_started'
     STATE_SETUP_ENDED = 'setup_ended'
     STATE_BALLOT_DISTRIBUTION_STARTED = 'ballot_distribution_started'
-    STATE_BALLOT_DISTRIBUTION_SUSPENDED = 'ballot_distribution_suspended'
     STATE_BALLOT_DISTRIBUTION_ENDED = 'ballot_distribution_ended'
     STATE_VOTING_STARTED = 'voting_started'
-    STATE_VOTING_SUSPENDED = 'voting_suspended'
     STATE_VOTING_ENDED = 'voting_ended'
     STATE_TALLYING_STARTED = 'tallying_started'
     STATE_TALLYING_ENDED = 'tallying_ended'
@@ -76,10 +74,8 @@ class Election(models.Model):
         (STATE_SETUP_STARTED, _("Setup started")),
         (STATE_SETUP_ENDED, _("Setup ended")),
         (STATE_BALLOT_DISTRIBUTION_STARTED, _("Ballot distribution started")),
-        (STATE_BALLOT_DISTRIBUTION_SUSPENDED, _("Ballot distribution suspended")),
         (STATE_BALLOT_DISTRIBUTION_ENDED, _("Ballot distribution ended")),
         (STATE_VOTING_STARTED, _("Voting started")),
-        (STATE_VOTING_SUSPENDED, _("Voting suspended")),
         (STATE_VOTING_ENDED, _("Voting ended")),
         (STATE_TALLYING_STARTED, _("Tallying started")),
         (STATE_TALLYING_ENDED, _("Tallying ended")),
@@ -95,8 +91,6 @@ class Election(models.Model):
 
     name = models.TextField(_("name"))
 
-    ballot_distribution_starts_at = models.DateTimeField(_("ballot distribution starts at"))
-    ballot_distribution_ends_at = models.DateTimeField(_("ballot distribution ends at"))
     voting_starts_at = models.DateTimeField(_("voting starts at"))
     voting_ends_at = models.DateTimeField(_("voting ends at"))
 
