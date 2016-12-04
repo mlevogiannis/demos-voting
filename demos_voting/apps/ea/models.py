@@ -5,7 +5,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import datetime
 import logging
 import math
-import os
 import random
 
 import OpenSSL
@@ -96,19 +95,15 @@ class Option(Option):
 
 
 class Ballot(Ballot):
-    pass
+
+    def generate_credential(self):
+        randomness = random.getrandbits(self.election.credential_length * 5)
+        self.credential = base32.encode(randomness, self.election.credential_length)
+        hasher = get_hasher(self.election.DEFAULT_HASHER_IDENTIFIER)
+        self.credential_hash = hasher.hash(self.credential)
 
 
 class Part(Part):
-
-    def generate_credential(self):
-
-        bytes = os.urandom(self.election.credential_length)
-        length = (self.election.credential_length * 8 + 4) // 5
-        self.credential = base32.encode_from_bytes(bytes, length)
-
-        hasher = get_hasher(self.election.DEFAULT_HASHER_IDENTIFIER)
-        self.credential_hash = hasher.hash(self.credential)
 
     def generate_security_code(self):
 

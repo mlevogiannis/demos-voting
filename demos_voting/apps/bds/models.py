@@ -32,12 +32,12 @@ class Option(Option):
 
 
 class Ballot(Ballot):
-    pass
+
+    credential = models.CharField(_("credential"), max_length=32)
 
 
 class Part(Part):
 
-    credential = models.CharField(_("credential"), max_length=32)
     security_code = models.CharField(_("security code"), max_length=32, null=True)
 
     @cached_property

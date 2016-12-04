@@ -48,11 +48,12 @@ class Ballot(Ballot):
 
     cast_at = models.DateTimeField(_("cast at"), null=True, default=None)
 
-
-class Part(Part):
-
     credential = models.CharField(_("credential"), max_length=32, null=True, default=None)
     credential_hash = models.CharField(_("credential hash"), max_length=255)
+
+
+class Part(Part):
+    pass
 
 
 class PQuestion(PQuestion):

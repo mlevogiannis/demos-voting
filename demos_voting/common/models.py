@@ -102,7 +102,7 @@ class Election(models.Model):
 
     ballot_cnt = models.PositiveIntegerField(_("number of ballots"))
 
-    credential_length = models.PositiveIntegerField(_("credential length"), default=16)
+    credential_length = models.PositiveIntegerField(_("credential length"), default=26)
     long_votecode_length = models.PositiveIntegerField(_("long votecode length"), default=16)
     receipt_length = models.PositiveIntegerField(_("receipt length"), default=8)
     security_code_length = models.PositiveIntegerField(_("security code length"), null=True)
@@ -400,11 +400,10 @@ class PQuestion(models.Model):
                 s >>= p_bits
         else:
             def _randomness_extractor(index, option_cnt):
+                serial_number = force_text(self.ballot.serial_number)
                 group_index = force_text(index).zfill(len(force_text(option_cnt - 1)))
-
-                key = self.part.credential
-                msg = self.part.security_code + group_index
-
+                key = self.ballot.credential + self.part.security_code
+                msg = serial_number + self.part.tag + group_index
                 digest = hmac.new(force_bytes(key), force_bytes(msg), hashlib.sha512).digest()
                 return int_from_bytes(digest, byteorder='big') % math.factorial(option_cnt)
 
@@ -459,11 +458,12 @@ class POption(models.Model):
         if not (self.part.security_code or self.election.security_code_type_is_none):
             raise AttributeError
 
+        serial_number = force_text(self.ballot.serial_number)
         option_index = force_text(self.index).zfill(len(force_text(self.question.options.count() - 1)))
         question_index = force_text(self.question.index).zfill(len(force_text(self.part.questions.count() - 1)))
 
-        key = self.part.credential
-        msg = self.part.security_code + question_index + option_index
+        key = self.ballot.credential + self.part.security_code
+        msg = serial_number + self.part.tag + question_index + option_index
 
         digest = hmac.new(force_bytes(key), force_bytes(msg), hashlib.sha256).digest()
 

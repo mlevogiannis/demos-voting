@@ -35,19 +35,20 @@ class Ballot(Ballot):
 
     cast_at = models.DateTimeField(_("cast at"), null=True, default=None)
 
+    credential_hash = models.CharField(_("credential hash"), max_length=255)
+
     @property
     def is_cast(self):
         return self.cast_at is not None
-
-
-class Part(Part):
-
-    credential_hash = models.CharField(_("credential hash"), max_length=255)
 
     def verify_credential(self, credential):
         hasher = get_hasher(identify_hasher(self.credential_hash))
         regex = r'^%s{%d}$' % (base32.regex, (self.election.credential_length * 8 + 4) // 5)
         return (re.match(regex, credential) and hasher.verify(base32.normalize(credential), self.credential_hash))
+
+
+class Part(Part):
+    pass
 
 
 class PQuestion(PQuestion):
