@@ -4,44 +4,19 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import math
 
-from django.utils.six.moves import range, zip
 
+def permutation(initial, index):
 
-def permute(iterable, index):
+    initial = list(initial)
+    factorial = math.factorial(len(initial))
 
-    seq = list(iterable)
-    fact = math.factorial(len(seq))
-    index %= fact
-    perm = []
+    if index < 0 or index >= factorial:
+        raise ValueError
 
-    while seq:
-        fact //= len(seq)
-        next, index = divmod(index, fact)
-        item = seq.pop(next)
-        perm.append(item)
+    final = []
+    while initial:
+        factorial //= len(initial)
+        item, index = divmod(index, factorial)
+        final.append(initial.pop(item))
 
-    return perm
-
-
-def permute_ori(iterable, index):
-
-    seq = list(iterable)
-    seqlen = len(seq)
-
-    fact = math.factorial(seqlen)
-    index %= fact
-
-    next = []
-
-    for i in range(seqlen, 0, -1):
-        fact //= i
-        pos, index = divmod(index, fact)
-        next.append(pos)
-
-    perm = []
-
-    for item, pos in zip(reversed(seq), reversed(next)):
-        perm.insert(pos, item)
-
-    return perm
-
+    return final

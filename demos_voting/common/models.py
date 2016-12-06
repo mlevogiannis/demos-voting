@@ -4,6 +4,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import hashlib
 import hmac
+import itertools
 import logging
 import math
 
@@ -18,6 +19,7 @@ from django.utils.translation import pgettext_lazy, ugettext_lazy as _
 from demos_voting.common import managers
 from demos_voting.common.utils import base32
 from demos_voting.common.utils.int import int_from_bytes
+from demos_voting.common.utils.permutation import permutation
 
 logger = logging.getLogger(__name__)
 
@@ -354,33 +356,39 @@ class PQuestion(models.Model):
         return self.question.index
 
     @cached_property
-    def permutation_index(self):
+    def permutation(self):
 
         # Split options into groups, one for each security code's block.
-        # See `Part.generate_security_code` for details.
 
         if self.election.type_is_election:
-            parties = self.election.questions.all()[0].options.all()
-            candidates = self.election.questions.all()[1].options.all()
-            groups = [tuple(parties)] + [
-                options for options in zip(*([iter(candidates)] * (len(candidates) // len(parties))))
+
+            # The first group is always the party list, followed by one group
+            # for each party's candidates. The candidate list has a special
+            # structure by grouping together the options that correspond to
+            # each party's candidates. All parties always have the same number
+            # of candidates, which includes the blank ones.
+
+            party_count = self.election.questions.all()[0].options.count()
+            candidate_count = self.election.questions.all()[1].options.count()
+
+            groups = [tuple(range(party_count))] + [
+                group for group in zip(*([iter(range(candidate_count))] * (candidate_count // party_count)))
             ]
+
         elif self.election.type_is_referendum:
-            groups = [tuple(question.options.all()) for question in self.election.questions.all()]
+            groups = [tuple(range(questions.options.count())) for questions in self.election.questions.all()]
 
-        # Due to the candidate list's special structure we have to return a
-        # list of permutation indices, one for each party's candidates.
-
-        question_is_candidate_list = (self.election.type_is_election and self.question.index == 1)
+        question_is_candidate_list = (self.election.type_is_election and self.index == 1)
 
         if question_is_candidate_list:
             p_list = []
 
-        # If the security code has enough bits to cover all permutations for
-        # all groups, then decode it to get each one's permutation index.
-        # Otherwise use the randomness extractor to generate it.
+        # Check whether the security code has enough bits to encode the
+        # permutations for all groups.
 
         if self.election.security_code_length >= self.election._security_code_full_length:
+
+            # Decode the security code to get the group's permutation.
 
             if self.election.security_code_type_is_numeric:
                 s = int(self.part.security_code)
@@ -392,29 +400,39 @@ class PQuestion(models.Model):
                 p_bits = (math.factorial(len(group)) - 1).bit_length()
                 p = s & ((1 << p_bits) - 1)
 
-                if question_is_candidate_list and i >= self.question.index:
+                if question_is_candidate_list:
                     p_list.append(p)
-                elif i == self.question.index:
-                    return p
+                elif i == self.index:
+                    break
 
                 s >>= p_bits
         else:
-            def _randomness_extractor(index, option_cnt):
+            # Use the randomness extractor to generate the group's permutation.
+
+            def _randomness_extractor(i, group):
                 serial_number = force_text(self.ballot.serial_number)
-                group_index = force_text(index).zfill(len(force_text(option_cnt - 1)))
+                group_index = force_text(i).zfill(len(force_text(len(group) - 1)))
                 key = self.ballot.credential + self.part.security_code
                 msg = serial_number + self.part.tag + group_index
                 digest = hmac.new(force_bytes(key), force_bytes(msg), hashlib.sha512).digest()
-                return int_from_bytes(digest, byteorder='big') % math.factorial(option_cnt)
+                return int_from_bytes(digest, byteorder='big') % math.factorial(len(group))
 
             if question_is_candidate_list:
-                for i, group in enumerate(groups[self.question.index:], start=self.question.index):
-                    p_list.append(_randomness_extractor(i, len(group)))
+                for i, group in enumerate(groups):
+                    p_list.append(_randomness_extractor(i, group))
             else:
-                return _randomness_extractor(self.question.index, len(groups[self.question.index]))
+                p = _randomness_extractor(self.index, groups[self.index])
+
+        # Create the permutation array.
 
         if question_is_candidate_list:
-            return p_list
+            permutation_array = itertools.chain.from_iterable(
+                permutation([permutation(group, p) for group, p in zip(groups[1:], p_list[1:])], p_list[0])
+            )
+        else:
+            permutation_array = permutation(groups[self.index], p)
+
+        return list(permutation_array)
 
     # Related object access
 
