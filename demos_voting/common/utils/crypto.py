@@ -45,12 +45,12 @@ def KeyGen(t_num = 1, nid = 713):
 
 
 ########################################################################################
-# Ballot generation, str_tk is the list of trustee keys, str_h is the public key, sn is serial number
-# n1 is the number of options, n2 is the number of blank options, perm_arrays is a list of two permutation
-# arrays, nid is the curve ID.
+# Ballot generation, str_tk is the list of trustee keys, str_h is the public key, sn is serial number,
+# bitmask is a binary array that indicates where are options and where are blanks, perm_arrays is a list
+# of two permutation arrays, nid is the curve ID.
 # It returns the ballot.
 ########################################################################################
-def BallotGen(str_tk, str_h, sn = b"1", n1 = 1, n2 = 1, perm_arrays = None,  nid = 713):
+def BallotGen(str_tk, str_h, sn = b"1", bitmask = [1], perm_arrays = None,  nid = 713):
     G = EcGroup(nid)
     ec_g = G.generator()
     order = G.order()
@@ -60,19 +60,28 @@ def BallotGen(str_tk, str_h, sn = b"1", n1 = 1, n2 = 1, perm_arrays = None,  nid
     tk = []
     for k in str_tk:
         tk.append(a2b_base64(k))
+
+    n = len(bitmask)
+    #########################
+    #prefix sum for one bit
+    total = 0 # the number of options
+    for i in range(n):
+        total += bitmask[i]
+        bitmask[i] = total*bitmask[i]
+    #########################
     #create vector encryptions
     Ballot = [] #Ballot of both A B sides
     #side A/B
     for side, perm in zip([b'A',b'B'], perm_arrays):
-        assert n1 + n2 == len(perm)
-        Row_side = [] #n1+n2 rows for each side
+        assert n == len(perm)
+        Row_side = [] #n rows for each side
         ZK_side = [] #only for sum of b_i = 1 ZK, one row
         Rand_side = []#Not published, only used for zk later
-        #for i in range(n1+n2):  #none-shuffle version
+        #for i in range(n):  #none-shuffle version
         for i in perm: #shuffle version
             row = [] # inside row there are each Enc, which consists of c1,c2 and zks  #Last one is the 0/1 zk for each row
             row_r = [] #store r
-            for j in range(n1):
+            for j in range(n):
                 #r_{i,j} = \Sum hmac_sk{sn,side, b"rand", i,j}
                 bn_r = Bn(0)
                 for k in tk:
@@ -90,7 +99,7 @@ def BallotGen(str_tk, str_h, sn = b"1", n1 = 1, n2 = 1, perm_arrays = None,  nid
                 ec_T2 = bn_t * ec_g + bn_s * ec_h
                 ec_Y1 = bn_y * ec_g
                 ec_Y2 = bn_y * ec_h
-                if i != j:
+                if i+1 != bitmask[j]:
                     ec_Y2 += bn_t * ec_g
                 #compute delta 1 - 6
                 bn_delta = []
@@ -113,7 +122,7 @@ def BallotGen(str_tk, str_h, sn = b"1", n1 = 1, n2 = 1, perm_arrays = None,  nid
                 #encrypt b=1 if j = i, otherwise encrypt b=0
                 ec_c1 = bn_r * ec_g
                 ec_c2 = bn_r * ec_h
-                if i == j:#fix c2, phi1 and phi5 if b = 1
+                if i+1 == bitmask[j]:#fix c2, phi1 and phi5 if b = 1
                     ec_c2 += ec_g
                     phi1 = phi1.mod_add(Bn(1),order)
                     phi5 = phi5.mod_sub(bn_r,order)
@@ -153,7 +162,7 @@ def BallotGen(str_tk, str_h, sn = b"1", n1 = 1, n2 = 1, perm_arrays = None,  nid
             bn_temp = bn_z.mod_add(bn_row_r.mod_mul(bn_u,order),order)
             phi12 = bn_delta_row[5].mod_sub(bn_temp, order)
 
-            if i >= n1: #\sum b_i = 0  fake ballots
+            if bitmask[j] == 0: #\sum b_i = 0  fake ballots
                 ec_Z2 +=bn_u * ec_g
                 phi7 = phi7.mod_add(Bn(1),order)
                 phi11 = phi11.mod_sub(bn_row_r,order)
@@ -161,8 +170,8 @@ def BallotGen(str_tk, str_h, sn = b"1", n1 = 1, n2 = 1, perm_arrays = None,  nid
             row.append({'U1':b2a_base64(ec_U1.export()),'U2':b2a_base64(ec_U2.export()),'Z1':b2a_base64(ec_Z1.export()),'Z2':b2a_base64(ec_Z2.export()),'phi7':b2a_base64(phi7.binary()), 'phi8':b2a_base64(phi8.binary()),'phi9':b2a_base64(phi9.binary()),'phi10':b2a_base64(phi10.binary()),'phi11':b2a_base64(phi11.binary()),'phi12':b2a_base64(phi12.binary())}) #the last one which is row ZK
             Row_side.append(row)
             Rand_side.append(row_r)
-        #column ZK       n1 columns
-        for ia in range(n1):
+        #column ZK       total (the number of options) columns
+        for ia in range(total):
             bn_delta_col = []#delta13, 14
             bn_col_r = Bn(0)
             for m in range(2):
@@ -174,7 +183,7 @@ def BallotGen(str_tk, str_h, sn = b"1", n1 = 1, n2 = 1, perm_arrays = None,  nid
                     bn_temp = Bn.from_binary(h.digest())
                     bn_delta_col[m] = bn_delta_col[m].mod_add(bn_temp, order)
             #compute sum of column r
-            for ib in range(n1+n2):
+            for ib in range(n):
                 bn_col_r = bn_col_r.mod_add(Rand_side[ib][ia],order)
 
             bn_w = order.random()
