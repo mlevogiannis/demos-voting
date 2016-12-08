@@ -46,11 +46,11 @@ def KeyGen(t_num = 1, nid = 713):
 
 ########################################################################################
 # Ballot generation, str_tk is the list of trustee keys, str_h is the public key, sn is serial number
-# n1 is the number of options, n2 is the number of blank options, perm is the permutation
-# array, nid is the curve ID.
+# n1 is the number of options, n2 is the number of blank options, perm_arrays is a list of two permutation
+# arrays, nid is the curve ID.
 # It returns the ballot.
 ########################################################################################
-def BallotGen(str_tk, str_h, sn = b"1", n1 = 1, n2 = 1, perm = None,  nid = 713):
+def BallotGen(str_tk, str_h, sn = b"1", n1 = 1, n2 = 1, perm_arrays = None,  nid = 713):
     G = EcGroup(nid)
     ec_g = G.generator()
     order = G.order()
@@ -61,10 +61,10 @@ def BallotGen(str_tk, str_h, sn = b"1", n1 = 1, n2 = 1, perm = None,  nid = 713)
     for k in str_tk:
         tk.append(a2b_base64(k))
     #create vector encryptions
-    assert n1 + n2 == len(perm)
     Ballot = [] #Ballot of both A B sides
     #side A/B
-    for side in [b'A',b'B']:
+    for side, perm in zip([b'A',b'B'], perm_arrays):
+        assert n1 + n2 == len(perm)
         Row_side = [] #n1+n2 rows for each side
         ZK_side = [] #only for sum of b_i = 1 ZK, one row
         Rand_side = []#Not published, only used for zk later
