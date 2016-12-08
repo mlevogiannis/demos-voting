@@ -8,6 +8,7 @@ import itertools
 import logging
 import math
 
+from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import six
@@ -169,6 +170,11 @@ class Election(models.Model):
             security_code = base32.encode(s_max)
 
         return len(security_code)
+
+    def clean(self):
+
+        if self.votecode_type_is_long and not self.security_code_type_is_alphanumeric:
+            raise ValidationError(_("Vote-codes of type long require a security code of type alphanumeric."))
 
     # Default manager, meta options and natural key
 

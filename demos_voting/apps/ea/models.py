@@ -40,11 +40,14 @@ class Election(Election):
         if self.security_code_type_is_none:
             self.security_code_length = None
         else:
-            self.security_code_length = max(
-                self.SECURITY_CODE_MIN_LENGTH, min(
-                    self.SECURITY_CODE_MAX_LENGTH, self._security_code_full_length
+            if self.votecode_type_is_long:
+                self.security_code_length = self.SECURITY_CODE_MAX_LENGTH
+            else:
+                self.security_code_length = max(
+                    self.SECURITY_CODE_MIN_LENGTH, min(
+                        self.SECURITY_CODE_MAX_LENGTH, self._security_code_full_length
+                    )
                 )
-            )
 
     def generate_key(self):
 
