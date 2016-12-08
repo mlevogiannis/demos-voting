@@ -205,9 +205,10 @@ class POption(POption):
 
         if self.election.votecode_type_is_long:
             length = self.election.long_votecode_length
+            permutation = self.question.permutation
 
             serial_number = force_text(self.ballot.serial_number)
-            option_index = force_text(self.index).zfill(len(force_text(self.question.options.count() - 1)))
+            option_index = force_text(permutation.index(self.index)).zfill(len(force_text(len(permutation) - 1)))
             question_index = force_text(self.question.index).zfill(len(force_text(self.part.questions.count() - 1)))
 
             key = self.ballot.credential + self.part.security_code
