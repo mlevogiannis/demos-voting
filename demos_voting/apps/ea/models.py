@@ -3,6 +3,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import datetime
+import hashlib
+import hmac
 import logging
 import math
 import random
@@ -182,8 +184,10 @@ class PQuestion(PQuestion):
 
     @cached_property
     def _long_votecode_hash_config(self):
+        config = None
         if settings.DEMOS_VOTING_LONG_VOTECODE_HASH_REUSE_SALT:
-            return get_hasher(self.election.DEFAULT_HASHER_IDENTIFIER).config()
+            config = get_hasher(self.election.DEFAULT_HASHER_IDENTIFIER).config()
+        return config
 
     @cached_property
     def _short_votecodes(self):
@@ -197,10 +201,21 @@ class POption(POption):
     def generate_votecode(self):
 
         if self.election.votecode_type_is_long:
-            reuse_salt = settings.DEMOS_VOTING_LONG_VOTECODE_HASH_REUSE_SALT
+            length = self.election.long_votecode_length
+
+            serial_number = force_text(self.ballot.serial_number)
+            option_index = force_text(self.index).zfill(len(force_text(self.question.options.count() - 1)))
+            question_index = force_text(self.question.index).zfill(len(force_text(self.part.questions.count() - 1)))
+
+            key = self.ballot.credential + self.part.security_code
+            msg = serial_number + self.part.tag + question_index + option_index
+            digest = hmac.new(force_bytes(key), force_bytes(msg), hashlib.sha256).digest()
+
+            self.votecode = base32.encode_from_bytes(digest, length)[-length:]
+
             hasher = get_hasher(self.election.DEFAULT_HASHER_IDENTIFIER)
-            config = hasher.config() if not reuse_salt else self.question._long_votecode_hash_config
-            self.votecode = self._generate_long_votecode()
+            config = self.question._long_votecode_hash_config or hasher.config()
+
             self.votecode_hash = hasher.hash(self.votecode, config)
         else:
             self.votecode = self.question._short_votecodes[self.index]

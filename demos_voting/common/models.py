@@ -469,25 +469,6 @@ class POption(models.Model):
     question = models.ForeignKey('PQuestion')
     index = models.PositiveSmallIntegerField(_("index"))
 
-    # Custom methods and properties
-
-    def _generate_long_votecode(self):
-
-        if not (self.part.security_code or self.election.security_code_type_is_none):
-            raise AttributeError
-
-        serial_number = force_text(self.ballot.serial_number)
-        option_index = force_text(self.index).zfill(len(force_text(self.question.options.count() - 1)))
-        question_index = force_text(self.question.index).zfill(len(force_text(self.part.questions.count() - 1)))
-
-        key = self.ballot.credential + self.part.security_code
-        msg = serial_number + self.part.tag + question_index + option_index
-
-        digest = hmac.new(force_bytes(key), force_bytes(msg), hashlib.sha256).digest()
-
-        long_votecode_length = self.election.long_votecode_length
-        return base32.encode_from_bytes(digest, long_votecode_length)[-long_votecode_length:]
-
     # Related object access
 
     @cached_property
