@@ -49,46 +49,50 @@ class Election(Election):
                     )
                 )
 
-    def generate_key(self):
+    def generate_keypair(self):
 
-        self.key = OpenSSL.crypto.PKey()
-        self.key.generate_key(OpenSSL.crypto.TYPE_RSA, 2048)
+        if self.votecode_type_is_long:
+            self.keypair = OpenSSL.crypto.PKey()
+            self.keypair.generate_key(OpenSSL.crypto.TYPE_RSA, 2048)
+        else:
+            self.keypair = None
 
-    def generate_cert(self):
+    def generate_certificate(self):
 
-        self.cert = OpenSSL.crypto.X509()
+        if self.votecode_type_is_long:
+            self.certificate = OpenSSL.crypto.X509()
 
-        ca_pkey_path = getattr(settings, 'DEMOS_VOTING_CA_PKEY_FILE', '')
-        ca_cert_path = getattr(settings, 'DEMOS_VOTING_CA_CERT_FILE', '')
+            ca_key_path = getattr(settings, 'DEMOS_VOTING_CA_PKEY_FILE', '')
+            ca_certificate_path = getattr(settings, 'DEMOS_VOTING_CA_CERT_FILE', '')
 
-        if ca_pkey_path or ca_cert_path:
+            if ca_key_path or ca_certificate_path:
+                ca_key_passphrase = getattr(settings, 'DEMOS_VOTING_CA_PKEY_PASSPHRASE', '')
 
-            ca_pkey_passphrase = getattr(settings, 'DEMOS_VOTING_CA_PKEY_PASSPHRASE', '')
+                with open(ca_key_path, 'r') as ca_pkey_file:
+                    ca_keypair = OpenSSL.crypto.load_privatekey(OpenSSL.crypto.FILETYPE_PEM, ca_pkey_file.read(),
+                                                            force_bytes(ca_key_passphrase))
 
-            with open(ca_pkey_path, 'r') as ca_pkey_file:
-                ca_key = OpenSSL.crypto.load_privatekey(OpenSSL.crypto.FILETYPE_PEM, ca_pkey_file.read(),
-                                                        force_bytes(ca_pkey_passphrase))
+                with open(ca_certificate_path, 'r') as ca_cert_file:
+                    ca_certificate = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, ca_cert_file.read())
 
-            with open(ca_cert_path, 'r') as ca_cert_file:
-                ca_cert = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, ca_cert_file.read())
+                self.certificate.set_subject(ca_certificate.get_subject())
 
-            self.cert.set_subject(ca_cert.get_subject())
+            else: # self-signed certificate
+                ca_keypair = self.keypair
+                ca_certificate = self.certificate
 
-        else: # self-signed certificate
+            validity = datetime.timedelta(365)
 
-            ca_key = self.key
-            ca_cert = self.cert
-
-        validity_period = datetime.timedelta(365)
-
-        self.cert.get_subject().CN = "DEMOS Voting - Election ID: %s" % self.id
-        self.cert.set_issuer(ca_cert.get_subject())
-        self.cert.set_version(3)
-        self.cert.set_serial_number(base32.decode(self.id))
-        self.cert.set_notBefore(force_bytes(self.setup_started_at.strftime('%Y%m%d%H%M%S%z')))
-        self.cert.set_notAfter(force_bytes((self.setup_started_at+validity_period).strftime('%Y%m%d%H%M%S%z')))
-        self.cert.set_pubkey(self.key)
-        self.cert.sign(ca_key, str('sha256'))
+            self.certificate.get_subject().CN = "DEMOS Voting - Election ID: %s" % self.id
+            self.certificate.set_issuer(ca_certificate.get_subject())
+            self.certificate.set_version(3)
+            self.certificate.set_serial_number(base32.decode(self.id))
+            self.certificate.set_notBefore(force_bytes(self.setup_started_at.strftime('%Y%m%d%H%M%S%z')))
+            self.certificate.set_notAfter(force_bytes((self.setup_started_at + validity).strftime('%Y%m%d%H%M%S%z')))
+            self.certificate.set_pubkey(self.keypair)
+            self.certificate.sign(ca_keypair, str('sha256'))
+        else:
+            self.certificate = None
 
 
 class Question(Question):
@@ -228,9 +232,8 @@ class POption(POption):
     def generate_receipt(self):
 
         if self.election.votecode_type_is_long:
-            length = (self.election.key.bits() + 4) // 5
-            signature = OpenSSL.crypto.sign(self.election.key, self.votecode, str('sha256'))
-            self.receipt = base32.encode_from_bytes(signature, length)
+            signature = OpenSSL.crypto.sign(self.election.keypair, self.votecode, str('sha256'))
+            self.receipt = base32.encode_from_bytes(signature, (self.election.keypair.bits() + 4) // 5)
         else:
             randomness = random.getrandbits(self.election.receipt_length * 5)
             self.receipt = base32.encode(randomness, self.election.receipt_length)
