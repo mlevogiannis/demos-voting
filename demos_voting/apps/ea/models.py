@@ -45,7 +45,7 @@ class Election(Election):
             else:
                 self.security_code_length = max(
                     self.SECURITY_CODE_MIN_LENGTH, min(
-                        self.SECURITY_CODE_MAX_LENGTH, self._security_code_full_length
+                        self.SECURITY_CODE_MAX_LENGTH, self._security_code_length
                     )
                 )
 
@@ -150,7 +150,7 @@ class Part(Part):
             s = 0
             s_max = 0
 
-            if self.election.security_code_length >= self.election._security_code_full_length:
+            if self.election.security_code_length >= self.election._security_code_length:
 
                 for group in groups:
                     p_max = math.factorial(len(group)) - 1

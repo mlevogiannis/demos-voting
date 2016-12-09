@@ -26,7 +26,7 @@ class Election(Election):
     tallying_started_at = models.DateTimeField(_("tallying started at"), null=True, default=None)
     tallying_ended_at = models.DateTimeField(_("tallying ended at"), null=True, default=None)
 
-    coins = models.CharField(_("coins"), max_length=128, null=True, default=None)
+    coins = models.TextField(_("voters' coins"), null=True, default=None)
 
 
 class Question(Question):
@@ -35,15 +35,13 @@ class Question(Question):
 
 class Option(Option):
 
-    votes = models.PositiveIntegerField(_("number of votes"), null=True, default=None)
+    vote_count = models.PositiveIntegerField(_("number of votes"), null=True, default=None)
 
 
 class Ballot(Ballot):
 
-    cast_at = models.DateTimeField(_("cast at"), null=True, default=None)
-
     credential = models.CharField(_("credential"), max_length=32, null=True, default=None)
-    credential_hash = models.CharField(_("credential hash"), max_length=255)
+    credential_hash = models.TextField(_("credential hash"))
 
 
 class Part(Part):
@@ -56,12 +54,12 @@ class PQuestion(PQuestion):
 
 class POption(POption):
 
-    voted = models.NullBooleanField(_("marked as voted"), default=None)
+    is_voted = models.NullBooleanField(_("marked as voted"), default=None)
 
     votecode = models.CharField(_("vote-code"), max_length=32, null=True, default=None)
-    votecode_hash = models.CharField(_("vote-code hash"), max_length=255, null=True, default=None)
+    votecode_hash = models.TextField(_("vote-code hash"), null=True, default=None)
 
-    receipt = models.CharField(_("receipt"), max_length=1024)
+    receipt = models.TextField(_("receipt"))
 
 
 class Task(Task):

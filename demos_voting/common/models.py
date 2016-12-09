@@ -103,14 +103,14 @@ class Election(models.Model):
     votecode_type = models.CharField(_("vote-code type"), max_length=16, choices=VOTECODE_TYPE_CHOICES)
     security_code_type = models.CharField(_("security code type"), max_length=16, choices=SECURITY_CODE_TYPE_CHOICES)
 
-    ballot_cnt = models.PositiveIntegerField(_("number of ballots"))
+    ballot_count = models.PositiveIntegerField(_("number of ballots"))
 
-    credential_length = models.PositiveIntegerField(_("credential length"), default=26)
-    long_votecode_length = models.PositiveIntegerField(_("long votecode length"), default=16)
-    receipt_length = models.PositiveIntegerField(_("receipt length"), default=8)
-    security_code_length = models.PositiveIntegerField(_("security code length"), null=True)
+    credential_length = models.PositiveSmallIntegerField(_("credential length"), default=26)
+    long_votecode_length = models.PositiveSmallIntegerField(_("long votecode length"), default=16)
+    receipt_length = models.PositiveSmallIntegerField(_("receipt length"), default=8)
+    security_code_length = models.PositiveSmallIntegerField(_("security code length"), null=True)
 
-    _id = models.AutoField(db_column='id', primary_key=True)
+    _id = models.AutoField(primary_key=True, db_column='id')
 
     # Custom methods and properties
 
@@ -143,7 +143,7 @@ class Election(models.Model):
         return self.security_code_type == self.SECURITY_CODE_TYPE_ALPHANUMERIC
 
     @cached_property
-    def _security_code_full_length(self):
+    def _security_code_length(self):
 
         # Split options into groups, one for each security code's block.
         # See `ea:Part.generate_security_code` for details.
@@ -184,8 +184,8 @@ class Election(models.Model):
         abstract = True
         default_related_name = 'elections'
         ordering = ['id']
-        verbose_name = pgettext_lazy("process", "election")
-        verbose_name_plural = pgettext_lazy("process", "elections")
+        verbose_name = pgettext_lazy("model", "election")
+        verbose_name_plural = pgettext_lazy("model", "elections")
 
     def natural_key(self):
         return (self.id,)
@@ -392,7 +392,7 @@ class PQuestion(models.Model):
         # Check whether the security code has enough bits to encode the
         # permutations for all groups.
 
-        if self.election.security_code_length >= self.election._security_code_full_length:
+        if self.election.security_code_length >= self.election._security_code_length:
 
             # Decode the security code to get the group's permutation.
 
@@ -513,8 +513,10 @@ class POption(models.Model):
 @python_2_unicode_compatible
 class Task(models.Model):
 
-    task_id = models.UUIDField(_("id"), unique=True)
     election = models.ForeignKey('Election')
+    id = models.UUIDField(_("id"), unique=True, db_column='_id')
+
+    _id = models.AutoField(primary_key=True, db_column='id')
 
     # Default manager, meta options and natural key
 
@@ -527,10 +529,10 @@ class Task(models.Model):
         verbose_name_plural = _("tasks")
 
     def natural_key(self):
-        return self.election.natural_key() + (self.task_id,)
+        return self.election.natural_key() + (self.id,)
 
     def __str__(self):
-        return "%s - %s" % (self.election.id, self.task_id)
+        return "%s - %s" % (self.election.id, self.id)
 
 
 @python_2_unicode_compatible

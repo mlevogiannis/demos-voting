@@ -34,12 +34,6 @@ class OptionManager(models.Manager):
 
 class BallotManager(models.Manager):
 
-    def count(self):
-        try:
-            return self.instance.ballot_cnt
-        except AttributeError:
-            return super(BallotManager, self).count()
-
     def prefetch_related(self, *lookups):
 
         lookups = list(lookups)

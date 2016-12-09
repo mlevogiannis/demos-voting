@@ -35,7 +35,7 @@ class Ballot(Ballot):
 
     cast_at = models.DateTimeField(_("cast at"), null=True, default=None)
 
-    credential_hash = models.CharField(_("credential hash"), max_length=255)
+    credential_hash = models.TextField(_("credential hash"))
 
     @property
     def is_cast(self):
@@ -58,9 +58,9 @@ class PQuestion(PQuestion):
 class POption(POption):
 
     votecode = models.CharField(_("vote-code"), max_length=32, null=True, default=None)
-    votecode_hash = models.CharField(_("vote-code hash"), max_length=255, null=True, default=None)
+    votecode_hash = models.TextField(_("vote-code hash"), null=True, default=None)
 
-    receipt = models.CharField(_("receipt"), max_length=1024)
+    receipt = models.TextField(_("receipt"))
 
 
 class Task(Task):

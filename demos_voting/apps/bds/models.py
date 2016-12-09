@@ -71,7 +71,7 @@ class PQuestion(PQuestion):
 class POption(POption):
 
     votecode = models.CharField(_("vote-code"), max_length=32)
-    receipt = models.CharField(_("receipt"), max_length=1024)
+    receipt = models.TextField(_("receipt"))
 
 
 class Task(Task):
