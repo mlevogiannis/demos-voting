@@ -14,14 +14,15 @@ import OpenSSL
 from django.conf import settings
 from django.db import models
 from django.utils import six
-from django.utils.encoding import force_bytes, force_text
+from django.utils.encoding import force_bytes, force_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
-from django.utils.six.moves import range
+from django.utils.six.moves import range, zip
 from django.utils.translation import ugettext_lazy as _
 
+from demos_voting.apps.ea import managers
 from demos_voting.common.models import (Election, Question, Option, Ballot, Part, PQuestion, POption, Task,
     PrivateApiUser, PrivateApiNonce)
-from demos_voting.common.utils import base32
+from demos_voting.common.utils import base32, crypto
 from demos_voting.common.utils.hashers import get_hasher
 
 logger = logging.getLogger(__name__)
@@ -34,6 +35,10 @@ class Election(Election):
     modified_at = models.DateTimeField(_("modified at"), auto_now=True)
     setup_started_at = models.DateTimeField(_("setup started at"), null=True, default=None)
     setup_ended_at = models.DateTimeField(_("setup ended at"), null=True, default=None)
+
+    @cached_property
+    def curve_nid(self):
+        return OpenSSL.crypto.get_elliptic_curve(self.curve_name)._nid
 
     def generate_security_code_length(self):
 
@@ -96,7 +101,16 @@ class Election(Election):
 
 
 class Question(Question):
-    pass
+
+    def generate_trustee_keys(self):
+        self.trustee_keys = self._crypto[0]
+
+    def generate_commitment_key(self):
+        self.commitment_key = self._crypto[1]
+
+    @cached_property
+    def _crypto(self):
+        return crypto.KeyGen(self.election.trustees.count(), self.election.curve_nid)
 
 
 class Option(Option):
@@ -110,6 +124,24 @@ class Ballot(Ballot):
         self.credential = base32.encode(randomness, self.election.credential_length)
         hasher = get_hasher(self.election.DEFAULT_HASHER_IDENTIFIER)
         self.credential_hash = hasher.hash(self.credential)
+
+    @cached_property
+    def _crypto(self):
+
+        ballot = []
+        for question in self.election.questions.all():
+
+            trustee_keys = question.trustee_keys
+            commitment_key = question.commitment_key
+            serial_number = force_bytes(self.serial_number)
+            options = [int(not option.is_blank) for option in question.options.all()]
+            permutations = [part.questions.all()[question.index].permutation for part in self.parts.all()]
+            curve_nid = self.election.curve_nid
+
+            parts = crypto.BallotGen(trustee_keys, commitment_key, serial_number, options, permutations, curve_nid)
+            ballot.append(parts)
+
+        return list(zip(*ballot))
 
 
 class Part(Part):
@@ -186,8 +218,19 @@ class Part(Part):
 
             self.security_code = security_code[-security_code_length:]
 
+    @cached_property
+    def _crypto(self):
+        return self.ballot._crypto[(Part.TAG_A, Part.TAG_B).index(self.tag)]
+
 
 class PQuestion(PQuestion):
+
+    def generate_zk(self):
+        self.zk = self._crypto['ZK']
+
+    @cached_property
+    def _crypto(self):
+        return self.part._crypto[self.index]
 
     @cached_property
     def _long_votecode_hash_config(self):
@@ -238,9 +281,43 @@ class POption(POption):
             randomness = random.getrandbits(self.election.receipt_length * 5)
             self.receipt = base32.encode(randomness, self.election.receipt_length)
 
+    def generate_commitment(self):
+        self.commitment = self._crypto[:-1]
+
+    def generate_zk1(self):
+        self.zk1 = self._crypto[-1]
+
+    @cached_property
+    def _crypto(self):
+        return self.question._crypto['Row'][self.index]
+
 
 class Task(Task):
     pass
+
+
+@python_2_unicode_compatible
+class Trustee(models.Model):
+
+    election = models.ForeignKey('Election')
+    email = models.EmailField(_('email address'))
+
+    objects = managers.TrusteeManager()
+
+    class Meta:
+        default_related_name = 'trustees'
+        ordering = ['election', 'email']
+        unique_together = ['election', 'email']
+        verbose_name = _("trustee")
+        verbose_name_plural = _("trustees")
+
+    def natural_key(self):
+        return self.election.natural_key() + (self.email,)
+
+    natural_key.dependencies = ['Election']
+
+    def __str__(self):
+        return self.email
 
 
 class PrivateApiUser(PrivateApiUser):

@@ -110,6 +110,8 @@ class Election(models.Model):
     receipt_length = models.PositiveSmallIntegerField(_("receipt length"), default=8)
     security_code_length = models.PositiveSmallIntegerField(_("security code length"), null=True)
 
+    curve_name = models.CharField(_("elliptic curve name"), max_length=16, default='prime256v1')
+
     _id = models.AutoField(primary_key=True, db_column='id')
 
     # Custom methods and properties
@@ -253,6 +255,12 @@ class Option(models.Model):
 
     index = models.PositiveSmallIntegerField(_("index"))
     name = models.TextField(_("name"), null=True)
+
+    # Custom methods and properties
+
+    @property
+    def is_blank(self):
+        return self.name is None
 
     # Related object access
 

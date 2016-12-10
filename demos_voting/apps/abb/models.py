@@ -9,6 +9,7 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from demos_voting.common import fields
 from demos_voting.common.models import (Election, Question, Option, Ballot, Part, PQuestion, POption, Task,
     PrivateApiUser, PrivateApiNonce)
 
@@ -30,7 +31,8 @@ class Election(Election):
 
 
 class Question(Question):
-    pass
+
+    commitment_key = models.TextField(_("commitment key"))
 
 
 class Option(Option):
@@ -49,7 +51,8 @@ class Part(Part):
 
 
 class PQuestion(PQuestion):
-    pass
+
+    zk = fields.JSONField(_("zero-knowledge proof"))
 
 
 class POption(POption):
@@ -60,6 +63,9 @@ class POption(POption):
     votecode_hash = models.TextField(_("vote-code hash"), null=True, default=None)
 
     receipt = models.TextField(_("receipt"))
+
+    commitment = fields.JSONField(_("commitment"))
+    zk1 = fields.JSONField(_("zero-knowledge proof ZK1"))
 
 
 class Task(Task):
