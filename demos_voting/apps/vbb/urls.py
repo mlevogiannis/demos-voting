@@ -16,8 +16,8 @@ urlpatterns = [
 
     url(r'^qrcode/$', views.QRCodeScannerView.as_view(), name='qrcode'),
 
-    url(r'^(?P<election_id>' + base32.regex + r'+)/(?P<voter_token>'
-        + base32.regex + r'+)/$', views.VoteView.as_view(), name='vote'),
+    url(r'^(?P<election_id>' + base32.regex + r'+)/(?P<serial_number>[0-9]+)/(?P<tag>A|B)/(?P<credential>' +
+        base32.regex + r'+)/$', views.VoteView.as_view(), name='vote'),
 ]
 
 urlpatterns_api = [

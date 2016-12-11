@@ -373,8 +373,10 @@ def generate(*ballots):
 
         for part in ballot.parts.all():
 
+            vbb_url = urljoin(settings.DEMOS_VOTING_URLS['vbb'], quote("%s/%d/%s/%s/" % (election.id,
+                ballot.serial_number, part.tag, ballot.credential)))
+
             abb_url = urljoin(settings.DEMOS_VOTING_URLS['abb'], quote("%s/" % election.id))
-            vbb_url = urljoin(settings.DEMOS_VOTING_URLS['vbb'], quote("%s/%s/" % (election.id, part.token)))
 
             qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_M)
             qr.add_data(vbb_url)

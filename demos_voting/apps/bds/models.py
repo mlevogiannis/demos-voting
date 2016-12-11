@@ -7,7 +7,6 @@ import os
 
 from django.conf import settings
 from django.db import models
-from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
 from demos_voting.common.models import (Election, Question, Option, Ballot, Part, PQuestion, POption, Task,
@@ -39,29 +38,6 @@ class Ballot(Ballot):
 class Part(Part):
 
     security_code = models.CharField(_("security code"), max_length=32, null=True)
-
-    @cached_property
-    def token(self):
-
-        serial_number_bits = (100 + self.election.ballots.count() - 1).bit_length()
-        tag_bits = 1
-        credential_bits = self.election.credential_length * 8
-
-        serial_number = self.ballot.serial_number
-        tag = (Part.TAG_A, Part.TAG_B).index(self.tag)
-        credential = base32.decode(self.credential)
-
-        t = (credential | (tag << credential_bits) | (serial_number << (tag_bits + credential_bits)))
-
-        token_bits = serial_number_bits + tag_bits + credential_bits
-        token_length = (token_bits + 4) // 5
-
-        padding_bits = (token_length * 5) - token_bits
-
-        if padding_bits > 0:
-            t |= (random.getrandbits(padding_bits) << token_bits)
-
-        return base32.encode(t, token_length)
 
 
 class PQuestion(PQuestion):
