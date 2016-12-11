@@ -1,9 +1,11 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+from base64 import b64encode, b64decode
+from binascii import hexlify
+
 from petlib.ec import EcGroup, EcPt
 from petlib.bn import Bn
 from petlib.hmac import Hmac
-from binascii import hexlify, b2a_base64, a2b_base64
 
 
 def Test(nid = 713):
@@ -38,9 +40,9 @@ def KeyGen(t_num = 1, nid = 713):
     for i in range(t_num):
         bn_temp = order.random()
         bn_sk += bn_temp
-        bn_tk.append(b2a_base64(bn_temp.binary()))
+        bn_tk.append(b64encode(bn_temp.binary()).decode('ascii'))
     ec_h = bn_sk * ec_g
-    return (bn_tk, b2a_base64(ec_h.export()), nid)
+    return (bn_tk, b64encode(ec_h.export()).decode('ascii'), nid)
 
 
 
@@ -55,11 +57,11 @@ def BallotGen(str_tk, str_h, sn = b"1", bitmask = [1], perm_arrays = None,  nid 
     ec_g = G.generator()
     order = G.order()
     #read pk = h
-    ec_h = EcPt.from_binary(a2b_base64(str_h), G)
+    ec_h = EcPt.from_binary(b64decode(str_h), G)
     #read tk
     tk = []
     for k in str_tk:
-        tk.append(a2b_base64(k))
+        tk.append(b64decode(k))
 
     n = len(bitmask)
     #########################
@@ -126,7 +128,20 @@ def BallotGen(str_tk, str_h, sn = b"1", bitmask = [1], perm_arrays = None,  nid 
                     ec_c2 += ec_g
                     phi1 = phi1.mod_add(Bn(1),order)
                     phi5 = phi5.mod_sub(bn_r,order)
-                row.append({'C1':b2a_base64(ec_c1.export()),'C2':b2a_base64(ec_c2.export()),'T1':b2a_base64(ec_T1.export()),'T2':b2a_base64(ec_T2.export()),'Y1':b2a_base64(ec_Y1.export()),'Y2':b2a_base64(ec_Y2.export()),'phi1':b2a_base64(phi1.binary()),'phi2':b2a_base64(phi2.binary()),'phi3':b2a_base64(phi3.binary()),'phi4':b2a_base64(phi4.binary()),'phi5':b2a_base64(phi5.binary()),'phi6':b2a_base64(phi6.binary())})
+                row.append({
+                    'C1': b64encode(ec_c1.export()).decode('ascii'),
+                    'C2': b64encode(ec_c2.export()).decode('ascii'),
+                    'T1': b64encode(ec_T1.export()).decode('ascii'),
+                    'T2': b64encode(ec_T2.export()).decode('ascii'),
+                    'Y1': b64encode(ec_Y1.export()).decode('ascii'),
+                    'Y2': b64encode(ec_Y2.export()).decode('ascii'),
+                    'phi1': b64encode(phi1.binary()).decode('ascii'),
+                    'phi2': b64encode(phi2.binary()).decode('ascii'),
+                    'phi3': b64encode(phi3.binary()).decode('ascii'),
+                    'phi4': b64encode(phi4.binary()).decode('ascii'),
+                    'phi5': b64encode(phi5.binary()).decode('ascii'),
+                    'phi6': b64encode(phi6.binary()).decode('ascii')
+                })
             #compute row ZK
             bn_u = order.random()
             bn_v = order.random()
@@ -167,7 +182,19 @@ def BallotGen(str_tk, str_h, sn = b"1", bitmask = [1], perm_arrays = None,  nid 
                 phi7 = phi7.mod_add(Bn(1),order)
                 phi11 = phi11.mod_sub(bn_row_r,order)
 
-            row.append({'U1':b2a_base64(ec_U1.export()),'U2':b2a_base64(ec_U2.export()),'Z1':b2a_base64(ec_Z1.export()),'Z2':b2a_base64(ec_Z2.export()),'phi7':b2a_base64(phi7.binary()), 'phi8':b2a_base64(phi8.binary()),'phi9':b2a_base64(phi9.binary()),'phi10':b2a_base64(phi10.binary()),'phi11':b2a_base64(phi11.binary()),'phi12':b2a_base64(phi12.binary())}) #the last one which is row ZK
+            row.append({
+                'U1': b64encode(ec_U1.export()).decode('ascii'),
+                'U2': b64encode(ec_U2.export()).decode('ascii'),
+                'Z1': b64encode(ec_Z1.export()).decode('ascii'),
+                'Z2': b64encode(ec_Z2.export()).decode('ascii'),
+                'phi7': b64encode(phi7.binary()).decode('ascii'),
+                'phi8': b64encode(phi8.binary()).decode('ascii'),
+                'phi9': b64encode(phi9.binary()).decode('ascii'),
+                'phi10': b64encode(phi10.binary()).decode('ascii'),
+                'phi11': b64encode(phi11.binary()).decode('ascii'),
+                'phi12': b64encode(phi12.binary()).decode('ascii')
+            }) #the last one which is row ZK
+
             Row_side.append(row)
             Rand_side.append(row_r)
         #column ZK       total (the number of options) columns
@@ -191,7 +218,12 @@ def BallotGen(str_tk, str_h, sn = b"1", bitmask = [1], perm_arrays = None,  nid 
             ec_W2 = bn_w * ec_h
             phi13 = bn_delta_col[0].mod_add(bn_col_r,order)
             phi14 = bn_delta_col[1].mod_add(bn_w,order)
-            ZK_side.append({'W1':b2a_base64(ec_W1.export()),'W2':b2a_base64(ec_W2.export()),'phi13':b2a_base64(phi13.binary()),'phi14':b2a_base64(phi14.binary())})
+            ZK_side.append({
+                'W1': b64encode(ec_W1.export()).decode('ascii'),
+                'W2': b64encode(ec_W2.export()).decode('ascii'),
+                'phi13': b64encode(phi13.binary()).decode('ascii'),
+                'phi14': b64encode(phi14.binary()).decode('ascii')
+            })
         Ballot.append({'Row':Row_side,'ZK':ZK_side})
 
 
@@ -209,12 +241,12 @@ def AddCom(commitments = [], nid = 713):
     ec_s1 = G.infinite()
     ec_s2 = G.infinite()
     for (c1,c2) in commitments:
-        ec_c1 = EcPt.from_binary(a2b_base64(c1), G)
-        ec_c2 = EcPt.from_binary(a2b_base64(c2), G)
+        ec_c1 = EcPt.from_binary(b64decode(c1), G)
+        ec_c2 = EcPt.from_binary(b64decode(c2), G)
         ec_s1 += ec_c1
         ec_s2 += ec_s2
 
-    return (b2a_base64(ec_s1.export()),b2a_base64(ec_s2.export()))
+    return (b64encode(ec_s1.export()).decode('ascii'),b64encode(ec_s2.export()).decode('ascii'))
 
 
 
@@ -229,6 +261,6 @@ def AddDecom(decoms = [], nid = 713):
     order = G.order()
     bn_sum = Bn(0)
     for d in decoms:
-        bn_sum = bn_sum.mod_add(Bn.from_binary(a2b_base64(d)),order)
+        bn_sum = bn_sum.mod_add(Bn.from_binary(b64decode(d)),order)
 
-    return b2a_base64(bn_sum.binary())
+    return b64encode(bn_sum.binary()).decode('ascii')
