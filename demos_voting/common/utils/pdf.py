@@ -204,6 +204,13 @@ def generate(*ballots):
         leading=16,
     )
 
+    kv_blank_paragraph_style = ParagraphStyle(
+        name='kv_blank_paragraph_style',
+        fontSize=font_md,
+        fontName=ttf_sans_italic,
+        leading=16,
+    )
+
     kv_data_paragraph_style = ParagraphStyle(
         name='kv_data_paragraph_style',
         fontSize=font_md,
@@ -223,8 +230,8 @@ def generate(*ballots):
     )
 
     def _kv_paragraph(key, value, mode):
-        if mode == 't':
-            style = kv_text_paragraph_style
+        if mode == 't' or mode == 'b':
+            style = kv_text_paragraph_style if mode == 't' else kv_blank_paragraph_style
             max_width = page_width - stringWidth(key + ":", ttf_sans_bold, style.fontSize) - h_padding
             value = "&nbsp;%s" % _truncate(" " + value, max_width, style.fontName, style.fontSize)
         elif mode == 'd':
@@ -447,7 +454,7 @@ def generate(*ballots):
                     party_option = election.questions.all()[0].options.all()[i]
                     party_p_option = part.questions.all()[0].options.all()[i]
 
-                    name = party_option.name
+                    name = blank_text if party_option.is_blank else party_option.name
                     votecode = party_p_option.votecode
                     receipt = party_p_option.receipt
 
@@ -456,7 +463,7 @@ def generate(*ballots):
                         receipt = receipt[-election.receipt_length:]
 
                     question_table_rows = [
-                        [_kv_paragraph(question_text, name, mode='t')],
+                        [_kv_paragraph(question_text, name, mode=('b' if party_option.is_blank else 't'))],
                         [_kv_paragraph(votecode_text, votecode, mode='d')],
                         [_kv_paragraph(receipt_text, receipt, mode='d')]
                     ]
