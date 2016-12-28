@@ -6,10 +6,6 @@
     padding-top: 12px;
 }
 
-#question-table {
-    display: none;
-}
-
 #question-table tr > td:last-child button,
 .question .option .input-group-addon:last-child {
     width: 56px;
@@ -110,11 +106,6 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-}
-
-.ctrl-elections,
-.ctrl-referendum {
-    display: none;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -239,16 +230,4 @@
 .material-switch > div > input[type="checkbox"]:checked + label::after {
     background: inherit;
     right: calc(50% - 18px);
-}
-
-/* -------------------------------------------------------------------------- */
-
-@media (min-width: 768px) and (max-width: 991px) {
-
-    .form-group > label[for="id_election-votecodes"] + .input-group > .input-group-addon:first-child {
-        max-width: 100px;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-    }
 }

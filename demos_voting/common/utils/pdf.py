@@ -50,7 +50,7 @@ def _load_ttf(family, style):
 @lru_cache(maxsize=None)
 def _load_image(filename, width=None, height=None):
 
-    p = os.path.join(settings.BASE_DIR, 'common/static/common/images', filename)
+    p = os.path.join(settings.BASE_DIR, 'demos_voting/common/static/common/images', filename)
     with open(p, 'rb') as f:
         b = io.BytesIO(f.read())
 
@@ -273,7 +273,7 @@ def generate(*ballots):
 
     # Calculate serial number and security code's column widths.
 
-    sn_length = len(force_text(100 + election.ballots.count() - 1))
+    sn_length = len(force_text(100 + election.ballot_count - 1))
 
     sn_key_width = stringWidth(serial_number_text, ttf_sans_bold, font_lg) + h_padding
     sn_value_width = max(stringWidth(c, ttf_sans_bold, font_lg) for c in string.digits) * sn_length + h_padding
@@ -599,3 +599,100 @@ def generate(*ballots):
         doc.build(elements)
 
     return pdf_list if len(ballots) > 1 else pdf_list[0]
+
+
+def sample(election_form, question_formset, option_formsets):
+
+    random_value = lambda symbols, length: ''.join(random.choice(symbols) for i in range(length))
+    queryset_cls = type(str('Queryset'), (list,), {'all': lambda self: self, 'count': lambda self: len(self)})
+
+    questions = queryset_cls()
+    for question_form, option_formset in zip(question_formset, option_formsets):
+
+        options = queryset_cls()
+        for option_form in option_formset:
+
+            options.append(type(str('Option'), (object,), {
+                'index': option_form.index,
+                'name': option_form.name,
+                'is_blank': option_form.is_blank,
+                'options': options,
+            })())
+
+        questions.append(type(str('Question'), (object,), {
+            'index': question_form.index,
+            'name': question_form.name,
+            'layout_is_one_column': question_form.layout_is_one_column,
+            'layout_is_two_column': question_form.layout_is_two_column,
+            'options': options,
+        })())
+
+    election = type(str('Election'), (object,), {
+        'id': '_id_',
+        'name': election_form.name,
+        'ballot_count': election_form.ballot_count,
+        'credential_length': election_form.credential_length,
+        'long_votecode_length': election_form.long_votecode_length,
+        'receipt_length': election_form.receipt_length,
+        'security_code_length': election_form.security_code_length,
+        'type_is_election': election_form.type_is_election,
+        'type_is_referendum': election_form.type_is_referendum,
+        'votecode_type_is_short': election_form.votecode_type_is_short,
+        'votecode_type_is_long': election_form.votecode_type_is_long,
+        'security_code_type_is_none': election_form.security_code_type_is_none,
+        'security_code_type_is_numeric': election_form.security_code_type_is_numeric,
+        'security_code_type_is_alphanumeric': election_form.security_code_type_is_alphanumeric,
+        'questions': questions,
+    })()
+
+    parts = queryset_cls()
+    for tag in ['A', 'B']:
+
+        p_questions = queryset_cls()
+        for question in election.questions.all():
+
+            if election.votecode_type_is_short:
+                short_votecodes = list(range(1, question.options.count() + 1))
+                random.shuffle(short_votecodes)
+
+            p_options = queryset_cls()
+            for option in question.options.all():
+
+                if election.votecode_type_is_short:
+                    votecode = short_votecodes[option.index]
+                elif election.votecode_type_is_long:
+                    votecode = random_value(base32.symbols, election.long_votecode_length)
+
+                p_options.append(type(str('POption'), (object,), {
+                    'index': option.index,
+                    'votecode': votecode,
+                    'receipt': random_value(base32.symbols, election.receipt_length),
+                })())
+
+            p_questions.append(type(str('PQuestion'), (object,), {
+                'options': p_options,
+            })())
+
+        if election.security_code_type_is_none:
+            security_code = None
+        else:
+            if election.security_code_type_is_numeric:
+                security_code_symbols = string.digits
+            elif election.security_code_type_is_alphanumeric:
+                security_code_symbols = base32.symbols
+            security_code = random_value(security_code_symbols, election.security_code_length)
+
+        parts.append(type(str('Part'), (object,), {
+            'tag': tag,
+            'security_code': security_code,
+            'questions': p_questions,
+        })())
+
+    ballot = type(str('Ballot'), (object,), {
+        'election': election,
+        'serial_number': 100,
+        'credential': random_value(base32.symbols, election.credential_length),
+        'parts': parts,
+    })()
+
+    return generate(ballot)

@@ -2,263 +2,473 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from functools import partial
-
 from django import forms
-from django.apps import apps
 from django.conf import settings
-from django.forms.formsets import BaseFormSet, formset_factory
+from django.core import validators
 from django.utils import timezone
+from django.utils.functional import cached_property
+from django.utils.six.moves import range, zip
 from django.utils.translation import ugettext_lazy as _
 
-from demos_voting.apps.ea.models import Election
-from demos_voting.common.utils import fields
-
-app_config = apps.get_app_config('ea')
-conf = app_config.get_constants_and_settings()
+from demos_voting.apps.ea.fields import ISO8601DateTimeField, MultiEmailField
+from demos_voting.apps.ea.models import Election, Question, Option, Trustee
 
 
-class ElectionForm(forms.Form):
+class ElectionForm(forms.ModelForm):
 
-    name = forms.CharField(label=_('Name'),
-        min_length=1, max_length=conf.ELECTION_MAXLEN)
-
-    starts_at = fields.DateTimeField(label=_('Start at'))
-    ends_at = fields.DateTimeField(label=_('End at'))
-
-    ballots_cnt = forms.IntegerField(label=_('Ballots'),
-        min_value=1, max_value=conf.MAX_BALLOTS)
-
-    language = forms.ChoiceField(label=_('Language'),
-        choices=settings.LANGUAGES)
-
-    trustee_list = fields.MultiEmailField(label=_('Trustee e-mails'),
-        min_length=1, max_length=conf.MAX_TRUSTEES, required=False)
-
-    _votecode_type_choices = (
-        ('short', _('Short')),
-        ('long', _('Long'))
+    trustee_emails = MultiEmailField(
+        label=_("Trustee emails"),
+        min_num=1,
+        max_num=settings.DEMOS_VOTING_MAX_TRUSTEES
     )
 
-    votecode_type = forms.ChoiceField(label=_('Vote-codes'),
-        choices=_votecode_type_choices)
-
-    _election_type_choices = (
-        ('elections', _('Elections')),
-        ('referendum', _('Referendum'))
+    max_candidate_choices = forms.IntegerField(
+        label=_("Maximum number of candidate choices"),
+        required=False,
+        min_value=1
     )
 
-    election_type = forms.ChoiceField(label=_('Election type'),
-        choices=_election_type_choices)
+    # https://code.djangoproject.com/ticket/24295
+    voting_starts_at = Election._meta.get_field('voting_starts_at').formfield(form_class=ISO8601DateTimeField)
+    voting_ends_at = Election._meta.get_field('voting_ends_at').formfield(form_class=ISO8601DateTimeField)
 
-    _election_system_choices = (
-        ('pr',  _('Proportional representation')),
-        ('mbs', _('Majority bonus system')),
-        ('mmp', _('Mixed Member Proportional')),
-        ('mr',  _('Majority rule')),
-    )
+    def __init__(self, *args, **kwargs):
+        self.datetime_now = timezone.now()
+        self.question_formset = kwargs.pop('question_formset', None)
+        self.party_formset = kwargs.pop('party_formset', None)
 
-    electoral_system = forms.ChoiceField(label=_('Electoral system'),
-        choices=_election_system_choices, required=False)
+        initial = kwargs.setdefault('initial', {})
+        initial.setdefault('type', Election.TYPE_REFERENDUM)
+        initial.setdefault('votecode_type', Election.VOTECODE_TYPE_SHORT)
+        initial.setdefault('security_code_type', Election.SECURITY_CODE_TYPE_NUMERIC)
 
-    choices = forms.IntegerField(label=_('Choices'),
-        initial=1, min_value=1, max_value=conf.MAX_OPTIONS, required=False)
+        self.type_election = Election.TYPE_ELECTION
+        self.type_referendum = Election.TYPE_REFERENDUM
 
-    error_msg = {
-        'passed': _("The date and time you selected have passed."),
-        'order': _("Start and end dates and times are not in logical order.")
-    }
+        super(ElectionForm, self).__init__(*args, **kwargs)
+        self.fields['ballot_count'].min_value = 1
 
     def clean_name(self):
-        return _trim_whitespace(self.cleaned_data['name']);
+        name = self.cleaned_data['name']
+        name = ' '.join(name.split())
+        validators.MinLengthValidator(1)(name)
+        validators.MaxLengthValidator(100)(name)
+        return name
 
-    def clean_starts_at(self):
+    def clean_voting_starts_at(self):
+        voting_starts_at = self.cleaned_data['voting_starts_at']
+        if voting_starts_at <= self.datetime_now:
+            message = _("Ensure that voting start time is in the future.")
+            raise forms.ValidationError(message, code='invalid')
+        return voting_starts_at
 
-        starts_at = self.cleaned_data['starts_at']
+    def clean_voting_ends_at(self):
+        voting_ends_at = self.cleaned_data['voting_ends_at']
+        if voting_ends_at <= self.datetime_now:
+            message = _("Ensure that voting end time is in the future.")
+            raise forms.ValidationError(message, code='invalid')
+        return voting_ends_at
 
-        # Verify that starts_at is valid
-
-        if starts_at < timezone.now():
-            raise forms.ValidationError(self.error_msg['passed'],code='invalid')
-
-        return starts_at
-
-    def clean_ends_at(self):
-
-        ends_at = self.cleaned_data['ends_at']
-
-        # Verify that ends_at is valid
-
-        if ends_at < timezone.now():
-            raise forms.ValidationError(self.error_msg['passed'],code='invalid')
-
-        return ends_at
+    def clean_ballot_count(self):
+        ballot_count = self.cleaned_data['ballot_count']
+        validators.MinValueValidator(1)(ballot_count)
+        validators.MaxValueValidator(settings.DEMOS_VOTING_MAX_BALLOTS)(ballot_count)
+        return ballot_count
 
     def clean(self):
-
         cleaned_data = super(ElectionForm, self).clean()
 
-        # Verify that ends_at is not before starts_at
+        voting_starts_at = cleaned_data.get('voting_starts_at')
+        voting_ends_at = cleaned_data.get('voting_ends_at')
+        if voting_starts_at and voting_ends_at and voting_starts_at > voting_ends_at:
+            message = _("Ensure that voting start time is before voting end time.")
+            self.add_error(None, forms.ValidationError(message, code='invalid'))
 
-        starts_at = cleaned_data.get('starts_at')
-        ends_at = cleaned_data.get('ends_at')
-
-        if starts_at and ends_at and ends_at <= starts_at:
-            error=forms.ValidationError(self.error_msg['order'], code='invalid')
-            self.add_error(None, error)
-
-        # 'vc_type' depends on 'votecode_type'
+        type = cleaned_data.get('type')
+        if type == Election.TYPE_ELECTION:
+            max_candidate_choices = cleaned_data.get('max_candidate_choices')
+            try:
+                if max_candidate_choices is None:
+                    raise forms.ValidationError(forms.Field.default_error_messages['required'], code='required')
+                else:
+                    validators.MinValueValidator(1)(max_candidate_choices)
+                    if self.party_formset and self.party_formset.total_form_count() > 0 and all(
+                        party_form.candidate_formset and party_form.candidate_formset.is_valid()
+                        for party_form
+                        in self.party_formset
+                    ):
+                        max_candidate_count = max(
+                            party_form.candidate_formset.total_form_count()
+                            for party_form
+                            in self.party_formset
+                        )
+                        validators.MaxValueValidator(max_candidate_count)(max_candidate_choices)
+            except forms.ValidationError as e:
+                self.add_error('max_candidate_choices', e)
 
         votecode_type = cleaned_data.get('votecode_type')
+        security_code_type = cleaned_data.get('security_code_type')
+        if (votecode_type == Election.VOTECODE_TYPE_LONG
+                and not security_code_type == Election.SECURITY_CODE_TYPE_ALPHANUMERIC):
+            message = _("Vote-codes of type long require a security code of type alphanumeric.")
+            self.add_error(None, forms.ValidationError(message, code='invalid'))
 
-        if votecode_type is not None:
-
-            if votecode_type == 'short':
-                cleaned_data['votecode_type'] = Election.VOTECODE_TYPE_SHORT
-            elif votecode_type == 'long':
-                cleaned_data['votecode_type'] = Election.VOTECODE_TYPE_LONG
-
-        # 'type' depends on 'election_type'
-
-        election_type = cleaned_data.get('election_type')
-
-        if election_type is not None:
-
-            if election_type == 'elections':
-                cleaned_data['type'] = Election.TYPE_ELECTION
-            elif election_type == 'referendum':
-                cleaned_data['type'] = Election.TYPE_REFERENDUM
-
-        # 'electoral_system' and 'choices' are required if and only if
-        # 'election_type' is 'elections'
-
-        if cleaned_data.get('type') == Election.TYPE_ELECTION:
-
-            for field in ('electoral_system', 'choices'):
-                if not cleaned_data.get(field):
-                    self.add_error(field, forms.ValidationError(forms.Field.\
-                        default_error_messages['required'], code='required'))
+    class Meta:
+        model = Election
+        fields = [
+            'name', 'voting_starts_at', 'voting_ends_at', 'type', 'votecode_type', 'security_code_type',
+            'ballot_count', 'max_candidate_choices', 'trustee_emails'
+        ]
+        widgets = {
+            'name': forms.TextInput,
+            'type': forms.RadioSelect,
+            'votecode_type': forms.RadioSelect,
+            'security_code_type': forms.RadioSelect,
+        }
 
 
-class QuestionForm(forms.Form):
-
-    question = forms.CharField(label=_('Question'), min_length=1,
-        max_length=conf.QUESTION_MAXLEN)
-
-    columns = forms.BooleanField(label=_('Display in columns'), required=False)
+class QuestionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
-
-        option_formset = kwargs.pop('option_formset', None)
-        choices = option_formset.total_form_count() if option_formset else 2
-
+        self.option_formset = kwargs.pop('option_formset', None)
         super(QuestionForm, self).__init__(*args, **kwargs)
+        self.fields['min_choices'].min_value = 1
+        self.fields['max_choices'].min_value = 1
 
-        self.fields['choices'] = forms.IntegerField(label=_('Multiple choices'),
-            initial=1, min_value=1, max_value=choices)
+    def clean_name(self):
+        name = self.cleaned_data['name']
+        name = ' '.join(name.split())
+        validators.MinLengthValidator(1)(name)
+        validators.MaxLengthValidator(100)(name)
+        return name
 
-    def clean_question(self):
-        return _trim_whitespace(self.cleaned_data['question']);
+    def clean_min_choices(self):
+        min_choices = self.cleaned_data['min_choices']
+        validators.MinValueValidator(1)(min_choices)
+        if self.option_formset and self.option_formset.is_valid():
+            validators.MaxValueValidator(self.option_formset.total_form_count() - 1)(min_choices)
+        return min_choices
 
-
-class BaseQuestionFormSet(BaseFormSet):
-
-    def __init__(self, *args, **kwargs):
-
-        super(BaseQuestionFormSet, self).__init__(*args, **kwargs)
-
-        for form in self.forms:
-            form.empty_permitted = False
-
-    def _construct_form(self, i, **kwargs):
-
-        # Workaround for 'form_kwargs' not supported in Django 1.8.x
-        # See https://code.djangoproject.com/ticket/18166
-
-        kwargs['option_formset'] = self.option_formsets[i]
-        return super(BaseQuestionFormSet, self)._construct_form(i, **kwargs)
-
-    def clean(self):
-        '''Checks that no two questions are the same.'''
-
-        if any(self.errors):
-            return
-
-        question_list = []
-
-        for form in self.forms:
-
-            question = form.cleaned_data.get('question')
-
-            if not question:
-                form.add_error('question', forms.ValidationError(forms.\
-                    Field.default_error_messages['required'], code='required'))
-
-            else:
-                if question in question_list:
-                    form.add_error(None, forms.ValidationError(
-                        _('Question already exists.'), code='not_unique'))
-                else:
-                    question_list.append(question)
-
-
-class OptionForm(forms.Form):
-
-    text = forms.CharField(label=_('Option'),
-        min_length=1, max_length=conf.OPTION_MAXLEN)
-
-    def clean_option(self):
-        return _trim_whitespace(self.cleaned_data['text']);
-
-
-class BaseOptionFormSet(BaseFormSet):
-
-    def __init__(self, *args, **kwargs):
-        super(BaseOptionFormSet, self).__init__(*args, **kwargs)
-        for form in self.forms:
-            form.empty_permitted = False
+    def clean_max_choices(self):
+        max_choices = self.cleaned_data['max_choices']
+        validators.MinValueValidator(1)(max_choices)
+        if self.option_formset and self.option_formset.is_valid():
+            validators.MaxValueValidator(self.option_formset.total_form_count())(max_choices)
+        return max_choices
 
     def clean(self):
-        '''Checks that no two options are the same.'''
+        cleaned_data = super(QuestionForm, self).clean()
+        min_choices = cleaned_data.get('min_choices')
+        max_choices = cleaned_data.get('max_choices')
+        if min_choices and max_choices and  min_choices > max_choices:
+            message = _("Ensure that the minimum number of choices is less than the maximum number of choices.")
+            self.add_error(None, forms.ValidationError(message, code='invalid'))
 
+    class Meta:
+        model = Question
+        fields = ['name', 'min_choices', 'max_choices', 'layout']
+        widgets = {
+            'name': forms.TextInput,
+        }
+
+
+class OptionForm(forms.ModelForm):
+
+    def clean_name(self):
+        name = self.cleaned_data['name']
+        name = ' '.join(name.split())
+        validators.MinLengthValidator(1)(name)
+        validators.MaxLengthValidator(50)(name)
+        return name
+
+    class Meta:
+        model = Option
+        fields = ['name']
+        widgets = {
+            'name': forms.TextInput,
+        }
+
+
+class PartyForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        self.candidate_formset = kwargs.pop('candidate_formset', None)
+        super(PartyForm, self).__init__(*args, **kwargs)
+
+    def clean_name(self):
+        name = self.cleaned_data['name']
+        name = ' '.join(name.split())
+        validators.MinLengthValidator(1)(name)
+        validators.MaxLengthValidator(100)(name)
+        return name
+
+    class Meta:
+        model = Option
+        fields = ['name']
+        widgets = {
+            'name': forms.TextInput,
+        }
+
+
+class CandidateForm(forms.ModelForm):
+
+    def clean_name(self):
+        name = self.cleaned_data['name']
+        name = ' '.join(name.split())
+        validators.MinLengthValidator(1)(name)
+        validators.MaxLengthValidator(50)(name)
+        return name
+
+    class Meta:
+        model = Option
+        fields = ['name']
+        widgets = {
+            'name': forms.TextInput,
+        }
+
+# -----------------------------------------------------------------------------
+
+class FormKwargsMixin(object):
+
+    # Backport from Django 1.9
+    # Added ability to pass kwargs to the form constructor in a formset.
+    # https://code.djangoproject.com/ticket/18166
+    # https://github.com/django/django/commit/fe21fb810a1bd12b10c534923809423b5c1cf4d7
+
+    def __init__(self, *args, **kwargs):
+        self.form_kwargs = kwargs.pop('form_kwargs', {})
+        super(FormKwargsMixin, self).__init__(*args, **kwargs)
+
+    def get_form_kwargs(self, index):
+        return self.form_kwargs.copy()
+
+    @cached_property
+    def forms(self):
+        return [self._construct_form(i, **self.get_form_kwargs(i)) for i in range(self.total_form_count())]
+
+    @property
+    def empty_form(self):
+        form = self.form(
+            auto_id=self.auto_id,
+            prefix=self.add_prefix('__prefix__'),
+            empty_permitted=True,
+            **self.get_form_kwargs(None)
+        )
+        self.add_fields(form, None)
+        return form
+
+
+class CommonMixin(object):
+
+    def _construct_form(self, *args, **kwargs):
+        form = super(CommonMixin, self)._construct_form(*args, **kwargs)
+        form.empty_permitted = False
+        return form
+
+    def is_valid(self):
+        try:
+            is_valid = super(CommonMixin, self).is_valid()
+        except forms.ValidationError as e:
+            if e.code != 'missing_management_form':
+                raise
+            else:
+                return False
+        else:
+            return is_valid
+
+    def clean(self):
+        super(CommonMixin, self).clean()
         if any(self.errors):
             return
-
-        text_list = []
-
+        values = set()
         for form in self.forms:
-
-            text = form.cleaned_data.get('text')
-
-            if not text:
-                form.add_error('text', forms.ValidationError(
-                    forms.Field.default_error_messages['required'],
-                    code='required'))
-
-            else:
-                if text in text_list:
-                    form.add_error(None, forms.ValidationError(
-                        _('Option already exists.'), code='not_unique'))
-                else:
-                    text_list.append(text)
+            value = getattr(form.instance, self.form_validators['unique'])
+            if value in values:
+                raise forms.ValidationError(self.error_messages['unique'], code='unique')
+            values.add(value)
 
 
-PartialQuestionFormSet = partial(formset_factory, QuestionForm, extra=-1,
-    validate_min=True, validate_max=True, min_num=1, max_num=conf.MAX_QUESTIONS)
+class BaseQuestionFormSet(FormKwargsMixin, CommonMixin, forms.BaseInlineFormSet):
 
-OptionFormSet = formset_factory(OptionForm, formset=BaseOptionFormSet, extra=0,
-    validate_min=True, validate_max=True, min_num=2, max_num=conf.MAX_OPTIONS)
+    form_validators = {
+        'unique': 'name'
+    }
 
-# ------------------------------------------------------------------------------
+    error_messages = {
+        'unique': _("Ensure that questions have distinct names.")
+    }
 
-def _trim_whitespace(field):
-    """Replace a string's continuous whitespace by a single space"""
+    def get_form_kwargs(self, index):
+        kwargs = super(BaseQuestionFormSet, self).get_form_kwargs(index)
+        option_formsets = kwargs.pop('option_formsets', None)
+        if index is not None and option_formsets is not None:
+            kwargs['option_formset'] = option_formsets[index]
+        return kwargs
 
-    field = " ".join(field.split())
 
-    if not field:
-        raise forms.ValidationError(
-            forms.Field.default_error_messages['required'], code='required')
+class BaseOptionFormSet(CommonMixin, forms.BaseInlineFormSet):
 
-    return field
+    form_validators = {
+        'unique': 'name'
+    }
 
+    error_messages = {
+        'unique': _("Ensure that options have distinct names.")
+    }
+
+
+class BasePartyFormSet(FormKwargsMixin, CommonMixin, forms.BaseModelFormSet):
+
+    form_validators = {
+        'unique': 'name'
+    }
+
+    error_messages = {
+        'unique': _("Ensure that paties have distinct names.")
+    }
+
+    def get_form_kwargs(self, index):
+        kwargs = super(BasePartyFormSet, self).get_form_kwargs(index)
+        candidate_formsets = kwargs.pop('candidate_formsets', None)
+        if index is not None and candidate_formsets is not None:
+            kwargs['candidate_formset'] = candidate_formsets[index]
+        return kwargs
+
+
+class BaseCandidateFormSet(CommonMixin, forms.BaseModelFormSet):
+
+    form_validators = {
+        'unique': 'name'
+    }
+
+    error_messages = {
+        'unique': _("Ensure that candidates have distinct names.")
+    }
+
+
+QuestionFormSet = forms.inlineformset_factory(
+    parent_model=Election,
+    model=Question,
+    form=QuestionForm,
+    formset=BaseQuestionFormSet,
+    extra=-1,
+    can_delete=False,
+    validate_min=True,
+    validate_max=True,
+    min_num=1,
+    max_num=settings.DEMOS_VOTING_MAX_REFERENDUM_QUESTIONS
+)
+
+OptionFormSet = forms.inlineformset_factory(
+    parent_model=Question,
+    model=Option,
+    form=OptionForm,
+    formset=BaseOptionFormSet,
+    extra=-1,
+    can_delete=False,
+    validate_min=True,
+    validate_max=True,
+    min_num=2,
+    max_num=settings.DEMOS_VOTING_MAX_REFERENDUM_OPTIONS
+)
+
+PartyFormSet = forms.modelformset_factory(
+    model=Option,
+    form=PartyForm,
+    formset=BasePartyFormSet,
+    extra=-1,
+    validate_min=True,
+    validate_max=True,
+    min_num=1,
+    max_num=settings.DEMOS_VOTING_MAX_ELECTION_PARTIES
+)
+
+CandidateFormSet = forms.modelformset_factory(
+    model=Option,
+    form=CandidateForm,
+    formset=BaseCandidateFormSet,
+    extra=-1,
+    validate_min=True,
+    validate_max=True,
+    min_num=1,
+    max_num=settings.DEMOS_VOTING_MAX_ELECTION_CANDIDATES
+)
+
+# -----------------------------------------------------------------------------
+
+def create_trustees(election_form):
+
+    election = election_form.save(commit=False)
+    trustee_emails = election_form.cleaned_data['trustee_emails']
+
+    return [Trustee(election=election, email=email) for email in trustee_emails]
+
+
+def create_questions_and_options(election_form):
+
+    election = election_form.save(commit=False)
+
+    if election.type_is_election:
+
+        party_formset = election_form.party_formset
+        candidate_formsets = [party_form.candidate_formset for party_form in party_formset]
+
+        max_candidate_choices = election_form.cleaned_data['max_candidate_choices']
+
+        # An election with parties and candidates always has two questions, the
+        # party list and the candidate list.
+
+        party_question = Question(
+            name=None,
+            min_choices=1,
+            max_choices=1,
+            layout=Question.LAYOUT_ONE_COLUMN
+        )
+
+        candidate_question = Question(
+            name=None,
+            min_choices=max_candidate_choices,
+            max_choices=max_candidate_choices,
+            layout=Question.LAYOUT_ONE_COLUMN
+        )
+
+        # The first question is the party list. The last party is always the blank
+        # party.
+
+        party_options = party_formset.save(commit=False) + [Option(name=None)]
+
+        # The second question is the candidate list. It has a special structure by
+        # grouping together the options that correspond to each party's candidates.
+        # All parties should always have the same number of candidates, which is
+        # the maximum number of candidates plus the maximum number of choices. So,
+        # parties with less candidates are padded with blank candidates. The blank
+        # party has only blank candidates.
+
+        max_candidate_count = max(formset.total_form_count() for formset in candidate_formsets) + max_candidate_choices
+
+        candidate_options = []
+        for formset in candidate_formsets + [CandidateFormSet(data={'form-TOTAL_FORMS': 0, 'form-INITIAL_FORMS': 0})]:
+            candidate_options.extend(formset.save(commit=False))
+            candidate_options.extend(Option(name=None) for _ in range(max_candidate_count-formset.total_form_count()))
+
+        questions = [party_question, candidate_question]
+        optionss = [party_options, candidate_options]
+
+    elif election.type_is_referendum:
+
+        question_formset = election_form.question_formset
+        option_formsets = [question_form.option_formset for question_form in question_formset]
+
+        questions = question_formset.save(commit=False)
+        optionss = [option_formset.save(commit=False) for option_formset in option_formsets]
+
+    # Assign indices and related instances to the new objects.
+
+    for question_index, (question, options) in enumerate(zip(questions, optionss)):
+        question.election = election
+        question.index = question_index
+        for option_index, option in enumerate(options):
+            option.question = question
+            option.index = option_index
+
+    return questions, optionss

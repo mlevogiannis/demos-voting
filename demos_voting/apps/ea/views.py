@@ -2,39 +2,31 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import base64
 import logging
-import random
-
-from base64 import b64encode, b64decode
 
 from django import http
-from django.apps import apps
-from django.core import urlresolvers
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import transaction
-from django.db.models import Max
 from django.middleware import csrf
 from django.shortcuts import render, redirect
-from django.utils import timezone, translation
+from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.utils.encoding import force_text
 from django.utils.six.moves import range, zip
 from django.utils.six.moves.urllib.parse import quote, urljoin
 from django.views.generic import View
 
 from celery.result import AsyncResult
 
-from demos_voting.apps.ea.forms import ElectionForm, OptionFormSet, PartialQuestionFormSet, BaseQuestionFormSet
-from demos_voting.apps.ea.models import Conf, Election, Question, OptionV, Task
-from demos_voting.apps.ea.tasks import election_setup, pdf
-from demos_voting.apps.ea.tasks.setup import _remote_app_update
-from demos_voting.common.utils import api, base32, enums
-from demos_voting.common.utils.json import CustomJSONEncoder
+from demos_voting.apps.ea.forms import (ElectionForm, QuestionFormSet, OptionFormSet, PartyFormSet, CandidateFormSet,
+    create_questions_and_options, create_trustees)
+from demos_voting.apps.ea.models import Election
+from demos_voting.common.utils import pdf
 
 logger = logging.getLogger(__name__)
-
-app_config = apps.get_app_config('ea')
-conf = app_config.get_constants_and_settings()
 
 
 class HomeView(View):
@@ -52,179 +44,129 @@ class CreateView(View):
     def get(self, request, *args, **kwargs):
 
         election_form = ElectionForm(prefix='election')
-
-        # Get an empty question formset
-
-        QuestionFormSet = PartialQuestionFormSet(formset=BaseQuestionFormSet)
-        question_formset = QuestionFormSet(prefix='question')
-
-        question_and_options_list = [
-            (question_formset.empty_form, OptionFormSet(prefix='option__prefix__'))
-        ]
+        question_formset = QuestionFormSet(prefix='questions')
+        option_formsets = [(question_formset.empty_form, OptionFormSet(prefix='options__prefix__'))]
 
         context = {
             'election_form': election_form,
             'question_formset': question_formset,
-            'question_and_options_list': question_and_options_list,
+            'option_formsets': option_formsets,
         }
 
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
 
-        # Get the election form
-
-        election_form = ElectionForm(request.POST, prefix='election')
-
-        # "Peek" at the number of questions
+        # Peek at the election type.
 
         try:
-            questions = int(request.POST['question-TOTAL_FORMS'])
-            if questions < 1 or questions > conf.MAX_QUESTIONS:
+            election_type = force_text(request.POST['election-type'])
+            if election_type not in (Election.TYPE_ELECTION, Election.TYPE_REFERENDUM):
                 raise ValueError
-        except (ValueError, TypeError, KeyError):
-            questions = 0
+        except Exception:
+            election_type = None
 
-        # Get the list of option formsets, each one corresponds to a question
+        # Peek at the number of questions.
 
-        option_formsets = [
-            OptionFormSet(request.POST, prefix='option%s' % i) for i in range(questions)
-        ]
+        try:
+            question_total_forms = int(request.POST['questions-TOTAL_FORMS'])
+            if election_type == Election.TYPE_ELECTION:
+                min_forms = QuestionFormSet.min_num
+                max_forms = QuestionFormSet.max_num
+            elif election_type == Election.TYPE_REFERENDUM:
+                min_forms = PartyFormSet.min_num
+                max_forms = PartyFormSet.max_num
+            if question_total_forms < min_forms or question_total_forms > max_forms:
+                raise ValueError
+        except Exception:
+            question_total_forms = None
 
-        # Get the question formset
+        # Instatiate and validate the appropriate forms.
 
-        BaseQuestionFormSet1 = type(str('BaseQuestionFormSet'),
-            (BaseQuestionFormSet,), dict(option_formsets=option_formsets))
+        is_valid = True
 
-        QuestionFormSet = PartialQuestionFormSet(formset=BaseQuestionFormSet1)
-        question_formset = QuestionFormSet(request.POST, prefix='question')
+        if election_type == Election.TYPE_ELECTION:
+            if question_total_forms:
+                candidate_formsets = []
+                for i in range(question_total_forms):
+                    candidate_formset = CandidateFormSet(data=request.POST, prefix='options%s' % i)
+                    candidate_formsets.append(candidate_formset)
+                    is_valid =candidate_formset.is_valid() and is_valid
+            else:
+                candidate_formsets = None
 
-        # Validate all forms
+            party_formset = PartyFormSet(
+                data=request.POST,
+                prefix='questions',
+                form_kwargs={'candidate_formsets': candidate_formsets}
+            )
 
-        election_valid = election_form.is_valid()
-        question_valid = question_formset.is_valid()
-        option_valid = all([formset.is_valid() for formset in option_formsets])
+            election_kwargs = {'party_formset': party_formset}
+            is_valid = party_formset.is_valid() and is_valid
 
-        if election_valid and question_valid and option_valid:
+        elif election_type == Election.TYPE_REFERENDUM:
+            if question_total_forms:
+                option_formsets = []
+                for i in range(question_total_forms):
+                    option_formset = OptionFormSet(data=request.POST, prefix='options%s' % i)
+                    option_formsets.append(option_formset)
+                    is_valid = option_formset.is_valid() and is_valid
+            else:
+                option_formsets = None
 
-            election_obj = dict(election_form.cleaned_data)
-            language = election_obj.pop('language')
+            question_formset = QuestionFormSet(
+                data=request.POST,
+                prefix='questions',
+                form_kwargs={'option_formsets': option_formsets}
+            )
 
-            # Pack questions, options and trustees in lists of dictionaries
+            election_kwargs = {'question_formset': question_formset}
+            is_valid = question_formset.is_valid() and is_valid
 
-            election_obj['__list_Question__'] = []
+        else:
+            election_kwargs = {}
 
-            for q_index, (question_form, option_formset) \
-                in enumerate(zip(question_formset, option_formsets)):
+        election_form = ElectionForm(data=request.POST, prefix='election', **election_kwargs)
+        is_valid = election_form.is_valid() and is_valid
 
-                question_obj = {
-                    'index': q_index,
-                    'text': question_form.cleaned_data['question'],
-                    'options_cnt': len(option_formset),
-                    'choices': question_form.cleaned_data['choices'] \
-                        if election_obj['type'] == Election.TYPE_REFERENDUM \
-                        else min(len(option_formset), election_obj['choices']),
-                    'columns': question_form.cleaned_data['columns'] \
-                        if election_obj['type'] == Election.TYPE_REFERENDUM \
-                        else False,
-                    '__list_OptionC__': [],
-                }
-
-                for o_index, option_form in enumerate(option_formset):
-
-                    option_obj = {
-                        'index': o_index,
-                        'text': option_form.cleaned_data['text'],
-                    }
-
-                    question_obj['__list_OptionC__'].append(option_obj)
-                election_obj['__list_Question__'].append(question_obj)
-
-            election_obj['__list_Trustee__'] = [
-                {'email': email} for email in election_obj.pop('trustee_list')
-            ]
-
-            # Perform the requested action
+        if is_valid:
+            election = election_form.save(commit=False)
+            trustees = create_trustees(election_form)
+            questions, optionss = create_questions_and_options(election_form)
 
             if request.is_ajax():
-
-                # Create a sample ballot
-
-                election_obj['id'] = 'election_id'
-
-                # Temporarily enable the requested language
-
-                translation.activate(language)
-
-                pdfcreator = pdf.BallotPDFCreator(election_obj)
-                pdfbuf = pdfcreator.sample()
-
-                translation.deactivate()
-
-                # Return the pdf ballot as a base64 encoded string
-
-                pdf_base64 = b64encode(pdfbuf.getvalue()).decode()
-                return http.HttpResponse(pdf_base64)
-
+                file = pdf.sample(election, questions, optionss)
+                data = base64.b64encode(file.getvalue()).decode()
+                return http.HttpResponse(data)
             else:
+                # TODO: election setup task
+                pass
 
-                # Create a new election
+        else:
+            if election_type == Election.TYPE_ELECTION:
+                question_formset = party_formset
+                option_formsets = candidate_formsets
 
-                election_obj['state'] = enums.State.PENDING
+            question_formset = question_formset or QuestionFormSet(prefix='questions')
 
-                # Get the next election_id. Concurrency control is achieved by
-                # locking for write an object with a predetermined, invalid ID.
+            option_formsets = list(zip(question_formset, option_formsets or [])) + [
+                (QuestionFormSet(prefix='questions').empty_form, OptionFormSet(prefix='options__prefix__'))
+            ]
 
-                with transaction.atomic():
+            question_formset_errors = sum(
+                int(not(question_form.is_valid() and option_formset.is_valid()))
+                for question_form, option_formset
+                in option_formsets[:-1]
+            )
 
-                    conf = Conf.objects.get_or_create(**Conf.defaults())
+            context = {
+                'election_form': election_form,
+                'question_formset': question_formset,
+                'option_formsets': option_formsets,
+                'question_formset_errors': question_formset_errors,
+            }
 
-                    defaults = {f.name: election_obj[f.name] for f in
-                        Election._meta.get_fields() if f.name in election_obj}
-
-                    election = Election.objects.select_for_update().create(id='-', conf=conf, **defaults)
-                    election.full_clean(exclude=['id'])
-
-                    max_id = Election.objects.exclude(id=election.id).aggregate(Max('id'))['id__max']
-                    election_id = '0' if max_id is None else base32.encode(base32.decode(max_id) + 1)
-
-                    election.id = election_id
-                    election.save(update_fields=['id'])
-
-                election_obj['id'] = election_id
-
-                # Prepare and start the election_setup task
-
-                task = election_setup.s(election_obj, language)
-                task.freeze()
-
-                Task.objects.create(election=election, task_id=task.id)
-                task.apply_async()
-
-                # Redirect to status page
-
-                return http.HttpResponseRedirect(
-                    urlresolvers.reverse('ea:status', args=[election_id]))
-
-        # Add an empty question form and option formset
-
-        question_and_options_list = list(zip(question_formset,
-            option_formsets)) + [(question_formset.empty_form,
-            OptionFormSet(prefix='option__prefix__'))]
-
-        question_formset_errors = sum(int(not(question_form.is_valid() and
-            option_formset.is_valid())) for question_form, option_formset
-            in question_and_options_list[:-1])
-
-        context = {
-            'election_form': election_form,
-            'question_formset': question_formset,
-            'question_formset_errors': question_formset_errors,
-            'question_and_options_list': question_and_options_list,
-        }
-
-        # Re-display the form with any errors
-        return render(request, self.template_name, context, status=422)
+            return render(request, self.template_name, context, status=422)
 
 
 class StatusView(View):

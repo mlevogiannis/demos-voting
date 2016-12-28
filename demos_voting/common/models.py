@@ -28,12 +28,12 @@ logger = logging.getLogger(__name__)
 @python_2_unicode_compatible
 class Election(models.Model):
 
-    TYPE_ELECTION = 'election'
     TYPE_REFERENDUM = 'referendum'
+    TYPE_ELECTION = 'election'
 
     TYPE_CHOICES = (
-        (TYPE_ELECTION, pgettext_lazy("type", "Election")),
         (TYPE_REFERENDUM, pgettext_lazy("type", "Referendum")),
+        (TYPE_ELECTION, pgettext_lazy("type", "Election")),
     )
 
     VOTECODE_TYPE_SHORT = 'short'
@@ -117,12 +117,12 @@ class Election(models.Model):
     # Custom methods and properties
 
     @property
-    def type_is_election(self):
-        return self.type == self.TYPE_ELECTION
-
-    @property
     def type_is_referendum(self):
         return self.type == self.TYPE_REFERENDUM
+
+    @property
+    def type_is_election(self):
+        return self.type == self.TYPE_ELECTION
 
     @property
     def votecode_type_is_short(self):
@@ -172,11 +172,6 @@ class Election(models.Model):
             security_code = base32.encode(s_max)
 
         return len(security_code)
-
-    def clean(self):
-
-        if self.votecode_type_is_long and not self.security_code_type_is_alphanumeric:
-            raise ValidationError(_("Vote-codes of type long require a security code of type alphanumeric."))
 
     # Default manager, meta options and natural key
 

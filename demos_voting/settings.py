@@ -349,10 +349,11 @@ DEMOS_VOTING_CA_PKEY_PASSPHRASE = ''
 
 DEMOS_VOTING_LONG_VOTECODE_HASH_REUSE_SALT = False
 
-# DEMOS_VOTING_MAX_*: The maximum number of ballots, questions per referendum,
-# options per question, parties per election and candidates per party.
+# DEMOS_VOTING_MAX_*: The maximum number of ballots, trustees, questions,
+# options, parties and candidates.
 
 DEMOS_VOTING_MAX_BALLOTS = 10000
+DEMOS_VOTING_MAX_TRUSTEES = 100
 DEMOS_VOTING_MAX_REFERENDUM_QUESTIONS = 50
 DEMOS_VOTING_MAX_REFERENDUM_OPTIONS = 50
 DEMOS_VOTING_MAX_ELECTION_PARTIES = 50

@@ -1,4 +1,4 @@
-// Datetimepickers -------------------------------------------------------------
+// Datetimepickers ------------------------------------------------------------
 
 var datetime_now = moment().seconds(0);
 var datetime_format = "ddd, D MMM YYYY, HH:mm";
@@ -46,43 +46,51 @@ $(".date [data-toggle='tooltip']").click(function(e) {
     $(this).tooltip("hide");
 });
 
-// Elections/Referendum --------------------------------------------------------
+// Election/Referendum type ---------------------------------------------------
 
-function election_type_change_handler() {
+$("input:radio[name='election-type']").change(function () {
 
-    var new_value = $("#id_election-election_type").val()
+    var new_value = $(this).filter(':checked').val();
+    var old_value = (new_value == "referendum") ? "election" : "referendum";
 
-    if (new_value != "elections" && new_value != "referendum") {
-        $(".ctrl-elections, .ctrl-referendum, #question-table").fadeOut();
-        return;
-    }
-
-    var old_value = new_value == "referendum" ? "elections" : "referendum";
-
-    $(".ctrl-" + old_value).fadeOut(200, function() {
-        $(".ctrl-" + new_value).fadeIn();
+    $("." + old_value + "-only").fadeOut(200, function() {
+        $("." + new_value + "-only").fadeIn(400).removeClass("hidden");
+        $(".btn > ." + new_value + "-only," + ".input-group-addon > ." + new_value + "-only").css("display", "inline");
     });
 
-    $(".btn > .ctrl-" + new_value).css("display", "inline");
-    $(".input-group-addon > .ctrl-" + new_value).css("display", "inline");
+    $(".question-entry:not(:last)").each(function(index) {
+        var question_entry = $(this);
+        var question = $(".question[data-index='" + question_entry.attr("data-index") + "']");
+        question_entry.find("[data-toggle='tooltip']").tooltip("destroy");
+        question_entry.remove();
+        question.remove();
+    });
 
-    $("#qed").toggleClass("hidden", new_value != "referendum");
+    update_question_table();
 
-    $(".elections-or-referendum[data-toggle='tooltip']").each(function(index) {
-
+    $("#question-add, .question-remove, .option-remove").each(function(index) {
         var tooltip = $(this);
-        var title = tooltip.data("title-" + new_value);
-
-        tooltip.attr("title", title);
+        tooltip.attr("title", tooltip.data("title-" + new_value));
         tooltip.tooltip("fixTitle");
     });
+});
 
-    $("#question-table").fadeIn();
-}
+// Votecode type --------------------------------------------------------------
 
-$("#id_election-election_type").on("change", election_type_change_handler);
+$("input:radio[name='election-votecode_type']").change(function () {
+    var votecode_type = $(this);
+    var security_code_type = $("input:radio[name='election-security_code_type']");
 
-// Question sortable -----------------------------------------------------------
+    if (votecode_type.filter(':checked').val() == "long") {
+        security_code_type.filter('[value=alphanumeric]').prop('checked', true);
+        security_code_type.filter(':not([value=alphanumeric])').prop('disabled', true);
+    }
+    else {
+        security_code_type.prop('disabled', false);
+    }
+});
+
+// Question sortable ----------------------------------------------------------
 
 $("#question-table tbody").sortable({
     start: function(event, ui) {
@@ -110,7 +118,7 @@ $("#question-table tbody").sortable({
     placeholder: "question-sortable-placeholder",
 });
 
-// Question control buttons ----------------------------------------------------
+// Question control buttons ---------------------------------------------------
 
 $("#question-add").click(function(e) {
 
@@ -232,7 +240,7 @@ $(".question-cancel").click(function(e) {
     }
 });
 
-// Question show/hide functions ------------------------------------------------
+// Question show/hide functions -----------------------------------------------
 
 function show_question(question) {
 
@@ -243,15 +251,15 @@ function show_question(question) {
 
     var modal_title = question_modal.find(".modal-title");
 
-    var b0 = ($("#id_election-election_type").val() == "elections");
+    var b0 = ($("input:radio[name='election-type']:checked").val() == "election");
     var b1 = (typeof question.data("question-data") === "undefined");
 
     var title_attr;
 
     if (b0 && b1)
-        title_attr = "title-elections-add"
+        title_attr = "title-election-add"
     else if (b0 && !b1)
-        title_attr = "title-elections-edit"
+        title_attr = "title-election-edit"
     else if (!b0 && b1)
         title_attr = "title-referendum-add"
     else // if (!b0 && !b1)
@@ -278,7 +286,7 @@ function hide_question(question, complete_f) {
     question_modal.modal("hide");
 }
 
-// Question order update -------------------------------------------------------
+// Question order update ------------------------------------------------------
 
 function update_question_table() {
 
@@ -329,7 +337,7 @@ function update_question_table() {
 
                 // Updates question's index or option's prefix
 
-                var re = /(question-|option)(?:__prefix__|\d+)/;
+                var re = /(questions-|options)(?:__prefix__|\d+)/;
                 return attr.replace(re, "$1" + field_index);
             });
         }
@@ -358,14 +366,15 @@ function update_question_table() {
 
     // Update TOTAL_FORMS value and add-button's state
 
-    var maximum = management_form_max("question");
+    var maximum = management_form_max("questions");
     var questions = $(".question-entry:not(:last)").length;
 
-    management_form_total("question", questions);
+    // TODO: parties < maximum
+    management_form_total("questions", questions);
     $("#question-add").prop("disabled", !(questions < maximum));
 }
 
-// Option sortable -------------------------------------------------------------
+// Option sortable ------------------------------------------------------------
 
 function register_option_sortable(question) {
 
@@ -383,12 +392,12 @@ function register_option_sortable(question) {
     });
 }
 
-// Option control buttons ------------------------------------------------------
+// Option control buttons -----------------------------------------------------
 
 $(".option-add").click(function(e) {
 
     var question = $(this).closest(".question");
-    var option_prefix = "option" + question.attr("data-index");
+    var option_prefix = "options" + question.attr("data-index");
 
     // Check if a new option can be added
 
@@ -405,7 +414,7 @@ $(".option-add").click(function(e) {
 
     new_option.appendTo(question.find(".option-list"));
 
-    new_option.find("input").val("");
+    new_option.find("input").focus().val("");
     new_option.find(".form-group").removeClass("has-error");
 
     // Update option_list
@@ -422,7 +431,7 @@ $(".option-remove").click(function(e) {
     var option = $(this).closest(".option");
     var question = $(this).closest(".question");
 
-    var option_prefix = "option" + question.attr("data-index");
+    var option_prefix = "options" + question.attr("data-index");
 
     // Check if the option can be removed
 
@@ -440,12 +449,12 @@ $(".option-remove").click(function(e) {
     update_option_list(question);
 });
 
-// Option order update -------------------------------------------------------
+// Option order update --------------------------------------------------------
 
 function update_option_list(question) {
 
     var option_list = question.find(".option");
-    var option_prefix = "option" + question.attr("data-index");
+    var option_prefix = "options" + question.attr("data-index");
 
     // Update each option in the option list
 
@@ -462,7 +471,7 @@ function update_option_list(question) {
 
                 // Update option's index
 
-                var re = /(option(?:__prefix__|\d+)-)\d+/;
+                var re = /(options(?:__prefix__|\d+)-)\d+/;
                 return attr.replace(re, "$1" + field_index);
             });
         }
@@ -495,6 +504,7 @@ function update_option_list(question) {
     var options = option_list.length;
     var maximum = management_form_max(option_prefix);
 
+    // TODO: candidates < maximum
     management_form_total(option_prefix, options);
     question.find(".option-add").prop("disabled", !(options < maximum));
 
@@ -518,7 +528,7 @@ function update_option_list(question) {
 
 /*function update_multiple_choice_select(question) {
 
-    var option_prefix = "option" + question.attr("data-index");
+    var option_prefix = "options" + question.attr("data-index");
     var option_total = management_form_total(option_prefix);
 
     var select_input = question.find(".multiple-choice-select");
@@ -543,10 +553,9 @@ function update_option_list(question) {
     }
 }*/
 
-// ManagementForm functions ----------------------------------------------------
+// ManagementForm functions ---------------------------------------------------
 
 function management_form_total(prefix, value) {
-
     // Return or update ManagementForm's TOTAL_FORMS value
 
     var total_forms = $("#id_" + prefix + "-TOTAL_FORMS");
@@ -558,20 +567,16 @@ function management_form_total(prefix, value) {
 }
 
 function management_form_min(prefix) {
-
     // Return ManagementForm's MIN_NUM_FORMS value
-
     return parseInt($("#id_" + prefix + "-MIN_NUM_FORMS").val());
 }
 
 function management_form_max(prefix) {
-
     // Return ManagementForm's MAX_NUM_FORMS value
-
     return parseInt($("#id_" + prefix + "-MAX_NUM_FORMS").val());
 }
 
-// Ballot preview --------------------------------------------------------------
+// Ballot preview -------------------------------------------------------------
 
 $(":input, .date").on("remove change update dp.change dp.update", function(e) {
     $("form").data("has-changed", true);
@@ -760,7 +765,7 @@ $("#pdf-modal").on("hidden.bs.modal", function(e) {
         spinner.stop();
 });
 
-// Input-group with checkbox/spinner -------------------------------------------
+// Input-group with checkbox/spinner ------------------------------------------
 
 $(".input-group-checkbox > .input-group-btn > .btn").click(function(e) {
 
@@ -790,7 +795,7 @@ $(".input-group-spinner > .input-group-btn > .btn").click(function(e) {
     input.trigger("change");
 });
 
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 $("form .form-group").find(":input, .date").on("remove change update dp.change dp.update", function(e) {
 
@@ -816,7 +821,7 @@ $("form .alert").on("closed.bs.alert", function () {
     $("body").scrollTop($("body").scrollTop() - height);
 });
 
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 // Update question events
 
@@ -833,7 +838,3 @@ $("form").find(".question").each(function(index, element) {
 $("body").tooltip({
     selector: "[data-toggle='tooltip']",
 });
-
-// Show question or party table
-
-election_type_change_handler();

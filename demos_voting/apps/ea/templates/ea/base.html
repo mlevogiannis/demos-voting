@@ -16,9 +16,9 @@
 
 {% block navbar %}
     {% tuple "ea:home" _("Home") False as home %}
-    {% tuple "ea:create" _("Create Election") False as create %}
-    {% tuple "ea:status" _("Election Status") True as status %}
-    {% tuple "ea:center" _("Election Center") False as center %}
+    {% tuple "ea:create" _("Create") False as create %}
+    {% tuple "ea:status" _("Status") True as status %}
+    {% tuple "ea:center" _("Account") False as center %}
     {% tuple home create status center as links %}
     {{ block.super }}
 {% endblock navbar %}

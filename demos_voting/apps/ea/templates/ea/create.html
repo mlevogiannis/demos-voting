@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/css/bootstrap-datetimepicker.min.css">
 
 <!-- create.css -->
-<link rel="stylesheet" href="{% static 'ea/create.css' %}">
+<link rel="stylesheet" href="{% static "ea/create.css" %}">
 
 {% endblock css %}
 
@@ -20,17 +20,13 @@
 <div class="row">
     <div class="col-xs-12">
 
-        <div class="page-header text-center">
-            <h2>{% trans "Create Election" %}</h2>
-        </div>
-
-        <form action="{% url 'ea:create' %}" method="post">
+        <form action="{% url "ea:create" %}" method="post">
             {% csrf_token %}
 
             {% trans "General" as general %}
             {% trans "The following errors where detected" as following_errors_detected %}
 
-            <div id="election" class="group-wrapper">
+            <div id="election" class="form-horizontal group-wrapper">
 
                 <div class="main-header-small">
                     <h3>{% trans "Election" %}</h3>
@@ -55,143 +51,104 @@
                     {% endif %}
                 </div>
 
-                <!-- Name input -->
                 <div class="form-group {% if election_form.name.errors %} has-error {% endif %}">
-                    <label class="sr-only" for="{{ election_form.name.id_for_label }}">{{ election_form.name.label }}</label>
-                    <div class="input-group">
-                        <div class="input-group-addon">{{ election_form.name.label }}:</div>
-                        <input type="text" class="form-control" id="{{ election_form.name.auto_id }}" placeholder="{% trans 'Type the election name here' %}" value="{{ election_form.name.value|default_if_none:'' }}" name="{{ election_form.name.html_name }}" maxlength="{{ election_form.name.field.max_length }}">
+                    <label for="{{ election_form.name.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ election_form.name.label }}:</label>
+                    <div class="col-sm-9 col-md-10">
+                        <input type="text" class="form-control" id="{{ election_form.name.auto_id }}" placeholder="{% trans "Type the election's name here" %}" value="{{ election_form.name.value|default_if_none:'' }}" name="{{ election_form.name.html_name }}" maxlength="{{ election_form.name.field.max_length }}">
                     </div>
                 </div>
 
-                {% trans "Date and time picker" as datetime_picker %}
-
-                <!-- Start/end date and time input -->
-                <div class="row">
-                    <div class="col-xs-12 col-sm-6">
-                        <div class="form-group {% if election_form.starts_at.errors %} has-error {% endif %}">
-                            <label class="sr-only" for="{{ election_form.starts_at.id_for_label }}">{{ election_form.starts_at.label }}</label>
-                            <div class="input-group date">
-                                <div class="input-group-addon">{{ election_form.starts_at.label }}:</div>
-                                <input type="text" class="form-control" id="{{ election_form.starts_at.auto_id }}" placeholder="{% trans 'Date and time' %}">
-                                <div class="input-group-addon" data-toggle="tooltip" data-container="body" title="{{ datetime_picker }}"><span class="glyphicon glyphicon-calendar"></span></div>
-                            </div>
-                            <input class="datetime-iso8601-input" type="text" value="{{ election_form.starts_at.value|default_if_none:'' }}" name="{{ election_form.starts_at.html_name }}" hidden>
+                <div class="form-group {% if election_form.type.errors %} has-error {% endif %}">
+                    <label for="{{ election_form.type.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ election_form.type.label }}:</label>
+                    <div class="col-sm-9 col-md-10">
+                        {% for radio in election_form.type %}
+                        {% if not forloop.first %}
+                        <div class="radio">
+                            <label>{{ radio.tag }}{{ radio.choice_label }}</label>
                         </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-6">
-                        <div class="form-group {% if election_form.ends_at.errors %} has-error {% endif %}">
-                            <label class="sr-only" for="{{ election_form.ends_at.id_for_label }}">{{ election_form.ends_at.label }}</label>
-                            <div class="input-group date">
-                                <div class="input-group-addon">{{ election_form.ends_at.label }}:</div>
-                                <input type="text" class="form-control" id="{{ election_form.ends_at.auto_id }}" placeholder="{% trans 'Date and time' %}">
-                                <div class="input-group-addon" data-toggle="tooltip" data-container="body" title="{{ datetime_picker }}"><span class="glyphicon glyphicon-calendar"></span></div>
-                            </div>
-                            <input class="datetime-iso8601-input" type="text" value="{{ election_form.ends_at.value|default_if_none:'' }}" name="{{ election_form.ends_at.html_name }}" hidden>
-                        </div>
+                        {% endif %}
+                        {% endfor %}
                     </div>
                 </div>
 
-                <!-- Ballots and votecode type input -->
-                <div class="row">
-                    <div class="col-xs-12 col-sm-6">
-                        <div class="form-group {% if election_form.ballots_cnt.errors %} has-error {% endif %}">
-                            <label class="sr-only" for="{{ election_form.ballots_cnt.id_for_label }}">{{ election_form.ballots_cnt.label }}</label>
-                            <div class="input-group input-group-spinner">
-                                <div class="input-group-addon">{{ election_form.ballots_cnt.label }}:</div>
-                                <input type="text" class="form-control input-type-number" id="{{ election_form.ballots_cnt.auto_id }}" placeholder="{% trans 'How many?' %}" value="{{ election_form.ballots_cnt.value|default_if_none:'' }}" name="{{ election_form.ballots_cnt.html_name }}" min="{{ election_form.ballots_cnt.field.min_value }}" max="{{ election_form.ballots_cnt.field.max_value }}">
-                                <div class="input-group-btn">
-                                    <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-triangle-top"></span></button>
-                                    <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-triangle-bottom"></span></button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-6">
-                        <div class="form-group {% if election_form.votecode_type.errors %} has-error {% endif %}">
-                            <label class="sr-only" for="{{ election_form.votecode_type.id_for_label }}">{{ election_form.votecode_type.label }}</label>
-                            <div class="input-group">
-                                <div class="input-group-addon">{{ election_form.votecode_type.label }}:</div>
-                                <select class="form-control select-placeholder" id="{{ election_form.votecode_type.auto_id }}" name="{{ election_form.votecode_type.html_name }}">
-                                    <option {% if not election_form.votecode_type.data %} selected {% endif %} disabled>{% trans "Select" %}</option>
-                                    {% for value, name in election_form.votecode_type.field.choices %}
-                                    <option {% if not election_form.votecode_type.data and election_form.votecode_type.field.initial == value or election_form.votecode_type.data == value %}selected{% endif %} value="{{ value }}">{{ name }}</option>
-                                    {% endfor %}
-                                </select>
+                <div class="election-only {% if election_form.type.value != election_form.type_election %} hidden {% endif %} form-group {% if election_form.max_candidate_choices.errors %} has-error {% endif %}">
+                    <label for="{{ election_form.max_candidate_choices.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ election_form.max_candidate_choices.label }}:</label>
+                    <div class="col-sm-9 col-md-10">
+                        <div class="input-group input-group-spinner">
+                            <input type="text" class="form-control input-type-number" id="{{ election_form.max_candidate_choices.auto_id }}" placeholder="{% trans "How many?" %}" value="{{ election_form.max_candidate_choices.value|default_if_none:'' }}" name="{{ election_form.max_candidate_choices.html_name }}" min="{{ election_form.max_candidate_choices.field.min_value }}" max="{{ election_form.max_candidate_choices.field.max_value }}">
+                            <div class="input-group-btn">
+                                <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-triangle-top"></span></button>
+                                <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-triangle-bottom"></span></button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Election type and language input -->
-                <div class="row">
-                    <div class="col-xs-12 col-sm-6">
-                        <div class="form-group {% if election_form.election_type.errors %} has-error {% endif %}">
-                            <label class="sr-only" for="{{ election_form.election_type.id_for_label }}">{{ election_form.election_type.label }}</label>
-                            <div class="input-group">
-                                <div class="input-group-addon">{{ election_form.election_type.label }}:</div>
-                                <select class="form-control select-placeholder" id="{{ election_form.election_type.auto_id }}" name="{{ election_form.election_type.html_name }}">
-                                    <option {% if not election_form.election_type.data %} selected {% endif %} disabled>{% trans "Select" %}</option>
-                                    {% for value, name in election_form.election_type.field.choices %}
-                                    <option {% if not election_form.election_type.data and election_form.election_type.field.initial == value or election_form.election_type.data == value %}selected{% endif %} value="{{ value }}">{{ name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
+                <div class="form-group {% if election_form.voting_starts_at.errors %} has-error {% endif %}">
+                    <label for="{{ election_form.voting_starts_at.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ election_form.voting_starts_at.label }}:</label>
+                    <div class="col-sm-9 col-md-10">
+                        <div class="input-group date">
+                            <input type="text" class="form-control" id="{{ election_form.voting_starts_at.auto_id }}" placeholder="{% trans "Date and time" %}">
+                            <div class="input-group-addon" data-toggle="tooltip" data-container="body" title="{{ datetime_picker }}"><span class="glyphicon glyphicon-calendar"></span></div>
                         </div>
+                        <input class="datetime-iso8601-input" type="text" value="{{ election_form.voting_starts_at.value|default_if_none:'' }}" name="{{ election_form.voting_starts_at.html_name }}" hidden>
                     </div>
-                    <div class="col-xs-12 col-sm-6">
-                        <div class="form-group {% if election_form.language.errors %} has-error {% endif %}">
-                            <label class="sr-only" for="{{ election_form.language.id_for_label }}">{{ election_form.language.label }}</label>
-                            <div class="input-group">
-                                <div class="input-group-addon">{{ election_form.language.label }}:</div>
-                                <select class="form-control select-placeholder" id="{{ election_form.language.auto_id }}" name="{{ election_form.language.html_name }}">
-                                    <option {% if not election_form.language.data %} selected {% endif %} disabled>{% trans "Select" %}</option>
-                                    {% for value, name in election_form.language.field.choices %}
-                                    <option {% if not election_form.language.data and election_form.language.field.initial == value or election_form.language.data == value %}selected{% endif %} value="{{ value }}">{{ name }}</option>
-                                    {% endfor %}
-                                </select>
+                </div>
+
+                <div class="form-group {% if election_form.voting_ends_at.errors %} has-error {% endif %}">
+                    <label for="{{ election_form.voting_ends_at.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ election_form.voting_ends_at.label }}:</label>
+                    <div class="col-sm-9 col-md-10">
+                        <div class="input-group date">
+                            <input type="text" class="form-control" id="{{ election_form.voting_ends_at.auto_id }}" placeholder="{% trans "Date and time" %}">
+                            <div class="input-group-addon" data-toggle="tooltip" data-container="body" title="{{ datetime_picker }}"><span class="glyphicon glyphicon-calendar"></span></div>
+                        </div>
+                        <input class="datetime-iso8601-input" type="text" value="{{ election_form.voting_ends_at.value|default_if_none:'' }}" name="{{ election_form.voting_ends_at.html_name }}" hidden>
+                    </div>
+                </div>
+
+                <div class="form-group {% if election_form.ballot_count.errors %} has-error {% endif %}">
+                    <label for="{{ election_form.ballot_count.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ election_form.ballot_count.label }}:</label>
+                    <div class="col-sm-9 col-md-10">
+                        <div class="input-group input-group-spinner">
+                            <input type="text" class="form-control input-type-number" id="{{ election_form.ballot_count.auto_id }}" placeholder="{% trans "How many?" %}" value="{{ election_form.ballot_count.value|default_if_none:'' }}" name="{{ election_form.ballot_count.html_name }}" min="{{ election_form.ballot_count.field.min_value }}" max="{{ election_form.ballot_count.field.max_value }}">
+                            <div class="input-group-btn">
+                                <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-triangle-top"></span></button>
+                                <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-triangle-bottom"></span></button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Electoral system and candidate choices input -->
-                <div class="row ctrl-elections">
-                    <div class="col-xs-12 col-sm-6">
-                        <div class="form-group {% if election_form.electoral_system.errors %} has-error {% endif %}">
-                            <label class="sr-only" for="{{ election_form.electoral_system.id_for_label }}">{{ election_form.electoral_system.label }}</label>
-                            <div class="input-group">
-                                <div class="input-group-addon">{{ election_form.electoral_system.label }}:</div>
-                                <select class="form-control select-placeholder" id="{{ election_form.electoral_system.auto_id }}" name="{{ election_form.electoral_system.html_name }}">
-                                    <option {% if not election_form.electoral_system.data %} selected {% endif %} disabled>{% trans "Select" %}</option>
-                                    {% for value, name in election_form.electoral_system.field.choices %}
-                                    <option {% if not election_form.electoral_system.data and election_form.electoral_system.field.initial == value or election_form.electoral_system.data == value %}selected{% endif %} value="{{ value }}">{{ name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
+                <div class="form-group {% if election_form.votecode_type.errors %} has-error {% endif %}">
+                    <label for="{{ election_form.votecode_type.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ election_form.votecode_type.label }}:</label>
+                    <div class="col-sm-9 col-md-10">
+                        {% for radio in election_form.votecode_type %}
+                        {% if not forloop.first %}
+                        <div class="radio">
+                            <label>{{ radio.tag }}{{ radio.choice_label }}</label>
                         </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-6">
-                        <div class="form-group {% if election_form.choices.errors %} has-error {% endif %}">
-                            <label class="sr-only" for="{{ election_form.choices.id_for_label }}">{{ election_form.choices.label }}</label>
-                                <div class="input-group input-group-spinner">
-                                <div class="input-group-addon">{{ election_form.choices.label }}:</div>
-                                <input type="text" class="form-control input-type-number" id="{{ election_form.choices.auto_id }}" value="{{ election_form.choices.value|default_if_none:'1' }}" min="{{ election_form.choices.field.min_value }}" max="{{ election_form.choices.field.max_value }}" name="{{ election_form.choices.html_name }}">
-                                <div class="input-group-btn">
-                                    <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-triangle-top"></span></button>
-                                    <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-triangle-bottom"></span></button>
-                                </div>
-                            </div>
-                        </div>
+                        {% endif %}
+                        {% endfor %}
                     </div>
                 </div>
 
-                <!-- Trustee input -->
-                <div class="form-group {% if election_form.trustee_list.errors %} has-error {% endif %} hidden">
-                    <label class="sr-only" for="{{ election_form.trustee_list.id_for_label }}">{{ election_form.trustee_list.label }}</label>
-                    <div class="input-group">
-                        <div class="input-group-addon">{{ election_form.trustee_list.label }}:</div>
-                        <input type="text" class="form-control" id="{{ election_form.trustee_list.auto_id }}" placeholder="{% trans 'e.g.' %}: alice@demos-voting.org, bob@demos-voting.org" value="{{ election_form.trustee_list.value|default_if_none:'' }}" name="{{ election_form.trustee_list.html_name }}" maxlength="{{ election_form.trustee_list.field.max_length }}">
+                <div class="form-group {% if election_form.security_code_type.errors %} has-error {% endif %}">
+                    <label for="{{ election_form.security_code_type.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ election_form.security_code_type.label }}:</label>
+                    <div class="col-sm-9 col-md-10">
+                        {% for radio in election_form.security_code_type %}
+                        {% if not forloop.first %}
+                        <div class="radio">
+                            <label>{{ radio.tag }}{{ radio.choice_label }}</label>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="form-group {% if election_form.trustee_emails.errors %} has-error {% endif %}">
+                    <label for="{{ election_form.trustee_emails.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ election_form.trustee_emails.label }}:</label>
+                    <div class="col-sm-9 col-md-10">
+                        <textarea class="form-control" id="{{ election_form.trustee_emails.auto_id }}" placeholder="{% trans "e.g." %}: alice@demos-voting.org, bob@demos-voting.org" value="{{ election_form.trustee_emails.value|default_if_none:'' }}" name="{{ election_form.trustee_emails.html_name }}" maxlength="{{ election_form.trustee_emails.field.max_length }}" rows="3"></textarea>
                     </div>
                 </div>
             </div>
@@ -199,8 +156,8 @@
             <div id="question-table" class="group-wrapper">
 
                 <div class="main-header-small">
-                    <h3><span class="ctrl-referendum">{% trans "Questions" %}</span><span class="ctrl-elections">{% trans "Parties" %}</span></h3>
-                    <h5 class="text-muted"><span class="ctrl-referendum">({% trans "drag and drop to rearrange the questions" %})</span><span class="ctrl-elections">({% trans "drag and drop to rearrange the parties" %})</span></h5>
+                    <h3><span class="referendum-only {% if election_form.type.value != election_form.type_referendum %} hidden {% endif %}">{% trans "Questions" %}</span><span class="election-only {% if election_form.type.value != election_form.type_election %} hidden {% endif %}">{% trans "Parties" %}</span></h3>
+                    <h5 class="text-muted"><span class="referendum-only {% if election_form.type.value != election_form.type_referendum %} hidden {% endif %}">({% trans "drag and drop to rearrange the questions" %})</span><span class="election-only {% if election_form.type.value != election_form.type_election %} hidden {% endif %}">({% trans "drag and drop to rearrange the parties" %})</span></h5>
                 </div>
 
                 <div class="alert-wrapper">
@@ -226,48 +183,40 @@
                 </div>
 
                 <table class="table table-hover">
-
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th><span class="ctrl-referendum">{% trans "Question" %}</span><span class="ctrl-elections">{% trans "Party" %}</span></th>
+                            <th><span class="referendum-only {% if election_form.type.value != election_form.type_referendum %} hidden {% endif %}">{% trans "Question" %}</span><span class="election-only {% if election_form.type.value != election_form.type_election %} hidden {% endif %}">{% trans "Party" %}</span></th>
                             <th class="text-center">{% trans "Action" %}</th>
                         </tr>
                     </thead>
-
                     <tbody>
-                        {% for question_form, option_formset in question_and_options_list %}
+                        {% for question_form, option_formset in option_formsets %}
                         <tr class="question-entry {% if question_form.errors or option_formset.total_error_count %} danger {% endif %} {% if forloop.last %} hidden {% endif %}" data-index="{% if not forloop.last %}{{ forloop.counter0 }}{% else %}__prefix__{% endif %}">
                             <th scope="row">{% if not forloop.last %}{{ forloop.counter }}{% endif %}</th>
-                            <td class="">{% if not forloop.last %}{{ question_form.question.value }}{% endif %}</td>
-                            <td class="text-center"><button type="button" class="btn btn-default btn-sm question-remove elections-or-referendum" data-toggle="tooltip" data-container="body" data-title-referendum="{% trans 'Remove this question' %}" data-title-elections="{% trans 'Remove this party' %}"><span class="glyphicon glyphicon-trash"></span></button></td>
+                            <td class="">{% if not forloop.last %}{{ question_form.name.value }}{% endif %}</td>
+                            <td class="text-center"><button type="button" class="btn btn-default btn-sm question-remove" data-toggle="tooltip" data-container="body" data-title-referendum="{% trans "Remove this question" %}" data-title-election="{% trans "Remove this party" %}"><span class="glyphicon glyphicon-trash"></span></button></td>
                         </tr>
                         {% endfor %}
                     </tbody>
-
                     <tfoot>
                         <tr>
                             <th></th>
-                            <td><span class="text-muted"><em><span class="ctrl-referendum">{% trans "Click on the action to add a new question" %}</span><span class="ctrl-elections">{% trans "Click on the action to add a new party" %}</span></em></span></td>
-                            <td class="text-center"><button type="button" id="question-add" class="btn btn-default btn-sm elections-or-referendum" data-toggle="tooltip" data-container="body" data-title-referendum="{% trans 'Add new question' %}" data-title-elections="{% trans 'Add new party' %}"><span class="glyphicon glyphicon-plus"></span></button></td>
+                            <td><span class="text-muted"><em><span class="referendum-only {% if election_form.type.value != election_form.type_referendum %} hidden {% endif %}">{% trans "Click on the action to add a new question" %}</span><span class="election-only {% if election_form.type.value != election_form.type_election %} hidden {% endif %}">{% trans "Click on the action to add a new party" %}</span></em></span></td>
+                            <td class="text-center"><button type="button" id="question-add" class="btn btn-default btn-sm" data-toggle="tooltip" data-container="body" data-title-referendum="{% trans "Add new question" %}" data-title-election="{% trans "Add new party" %}"><span class="glyphicon glyphicon-plus"></span></button></td>
                         </tr>
                     </tfoot>
-
                 </table>
             </div>
 
-            <div id="form-buttons" class="btn-group btn-group-justified" role="group">
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-default" id="ballot-preview">{% trans "Ballot Preview" %}</button>
-                </div>
-                <div class="btn-group" role="group">
-                    <button type="submit" class="btn btn-default">{% trans "Create Election" %}</button>
-                </div>
+            <div id="form-buttons" class="text-right">
+                <button type="button" class="btn btn-default" id="ballot-preview">{% trans "Ballot preview" %}</button>
+                <button type="submit" class="btn btn-default">{% trans "Create election" %}</button>
             </div>
 
             {{ question_formset.management_form }}
 
-            {% for question_form, option_formset in question_and_options_list %}
+            {% for question_form, option_formset in option_formsets %}
 
             {% if forloop.last %}
         </form> {# exclude formset's empty_form from the actual form #}
@@ -278,7 +227,7 @@
                 <div class="group-wrapper">
 
                     <div class="modal-header-small">
-                        <h3><span class="ctrl-referendum">{% trans "Question" %}</span><span class="ctrl-elections">{% trans "Party" %}</span></h3>
+                        <h3><span class="referendum-only {% if election_form.type.value != election_form.type_referendum %} hidden {% endif %}">{% trans "Question" %}</span><span class="election-only {% if election_form.type.value != election_form.type_election %} hidden {% endif %}">{% trans "Party" %}</span></h3>
                         <h5 class="text-muted">({% trans "all fields are required" %})</h5>
                     </div>
 
@@ -300,43 +249,50 @@
                         {% endif %}
                     </div>
 
-                    <!-- Question input -->
-                    <div class="form-group {% if question_form.question.errors %} has-error {% endif %}">
-                        <label class="sr-only" for="{{ question_form.question.id_for_label }}">{{ question_form.question.label }}</label>
+                    <div class="form-group {% if question_form.name.errors %} has-error {% endif %}">
+                        <label class="sr-only" for="{{ question_form.name.id_for_label }}">{{ question_form.name.label }}</label>
                         <div class="input-group">
-                            <div class="input-group-addon"><span class="ctrl-referendum">{{ question_form.question.label }}</span><span class="ctrl-elections">{% trans "Party" %}</span></div>
-                            <input type="text" class="form-control" id="{{ question_form.question.auto_id }}" placeholder="{% trans 'Type it here' %}" value="{{ question_form.question.value|default_if_none:'' }}" name="{{ question_form.question.html_name }}" maxlength="{{ question_form.question.field.max_length }}">
+                            <div class="input-group-addon">{{ question_form.name.label }}</div>
+                            <input type="text" class="form-control" id="{{ question_form.name.auto_id }}" placeholder="{% trans "Type the name here" %}" value="{{ question_form.name.value|default_if_none:'' }}" name="{{ question_form.name.html_name }}" maxlength="{{ question_form.name.field.max_length }}">
                         </div>
                     </div>
 
-                    <!-- Multiple choices and columns input -->
-                    <div class="row" id="qed">
-                        <div class="col-xs-12 col-sm-6">
-                            <div class="form-group {% if question_form.choices.errors %} has-error {% endif %}">
-                                <label class="sr-only" for="{{ question_form.choices.id_for_label }}">{{ question_form.choices.label }}</label>
-                                <div class="input-group input-group-spinner">
-                                    <div class="input-group-addon">{{ question_form.choices.label }}:</div>
-                                    <input type="text" class="form-control input-type-number" id="{{ question_form.choices.auto_id }}" value="{{ question_form.choices.value|default_if_none:'' }}" min="{{ question_form.choices.field.min_value }}" max="{{ question_form.choices.field.max_value }}" name="{{ question_form.choices.html_name }}">
-                                    <div class="input-group-btn">
-                                        <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-triangle-top"></span></button>
-                                        <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-triangle-bottom"></span></button>
-                                    </div>
-                                </div>
+                    <div class="referendum-only {% if election_form.type.value != election_form.type_referendum %} hidden {% endif %} form-group {% if question_form.min_choices.errors %} has-error {% endif %}">
+                        <label class="sr-only" for="{{ question_form.min_choices.id_for_label }}">{{ question_form.min_choices.label }}</label>
+                        <div class="input-group input-group-spinner">
+                            <div class="input-group-addon">{{ question_form.min_choices.label }}:</div>
+                            <input type="text" class="form-control input-type-number" id="{{ question_form.min_choices.auto_id }}" placeholder="{% trans "How many?" %}" value="{{ question_form.min_choices.value|default_if_none:'' }}" name="{{ question_form.min_choices.html_name }}" min="{{ question_form.min_choices.field.min_value }}" max="{{ question_form.min_choices.field.max_value }}">
+                            <div class="input-group-btn">
+                                <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-triangle-top"></span></button>
+                                <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-triangle-bottom"></span></button>
                             </div>
                         </div>
-                        <div class="col-xs-12 col-sm-6">
-                            <div class="form-group {% if question_form.columns.errors %} has-error {% endif %}">
-                                <label class="sr-only" for="{{ question_form.columns.id_for_label }}">{{ question_form.columns.label }}</label>
-                                <div class="input-group">
-                                    <div class="input-group-addon">{{ question_form.columns.label }}:</div>
-                                    <div class="input-group-addon material-switch">
-                                        <div class="">
-                                            <input id="{{ question_form.columns.auto_id }}" name="{{ question_form.columns.html_name }}" type="checkbox" {% if question_form.columns.value %}checked{% endif %}/>
-                                            <label for="{{ question_form.columns.id_for_label }}" class="label-default"></label>
-                                        </div>
-                                    </div>
-                                </div>
+                    </div>
+
+                    <div class="referendum-only {% if election_form.type.value != election_form.type_referendum %} hidden {% endif %} form-group {% if question_form.max_choices.errors %} has-error {% endif %}">
+                        <label class="sr-only" for="{{ question_form.max_choices.id_for_label }}">{{ question_form.max_choices.label }}</label>
+                        <div class="input-group input-group-spinner">
+                            <div class="input-group-addon">{{ question_form.max_choices.label }}:</div>
+                            <input type="text" class="form-control input-type-number" id="{{ question_form.max_choices.auto_id }}" placeholder="{% trans "How many?" %}" value="{{ question_form.max_choices.value|default_if_none:'' }}" name="{{ question_form.max_choices.html_name }}" min="{{ question_form.max_choices.field.min_value }}" max="{{ question_form.max_choices.field.max_value }}">
+                            <div class="input-group-btn">
+                                <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-triangle-top"></span></button>
+                                <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-triangle-bottom"></span></button>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="referendum-only {% if election_form.type.value != election_form.type_referendum %} hidden {% endif %} form-group {% if question_form.layout.errors %} has-error {% endif %}">
+                        <label class="sr-only" for="{{ question_form.layout.id_for_label }}">{{ question_form.layout.label }}</label>
+                        <div class="input-group">
+                            <div class="input-group-addon">{{ question_form.layout.label }}:</div>
+                            <select class="form-control select-placeholder" id="{{ question_form.layout.auto_id }}" name="{{ question_form.layout.html_name }}">
+                                <option {% if not question_form.layout.data %} selected {% endif %} disabled>{% trans "Select" %}</option>
+                                {% for value, name in question_form.layout.field.choices %}
+                                {% if not forloop.first %}
+                                <option {% if not question_form.layout.data and question_form.layout.field.initial == value or question_form.layout.data == value %}selected{% endif %} value="{{ value }}">{{ name }}</option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -344,8 +300,8 @@
                 <div class="group-wrapper">
 
                     <div class="modal-header-small">
-                        <h3><span class="ctrl-referendum">{% trans "Options" %}</span><span class="ctrl-elections">{% trans "Candidates" %}</span></h3>
-                        <h5 class="text-muted"><span class="ctrl-referendum">({% trans "drag and drop to rearrange the options" %})</span><span class="ctrl-elections">({% trans "drag and drop to rearrange the candidates" %})</span></h5>
+                        <h3><span class="referendum-only {% if election_form.type.value != election_form.type_referendum %} hidden {% endif %}">{% trans "Options" %}</span><span class="election-only {% if election_form.type.value != election_form.type_election %} hidden {% endif %}">{% trans "Candidates" %}</span></h3>
+                        <h5 class="text-muted"><span class="referendum-only {% if election_form.type.value != election_form.type_referendum %} hidden {% endif %}">({% trans "drag and drop to rearrange the options" %})</span><span class="election-only {% if election_form.type.value != election_form.type_election %} hidden {% endif %}">({% trans "drag and drop to rearrange the candidates" %})</span></h5>
                     </div>
 
                     <div class="alert-wrapper">
@@ -385,13 +341,12 @@
                         {% for option_form in option_formset %}
                         <li class="option">
 
-                            <!-- Option input -->
-                            <div class="form-group {% if option_form.text.errors or option_form.non_field_errors %} has-error {% endif %}">
-                                <label class="sr-only" for="{{ option_form.text.id_for_label }}">{% trans "Option" %}/{% trans "Candidate" %} {{ forloop.counter }}</label>
+                            <div class="form-group {% if option_form.name.errors or option_form.non_field_errors %} has-error {% endif %}">
+                                <label class="sr-only" for="{{ option_form.name.id_for_label }}">{% trans "Option" %}/{% trans "Candidate" %} {{ forloop.counter }}</label>
                                 <div class="input-group">
-                                    <div class="input-group-addon"><span class="ctrl-referendum">{% trans "Option" %}</span><span class="ctrl-elections">{% trans "Candidate" %}</span> <span class="index">{{ forloop.counter }}</span>:</div>
-                                    <input type="text" class="form-control" id="{{ option_form.text.auto_id }}" placeholder="{% trans 'Type it here' %}" value="{{ option_form.text.value|default_if_none:'' }}" name="{{ option_form.text.html_name }}" maxlength="{{ option_form.text.field.max_length }}">
-                                    <div class="input-group-addon option-remove elections-or-referendum" data-toggle="tooltip" data-container="body" data-title-referendum="{% trans 'Remove this option' %}" data-title-elections="{% trans 'Remove this candidate' %}"><span class="glyphicon glyphicon-trash"></span></div>
+                                    <div class="input-group-addon"><span class="referendum-only {% if election_form.type.value != election_form.type_referendum %} hidden {% endif %}">{% trans "Option" %}</span><span class="election-only {% if election_form.type.value != election_form.type_election %} hidden {% endif %}">{% trans "Candidate" %}</span> <span class="index">{{ forloop.counter }}</span>:</div>
+                                    <input type="text" class="form-control" id="{{ option_form.name.auto_id }}" placeholder="{% trans "Type the name here" %}" value="{{ option_form.name.value|default_if_none:'' }}" name="{{ option_form.name.html_name }}" maxlength="{{ option_form.name.field.max_length }}">
+                                    <div class="input-group-addon option-remove" data-toggle="tooltip" data-container="body" data-title-referendum="{% trans "Remove this option" %}" data-title-election="{% trans "Remove this candidate" %}"><span class="glyphicon glyphicon-trash"></span></div>
                                 </div>
                             </div>
 
@@ -400,7 +355,7 @@
                     </ul>
 
                     <div class="option-add-wrapper">
-                        <button type="button" class="btn btn-default option-add"><span class="glyphicon glyphicon-plus"></span> <span class="ctrl-referendum">{% trans "Add new option" %}</span><span class="ctrl-elections">{% trans "Add new candidate" %}</span></button>
+                        <button type="button" class="btn btn-default option-add"><span class="glyphicon glyphicon-plus"></span> <span class="referendum-only {% if election_form.type.value != election_form.type_referendum %} hidden {% endif %}">{% trans "Add new option" %}</span><span class="election-only {% if election_form.type.value != election_form.type_election %} hidden {% endif %}">{% trans "Add new candidate" %}</span></button>
                     </div>
 
                 </div>
@@ -414,8 +369,8 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close question-cancel" aria-label="{% trans 'Close' %}"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="question-modal-label" data-title-referendum-add="{% trans 'Add new question' %}" data-title-referendum-edit="{% trans 'Edit question' %}" data-title-elections-add="{% trans 'Add new party' %}" data-title-elections-edit="{% trans 'Edit party' %}"></h4>
+                <button type="button" class="close question-cancel" aria-label="{% trans "Close" %}"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="question-modal-label" data-title-referendum-add="{% trans "Add new question" %}" data-title-referendum-edit="{% trans "Edit question" %}" data-title-election-add="{% trans "Add new party" %}" data-title-election-edit="{% trans "Edit party" %}"></h4>
             </div>
             <div class="modal-body">
             </div>
@@ -431,7 +386,7 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="{% trans 'Close' %}"><span aria-hidden="true">&times;</span></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="{% trans "Close" %}"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title text-overflow" id="pdf-modal-label">{% trans "Ballot Preview" %}</h4>
             </div>
             <div class="modal-body">
@@ -439,10 +394,10 @@
                     <p class="text-center">{% trans "Please wait..." %}</p>
                 </div>
                 <div class="pdf-form-error hidden">
-                    <p class="text-center">{% trans "Unable to preview the ballot because there are errors in the form. Please correct them before continuing." %}</p>
+                    <p class="text-center">{% trans "Unable to preview the ballot. Please fix the errors and try again." %}</p>
                 </div>
                 <div class="pdf-error hidden">
-                    <p class="text-center">{% trans "An error occurred while processing your request" %}.</p>
+                    <p class="text-center">{% trans "An error occurred while processing your request." %}</p>
                 </div>
                 <object class="pdf-object hidden" type="application/pdf" width="100%" height="100%">
                     <p class="text-center">{% trans "It appears that there is no support for PDF documents in this web browser" %}.</p>
@@ -478,12 +433,12 @@
 <script> $("#start-datetimepicker").datetimepicker || document.write("<script src='{{ moment_locale_static }}'><\/script>") </script>
 
 <!-- jquery-ui-custom.js -->
-<script src="{% static 'common/libs/jquery-ui/1.11.4/jquery-ui.min.js' %}"></script>
+<script src="{% static "common/libs/jquery-ui/1.11.4/jquery-ui.min.js" %}"></script>
 
 <!-- jquery-ui-touch-punch.js -->
-<script src="{% static 'common/libs/jquery-ui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js' %}"></script>
+<script src="{% static "common/libs/jquery-ui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js" %}"></script>
 
 <!-- create.js -->
-<script src="{% static 'ea/create.js' %}"></script>
+<script src="{% static "ea/create.js" %}"></script>
 
 {% endblock script %}
