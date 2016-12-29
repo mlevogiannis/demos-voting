@@ -3,6 +3,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import base64
+import itertools
 import logging
 
 from django import http
@@ -23,7 +24,8 @@ from celery.result import AsyncResult
 
 from demos_voting.apps.ea.forms import (ElectionForm, QuestionFormSet, OptionFormSet, PartyFormSet, CandidateFormSet,
     create_questions_and_options, create_trustees)
-from demos_voting.apps.ea.models import Election
+from demos_voting.apps.ea.models import Election, Question, Option, Trustee
+from demos_voting.apps.ea.tasks import setup_task
 from demos_voting.common.utils import pdf
 
 logger = logging.getLogger(__name__)
@@ -131,16 +133,43 @@ class CreateView(View):
 
         if is_valid:
             election = election_form.save(commit=False)
+
             trustees = create_trustees(election_form)
             questions, optionss = create_questions_and_options(election_form)
+
+            election.generate_long_votecode_length()
+            election.generate_security_code_length(optionss)
 
             if request.is_ajax():
                 file = pdf.sample(election, questions, optionss)
                 data = base64.b64encode(file.getvalue()).decode()
                 return http.HttpResponse(data)
+
             else:
-                # TODO: election setup task
-                pass
+                with transaction.atomic():
+                    election.state = Election.STATE_PENDING
+                    election.save()
+
+                    for trustee in trustees:
+                        trustee.election_id = election.pk
+
+                    Trustee.objects.bulk_create(trustees)
+
+                    for question in questions:
+                        question.election_id = election.pk
+
+                    Question.objects.bulk_create(questions)
+
+                    question_pks = Question.objects.filter(election=election).values_list('pk', flat=True)
+                    for question_pk, options in zip(question_pks, optionss):
+                        for option in options:
+                            option.question_id = question_pk
+
+                    Option.objects.bulk_create(itertools.chain.from_iterable(optionss))
+
+                    setup_task.delay(election.id)
+
+                return redirect('ea:status', election_id=election.id)
 
         else:
             if election_type == Election.TYPE_ELECTION:
@@ -248,68 +277,4 @@ class CenterView(View):
         return http.HttpResponse(status=404)
 
 
-# API Views --------------------------------------------------------------------
-
-class ApiUpdateStateView(View):
-
-    @method_decorator(api.user_required(['abb', 'vbb', 'bds']))
-    def dispatch(self, *args, **kwargs):
-        return super(ApiUpdateStateView, self).dispatch(*args, **kwargs)
-
-    def get(self, request):
-
-        csrf.get_token(request)
-        return http.HttpResponse()
-
-    def post(self, request, *args, **kwargs):
-
-        try:
-            data = api.ApiSession.load_json_request(request.POST)
-
-            e_id = data['e_id']
-            election = Election.objects.get(id=e_id)
-
-            state = enums.State(int(data['state']))
-
-            # All servers can set state to ERROR, except for abb which can
-            # also set it to COMPLETED, only if the election has ended.
-
-            username = request.user.get_username()
-
-            if not (state == enums.State.ERROR or (username == 'abb' \
-                and state == enums.State.COMPLETED \
-                and election.state == enums.State.RUNNING \
-                and timezone.now() > election.ends_at)):
-
-                raise Exception('User \'%s\' tried to set election state to '
-                    '\'%s\', but current state is \'%s\'.' \
-                    % (username, state.name, election.state.name))
-
-            # Update election state
-
-            election.state = state
-            election.save(update_fields=['state'])
-
-            data = {
-                'model': 'Election',
-                'natural_key': {
-                    'e_id': e_id
-                },
-                'fields': {
-                    'state': state
-                },
-            }
-
-            api_session = {app_name: api.ApiSession(app_name, app_config)
-                for app_name in ['abb','vbb','bds'] if not app_name == username}
-
-            for app_name in api_session.keys():
-                _remote_app_update(app_name, data=data, \
-                    api_session=api_session, url_path='api/update/');
-
-        except Exception:
-            logger.exception('UpdateStateView: API error')
-            return http.HttpResponse(status=422)
-
-        return http.HttpResponse()
-
+# API Views -------------------------------------------------------------------

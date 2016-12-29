@@ -12,7 +12,8 @@ import random
 import OpenSSL
 
 from django.conf import settings
-from django.db import models
+from django.db import models, IntegrityError
+from django.db.models.functions import Length
 from django.utils import six
 from django.utils.encoding import force_bytes, force_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
@@ -40,22 +41,36 @@ class Election(Election):
     def curve_nid(self):
         return OpenSSL.crypto.get_elliptic_curve(self.curve_name)._nid
 
-    def generate_security_code_length(self):
+    def save(self, *args, **kwargs):
+        if not self.id:
+            while True:
+                id = (Election.objects.order_by(Length('id'), 'id').values('id').last() or {}).get('id')
+                self.id = base32.encode(base32.decode(id) + 1) if id is not None else '0'
+                try:
+                    return super(Election, self).save(*args, **kwargs)
+                except IntegrityError:
+                    continue
+        else:
+            return super(Election, self).save(*args, **kwargs)
 
+    def generate_long_votecode_length(self):
+        if not self.votecode_type_is_long:
+            self.long_votecode_length = None
+
+    def generate_security_code_length(self, optionss=None):
         if self.security_code_type_is_none:
             self.security_code_length = None
         else:
             if self.votecode_type_is_long:
                 self.security_code_length = self.SECURITY_CODE_MAX_LENGTH
             else:
+                length = self._generate_security_code_length(optionss) if optionss else self._security_code_length
                 self.security_code_length = max(
-                    self.SECURITY_CODE_MIN_LENGTH, min(
-                        self.SECURITY_CODE_MAX_LENGTH, self._security_code_length
-                    )
+                    self.SECURITY_CODE_MIN_LENGTH,
+                    min(self.SECURITY_CODE_MAX_LENGTH, length)
                 )
 
     def generate_keypair(self):
-
         if self.votecode_type_is_long:
             self.keypair = OpenSSL.crypto.PKey()
             self.keypair.generate_key(OpenSSL.crypto.TYPE_RSA, 2048)
@@ -63,7 +78,6 @@ class Election(Election):
             self.keypair = None
 
     def generate_certificate(self):
-
         if self.votecode_type_is_long:
             self.certificate = OpenSSL.crypto.X509()
 
@@ -127,35 +141,28 @@ class Ballot(Ballot):
 
     @cached_property
     def _crypto(self):
-
         ballot = []
         for question in self.election.questions.all():
-
             trustee_keys = question.trustee_keys
             commitment_key = question.commitment_key
             serial_number = force_bytes(self.serial_number)
             options = [int(not option.is_blank) for option in question.options.all()]
             permutations = [part.questions.all()[question.index].permutation for part in self.parts.all()]
             curve_nid = self.election.curve_nid
-
             parts = crypto.BallotGen(trustee_keys, commitment_key, serial_number, options, permutations, curve_nid)
             ballot.append(parts)
-
         return list(zip(*ballot))
 
 
 class Part(Part):
 
     def generate_security_code(self):
-
         if self.election.security_code_type_is_none:
             self.security_code = None
         else:
-
             # Split options into groups, one for each security code's block.
 
             if self.election.type_is_election:
-
                 # The first group is always the party list, followed by one
                 # group for each party's candidates. Candidate lists have a
                 # special structure by grouping the options that correspond
@@ -183,14 +190,11 @@ class Part(Part):
             s_max = 0
 
             if self.election.security_code_length >= self.election._security_code_length:
-
                 for group in groups:
                     p_max = math.factorial(len(group)) - 1
-
                     p = None
                     while p is None or p > p_max:
                         p = random.getrandbits(p_max.bit_length())
-
                     s |= (p << s_max.bit_length())
                     s_max |= (p_max << s_max.bit_length())
 
@@ -249,7 +253,6 @@ class PQuestion(PQuestion):
 class POption(POption):
 
     def generate_votecode(self):
-
         if self.election.votecode_type_is_long:
             length = self.election.long_votecode_length
             permutation = self.question.permutation
@@ -273,7 +276,6 @@ class POption(POption):
             self.votecode_hash = None
 
     def generate_receipt(self):
-
         if self.election.votecode_type_is_long:
             signature = OpenSSL.crypto.sign(self.election.keypair, self.votecode, str('sha256'))
             self.receipt = base32.encode_from_bytes(signature, (self.election.keypair.bits() + 4) // 5)

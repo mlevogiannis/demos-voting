@@ -8,28 +8,17 @@ import math
 import requests
 
 from base64 import b64encode
-from enum import IntEnum, unique
 
 from django import http
-from django.apps import apps
 from django.core.exceptions import ValidationError
-from django.db.models import Max
 from django.middleware import csrf
 from django.shortcuts import render, redirect
 from django.utils import six, timezone
-from django.utils.decorators import method_decorator
 from django.utils.six.moves import range
 from django.utils.six.moves.urllib.parse import quote, urljoin
 from django.views.generic import View
 
-from demos_voting.apps.vbb.models import Election, Question, Ballot, Part, OptionV
-from demos_voting.common.utils import api, base32, enums, hashers
-from demos_voting.common.utils.int import int_to_bytes
-
 logger = logging.getLogger(__name__)
-
-app_config = apps.get_app_config('vbb')
-conf = app_config.get_constants_and_settings()
 
 
 class HomeView(View):
@@ -440,26 +429,4 @@ class QRCodeScannerView(View):
         return render(request, self.template_name, {})
 
 
-# API Views --------------------------------------------------------------------
-
-class ApiSetupView(api.ApiSetupView):
-
-    def __init__(self, *args, **kwargs):
-        kwargs['app_config'] = app_config
-        super(ApiSetupView, self).__init__(*args, **kwargs)
-
-    @method_decorator(api.user_required('ea'))
-    def dispatch(self, *args, **kwargs):
-        return super(ApiSetupView, self).dispatch(*args, **kwargs)
-
-
-class ApiUpdateView(api.ApiUpdateView):
-
-    def __init__(self, *args, **kwargs):
-        kwargs['app_config'] = app_config
-        super(ApiUpdateView, self).__init__(*args, **kwargs)
-
-    @method_decorator(api.user_required('ea'))
-    def dispatch(self, *args, **kwargs):
-        return super(ApiUpdateView, self).dispatch(*args, **kwargs)
-
+# API Views -------------------------------------------------------------------

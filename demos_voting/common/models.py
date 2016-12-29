@@ -54,7 +54,7 @@ class Election(models.Model):
         (SECURITY_CODE_TYPE_ALPHANUMERIC, _("Alphanumeric")),
     )
 
-    SECURITY_CODE_MIN_LENGTH = 4
+    SECURITY_CODE_MIN_LENGTH = 1
     SECURITY_CODE_MAX_LENGTH = 8
 
     STATE_DRAFT = 'draft'
@@ -106,7 +106,7 @@ class Election(models.Model):
     ballot_count = models.PositiveIntegerField(_("number of ballots"))
 
     credential_length = models.PositiveSmallIntegerField(_("credential length"), default=26)
-    long_votecode_length = models.PositiveSmallIntegerField(_("long votecode length"), default=16)
+    long_votecode_length = models.PositiveSmallIntegerField(_("long votecode length"), null=True, default=16)
     receipt_length = models.PositiveSmallIntegerField(_("receipt length"), default=8)
     security_code_length = models.PositiveSmallIntegerField(_("security code length"), null=True)
 
@@ -146,25 +146,20 @@ class Election(models.Model):
 
     @cached_property
     def _security_code_length(self):
+        optionss = (question.options.all() for question in self.questions.all())
+        return self._generate_security_code_length(optionss)
 
-        # Split options into groups, one for each security code's block.
-        # See `ea:Part.generate_security_code` for details.
-
+    def _generate_security_code_length(self, optionss):
+        groups = [len(options) for options in optionss]
         if self.type_is_election:
-            parties = self.questions.all()[0].options.all()
-            candidates = self.questions.all()[1].options.all()
-            groups = [tuple(parties)] + [
-                options for options in zip(*([iter(candidates)] * (len(candidates) // len(parties))))
-            ]
-        elif self.type_is_referendum:
-            groups = [tuple(question.options.all()) for question in self.questions.all()]
+            groups = [groups[0]] + [groups[1] // groups[0]] * groups[0]
 
-        # Calculate the security code's length required to encode all
-        # possible permutation indices for all option groups.
+        # Calculate the security code's ideal length, the one required to
+        # encode all possible permutation indices for all option groups.
 
         s_max=0
-        for group in groups:
-            s_max |= ((math.factorial(len(group)) - 1) << s_max.bit_length())
+        for group_len in groups:
+            s_max |= ((math.factorial(group_len) - 1) << s_max.bit_length())
 
         if self.security_code_type_is_numeric:
             security_code = force_text(s_max)
@@ -366,11 +361,7 @@ class PQuestion(models.Model):
 
     @cached_property
     def permutation(self):
-
-        # Split options into groups, one for each security code's block.
-
         if self.election.type_is_election:
-
             # The first group is always the party list, followed by one group
             # for each party's candidates. The candidate list has a special
             # structure by grouping together the options that correspond to
@@ -396,7 +387,6 @@ class PQuestion(models.Model):
         # permutations for all groups.
 
         if self.election.security_code_length >= self.election._security_code_length:
-
             # Decode the security code to get the group's permutation.
 
             if self.election.security_code_type_is_numeric:
@@ -405,15 +395,12 @@ class PQuestion(models.Model):
                 s = base32.decode(self.part.security_code)
 
             for i, group in enumerate(groups):
-
                 p_bits = (math.factorial(len(group)) - 1).bit_length()
                 p = s & ((1 << p_bits) - 1)
-
                 if question_is_candidate_list:
                     p_list.append(p)
                 elif i == self.index:
                     break
-
                 s >>= p_bits
         else:
             # Use the randomness extractor to generate the group's permutation.
@@ -517,6 +504,8 @@ class POption(models.Model):
 class Task(models.Model):
 
     election = models.ForeignKey('Election')
+
+    name = models.CharField(_("name"), max_length=128)
     id = models.UUIDField(_("id"), unique=True, db_column='_id')
 
     _id = models.AutoField(primary_key=True, db_column='id')
@@ -528,6 +517,8 @@ class Task(models.Model):
     class Meta:
         abstract = True
         default_related_name = 'tasks'
+        ordering = ['election', 'name']
+        unique_together = ['election', 'name']
         verbose_name = _("task")
         verbose_name_plural = _("tasks")
 

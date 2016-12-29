@@ -15,6 +15,10 @@ class AppConfig(AppConfig):
     name = 'demos_voting.common'
     verbose_name = "Common package"
 
+    def ready(self):
+        super(AppConfig, self).ready()
+        from demos_voting.common import tasks
+
 
 class CommonMixin(object):
 

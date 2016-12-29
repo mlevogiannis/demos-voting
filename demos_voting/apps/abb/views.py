@@ -10,20 +10,18 @@ import math
 import os
 
 from base64 import b64decode
-from datetime import timedelta
 from itertools import dropwhile
 
 from google.protobuf import message
 
 from django import http
-from django.apps import apps
 from django.conf.urls import include, url
 from django.core import exceptions
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
 from django.db import models, transaction
-from django.db.models import Max, Sum
+from django.db.models import Sum
 from django.middleware import csrf
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -31,15 +29,7 @@ from django.utils.decorators import method_decorator
 from django.utils.six.moves import range, zip
 from django.views.generic import View
 
-from demos_voting.apps.abb.models import Election, Question, Ballot, Part, OptionV, Task
-from demos_voting.apps.abb.tasks import tally_protocol
-from demos_voting.common.utils import api, base32, enums, hashers
-from demos_voting.common.utils.int import int_from_bytes, int_to_bytes
-
 logger = logging.getLogger(__name__)
-
-app_config = apps.get_app_config('abb')
-conf = app_config.get_constants_and_settings()
 
 
 class HomeView(View):
@@ -123,73 +113,7 @@ class ResultsView(View):
         return render(request, self.template_name, context)
 
 
-# API Views --------------------------------------------------------------------
-
-class ApiSetupView(api.ApiSetupView):
-
-    def __init__(self, *args, **kwargs):
-        kwargs['app_config'] = app_config
-        super(ApiSetupView, self).__init__(*args, **kwargs)
-
-    @method_decorator(api.user_required('ea'))
-    def dispatch(self, *args, **kwargs):
-        return super(ApiSetupView, self).dispatch(*args, **kwargs)
-
-    def post(self, request, phase):
-
-        try:
-            election_obj = api.ApiSession.load_json_request(request.POST)
-
-            if phase == 'p1':
-                election_obj['cert'] = request.FILES['cert.pem']
-
-        except Exception:
-            logger.exception('SetupView: API error')
-            return http.HttpResponse(status=422)
-
-        return super(ApiSetupView, self).post(request, election_obj)
-
-
-class ApiUpdateView(api.ApiUpdateView):
-
-    def __init__(self, *args, **kwargs):
-        kwargs['app_config'] = app_config
-        super(ApiUpdateView, self).__init__(*args, **kwargs)
-
-    @method_decorator(api.user_required('ea'))
-    def dispatch(self, *args, **kwargs):
-        return super(ApiUpdateView, self).dispatch(*args, **kwargs)
-
-    def post(self, request):
-
-        try:
-            data = api.ApiSession.load_json_request(request.POST)
-
-            model = data['model']
-            fields = data['fields']
-            natural_key = data['natural_key']
-
-            if model == 'Election' and 'state' in fields:
-
-                election = Election.objects.get_by_natural_key(**natural_key)
-
-                if election.state == enums.State.WORKING \
-                    and fields['state'] == enums.State.RUNNING:
-
-                    eta = election.ends_at + timedelta(seconds=5)
-
-                    task = tally_protocol.s(election.id)
-                    task.freeze()
-
-                    Task.objects.create(election=election, task_id=task.id)
-                    task.apply_async(eta=eta)
-
-        except Exception:
-            logger.exception('UpdateView: API error')
-            return http.HttpResponse(status=422)
-
-        return super(ApiUpdateView, self).post(request, data)
-
+# API Views -------------------------------------------------------------------
 
 class ApiVoteView(View):
 
