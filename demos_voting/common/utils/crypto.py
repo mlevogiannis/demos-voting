@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from base64 import b64encode, b64decode
 from binascii import hexlify
+from collections import OrderedDict
 
 from petlib.ec import EcGroup, EcPt
 from petlib.bn import Bn
@@ -128,20 +129,20 @@ def BallotGen(str_tk, str_h, sn = b"1", bitmask = [1], perm_arrays = None,  nid 
                     ec_c2 += ec_g
                     phi1 = phi1.mod_add(Bn(1),order)
                     phi5 = phi5.mod_sub(bn_r,order)
-                row.append({
-                    'C1': b64encode(ec_c1.export()).decode('ascii'),
-                    'C2': b64encode(ec_c2.export()).decode('ascii'),
-                    'T1': b64encode(ec_T1.export()).decode('ascii'),
-                    'T2': b64encode(ec_T2.export()).decode('ascii'),
-                    'Y1': b64encode(ec_Y1.export()).decode('ascii'),
-                    'Y2': b64encode(ec_Y2.export()).decode('ascii'),
-                    'phi1': b64encode(phi1.binary()).decode('ascii'),
-                    'phi2': b64encode(phi2.binary()).decode('ascii'),
-                    'phi3': b64encode(phi3.binary()).decode('ascii'),
-                    'phi4': b64encode(phi4.binary()).decode('ascii'),
-                    'phi5': b64encode(phi5.binary()).decode('ascii'),
-                    'phi6': b64encode(phi6.binary()).decode('ascii')
-                })
+                row.append(OrderedDict([
+                    ('C1', b64encode(ec_c1.export()).decode('ascii')),
+                    ('C2', b64encode(ec_c2.export()).decode('ascii')),
+                    ('T1', b64encode(ec_T1.export()).decode('ascii')),
+                    ('T2', b64encode(ec_T2.export()).decode('ascii')),
+                    ('Y1', b64encode(ec_Y1.export()).decode('ascii')),
+                    ('Y2', b64encode(ec_Y2.export()).decode('ascii')),
+                    ('phi1', b64encode(phi1.binary()).decode('ascii')),
+                    ('phi2', b64encode(phi2.binary()).decode('ascii')),
+                    ('phi3', b64encode(phi3.binary()).decode('ascii')),
+                    ('phi4', b64encode(phi4.binary()).decode('ascii')),
+                    ('phi5', b64encode(phi5.binary()).decode('ascii')),
+                    ('phi6', b64encode(phi6.binary()).decode('ascii')),
+                ]))
             #compute row ZK
             bn_u = order.random()
             bn_v = order.random()
@@ -182,18 +183,18 @@ def BallotGen(str_tk, str_h, sn = b"1", bitmask = [1], perm_arrays = None,  nid 
                 phi7 = phi7.mod_add(Bn(1),order)
                 phi11 = phi11.mod_sub(bn_row_r,order)
 
-            row.append({
-                'U1': b64encode(ec_U1.export()).decode('ascii'),
-                'U2': b64encode(ec_U2.export()).decode('ascii'),
-                'Z1': b64encode(ec_Z1.export()).decode('ascii'),
-                'Z2': b64encode(ec_Z2.export()).decode('ascii'),
-                'phi7': b64encode(phi7.binary()).decode('ascii'),
-                'phi8': b64encode(phi8.binary()).decode('ascii'),
-                'phi9': b64encode(phi9.binary()).decode('ascii'),
-                'phi10': b64encode(phi10.binary()).decode('ascii'),
-                'phi11': b64encode(phi11.binary()).decode('ascii'),
-                'phi12': b64encode(phi12.binary()).decode('ascii')
-            }) #the last one which is row ZK
+            row.append(OrderedDict([
+                ('U1', b64encode(ec_U1.export()).decode('ascii')),
+                ('U2', b64encode(ec_U2.export()).decode('ascii')),
+                ('Z1', b64encode(ec_Z1.export()).decode('ascii')),
+                ('Z2', b64encode(ec_Z2.export()).decode('ascii')),
+                ('phi7', b64encode(phi7.binary()).decode('ascii')),
+                ('phi8', b64encode(phi8.binary()).decode('ascii')),
+                ('phi9', b64encode(phi9.binary()).decode('ascii')),
+                ('phi10', b64encode(phi10.binary()).decode('ascii')),
+                ('phi11', b64encode(phi11.binary()).decode('ascii')),
+                ('phi12', b64encode(phi12.binary()).decode('ascii')),
+            ])) #the last one which is row ZK
 
             Row_side.append(row)
             Rand_side.append(row_r)
@@ -218,12 +219,12 @@ def BallotGen(str_tk, str_h, sn = b"1", bitmask = [1], perm_arrays = None,  nid 
             ec_W2 = bn_w * ec_h
             phi13 = bn_delta_col[0].mod_add(bn_col_r,order)
             phi14 = bn_delta_col[1].mod_add(bn_w,order)
-            ZK_side.append({
-                'W1': b64encode(ec_W1.export()).decode('ascii'),
-                'W2': b64encode(ec_W2.export()).decode('ascii'),
-                'phi13': b64encode(phi13.binary()).decode('ascii'),
-                'phi14': b64encode(phi14.binary()).decode('ascii')
-            })
+            ZK_side.append(OrderedDict([
+                ('W1', b64encode(ec_W1.export()).decode('ascii')),
+                ('W2', b64encode(ec_W2.export()).decode('ascii')),
+                ('phi13', b64encode(phi13.binary()).decode('ascii')),
+                ('phi14', b64encode(phi14.binary()).decode('ascii')),
+            ]))
         Ballot.append({'Row':Row_side,'ZK':ZK_side})
 
 

@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import collections
 import json
 
 from django.core import exceptions
@@ -39,7 +40,7 @@ class JSONField(models.TextField):
 
     def _json_loads(self, value):
         try:
-            return json.loads(value, cls=self.decoder)
+            return json.loads(value, cls=self.decoder, object_pairs_hook=collections.OrderedDict)
         except Exception as e:
             raise exceptions.ValidationError(e, code='invalid')
 
