@@ -19,6 +19,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = ''
 
+
 # SECURITY WARNING: don't run with debug/development turned on in production!
 DEBUG = False
 DEVELOPMENT = False
@@ -65,6 +66,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'demos_voting.common',
 ]
 
@@ -166,11 +168,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # Media files (generated or user-uploaded)
 # https://docs.djangoproject.com/en/1.8/topics/files/
 
-# SECURITY WARNING: Do NOT configure your web server to serve the files in
-# MEDIA_ROOT under the URL MEDIA_URL. Direct access must be restricted, so
-# files will be served by the web application.
+# SECURITY WARNING: Do NOT configure your web server to serve any files in
+# MEDIA_ROOT under MEDIA_URL. Files will be served by the web application.
 
-MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(DATA_DIR, 'media')
 
 
@@ -296,6 +296,7 @@ DEMOS_VOTING_APPS = []
 
 INSTALLED_APPS += ['demos_voting.apps.%s' % app for app in DEMOS_VOTING_APPS]
 LOCALE_PATHS += [os.path.join(BASE_DIR, 'demos_voting/apps/%s/locale' % app) for app in DEMOS_VOTING_APPS]
+TEMPLATES[0]['DIRS'] += [os.path.join(BASE_DIR, 'demos_voting/apps/%s/templates/' % app) for app in DEMOS_VOTING_APPS]
 
 # DEMOS_VOTING_URLS: The URLs by which the apps are served. Always use HTTPS.
 
@@ -311,10 +312,10 @@ DEMOS_VOTING_URLS = {
 # through a private network.
 
 DEMOS_VOTING_PRIVATE_API_URLS = {
-    'ea':  'https://demos-voting-ea.example.local/',
-    'bds': 'https://demos-voting-bds.example.local/',
-    'abb': 'https://demos-voting-abb.example.local/',
-    'vbb': 'https://demos-voting-vbb.example.local/',
+    'ea':  'https://demos-voting-ea.example.local/api/',
+    'bds': 'https://demos-voting-bds.example.local/api/',
+    'abb': 'https://demos-voting-abb.example.local/api/',
+    'vbb': 'https://demos-voting-vbb.example.local/api/',
 }
 
 # DEMOS_VOTING_PRIVATE_API_VERIFY_SSL: Verify SSL certificates for private API
@@ -371,4 +372,22 @@ CELERY_RESULT_BACKEND = 'db+postgresql://%(USER)s:%(PASSWORD)s@%(HOST)s:%(PORT)s
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
+
+
+# Django REST Framework configuration
+# http://www.django-rest-framework.org/#api-guide
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10,
+}
+
+
+# Django Sendfile
+# https://pypi.python.org/pypi/django-sendfile
+
+SENDFILE_BACKEND = 'sendfile.backends.xsendfile'
+
+if DEVELOPMENT:
+    SENDFILE_BACKEND = 'sendfile.backends.development'
 

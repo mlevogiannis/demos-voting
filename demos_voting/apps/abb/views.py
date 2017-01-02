@@ -4,30 +4,29 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import hashlib
 import hmac
-import json
 import logging
 import math
-import os
 
 from base64 import b64decode
-from itertools import dropwhile
-
-from google.protobuf import message
 
 from django import http
-from django.conf.urls import include, url
-from django.core import exceptions
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
-from django.db import models, transaction
-from django.db.models import Sum
+from django.db import transaction
+from django.db.models import Prefetch, Sum
 from django.middleware import csrf
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.six.moves import range, zip
 from django.views.generic import View
+
+from rest_framework import mixins, viewsets
+
+from sendfile import sendfile
+
+from demos_voting.apps.abb.models import Election, Ballot
+from demos_voting.apps.abb.serializers import ElectionSerializer, BallotSerializer
+from demos_voting.common.utils import base32
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +116,7 @@ class ResultsView(View):
 
 class ApiVoteView(View):
 
-    @method_decorator(api.user_required('vbb'))
+    #@method_decorator(api.user_required('vbb'))
     def dispatch(self, *args, **kwargs):
         return super(ApiVoteView, self).dispatch( *args, **kwargs)
 
@@ -277,441 +276,35 @@ class ApiVoteView(View):
         return http.HttpResponse()
 
 
-class ApiExportView(View):
+class ElectionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    lookup_field = 'id'
+    lookup_value_regex = base32.regex + r'+'
+    queryset = Election.objects.none()
+    serializer_class = ElectionSerializer
 
-    template_name = 'abb/export.html'
+    def get_queryset(self):
+        return Election.objects.prefetch_related('questions__options')
 
-    def __post_election(o, v, d):
-        ''' o: objects, v: value, d: default '''
-        return d if o['Election'].state != enums.State.COMPLETED else v
 
-    _namespaces = {
-        'election': {
-            'model': Election,
-            'args': [('id', base32.regex + '+')],
-            'fields': ['cert', 'voter_coins_hash', 'id', 'type', 'votecode_type'],
-            'cache': lambda a: 'export_file' if not a or 'ballots' in a else '',
-            'next': ['ballot', 'question_fk'],
-        },
-        'ballot': {
-            'model': Ballot,
-            'args': [('serial', '[0-9]+')],
-            'fields': ['serial'],
-            'next': ['part'],
-        },
-        'part': {
-            'model': Part,
-            'args': [('tag', '[AaBb]')],
-            'fields': ['tag', 'l_votecode_iterations', 'l_votecode_salt',
-                'security_code'],
-            'callback': lambda o, f, v, d, _func=__post_election:
-                v or None if f in ('l_votecode_iterations', 'l_votecode_salt') \
-                else _func(o, v, d) or None if f == 'security_code' else v,
-            'next': ['question'],
-        },
-        'question': {
-            'model': Question,
-            'args': [('index', '[0-9]+')],
-            'fields': ['index'],
-            'next': ['option'],
-        },
-        'option': {
-            'model': OptionV,
-            'name': 'option',
-            'args': [('index', '[0-9]+')],
-            'fields': ['com', 'index', 'l_votecode', 'l_votecode_hash',
-                'receipt_full', 'votecode', 'voted', 'zk1', 'zk2'],
-            'callback': lambda o, f, v, d, _func=__post_election:
-                v or None if f == 'l_votecode_hash' else \
-                _func(o, v, d) if f in ('voted', 'zk2') else \
-                _func(o, v, d) or None if f == 'l_votecode' else v,
-        },
-        'question_fk': {
-            'model': Question,
-            'args': [('index', '[0-9]+')],
-            'fields': ['com_combined', 'decom_combined', 'index', 'key'],
-        },
-    }
+class BallotViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    lookup_field = 'serial_number'
+    lookup_value_regex = r'[0-9]+'
+    queryset = Ballot.objects.none()
+    serializer_class = BallotSerializer
 
-    _namespace_root = ['election']
+    def get_queryset(self):
+        queryset = Ballot.objects.filter(election__id=self.kwargs['election_id'])
+        queryset = queryset.prefetch_related('parts__questions__options')
+        queryset = queryset.prefetch_related(Prefetch('election', Election.objects.only('state', 'votecode_type')))
+        return queryset
 
 
-    # --------------------------------------------------------------------------
+# Media Views -----------------------------------------------------------------
 
-    def __update_namespaces(namespaces):
+class CertificateView(View):
+    def get(self, request, election_id):
+        election = get_object_or_404(Election.objects.only('certificate'), id=election_id)
+        if not election.certificate:
+            raise http.Http404("Election does not have a certificate.")
+        return sendfile(request, election.certificate.path)
 
-        # model: required
-        # name: optional, defaults to the model's verbose name
-        # args: optional, defaults to an empty list
-        # fields: optional, defaults to an empty list
-        # files: auto-completed, derives from fields
-        # namespaces: auto-completed, derives from next
-        # cache: optional, defaults to None
-        # callback: optional, defaults to None
-        # next: optional, defaults to an empty list
-
-        for node in namespaces.values():
-
-            node.setdefault('name', node['model']._meta.verbose_name)
-
-            for key in ['args', 'fields', 'next']:
-                node.setdefault(key, [])
-
-            for key in ['cache', 'callback']:
-                node.setdefault(key, None)
-
-        for node in namespaces.values():
-
-            node['namespaces'] = \
-                [namespaces[next]['name'] + 's' for next in node['next']]
-
-            if set(node['fields']) & set(node['namespaces']):
-                raise exceptions.ImproperlyConfigured("'fields' " \
-                    "and 'namespaces' must be disjoint sets.")
-
-            node['files'] = [field for field in list(node['fields']) \
-                if isinstance(node['model']._meta.get_field(field), \
-                models.FileField) and not node['fields'].remove(field)]
-
-    __update_namespaces(_namespaces)
-
-    # --------------------------------------------------------------------------
-
-
-    @classmethod
-    def as_patterns(cls):
-
-        def _build_urlpatterns(ns):
-
-            node = cls._namespaces[ns]
-
-            urlpatterns = []
-            for next in node['next']:
-                urlpatterns += _build_urlpatterns(next)
-
-            argpath = '/'.join(['(?P<' + node['model'].__name__ + '__' + \
-                field + '>' + regex + ')' for field, regex in node['args']])
-
-            urlpatterns = [url(r'^' + node['name'] + 's/', include([
-                url(r'^$', cls.as_view(), name='schema'),
-                url(r'^' + argpath + '/', include([
-                    url(r'^$', cls.as_view(), name='data'),
-                ] + urlpatterns)),
-            ], namespace=ns))]
-
-            return urlpatterns
-
-        urlpatterns = []
-        for ns in cls._namespace_root:
-            urlpatterns += _build_urlpatterns(ns)
-
-        return urlpatterns
-
-
-    @classmethod
-    def _export(cls, namespaces, url_args, query_args, url_name):
-
-        # Get each namespace's model instance, until the requested one is found
-
-        objects = {}
-
-        for i, ns in enumerate(namespaces, start=1):
-
-            node = cls._namespaces[ns]
-
-            kwflds = {f.name: objects[k] for k in objects for f
-                in node['model']._meta.get_fields() if f.is_relation
-                and k == f.related_model.__name__}
-
-            kwflds.update(url_args.get(node['model'].__name__, {}))
-
-            if i < len(namespaces):
-                objects[node['model'].__name__] = \
-                    get_object_or_404(node['model'], **kwflds)
-
-        # Build and return the requested data
-
-        if url_name == 'data':
-
-            def _build_data(ns, objects, kwflds):
-
-                node = cls._namespaces[ns]
-
-                # 'obj_fields' is the intersection of the namespace's fields
-                # and the fields specified in the namespace's url query. If an
-                # url query is not specified, all fields are returned. If the
-                # url query is an empty list (or does not contain any valid
-                # 'fields'), no fields are returned. In addition to 'fields',
-                # the url query may contain 'namespaces', but this does not pose
-                # a problem since 'fields' and 'namespaces' are disjoint sets.
-
-                f1 = set(node['fields'])
-                f2 = set(query_args.get(node['name'], node['fields']))
-
-                obj_fields = list(f1 & f2)
-
-                # Update input query's fields with the model's related fields
-
-                kwflds.update({f.name: objects[k] for k in objects for f
-                    in node['model']._meta.get_fields() if f.is_relation
-                    and k == f.related_model.__name__})
-
-                # Get all model instances as a list of dictionaries
-
-                try:
-                    obj_qs = node['model'].objects.filter(**kwflds)
-                    if not obj_qs:
-                        raise ObjectDoesNotExist()
-
-                except (ValidationError, ObjectDoesNotExist):
-                    raise http.Http404('No %s matches the given query.' % \
-                        node['model'].__name__)
-
-                obj_data_l = list(obj_qs.values(*obj_fields)) \
-                    if obj_fields else [dict() for _ in range(obj_qs.count())]
-
-                # Check if the namespace has a callback function
-
-                callback = node['callback']
-
-                if obj_fields and callback:
-
-                    # In addition to objects, pass each field's default value
-                    # to the callback, too. This may or may not be taken into
-                    # account when determining the callback's return value.
-
-                    default = { f: node['model'].\
-                        _meta.get_field(f).get_default() for f in obj_fields }
-
-                    # Call the callback function for every returned field
-
-                    _objects = objects.copy()
-
-                    for obj, obj_data in zip(obj_qs, obj_data_l):
-                        _objects[node['model'].__name__] = obj
-                        for f, v in obj_data.items():
-                            obj_data[f] = callback(_objects, f, v, default[f])
-
-                # Traverse the namespace tree and repeat
-
-                _objects = objects.copy()
-                fields = set(query_args.get(node['name'], node['namespaces']))
-
-                for next in node['next']:
-
-                    name = cls._namespaces[next]['name'] + 's'
-
-                    if name not in fields:
-                        continue
-
-                    for obj, obj_data in zip(obj_qs, obj_data_l):
-                        _objects[node['model'].__name__] = obj
-                        obj_data[name] = _build_data(next, _objects, {})
-
-                return obj_data_l
-
-            # Return the requested model's data
-
-            data = _build_data(ns, objects, kwflds)[0]
-
-        elif url_name == 'schema':
-
-            # Get the list of available input arguments
-
-            args = [arg for arg, _ in node['args']]
-
-            if args:
-                flat = (len(args) == 1)
-                object_qs = node['model'].objects.filter(**kwflds)
-                values = list(object_qs.values_list(*args, flat=flat))
-            else:
-                values = []
-
-            # Return the requested model's data
-
-            data = {
-                'fields': sorted(node['fields']),
-                'files': sorted(node['files']),
-                'namespaces': sorted(node['namespaces']),
-                'values': values,
-            }
-
-        return data
-
-
-    @classmethod
-    def _export_file(cls, namespace, url_args, fieldname, filename=None):
-
-        model = cls._namespaces[namespace]['model']
-
-        kwflds = url_args.get(model.__name__, {})
-        obj = get_object_or_404(model, **kwflds)
-
-        filefield = getattr(obj, fieldname)
-
-        if not (filefield and filefield.storage.exists(filefield.name)):
-            raise http.Http404('File not found: %s' % fieldname)
-
-        filename = os.path.basename(filefield.name) if not filename \
-            else filename + os.path.splitext(filefield.name)[-1]
-
-        try:
-            filefield.open('rb')
-        except IOError:
-            raise http.Http404('Error opening file: %s' % filename)
-
-        response = http.FileResponse(filefield.file)
-        response['Content-Disposition'] = 'attachment; filename="%s"' % filename
-
-        return response
-
-
-    def get(self, request, **kwargs):
-
-        url_name = request.resolver_match.url_name
-
-        # Accept case insensitive ballot part tags
-
-        if 'Part__tag' in kwargs:
-            kwargs['Part__tag'] = kwargs['Part__tag'].upper()
-
-        # Ignore any namespaces before root
-
-        namespaces = list(dropwhile(lambda ns: \
-            ns not in self._namespace_root, request.resolver_match.namespaces))
-
-        ns = namespaces[-1]
-        node = self._namespaces[ns]
-
-        # 'url_args' is a dict containing all captured url arguments (dicts),
-        # organized by their model's name
-
-        url_args = {}
-
-        for key, value in kwargs.items():
-            model, field = key.split('__', 1)
-            url_args.setdefault(model, {}).update({field: value})
-
-        # 'query_args' is a dict containing all url query arguments (lists),
-        # organized by their namespace's name
-
-        query_args = {k: [s for q in v for s in q.split(',') if s]
-            for k, v in request.GET.iterlists()}
-
-        # 'html' is a built-in name, no namespace is allowed to use it. If true,
-        # return a HTML page with the data, if undefined or false return a file.
-
-        html_args = query_args.pop('html', ['false'])
-        html = html_args[0].lower() if html_args else ''
-
-        if len(html_args) != 1 or html not in ('true', 'false'):
-            raise http.Http404('Invalid "html" query: true / false')
-
-        # 'schema' does not support any query arguments
-
-        if url_name == 'schema' and query_args:
-            raise http.Http404('Invalid query: no namespace specified')
-
-        # Traverse the namespace tree, starting from the requested namespace and
-        # ending to all reachable leaf nodes, and build a dictionary whose keys
-        # are the names of each namespace and values are lists of all reachable
-        # namespace nodes. This structure is used only for validation.
-
-        nodes_by_name = {}
-
-        def _build_nodes(_ns):
-            node = self._namespaces[_ns]
-            fields = set(query_args.get(node['name'], node['namespaces']))
-            for next in node['next']:
-                if self._namespaces[next]['name'] + 's' not in fields:
-                    continue
-                _build_nodes(next)
-            nodes_by_name.setdefault(node['name'], []).append(node)
-
-        _build_nodes(ns)
-
-        # Special case: if a file field is requested, it must be the only
-        # field of the whole query and a member of the requested namespace
-
-        ns_args = query_args.get(node['name'], [])
-
-        filefield = ns_args[0] if len(query_args) == 1 and \
-            len(ns_args) == 1 and ns_args[0] in node['files'] else None
-
-        # Validate input query fields
-
-        for name, fields in query_args.items():
-
-            _nodes = nodes_by_name.get(name)
-
-            if not _nodes:
-                raise http.Http404('Invalid namespace: %s' % name)
-
-            if not fields:
-                raise http.Http404('No fields specified: %s' % name)
-
-            f1 = set(fields)
-            f2 = set([f for n in _nodes for f in n['fields'] + n['namespaces']])
-            f3 = set([f for n in _nodes for f in n['files']])
-
-            # Raise an error if an input field is invalid or it is a file and
-            # the requirement for files is not fulfilled (see comment above).
-            # A node's 'fields', 'files' and 'namespaces' are disjoint sets.
-
-            if not (f1 <= f2 or (filefield and f1 <= f3)):
-                field_diff = f1 - (f2 | f3)
-
-                raise http.Http404('Invalid "%s" fields: %s' % (name, \
-                    ', '.join(field_diff) if field_diff else
-                    'a file field cannot be combined with any other '
-                    'fields or be selected from a nested namespace.'))
-
-        # Return the requested file, if any
-
-        if url_name == 'data' and filefield:
-            return self._export_file(ns, url_args, filefield, filefield)
-
-        # If the namespace has a cache FileField return that cached file,
-        # ignoring html, ajax and url query arguments
-
-        cache = node['cache']
-        filefield = cache if not callable(cache) else cache(ns_args)
-
-        if url_name == 'data' and filefield:
-            return self._export_file(ns, url_args, filefield, node['name'])
-
-        # Export the requested data
-
-        data = self._export(namespaces, url_args, query_args, url_name)
-
-        # Serialize and return the requested data
-
-        encoder = self._CustomJSONEncoder
-
-        if html == 'true':
-            data = json.dumps(data, indent=4, sort_keys=True, cls=encoder)
-            response = render(request, self.template_name, {'data': data})
-
-        elif request.is_ajax():
-            response = http.JsonResponse(data, safe=False, encoder=encoder)
-
-        else:
-            response = http.HttpResponse()
-            response['Content-Disposition'] = 'attachment; filename="%s.json"' \
-                % (node['name'] + ('s' if url_name == 'schema' else ''))
-            json.dump(data, response, indent=4, sort_keys=True, cls=encoder)
-
-        return response
-
-
-    class _CustomJSONEncoder(DjangoJSONEncoder):
-        """JSONEncoder subclass that supports date/time and protobuf types."""
-
-        from demos_voting.common.utils import protobuf
-
-        def default(self, o):
-
-            if isinstance(o, message.Message):
-                return self.protobuf.to_dict(o, ordered=True)
-
-            return super(ApiExportView._CustomJSONEncoder, self).default(o)

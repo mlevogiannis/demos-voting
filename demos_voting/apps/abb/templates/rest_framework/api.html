@@ -1,0 +1,10 @@
+{% extends "rest_framework/base.html" %}
+
+{% block title %}{% if name %}{{ name }} – {% endif %}DEMOS Voting: Audit Bulletin Board{% endblock %}
+
+{% block branding %}
+  <a class="navbar-brand" href="{% url 'abb-api:api-root' %}">
+    DEMOS Voting: Audit Bulletin Board
+  </a>
+{% endblock %}
+
