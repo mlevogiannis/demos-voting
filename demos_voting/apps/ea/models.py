@@ -53,9 +53,9 @@ class Election(Election):
         else:
             return super(Election, self).save(*args, **kwargs)
 
-    def generate_long_votecode_length(self):
+    def generate_votecode_length(self):
         if not self.votecode_type_is_long:
-            self.long_votecode_length = None
+            self.votecode_length = None
 
     def generate_security_code_length(self, optionss=None):
         if self.security_code_type_is_none:
@@ -254,7 +254,7 @@ class POption(POption):
 
     def generate_votecode(self):
         if self.election.votecode_type_is_long:
-            length = self.election.long_votecode_length
+            length = self.election.votecode_length
             permutation = self.question.permutation
 
             serial_number = force_text(self.ballot.serial_number)

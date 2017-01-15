@@ -45,7 +45,7 @@ class ElectionSerializer(serializers.HyperlinkedModelSerializer):
         model = Election
         fields = [
             'url', 'ballots_url', 'id', 'name', 'voting_starts_at', 'voting_ends_at', 'state', 'type', 'votecode_type',
-            'security_code_type', 'ballot_count', 'credential_length', 'long_votecode_length', 'receipt_length',
+            'security_code_type', 'ballot_count', 'credential_length', 'votecode_length', 'receipt_length',
             'security_code_length', 'curve_name', 'certificate_url', 'coins', 'questions'
         ]
         extra_kwargs = {

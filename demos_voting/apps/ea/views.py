@@ -137,7 +137,7 @@ class CreateView(View):
             trustees = create_trustees(election_form)
             questions, optionss = create_questions_and_options(election_form)
 
-            election.generate_long_votecode_length()
+            election.generate_votecode_length()
             election.generate_security_code_length(optionss)
 
             if request.is_ajax():

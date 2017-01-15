@@ -88,7 +88,7 @@ def generate(*ballots):
     ttf_mono_bold = _load_ttf('Liberation Mono', 'Bold')
     ttf_mono_regular = _load_ttf('Liberation Mono', 'Regular')
 
-    long_votecode_chunk_length = 4
+    votecode_chunk_length = 4
 
     page_width, page_height = pagesize
     page_width -= 2 * h_margin
@@ -304,8 +304,7 @@ def generate(*ballots):
         votecode_length = len(force_text(max_options - 1))
     elif election.votecode_type_is_long:
         votecode_chars = base32.symbols + '-'
-        votecode_length = (election.long_votecode_length +
-            int(math.ceil(election.long_votecode_length / long_votecode_chunk_length)) - 1)
+        votecode_length = election.votecode_length + int(math.ceil(election.votecode_length/votecode_chunk_length)) - 1
 
     votecode_column_min_width = h_padding + max(
         stringWidth(votecode_text, ttf_sans_bold, font_sm),
@@ -459,7 +458,7 @@ def generate(*ballots):
                     receipt = party_p_option.receipt
 
                     if election.votecode_type_is_long:
-                        votecode = base32.hyphen(votecode, long_votecode_chunk_length)
+                        votecode = base32.hyphen(votecode, votecode_chunk_length)
                         receipt = receipt[-election.receipt_length:]
 
                     question_table_rows = [
@@ -485,7 +484,7 @@ def generate(*ballots):
                 receipts = [p_option.receipt[-election.receipt_length:] for p_option in p_options]
 
                 if election.votecode_type_is_long:
-                    votecodes = [base32.hyphen(votecode, long_votecode_chunk_length) for votecode in votecodes]
+                    votecodes = [base32.hyphen(votecode, votecode_chunk_length) for votecode in votecodes]
 
                 option_rows = [list(row) for row in zip(options, votecodes, receipts)]
                 option_row_cnt = len(option_rows)
@@ -632,7 +631,7 @@ def sample(election_form, question_formset, option_formsets):
         'name': election_form.name,
         'ballot_count': election_form.ballot_count,
         'credential_length': election_form.credential_length,
-        'long_votecode_length': election_form.long_votecode_length,
+        'votecode_length': election_form.votecode_length,
         'receipt_length': election_form.receipt_length,
         'security_code_length': election_form.security_code_length,
         'type_is_election': election_form.type_is_election,
@@ -661,7 +660,7 @@ def sample(election_form, question_formset, option_formsets):
                 if election.votecode_type_is_short:
                     votecode = short_votecodes[option.index]
                 elif election.votecode_type_is_long:
-                    votecode = random_value(base32.symbols, election.long_votecode_length)
+                    votecode = random_value(base32.symbols, election.votecode_length)
 
                 p_options.append(type(str('POption'), (object,), {
                     'index': option.index,
