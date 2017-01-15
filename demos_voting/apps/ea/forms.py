@@ -166,7 +166,7 @@ class QuestionForm(forms.ModelForm):
 
     class Meta:
         model = Question
-        fields = ['name', 'min_choices', 'max_choices', 'layout']
+        fields = ['name', 'min_choices', 'max_choices', 'table_layout']
         widgets = {
             'name': forms.TextInput,
         }
@@ -422,14 +422,14 @@ def create_questions_and_options(election_form):
             name=None,
             min_choices=1,
             max_choices=1,
-            layout=Question.LAYOUT_ONE_COLUMN
+            table_layout=Question.TABLE_LAYOUT_ONE_COLUMN
         )
 
         candidate_question = Question(
             name=None,
             min_choices=max_candidate_choices,
             max_choices=max_candidate_choices,
-            layout=Question.LAYOUT_ONE_COLUMN
+            table_layout=Question.TABLE_LAYOUT_ONE_COLUMN
         )
 
         # The first question is the party list. The last party is always the blank

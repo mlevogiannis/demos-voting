@@ -189,12 +189,12 @@ class Election(models.Model):
 @python_2_unicode_compatible
 class Question(models.Model):
 
-    LAYOUT_ONE_COLUMN = 'one_column'
-    LAYOUT_TWO_COLUMN = 'two_column'
+    TABLE_LAYOUT_ONE_COLUMN = 'one_column'
+    TABLE_LAYOUT_TWO_COLUMN = 'two_column'
 
-    LAYOUT_CHOICES = (
-        (LAYOUT_ONE_COLUMN, _("One-column")),
-        (LAYOUT_TWO_COLUMN, _("Two-column")),
+    TABLE_LAYOUT_CHOICES = (
+        (TABLE_LAYOUT_ONE_COLUMN, _("One-column")),
+        (TABLE_LAYOUT_TWO_COLUMN, _("Two-column")),
     )
 
     election = models.ForeignKey('Election')
@@ -205,17 +205,17 @@ class Question(models.Model):
     min_choices = models.PositiveSmallIntegerField(_("minimum number of choices"))
     max_choices = models.PositiveSmallIntegerField(_("maximum number of choices"))
 
-    layout = models.CharField(_("layout"), max_length=16, choices=LAYOUT_CHOICES)
+    table_layout = models.CharField(_("table layout"), max_length=16, choices=TABLE_LAYOUT_CHOICES)
 
     # Custom methods and properties
 
     @property
-    def layout_is_one_column(self):
-        return self.layout == self.LAYOUT_ONE_COLUMN
+    def table_layout_is_one_column(self):
+        return self.table_layout == self.TABLE_LAYOUT_ONE_COLUMN
 
     @property
-    def layout_is_two_column(self):
-        return self.layout == self.LAYOUT_TWO_COLUMN
+    def table_layout_is_two_column(self):
+        return self.table_layout == self.TABLE_LAYOUT_TWO_COLUMN
 
     # Default manager, meta options and natural key
 

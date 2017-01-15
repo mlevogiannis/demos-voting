@@ -281,15 +281,15 @@
                         </div>
                     </div>
 
-                    <div class="referendum-only {% if election_form.type.value != election_form.type_referendum %} hidden {% endif %} form-group {% if question_form.layout.errors %} has-error {% endif %}">
-                        <label class="sr-only" for="{{ question_form.layout.id_for_label }}">{{ question_form.layout.label }}</label>
+                    <div class="referendum-only {% if election_form.type.value != election_form.type_referendum %} hidden {% endif %} form-group {% if question_form.table_layout.errors %} has-error {% endif %}">
+                        <label class="sr-only" for="{{ question_form.table_layout.id_for_label }}">{{ question_form.table_layout.label }}</label>
                         <div class="input-group">
-                            <div class="input-group-addon">{{ question_form.layout.label }}:</div>
-                            <select class="form-control select-placeholder" id="{{ question_form.layout.auto_id }}" name="{{ question_form.layout.html_name }}">
-                                <option {% if not question_form.layout.data %} selected {% endif %} disabled>{% trans "Select" %}</option>
-                                {% for value, name in question_form.layout.field.choices %}
+                            <div class="input-group-addon">{{ question_form.table_layout.label }}:</div>
+                            <select class="form-control select-placeholder" id="{{ question_form.table_layout.auto_id }}" name="{{ question_form.table_layout.html_name }}">
+                                <option {% if not question_form.table_layout.data %} selected {% endif %} disabled>{% trans "Select" %}</option>
+                                {% for value, name in question_form.table_layout.field.choices %}
                                 {% if not forloop.first %}
-                                <option {% if not question_form.layout.data and question_form.layout.field.initial == value or question_form.layout.data == value %}selected{% endif %} value="{{ value }}">{{ name }}</option>
+                                <option {% if not question_form.table_layout.data and question_form.table_layout.field.initial == value or question_form.table_layout.data == value %}selected{% endif %} value="{{ value }}">{{ name }}</option>
                                 {% endif %}
                                 {% endfor %}
                             </select>
@@ -442,3 +442,4 @@
 <script src="{% static "ea/create.js" %}"></script>
 
 {% endblock script %}
+

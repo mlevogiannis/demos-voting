@@ -350,7 +350,7 @@ def generate(*ballots):
         receipt_column_width = receipt_column_min_width
 
         available_width = page_width - (option_column_width + votecode_column_width + receipt_column_width)
-        if question.layout_is_two_column:
+        if question.table_layout_is_two_column:
             available_width -= (page_width + h_padding) / 2
 
         if available_width < 0:
@@ -365,7 +365,7 @@ def generate(*ballots):
             votecode_column_width += available_width / 3
 
         option_table_column_widths = [option_column_width, votecode_column_width, receipt_column_width]
-        if question.layout_is_two_column:
+        if question.table_layout_is_two_column:
             option_table_column_widths += [h_padding] + option_table_column_widths
 
         _option_table_data.append((options, option_table_column_widths))
@@ -516,7 +516,7 @@ def generate(*ballots):
 
                     # Prepare one- or two-column option table.
 
-                    if question.layout_is_one_column:
+                    if question.table_layout_is_one_column:
 
                         option_table_row_cnt = min(option_table_available_row_cnt, option_row_cnt - row)
                         option_table_rows = option_rows[row: row + option_table_row_cnt]
@@ -526,7 +526,7 @@ def generate(*ballots):
                         if include_option_table_header:
                             option_table_rows = [option_table_header_row] + option_table_rows
 
-                    elif question.layout_is_two_column:
+                    elif question.table_layout_is_two_column:
 
                         option_table_row_cnt = min(2 * option_table_available_row_cnt, option_row_cnt - row)
 
@@ -621,8 +621,8 @@ def sample(election_form, question_formset, option_formsets):
         questions.append(type(str('Question'), (object,), {
             'index': question_form.index,
             'name': question_form.name,
-            'layout_is_one_column': question_form.layout_is_one_column,
-            'layout_is_two_column': question_form.layout_is_two_column,
+            'table_layout_is_one_column': question_form.table_layout_is_one_column,
+            'table_layout_is_two_column': question_form.table_layout_is_two_column,
             'options': options,
         })())
 
