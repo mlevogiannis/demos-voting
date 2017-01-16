@@ -2,39 +2,49 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import requests
+import importlib
 import tempfile
 
 from django.conf import settings
 from django.core import checks
-from django.utils.six.moves.urllib.parse import urljoin
 
-from demos_voting.common.models import PrivateApiUser
-from demos_voting.common.utils.private_api import PrivateApiAuth
+from requests.exceptions import RequestException
 
 
-def private_api_check(app_configs, **kwargs):
-    """Tests private API connectivity"""
+def api_check(app_configs, **kwargs):
+    """Tests API for connectivity issues"""
 
     messages = []
 
-    for local_app in settings.DEMOS_VOTING_APPS:
-        for remote_app in PrivateApiUser.APP_DEPENDENCIES[local_app]:
+    APP_DEPENDENCIES = {
+        'ea':  ['bds', 'abb', 'vbb'],
+        'bds': ['ea'],
+        'abb': ['ea', 'vbb'],
+        'vbb': ['ea', 'abb'],
+    }
 
-            try:
-                r = requests.get(
-                    url=urljoin(settings.DEMOS_VOTING_PRIVATE_API_URLS[remote_app], 'api/_private/test/'),
-                    verify=getattr(settings, 'DEMOS_VOTING_PRIVATE_API_VERIFY_SSL', True),
-                    auth=PrivateApiAuth(local_app)
-                )
-                r.raise_for_status()
-
-            except Exception as e:
+    for local_app_label in settings.DEMOS_VOTING_APPS:
+        api = importlib.import_module('demos_voting.apps.%s.utils.api' % local_app_label)
+        for remote_app_label in APP_DEPENDENCIES[local_app_label]:
+            if not settings.DEMOS_VOTING_API_URLS.get(remote_app_label):
                 messages.append(
-                    checks.Error("Could not connect to %s: %s" % (remote_app, e),
-                                 hint="Try running './manage.py create_private_api_users %s'." % local_app,
+                    checks.Error("API URL for '%s' must not be empty." % remote_app_label,
                                  id='common.E001')
                 )
+            if not settings.DEMOS_VOTING_API_KEYS.get(remote_app_label):
+                messages.append(
+                    checks.Error("API key for '%s' must not be empty." % remote_app_label,
+                                 id='common.E002')
+                )
+            else:
+                try:
+                    with api.APISession(remote_app_label) as s:
+                        s.get(url='_test/')
+                except RequestException as e:
+                    messages.append(
+                        checks.Error("Cannot connect from '%s' to '%s': %s" % (local_app_label, remote_app_label, e),
+                                     id='common.E003')
+                    )
 
     return messages
 
@@ -51,7 +61,7 @@ def file_storage_check(app_configs, **kwargs):
         messages.append(
             checks.Error("%s" % e,
                          hint="Ensure that MEDIA_ROOT exists and is writable.",
-                         id='common.E002')
+                         id='common.E004')
         )
 
     return messages
@@ -83,9 +93,9 @@ def security_check(app_configs, **kwargs):
                            id='common.W002')
         )
 
-    if not all(url.startswith('https://') for url in settings.DEMOS_VOTING_PRIVATE_API_URLS.values()):
+    if not all(url.startswith('https://') for url in settings.DEMOS_VOTING_API_URLS.values()):
         messages.append(
-            checks.Warning("One or more of the configured private API URLs do not use the HTTPS protocol.",
+            checks.Warning("One or more of the configured API URLs do not use the HTTPS protocol.",
                            id='common.W003')
         )
 

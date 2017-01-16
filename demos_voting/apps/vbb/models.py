@@ -9,8 +9,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from demos_voting.common.models import (Election, Question, Option, Ballot, Part, PQuestion, POption, Task,
-    PrivateApiUser, PrivateApiNonce)
+from demos_voting.common.models import Election, Question, Option, Ballot, Part, PQuestion, POption, Task, APIAuthNonce
 from demos_voting.common.utils import base32
 from demos_voting.common.utils.hashers import get_hasher, identify_hasher
 
@@ -67,9 +66,6 @@ class Task(Task):
     pass
 
 
-class PrivateApiUser(PrivateApiUser):
+class APIAuthNonce(APIAuthNonce):
     pass
 
-
-class PrivateApiNonce(PrivateApiNonce):
-    pass

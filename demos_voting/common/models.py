@@ -530,14 +530,7 @@ class Task(models.Model):
 
 
 @python_2_unicode_compatible
-class PrivateApiUser(models.Model):
-
-    APP_DEPENDENCIES = {
-        'ea':  ['bds', 'abb', 'vbb'],
-        'bds': ['ea'],
-        'abb': ['ea', 'vbb'],
-        'vbb': ['ea', 'abb'],
-    }
+class APIAuthNonce(models.Model):
 
     APP_LABEL_CHOICES = (
         ('ea',  _("Election Authority")),
@@ -546,57 +539,23 @@ class PrivateApiUser(models.Model):
         ('vbb', _("Virtual Ballot Box")),
     )
 
-    app_label = models.CharField(_("application label"), max_length=4, unique=True, choices=APP_LABEL_CHOICES)
-    preshared_key = models.CharField(_("pre-shared-key"), max_length=128)
-
-    # Default manager, meta options and natural key
-
-    objects = managers.PrivateApiUserManager()
-
-    class Meta:
-        abstract = True
-        default_related_name = 'users'
-        verbose_name = _("private API user")
-        verbose_name_plural = _("private API user")
-
-    def natural_key(self):
-        return (self.app_label,)
-
-    def __str__(self):
-        return "%s" % self.app_label
-
-
-@python_2_unicode_compatible
-class PrivateApiNonce(models.Model):
-
-    TYPE_LOCAL = 'local'
-    TYPE_REMOTE = 'remote'
-
-    TYPE_CHOICES = (
-        (TYPE_LOCAL, _("local")),
-        (TYPE_REMOTE, _("remote")),
-    )
-
-    user = models.ForeignKey('PrivateApiUser')
-
-    nonce = models.CharField(_("nonce"), max_length=32)
+    app_label = models.CharField(_("application label"), max_length=4, choices=APP_LABEL_CHOICES)
+    value = models.CharField(_("value"), max_length=32)
     timestamp = models.BigIntegerField(_("timestamp"))
 
-    type = models.CharField(_("type"), max_length=8, choices=TYPE_CHOICES)
-
     # Default manager, meta options and natural key
 
-    objects = managers.PrivateApiNonceManager()
+    objects = managers.APIAuthNonceManager()
 
     class Meta:
         abstract = True
-        default_related_name = 'nonces'
-        unique_together = ['user', 'nonce', 'timestamp', 'type']
-        verbose_name = _("private API nonce")
-        verbose_name_plural = _("private API nonce")
+        unique_together = ['app_label', 'value']
+        verbose_name = _("API authentication nonce")
+        verbose_name_plural = _("API authentication nonces")
 
     def natural_key(self):
-        return self.user.natural_key() + (self.nonce, self.timestamp, self.type)
+        return (self.app_label, self.value, self.timestamp)
 
     def __str__(self):
-        return "%s - %s - %s" % (self.nonce, self.timestamp, self.type)
+        return "%s: (%s, %s)" % (self.app_label, self.value, self.timestamp)
+

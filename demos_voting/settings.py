@@ -80,7 +80,6 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'demos_voting.common.middleware.PrivateApiMiddleware',
 ]
 
 ROOT_URLCONF = 'demos_voting.urls'
@@ -307,29 +306,43 @@ DEMOS_VOTING_URLS = {
     'vbb': 'https://www.example.com/demos-voting/vbb/',
 }
 
-# DEMOS_VOTING_PRIVATE_API_URLS: Same as DEMOS_VOTING_URLS, but used only for
-# private API requests. It is recommended that these URLs are accessible only
-# through a private network.
+# DEMOS_VOTING_API_URLS: Same as DEMOS_VOTING_URLS, but used only for API
+# requests. It is recommended that they are accessible only through a private
+# network.
 
-DEMOS_VOTING_PRIVATE_API_URLS = {
+DEMOS_VOTING_API_URLS = {
     'ea':  'https://demos-voting-ea.example.local/api/',
     'bds': 'https://demos-voting-bds.example.local/api/',
     'abb': 'https://demos-voting-abb.example.local/api/',
     'vbb': 'https://demos-voting-vbb.example.local/api/',
 }
 
-# DEMOS_VOTING_PRIVATE_API_VERIFY_SSL: Verify SSL certificates for private API
-# requests (enabled by default). See:
+# DEMOS_VOTING_API_KEYS: Pre-shared keys for API users. They are used to
+# authenticate API requests and should be set to unpredictable values.
+# If the installation is configured as (see DEMOS_VOTING_APPS):
+# - EA, then only BDS, ABB and VBB are required.
+# - BDS, then only EA is required.
+# - ABB, then only EA and VBB are required.
+# - VBB, then only EA and ABB are required.
+
+DEMOS_VOTING_API_KEYS = {
+    'ea':  '',
+    'bds': '',
+    'abb': '',
+    'vbb': '',
+}
+
+# DEMOS_VOTING_API_VERIFY_SSL: Verify SSL certificates for API requests. See:
 # http://docs.python-requests.org/en/latest/user/advanced/#ssl-cert-verification
 
-DEMOS_VOTING_PRIVATE_API_VERIFY_SSL = True
+DEMOS_VOTING_API_VERIFY_SSL = True
 
-# DEMOS_VOTING_PRIVATE_API_NONCE_TIMEOUT: To avoid the need to retain an
-# infinite number of nonces, restrict the time period after which a request
-# with an old timestamp is rejected. The client's and server's clocks must be
-# synchronized. The value is in seconds.
+# DEMOS_VOTING_API_NONCE_TIMEOUT: To avoid the need to retain an infinite
+# number of nonces, restrict the time period after which a request with an old
+# timestamp is rejected. The client and server's clocks must be synchronized.
+# The value is in seconds.
 
-DEMOS_VOTING_PRIVATE_API_NONCE_TIMEOUT = 300
+DEMOS_VOTING_API_NONCE_TIMEOUT = 600
 
 # DEMOS_VOTING_BATCH_SIZE: Controls how many objects (e.g. ballots) are
 # processed in one batch.

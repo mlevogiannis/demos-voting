@@ -6,7 +6,7 @@ from django.apps import AppConfig
 from django.core import checks
 from django.db.models.signals import pre_delete
 
-from demos_voting.common.checks import file_storage_check, security_check, privacy_check, private_api_check
+from demos_voting.common.checks import api_check, file_storage_check, security_check, privacy_check
 from demos_voting.common.signals import pre_delete_protect_handler
 
 
@@ -27,7 +27,7 @@ class CommonMixin(object):
 
         # Register common checks
 
-        checks.register(private_api_check, deploy=True)
+        checks.register(api_check, deploy=True)
         checks.register(file_storage_check)
         checks.register(privacy_check, deploy=True)
         checks.register(security_check, deploy=True)

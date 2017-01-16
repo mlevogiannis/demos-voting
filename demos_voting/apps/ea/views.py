@@ -20,13 +20,20 @@ from django.utils.six.moves import range, zip
 from django.utils.six.moves.urllib.parse import quote, urljoin
 from django.views.generic import View
 
+from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.viewsets import GenericViewSet
+
 from celery.result import AsyncResult
 
+from demos_voting.apps.ea.authentication import APIAuthentication
 from demos_voting.apps.ea.forms import (ElectionForm, QuestionFormSet, OptionFormSet, PartyFormSet, CandidateFormSet,
     create_questions_and_options, create_trustees)
-from demos_voting.apps.ea.models import Election, Question, Option, Trustee
+from demos_voting.apps.ea.models import Election, Question, Option, Ballot, Trustee
+from demos_voting.apps.ea.serializers import ElectionSerializer, BallotSerializer
 from demos_voting.apps.ea.tasks import setup_task
-from demos_voting.common.utils import pdf
+from demos_voting.common.utils import base32, pdf
 
 logger = logging.getLogger(__name__)
 
@@ -278,3 +285,32 @@ class CenterView(View):
 
 
 # API Views -------------------------------------------------------------------
+
+class ElectionViewSet(GenericViewSet):
+
+    lookup_field = 'id'
+    lookup_value_regex = base32.regex + r'+'
+    queryset = Election.objects.all()
+    serializer_class = ElectionSerializer
+    authentication_classes = (APIAuthentication,)
+    permission_classes = (DjangoModelPermissions,)
+
+
+class BallotViewSet(GenericViewSet):
+
+    lookup_field = 'serial_number'
+    lookup_value_regex = r'[0-9]+'
+    queryset = Ballot.objects.all()
+    serializer_class = BallotSerializer
+    authentication_classes = (APIAuthentication,)
+    permission_classes = (DjangoModelPermissions,)
+
+
+class TestAPIView(APIView):
+
+    authentication_classes = (APIAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        return Response(data=None)
+

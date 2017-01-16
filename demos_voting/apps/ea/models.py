@@ -21,8 +21,7 @@ from django.utils.six.moves import range, zip
 from django.utils.translation import ugettext_lazy as _
 
 from demos_voting.apps.ea import managers
-from demos_voting.common.models import (Election, Question, Option, Ballot, Part, PQuestion, POption, Task,
-    PrivateApiUser, PrivateApiNonce)
+from demos_voting.common.models import Election, Question, Option, Ballot, Part, PQuestion, POption, Task, APIAuthNonce
 from demos_voting.common.utils import base32, crypto
 from demos_voting.common.utils.hashers import get_hasher
 
@@ -322,9 +321,6 @@ class Trustee(models.Model):
         return self.email
 
 
-class PrivateApiUser(PrivateApiUser):
+class APIAuthNonce(APIAuthNonce):
     pass
 
-
-class PrivateApiNonce(PrivateApiNonce):
-    pass

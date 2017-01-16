@@ -105,17 +105,8 @@ class TaskManager(models.Manager):
         return self.get(election=election, task_id=task_id)
 
 
-class PrivateApiUserManager(models.Manager):
+class APIAuthNonceManager(models.Manager):
 
-    def get_by_natural_key(self, app_label):
-        return self.get(app_label=app_label)
+    def get_by_natural_key(self, app_label, value, timestamp):
+        return self.get(app_label=app_label, value=value, timestamp=timestamp)
 
-
-class PrivateApiNonceManager(models.Manager):
-
-    def get_by_natural_key(self, app_label, nonce, timestamp, type):
-
-        user_manager = self.model._meta.get_field('user').related_model.objects.db_manager(self.db)
-        user = user_manager.get_by_natural_key(app_label)
-
-        return self.get(user=user, nonce=nonce, timestamp=timestamp, type=type)

@@ -27,6 +27,7 @@ ballot_router.register(r'ballots', views.BallotViewSet, 'ballot')
 urlpatterns_api = [
     url(r'^', include(election_router.urls)),
     url(r'^', include(ballot_router.urls)),
+    url(r'^_test/$', views.TestAPIView.as_view()),
 ]
 
 # -----------------------------------------------------------------------------

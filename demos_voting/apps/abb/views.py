@@ -20,10 +20,15 @@ from django.utils.decorators import method_decorator
 from django.utils.six.moves import range, zip
 from django.views.generic import View
 
-from rest_framework import mixins, viewsets
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
+from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.viewsets import GenericViewSet
 
 from sendfile import sendfile
 
+from demos_voting.apps.abb.authentication import APIAuthentication
 from demos_voting.apps.abb.models import Election, Ballot
 from demos_voting.apps.abb.serializers import ElectionSerializer, BallotSerializer
 from demos_voting.common.utils import base32
@@ -276,27 +281,42 @@ class ApiVoteView(View):
         return http.HttpResponse()
 
 
-class ElectionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class ElectionViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
+
     lookup_field = 'id'
     lookup_value_regex = base32.regex + r'+'
     queryset = Election.objects.none()
     serializer_class = ElectionSerializer
+    authentication_classes = (APIAuthentication,)
+    permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)
 
     def get_queryset(self):
         return Election.objects.prefetch_related('questions__options')
 
 
-class BallotViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class BallotViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
+
     lookup_field = 'serial_number'
     lookup_value_regex = r'[0-9]+'
     queryset = Ballot.objects.none()
     serializer_class = BallotSerializer
+    authentication_classes = (APIAuthentication,)
+    permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)
 
     def get_queryset(self):
         queryset = Ballot.objects.filter(election__id=self.kwargs['election_id'])
         queryset = queryset.prefetch_related('parts__questions__options')
         queryset = queryset.prefetch_related(Prefetch('election', Election.objects.only('state', 'votecode_type')))
         return queryset
+
+
+class TestAPIView(APIView):
+
+    authentication_classes = (APIAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        return Response(data=None)
 
 
 # Media Views -----------------------------------------------------------------
