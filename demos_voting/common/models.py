@@ -116,34 +116,6 @@ class Election(models.Model):
 
     # Custom methods and properties
 
-    @property
-    def type_is_referendum(self):
-        return self.type == self.TYPE_REFERENDUM
-
-    @property
-    def type_is_election(self):
-        return self.type == self.TYPE_ELECTION
-
-    @property
-    def votecode_type_is_short(self):
-        return self.votecode_type == self.VOTECODE_TYPE_SHORT
-
-    @property
-    def votecode_type_is_long(self):
-        return self.votecode_type == self.VOTECODE_TYPE_LONG
-
-    @property
-    def security_code_type_is_none(self):
-        return self.security_code_type == self.SECURITY_CODE_TYPE_NONE
-
-    @property
-    def security_code_type_is_numeric(self):
-        return self.security_code_type == self.SECURITY_CODE_TYPE_NUMERIC
-
-    @property
-    def security_code_type_is_alphanumeric(self):
-        return self.security_code_type == self.SECURITY_CODE_TYPE_ALPHANUMERIC
-
     @cached_property
     def _security_code_length(self):
         optionss = (question.options.all() for question in self.questions.all())
@@ -151,7 +123,7 @@ class Election(models.Model):
 
     def _generate_security_code_length(self, optionss):
         groups = [len(options) for options in optionss]
-        if self.type_is_election:
+        if self.type == Election.TYPE_ELECTION:
             groups = [groups[0]] + [groups[1] // groups[0]] * groups[0]
 
         # Calculate the security code's ideal length, the one required to
@@ -161,9 +133,9 @@ class Election(models.Model):
         for group_len in groups:
             s_max |= ((math.factorial(group_len) - 1) << s_max.bit_length())
 
-        if self.security_code_type_is_numeric:
+        if self.security_code_type == Election.SECURITY_CODE_TYPE_NUMERIC:
             security_code = force_text(s_max)
-        elif self.security_code_type_is_alphanumeric:
+        elif self.security_code_type == Election.SECURITY_CODE_TYPE_ALPHANUMERIC:
             security_code = base32.encode(s_max)
 
         return len(security_code)
@@ -206,16 +178,6 @@ class Question(models.Model):
     max_choices = models.PositiveSmallIntegerField(_("maximum number of choices"))
 
     table_layout = models.CharField(_("table layout"), max_length=16, choices=TABLE_LAYOUT_CHOICES)
-
-    # Custom methods and properties
-
-    @property
-    def table_layout_is_one_column(self):
-        return self.table_layout == self.TABLE_LAYOUT_ONE_COLUMN
-
-    @property
-    def table_layout_is_two_column(self):
-        return self.table_layout == self.TABLE_LAYOUT_TWO_COLUMN
 
     # Default manager, meta options and natural key
 
@@ -361,7 +323,7 @@ class PQuestion(models.Model):
 
     @cached_property
     def permutation(self):
-        if self.election.type_is_election:
+        if self.election.type == Election.TYPE_ELECTION:
             # The first group is always the party list, followed by one group
             # for each party's candidates. The candidate list has a special
             # structure by grouping together the options that correspond to
@@ -375,10 +337,10 @@ class PQuestion(models.Model):
                 group for group in zip(*([iter(range(candidate_count))] * (candidate_count // party_count)))
             ]
 
-        elif self.election.type_is_referendum:
+        elif self.election.type == Election.TYPE_REFERENDUM:
             groups = [tuple(range(questions.options.count())) for questions in self.election.questions.all()]
 
-        question_is_candidate_list = (self.election.type_is_election and self.index == 1)
+        question_is_candidate_list = (self.election.type == Election.TYPE_ELECTION and self.index == 1)
 
         if question_is_candidate_list:
             p_list = []
@@ -389,9 +351,9 @@ class PQuestion(models.Model):
         if self.election.security_code_length >= self.election._security_code_length:
             # Decode the security code to get the group's permutation.
 
-            if self.election.security_code_type_is_numeric:
+            if self.election.security_code_type == Election.SECURITY_CODE_TYPE_NUMERIC:
                 s = int(self.part.security_code)
-            elif self.election.security_code_type_is_alphanumeric:
+            elif self.election.security_code_type == Election.SECURITY_CODE_TYPE_ALPHANUMERIC:
                 s = base32.decode(self.part.security_code)
 
             for i, group in enumerate(groups):

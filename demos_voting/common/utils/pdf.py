@@ -26,7 +26,7 @@ from reportlab.pdfbase.pdfmetrics import registerFont, stringWidth
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import Image, PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
-from demos_voting.common.models import Election
+from demos_voting.common.models import Election, Question
 from demos_voting.common.utils import base32
 
 
@@ -248,15 +248,18 @@ def generate(*ballots):
     # Translatable strings.
 
     serial_number_text = _("Serial number") + ":"
-    security_code_text =  (_("Security code") + ":") if not election.security_code_type_is_none else ""
+
+    security_code_text = None
+    if election.security_code_type != Election.SECURITY_CODE_TYPE_NONE:
+        security_code_text =  _("Security code") + ":"
 
     election_name_text = _("Election Name")
     election_id_text = _("Election ID")
 
-    if election.type_is_referendum:
-        question_text = (_("Question %(index)s") if election.questions.count() > 1 else _("Question"))
+    if election.type == Election.TYPE_REFERENDUM:
+        question_text = _("Question %(index)s") if election.questions.count() > 1 else _("Question")
         option_text = _("Option")
-    elif election.type_is_election:
+    elif election.type == Election.TYPE_ELECTION:
         question_text = _("Party")
         option_text = _("Candidate")
 
@@ -280,13 +283,13 @@ def generate(*ballots):
 
     sc_length = election.security_code_length
 
-    if election.security_code_type_is_none:
+    if election.security_code_type == Election.SECURITY_CODE_TYPE_NONE:
         sc_key_width = 0
         sc_value_width = 0
     else:
-        if election.security_code_type_is_numeric:
+        if election.security_code_type == Election.SECURITY_CODE_TYPE_NUMERIC:
             security_code_chars = string.digits
-        elif election.security_code_type_is_alphanumeric:
+        elif election.security_code_type == Election.SECURITY_CODE_TYPE_ALPHANUMERIC:
             security_code_chars = base32.symbols
         sc_key_width = stringWidth(security_code_text, ttf_sans_bold, font_lg) + h_padding
         sc_value_width = stringWidth(security_code_chars[0], ttf_mono_bold, font_lg) * sc_length + h_padding
@@ -295,14 +298,14 @@ def generate(*ballots):
 
     # Calculate votecode and receipt's minimum column widths.
 
-    if election.votecode_type_is_short:
+    if election.votecode_type == Election.VOTECODE_TYPE_SHORT:
         votecode_chars = string.digits
-        if election.type_is_referendum:
+        if election.type == Election.TYPE_REFERENDUM:
             max_options = settings.DEMOS_VOTING_MAX_REFERENDUM_OPTIONS
-        elif election.type_is_election:
+        elif election.type == Election.TYPE_ELECTION:
             max_options = election.questions.all()[1].options.count()
         votecode_length = len(force_text(max_options - 1))
-    elif election.votecode_type_is_long:
+    elif election.votecode_type == Election.VOTECODE_TYPE_LONG:
         votecode_chars = base32.symbols + '-'
         votecode_length = election.votecode_length + int(math.ceil(election.votecode_length/votecode_chunk_length)) - 1
 
@@ -320,18 +323,18 @@ def generate(*ballots):
 
     _option_table_data = []
 
-    if election.type_is_election:
+    if election.type == Election.TYPE_ELECTION:
         parties = election.questions.all()[0].options.all()
         candidates = election.questions.all()[1].options.all()
         groups = [options for options in zip(*([iter(candidates)] * (len(candidates) // len(parties))))]
-    elif election.type_is_referendum:
+    elif election.type == Election.TYPE_REFERENDUM:
         groups = [tuple(question.options.all()) for question in election.questions.all()]
 
     for i, options in enumerate(groups):
 
-        if election.type_is_election:
+        if election.type == Election.TYPE_ELECTION:
             question = election.questions.all()[1]
-        elif election.type_is_referendum:
+        elif election.type == Election.TYPE_REFERENDUM:
             question = election.questions.all()[i]
 
         options = [
@@ -350,7 +353,7 @@ def generate(*ballots):
         receipt_column_width = receipt_column_min_width
 
         available_width = page_width - (option_column_width + votecode_column_width + receipt_column_width)
-        if question.table_layout_is_two_column:
+        if question.table_layout == Question.TABLE_LAYOUT_TWO_COLUMN:
             available_width -= (page_width + h_padding) / 2
 
         if available_width < 0:
@@ -365,7 +368,7 @@ def generate(*ballots):
             votecode_column_width += available_width / 3
 
         option_table_column_widths = [option_column_width, votecode_column_width, receipt_column_width]
-        if question.table_layout_is_two_column:
+        if question.table_layout == Question.TABLE_LAYOUT_TWO_COLUMN:
             option_table_column_widths += [h_padding] + option_table_column_widths
 
         _option_table_data.append((options, option_table_column_widths))
@@ -396,7 +399,7 @@ def generate(*ballots):
 
             page_header_table = Table(
                 data=[
-                    [serial_number_text, ballot.serial_number, "", security_code_text, part.security_code or ""],
+                    [serial_number_text, ballot.serial_number, "", security_code_text or "", part.security_code or ""],
                     [_kv_paragraph(election_name_text, election.name, mode='t')],
                     [_kv_paragraph(election_id_text, election.id, mode='d')],
                 ],
@@ -438,18 +441,18 @@ def generate(*ballots):
             # Split options into groups. In the election case, candidates are
             # grouped by party. Otherwise, the groups are the questions.
 
-            if election.type_is_election:
+            if election.type == Election.TYPE_ELECTION:
                 parties = part.questions.all()[0].options.all()
                 candidates = part.questions.all()[1].options.all()
                 groups = [p_options for p_options in zip(*([iter(candidates)] * (len(candidates) // len(parties))))]
-            elif election.type_is_referendum:
+            elif election.type == Election.TYPE_REFERENDUM:
                 groups = [tuple(p_question.options.all()) for p_question in part.questions.all()]
 
             for i, (p_options, (options, option_table_column_widths)) in enumerate(zip(groups, _option_table_data)):
 
                 # Prepare question table's data.
 
-                if election.type_is_election:
+                if election.type == Election.TYPE_ELECTION:
                     party_option = election.questions.all()[0].options.all()[i]
                     party_p_option = part.questions.all()[0].options.all()[i]
 
@@ -457,7 +460,7 @@ def generate(*ballots):
                     votecode = party_p_option.votecode
                     receipt = party_p_option.receipt
 
-                    if election.votecode_type_is_long:
+                    if election.votecode_type == Election.VOTECODE_TYPE_LONG:
                         votecode = base32.hyphen(votecode, votecode_chunk_length)
                         receipt = receipt[-election.receipt_length:]
 
@@ -467,7 +470,7 @@ def generate(*ballots):
                         [_kv_paragraph(receipt_text, receipt, mode='d')]
                     ]
 
-                elif election.type_is_referendum:
+                elif election.type == Election.TYPE_REFERENDUM:
                     question = election.questions.all()[i]
                     question_table_rows = [
                         [_kv_paragraph(question_text % {'index': question.index + 1}, question.name, mode='t')]
@@ -483,7 +486,7 @@ def generate(*ballots):
                 votecodes = [p_option.votecode for p_option in p_options]
                 receipts = [p_option.receipt[-election.receipt_length:] for p_option in p_options]
 
-                if election.votecode_type_is_long:
+                if election.votecode_type == Election.VOTECODE_TYPE_LONG:
                     votecodes = [base32.hyphen(votecode, votecode_chunk_length) for votecode in votecodes]
 
                 option_rows = [list(row) for row in zip(options, votecodes, receipts)]
@@ -516,7 +519,7 @@ def generate(*ballots):
 
                     # Prepare one- or two-column option table.
 
-                    if question.table_layout_is_one_column:
+                    if question.table_layout == Question.TABLE_LAYOUT_ONE_COLUMN:
 
                         option_table_row_cnt = min(option_table_available_row_cnt, option_row_cnt - row)
                         option_table_rows = option_rows[row: row + option_table_row_cnt]
@@ -526,7 +529,7 @@ def generate(*ballots):
                         if include_option_table_header:
                             option_table_rows = [option_table_header_row] + option_table_rows
 
-                    elif question.table_layout_is_two_column:
+                    elif question.table_layout == Question.TABLE_LAYOUT_TWO_COLUMN:
 
                         option_table_row_cnt = min(2 * option_table_available_row_cnt, option_row_cnt - row)
 
@@ -621,8 +624,7 @@ def sample(election_form, question_formset, option_formsets):
         questions.append(type(str('Question'), (object,), {
             'index': question_form.index,
             'name': question_form.name,
-            'table_layout_is_one_column': question_form.table_layout_is_one_column,
-            'table_layout_is_two_column': question_form.table_layout_is_two_column,
+            'table_layout': question_form.table_layout,
             'options': options,
         })())
 
@@ -634,13 +636,9 @@ def sample(election_form, question_formset, option_formsets):
         'votecode_length': election_form.votecode_length,
         'receipt_length': election_form.receipt_length,
         'security_code_length': election_form.security_code_length,
-        'type_is_election': election_form.type_is_election,
-        'type_is_referendum': election_form.type_is_referendum,
-        'votecode_type_is_short': election_form.votecode_type_is_short,
-        'votecode_type_is_long': election_form.votecode_type_is_long,
-        'security_code_type_is_none': election_form.security_code_type_is_none,
-        'security_code_type_is_numeric': election_form.security_code_type_is_numeric,
-        'security_code_type_is_alphanumeric': election_form.security_code_type_is_alphanumeric,
+        'type': election_form.type,
+        'votecode_type': election_form.votecode_type,
+        'security_code_type': election_form.security_code_type,
         'questions': questions,
     })()
 
@@ -650,16 +648,16 @@ def sample(election_form, question_formset, option_formsets):
         p_questions = queryset_cls()
         for question in election.questions.all():
 
-            if election.votecode_type_is_short:
+            if election.votecode_type == Election.VOTECODE_TYPE_SHORT:
                 short_votecodes = list(range(1, question.options.count() + 1))
                 random.shuffle(short_votecodes)
 
             p_options = queryset_cls()
             for option in question.options.all():
 
-                if election.votecode_type_is_short:
+                if election.votecode_type == Election.VOTECODE_TYPE_SHORT:
                     votecode = short_votecodes[option.index]
-                elif election.votecode_type_is_long:
+                elif election.votecode_type == Election.VOTECODE_TYPE_LONG:
                     votecode = random_value(base32.symbols, election.votecode_length)
 
                 p_options.append(type(str('POption'), (object,), {
@@ -672,12 +670,12 @@ def sample(election_form, question_formset, option_formsets):
                 'options': p_options,
             })())
 
-        if election.security_code_type_is_none:
+        if election.security_code_type == Election.SECURITY_CODE_TYPE_NONE:
             security_code = None
         else:
-            if election.security_code_type_is_numeric:
+            if election.security_code_type == Election.SECURITY_CODE_TYPE_NUMERIC:
                 security_code_symbols = string.digits
-            elif election.security_code_type_is_alphanumeric:
+            elif election.security_code_type == Election.SECURITY_CODE_TYPE_ALPHANUMERIC:
                 security_code_symbols = base32.symbols
             security_code = random_value(security_code_symbols, election.security_code_length)
 

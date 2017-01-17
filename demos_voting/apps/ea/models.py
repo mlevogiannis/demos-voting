@@ -53,14 +53,14 @@ class Election(Election):
             return super(Election, self).save(*args, **kwargs)
 
     def generate_votecode_length(self):
-        if not self.votecode_type_is_long:
+        if self.votecode_type != Election.VOTECODE_TYPE_LONG:
             self.votecode_length = None
 
     def generate_security_code_length(self, optionss=None):
-        if self.security_code_type_is_none:
+        if self.security_code_type == Election.SECURITY_CODE_TYPE_NONE:
             self.security_code_length = None
         else:
-            if self.votecode_type_is_long:
+            if self.votecode_type == Election.VOTECODE_TYPE_LONG:
                 self.security_code_length = self.SECURITY_CODE_MAX_LENGTH
             else:
                 length = self._generate_security_code_length(optionss) if optionss else self._security_code_length
@@ -70,14 +70,14 @@ class Election(Election):
                 )
 
     def generate_keypair(self):
-        if self.votecode_type_is_long:
+        if self.votecode_type == Election.VOTECODE_TYPE_LONG:
             self.keypair = OpenSSL.crypto.PKey()
             self.keypair.generate_key(OpenSSL.crypto.TYPE_RSA, 2048)
-        else:
+        elif self.votecode_type == Election.VOTECODE_TYPE_SHORT:
             self.keypair = None
 
     def generate_certificate(self):
-        if self.votecode_type_is_long:
+        if self.votecode_type == Election.VOTECODE_TYPE_LONG:
             self.certificate = OpenSSL.crypto.X509()
 
             ca_key_path = getattr(settings, 'DEMOS_VOTING_CA_PKEY_FILE', '')
@@ -109,7 +109,8 @@ class Election(Election):
             self.certificate.set_notAfter(force_bytes((self.setup_started_at + validity).strftime('%Y%m%d%H%M%S%z')))
             self.certificate.set_pubkey(self.keypair)
             self.certificate.sign(ca_keypair, str('sha256'))
-        else:
+
+        elif self.votecode_type == Election.VOTECODE_TYPE_SHORT:
             self.certificate = None
 
 
@@ -156,12 +157,12 @@ class Ballot(Ballot):
 class Part(Part):
 
     def generate_security_code(self):
-        if self.election.security_code_type_is_none:
+        if self.election.security_code_type == Election.SECURITY_CODE_TYPE_NONE:
             self.security_code = None
         else:
             # Split options into groups, one for each security code's block.
 
-            if self.election.type_is_election:
+            if self.election.type == Election.TYPE_ELECTION:
                 # The first group is always the party list, followed by one
                 # group for each party's candidates. Candidate lists have a
                 # special structure by grouping the options that correspond
@@ -175,7 +176,7 @@ class Part(Part):
                     options for options in zip(*([iter(candidates)] * (len(candidates) // len(parties))))
                 ]
 
-            elif self.election.type_is_referendum:
+            elif self.election.type == Election.TYPE_REFERENDUM:
                 groups = [tuple(question.options.all()) for question in self.election.questions.all()]
 
             # If the security code has enough bits to cover all permutations
@@ -199,9 +200,16 @@ class Part(Part):
 
             # Fill (the remainder of) the security code with random bits.
 
-            base = 10 if self.election.security_code_type_is_numeric else 32
-            s_enc_max = sum(base ** i for i in range(self.election.security_code_length)) * (base - 1)
+            security_code_length = self.election.security_code_length
 
+            if self.election.security_code_type == Election.SECURITY_CODE_TYPE_NUMERIC:
+                base = 10
+                encode = lambda s, l: force_text(s).zfill(l)
+            elif self.election.security_code_type == Election.SECURITY_CODE_TYPE_ALPHANUMERIC:
+                base = 32
+                encode = lambda s, l: base32.encode(s, l)
+
+            s_enc_max = sum(base ** i for i in range(security_code_length)) * (base - 1)
             r_max = (s_enc_max - s_max) >> s_max.bit_length()
 
             if r_max > 0:
@@ -210,16 +218,7 @@ class Part(Part):
                     r = random.getrandbits(r_max.bit_length())
                 s |= (r << s_max.bit_length())
 
-            # Finally, encode the security code.
-
-            security_code_length = self.election.security_code_length
-
-            if self.election.security_code_type_is_numeric:
-                security_code = force_text(s).zfill(security_code_length)
-            elif self.election.security_code_type_is_alphanumeric:
-                security_code = base32.encode(s, security_code_length)
-
-            self.security_code = security_code[-security_code_length:]
+            self.security_code = encode(s, security_code_length)[-security_code_length:]
 
     @cached_property
     def _crypto(self):
@@ -252,7 +251,7 @@ class PQuestion(PQuestion):
 class POption(POption):
 
     def generate_votecode(self):
-        if self.election.votecode_type_is_long:
+        if self.election.votecode_type == Election.VOTECODE_TYPE_LONG:
             length = self.election.votecode_length
             permutation = self.question.permutation
 
@@ -270,15 +269,16 @@ class POption(POption):
             config = self.question._long_votecode_hash_config or hasher.config()
 
             self.votecode_hash = hasher.hash(self.votecode, config)
-        else:
+
+        elif self.election.votecode_type == Election.VOTECODE_TYPE_SHORT:
             self.votecode = self.question._short_votecodes[self.index]
             self.votecode_hash = None
 
     def generate_receipt(self):
-        if self.election.votecode_type_is_long:
+        if self.election.votecode_type == Election.VOTECODE_TYPE_LONG:
             signature = OpenSSL.crypto.sign(self.election.keypair, self.votecode, str('sha256'))
             self.receipt = base32.encode_from_bytes(signature, (self.election.keypair.bits() + 4) // 5)
-        else:
+        elif self.election.votecode_type == Election.VOTECODE_TYPE_SHORT:
             randomness = random.getrandbits(self.election.receipt_length * 5)
             self.receipt = base32.encode(randomness, self.election.receipt_length)
 

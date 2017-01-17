@@ -408,7 +408,7 @@ def create_questions_and_options(election_form):
 
     election = election_form.save(commit=False)
 
-    if election.type_is_election:
+    if election.type == Election.TYPE_ELECTION:
 
         party_formset = election_form.party_formset
         candidate_formsets = [party_form.candidate_formset for party_form in party_formset]
@@ -454,7 +454,7 @@ def create_questions_and_options(election_form):
         questions = [party_question, candidate_question]
         optionss = [party_options, candidate_options]
 
-    elif election.type_is_referendum:
+    elif election.type == Election.TYPE_REFERENDUM:
 
         question_formset = election_form.question_formset
         option_formsets = [question_form.option_formset for question_form in question_formset]
