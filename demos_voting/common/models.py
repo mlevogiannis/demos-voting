@@ -318,10 +318,6 @@ class PQuestion(models.Model):
     # Custom methods and properties
 
     @cached_property
-    def index(self):
-        return self.question.index
-
-    @cached_property
     def permutation(self):
         if self.election.type == Election.TYPE_ELECTION:
             # The first group is always the party list, followed by one group
