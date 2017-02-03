@@ -147,7 +147,6 @@ class Election(models.Model):
     class Meta:
         abstract = True
         default_related_name = 'elections'
-        ordering = ['id']
         verbose_name = pgettext_lazy("model", "election")
         verbose_name_plural = pgettext_lazy("model", "elections")
 

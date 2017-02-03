@@ -13,7 +13,6 @@ import OpenSSL
 
 from django.conf import settings
 from django.db import models, IntegrityError
-from django.db.models.functions import Length
 from django.utils import six
 from django.utils.encoding import force_bytes, force_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
@@ -43,8 +42,8 @@ class Election(Election):
     def save(self, *args, **kwargs):
         if not self.id:
             while True:
-                id = (Election.objects.order_by(Length('id'), 'id').values('id').last() or {}).get('id')
-                self.id = base32.encode(base32.decode(id) + 1) if id is not None else '0'
+                last_id = (Election.objects.values('id').last() or {}).get('id')
+                self.id = base32.encode(base32.decode(last_id) + 1) if last_id else '0'
                 try:
                     return super(Election, self).save(*args, **kwargs)
                 except IntegrityError:

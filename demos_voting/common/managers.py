@@ -3,9 +3,13 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from django.db import models
+from django.db.models.functions import Length
 
 
 class ElectionManager(models.Manager):
+
+    def get_queryset(self):
+        return super(ElectionManager, self).get_queryset().order_by(Length('id'), 'id')
 
     def get_by_natural_key(self, election_id):
         return self.get(id=election_id)
