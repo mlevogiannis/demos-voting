@@ -67,7 +67,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'demos_voting.common',
+    'demos_voting.base',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -153,7 +153,7 @@ USE_I18N = True
 USE_L10N = True
 
 LOCALE_PATHS = [
-    os.path.join(BASE_DIR, 'demos_voting/common/locale'),
+    os.path.join(BASE_DIR, 'demos_voting/base/locale'),
 ]
 
 
@@ -285,25 +285,25 @@ if DEVELOPMENT:
 
 # DEMOS Voting configuration
 
-# DEMOS_VOTING_APPS: One or more of ['ea', 'bds', 'abb', 'vbb']. Warning: The
-# apps must be isolated (with regard to data storage, access to the server,
-# etc) in order to protect the voter's privacy. Do NOT install multiple apps
-# on the same production server. This feature is intended to be used only for
-# development purposes.
+# DEMOS_VOTING_APPS: One or more of 'ballot_distributor', 'bulletin_board',
+# 'election_authority' and 'vote_collector'. Warning: The apps must be isolated
+# (with regard to data storage, access to the server, etc) in order to protect
+# the voters' privacy. Do NOT install multiple apps on the same production
+# server. This feature is intended to be used only for development purposes.
 
 DEMOS_VOTING_APPS = []
 
-INSTALLED_APPS += ['demos_voting.apps.%s' % app for app in DEMOS_VOTING_APPS]
-LOCALE_PATHS += [os.path.join(BASE_DIR, 'demos_voting/apps/%s/locale' % app) for app in DEMOS_VOTING_APPS]
-TEMPLATES[0]['DIRS'] += [os.path.join(BASE_DIR, 'demos_voting/apps/%s/templates/' % app) for app in DEMOS_VOTING_APPS]
+INSTALLED_APPS += ['demos_voting.%s' % app for app in DEMOS_VOTING_APPS]
+LOCALE_PATHS += [os.path.join(BASE_DIR, 'demos_voting/%s/locale' % app) for app in DEMOS_VOTING_APPS]
+TEMPLATES[0]['DIRS'] += [os.path.join(BASE_DIR, 'demos_voting/%s/templates/' % app) for app in DEMOS_VOTING_APPS]
 
 # DEMOS_VOTING_URLS: The URLs by which the apps are served. Always use HTTPS.
 
 DEMOS_VOTING_URLS = {
-    'ea':  'https://www.example.com/demos-voting/ea/',
-    'bds': 'https://www.example.com/demos-voting/bds/',
-    'abb': 'https://www.example.com/demos-voting/abb/',
-    'vbb': 'https://www.example.com/demos-voting/vbb/',
+    'ballot_distributor': 'https://www.example.com/demos-voting/ballot-distributor/',
+    'bulletin_board': 'https://www.example.com/demos-voting/bulletin-board/',
+    'election_authority': 'https://www.example.com/demos-voting/election-authority/',
+    'vote_collector': 'https://www.example.com/demos-voting/vote-collector/',
 }
 
 # DEMOS_VOTING_API_URLS: Same as DEMOS_VOTING_URLS, but used only for API
@@ -311,25 +311,24 @@ DEMOS_VOTING_URLS = {
 # network.
 
 DEMOS_VOTING_API_URLS = {
-    'ea':  'https://demos-voting-ea.example.local/api/',
-    'bds': 'https://demos-voting-bds.example.local/api/',
-    'abb': 'https://demos-voting-abb.example.local/api/',
-    'vbb': 'https://demos-voting-vbb.example.local/api/',
+    'ballot_distributor': 'https://demos-voting-ballot-distributor.example.local/api/',
+    'bulletin_board': 'https://demos-voting-bulletin-board.example.local/api/',
+    'election_authority': 'https://demos-voting-election-authority.example.local/api/',
+    'vote_collector': 'https://demos-voting-vote-collector.example.local/api/',
 }
 
-# DEMOS_VOTING_API_KEYS: Pre-shared keys for API users. They are used to
-# authenticate API requests and should be set to unpredictable values.
-# If the installation is configured as (see DEMOS_VOTING_APPS):
-# - EA, then only BDS, ABB and VBB are required.
-# - BDS, then only EA is required.
-# - ABB, then only EA and VBB are required.
-# - VBB, then only EA and ABB are required.
+# DEMOS_VOTING_API_KEYS: Pre-shared keys for API users, used to authenticate
+# API requests. Dependencies (installed app: required keys):
+# 'ballot_distributor': 'election_authority'
+# 'bulletin_board': 'election_authority', 'vote_collector'
+# 'election_authority': 'ballot_distributor', 'bulletin_board', 'vote_collector'
+# 'vote_collector': 'election_authority', 'bulletin_board'
 
 DEMOS_VOTING_API_KEYS = {
-    'ea':  '',
-    'bds': '',
-    'abb': '',
-    'vbb': '',
+    'ballot_distributor': '',
+    'bulletin_board': '',
+    'election_authority': '',
+    'vote_collector': '',
 }
 
 # DEMOS_VOTING_API_VERIFY_SSL: Verify SSL certificates for API requests. See:
@@ -359,7 +358,7 @@ DEMOS_VOTING_CA_PKEY_PASSPHRASE = ''
 
 # DEMOS_VOTING_LONG_VOTECODE_HASH_REUSE_SALT: (ea only) Use the same salt value
 # for all long votecode hashes of each ballot part's question. This can greatly
-# improve vbb's performance for questions with many options.
+# improve the vote collector's performance for questions with many options.
 
 DEMOS_VOTING_LONG_VOTECODE_HASH_REUSE_SALT = False
 

@@ -1,0 +1,23 @@
+{% extends "base/base.html" %}
+
+{% load i18n %}
+{% load base.utils %}
+
+{% block title %}
+    {% trans "Ballot Distributor" as title %}
+    {{ block.super }}
+{% endblock title %}
+
+{% block header %}
+    {% trans "Ballot Distributor" as title %}
+    {% url "ballot_distributor:home" as url %}
+    {{ block.super }}
+{% endblock header %}
+
+{% block navbar %}
+    {% tuple "ballot_distributor:home" _("Home") False as home %}
+    {% tuple "ballot_distributor:manage" _("Ballot Management") True as manage %}
+    {% tuple home manage as links %}
+    {{ block.super }}
+{% endblock navbar %}
+

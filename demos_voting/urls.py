@@ -30,8 +30,8 @@ urlpatterns_api = []
 urlpatterns_media = []
 
 for app in settings.DEMOS_VOTING_APPS:
-    urlconf = import_module('demos_voting.apps.%s.urls' % app)
-    path = ((app + r'/') if len(settings.DEMOS_VOTING_APPS) > 1 else r'')
+    urlconf = import_module('demos_voting.%s.urls' % app)
+    path = ((app.replace('_', '-') + r'/') if len(settings.DEMOS_VOTING_APPS) > 1 else r'')
 
     urlpatterns += i18n_patterns(url(path, include(urlconf, namespace=app, app_name=app)))
     urlpatterns_api += [url(path, include(urlconf.urlpatterns_api, namespace="%s-api" % app, app_name=app))]

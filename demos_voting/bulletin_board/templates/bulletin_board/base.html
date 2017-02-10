@@ -1,0 +1,24 @@
+{% extends "base/base.html" %}
+
+{% load i18n %}
+{% load base.utils %}
+
+{% block title %}
+    {% trans "Bulletin Board" as title %}
+    {{ block.super }}
+{% endblock title %}
+
+{% block header %}
+    {% trans "Bulletin Board" as title %}
+    {% url "bulletin_board:home" as url %}
+    {{ block.super }}
+{% endblock header %}
+
+{% block navbar %}
+    {% tuple "bulletin_board:home" _("Home") False as home %}
+    {% tuple "bulletin_board:audit" _("Audit") True as audit %}
+    {% tuple "bulletin_board:results" _("Results") True as results %}
+    {% tuple home audit results as links %}
+    {{ block.super }}
+{% endblock navbar %}
+

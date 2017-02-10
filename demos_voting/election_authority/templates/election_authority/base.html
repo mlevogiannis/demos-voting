@@ -1,0 +1,25 @@
+{% extends "base/base.html" %}
+
+{% load i18n %}
+{% load base.utils %}
+
+{% block title %}
+    {% trans "Election Authority" as title %}
+    {{ block.super }}
+{% endblock title %}
+
+{% block header %}
+    {% trans "Election Authority" as title %}
+    {% url "election_authority:home" as url %}
+    {{ block.super }}
+{% endblock header %}
+
+{% block navbar %}
+    {% tuple "election_authority:home" _("Home") False as home %}
+    {% tuple "election_authority:create" _("Create") False as create %}
+    {% tuple "election_authority:status" _("Status") True as status %}
+    {% tuple "election_authority:center" _("Account") False as center %}
+    {% tuple home create status center as links %}
+    {{ block.super }}
+{% endblock navbar %}
+

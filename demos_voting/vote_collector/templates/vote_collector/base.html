@@ -1,0 +1,24 @@
+{% extends "base/base.html" %}
+
+{% load i18n %}
+{% load base.utils %}
+
+{% block title %}
+    {% trans "Digital Ballot Box" as title %}
+    {{ block.super }}
+{% endblock title %}
+
+{% block header %}
+    {% trans "Digital Ballot Box" as title %}
+    {% url "vote_collector:home" as url %}
+    {{ block.super }}
+{% endblock header %}
+
+{% block navbar %}
+    {% tuple "vote_collector:home" _("Home") False as home %}
+    {% tuple "vote_collector:vote" _("Vote") True as vote %}
+    {% tuple "vote_collector:qrcode" _("Read QR Code") False as qrcode %}
+    {% tuple home vote qrcode as links %}
+    {{ block.super }}
+{% endblock navbar %}
+

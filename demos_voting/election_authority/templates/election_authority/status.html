@@ -1,0 +1,107 @@
+{% extends "election_authority/base.html" %}
+
+{% load i18n %}
+{% load l10n %}
+{% load staticfiles %}
+{% load base.float %}
+{% load base.utils %}
+
+
+{% block css %}
+
+<!-- status.css -->
+<link rel="stylesheet" href="{% static 'election_authority/status.css' %}">
+
+{% endblock css %}
+
+
+{% block main %}
+
+<div class="row">
+    <div class="col-xs-12">
+
+        {% tuple _("Election") election.id as t1 %}
+        {% tuple _("Ballots") election.ballots as t3 %}
+
+        {% if election.is_election %}
+            {% tuple _("Type") _("Elections") as t2 %}
+        {% else %}
+            {% tuple _("Type") _("Referendum") as t2 %}
+        {% endif %}
+
+        {% tuple t1 t2 t3 as panels %}
+        {% include "base/election_box.html" with object=election panels=panels %}
+
+        <div id="main-wrapper">
+
+            <div class="alert alert-warning fade in text-center hidden" role="alert">
+                <p>{% trans "Unable to fetch election state, retrying..." %}</p>
+            </div>
+
+            <div class="alert alert-dnager fade in hidden" role="alert">
+                <p>{% trans "The election was stopped due to a fatal error." %}</p>
+            </div>
+
+            <div class="list-group">
+                <a class="list-group-item" data-state="{{ State.DRAFT }}">
+                    {% trans "Election defined" %}
+                    <span class="glyphicon pull-right hidden"></span>
+                </a>
+                <a class="list-group-item" data-state="{{ State.PENDING }}">
+                    {% trans "Pending approval" %}
+                    <span class="glyphicon pull-right hidden"></span>
+                </a>
+                <a class="list-group-item" data-state="{{ State.WORKING }}">
+                    {% trans "Generating ballots" %}
+                    <span class="glyphicon pull-right hidden"></span>
+                    <div class="progress hidden">
+                        <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                            <span class="sr-only">0%</span>
+                        </div>
+                    </div>
+                </a>
+                <a class="list-group-item" data-state="{{ State.RUNNING|floatadd:'-0.1'|unlocalize }}">
+                    {% trans "Awaiting start time" %}
+                    <span class="glyphicon pull-right hidden"></span>
+                </a>
+                <a class="list-group-item" data-state="{{ State.RUNNING }}">
+                    {% trans "Voting is in progress" %}
+                    <span class="glyphicon pull-right hidden"></span>
+                </a>
+                <a class="list-group-item" data-state="{{ State.RUNNING|floatadd:'+0.1'|unlocalize }}">
+                    {% trans "Extracting result" %}
+                    <span class="glyphicon pull-right hidden"></span>
+                </a>
+                <a class="list-group-item" data-state="{{ State.COMPLETED }}">
+                    {% trans "Completed" %}
+                    <span class="glyphicon pull-right hidden"></span>
+                </a>
+            </div>
+
+            <div class="main-header-small">
+                <h5>{% trans "Ballot management" %}:</h5>
+            </div>
+            <pre><a target="_blank" href="{{ bds_url }}">{{ bds_url }}</a></pre>
+
+            <div class="main-header-small">
+                <h5>{% trans "Election results" %}:</h5>
+            </div>
+            <pre><a target="_blank" href="{{ abb_url }}">{{ abb_url }}</a></pre>
+        </div>
+
+    </div>
+</div>
+
+{% endblock main %}
+
+
+{% block script %}
+
+<script>
+    var state_list = { {% for state, value in State.items %} {{ state }}: {{ value }}, {% endfor %} }
+</script>
+
+<!-- status.js -->
+<script src="{% static 'election_authority/status.js' %}"></script>
+
+{% endblock script %}
