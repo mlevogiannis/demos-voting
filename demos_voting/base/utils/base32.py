@@ -6,7 +6,7 @@ import os
 import random as _random
 import re
 
-from demos_voting.base.utils.int import int_from_bytes, int_to_bytes
+from demos_voting.base.utils.compatibility import int_from_bytes, int_to_bytes
 from django.utils.six.moves import zip_longest
 
 # Reference: http://www.crockford.com/wrmg/base32.html

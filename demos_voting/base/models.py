@@ -19,7 +19,7 @@ from django.utils.translation import pgettext_lazy, ugettext_lazy as _
 
 from demos_voting.base import managers
 from demos_voting.base.utils import base32
-from demos_voting.base.utils.int import int_from_bytes
+from demos_voting.base.utils.compatibility import int_from_bytes
 from demos_voting.base.utils.permutation import permutation
 
 logger = logging.getLogger(__name__)
