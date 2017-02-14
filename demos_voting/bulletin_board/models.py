@@ -10,7 +10,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from demos_voting.base import fields
-from demos_voting.base.models import Election, Question, Option, Ballot, Part, PQuestion, POption, Task, APIAuthNonce
+from demos_voting.base.models import Election, Question, Option, Ballot, Part, PQuestion, POption, Task
 
 logger = logging.getLogger(__name__)
 
@@ -68,9 +68,5 @@ class POption(POption):
 
 
 class Task(Task):
-    pass
-
-
-class APIAuthNonce(APIAuthNonce):
     pass
 

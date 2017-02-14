@@ -78,6 +78,6 @@ class TaskManager(models.Manager):
 
 class APIAuthNonceManager(models.Manager):
 
-    def get_by_natural_key(self, app_label, value, timestamp):
-        return self.get(app_label=app_label, value=value, timestamp=timestamp)
+    def get_by_natural_key(self, username, value, timestamp):
+        return self.get(username=username, value=value, timestamp=timestamp)
 

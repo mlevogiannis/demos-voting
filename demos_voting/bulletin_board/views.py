@@ -21,15 +21,15 @@ from django.utils.six.moves import range, zip
 from django.views.generic import View
 
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
-from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
 from sendfile import sendfile
 
+from demos_voting.base.authentication import APIAuthentication
 from demos_voting.base.utils import base32
-from demos_voting.bulletin_board.authentication import APIAuthentication
 from demos_voting.bulletin_board.models import Election, Ballot
 from demos_voting.bulletin_board.serializers import ElectionSerializer, BallotSerializer
 
@@ -288,7 +288,7 @@ class ElectionViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     queryset = Election.objects.none()
     serializer_class = ElectionSerializer
     authentication_classes = (APIAuthentication,)
-    permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get_queryset(self):
         return Election.objects.prefetch_related('questions__options')
@@ -301,7 +301,7 @@ class BallotViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
     queryset = Ballot.objects.none()
     serializer_class = BallotSerializer
     authentication_classes = (APIAuthentication,)
-    permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get_queryset(self):
         queryset = Ballot.objects.filter(election__id=self.kwargs['election_id'])

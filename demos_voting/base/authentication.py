@@ -15,47 +15,47 @@ from django.utils.encoding import force_bytes, force_str, force_text
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 
-from demos_voting.base.utils.api import API_AUTH_PARAMS, API_AUTH_SCHEME
+from demos_voting.base.models import APIAuthNonce
+from demos_voting.base.utils.api import API_AUTH_HEADER, APIUser
 
 logger = logging.getLogger(__name__)
 
 
 class APIAuthentication(BaseAuthentication):
 
-    user_cls = None
-    auth_nonce_cls = None
+    _scheme, _params = API_AUTH_HEADER.split()
 
-    credentials_re = re.compile(API_AUTH_PARAMS % {
-        'app_label': r'(?P<app_label>%s)' % r'|'.join([k for k, v in settings.DEMOS_VOTING_API_KEYS.items() if v]),
+    _credentials_regex = re.compile(_params % {
+        'username': r'(?P<username>\w{1,32})',
         'nonce': r'(?P<nonce>[0-9a-f]{32})',
-        'timestamp': r'(?P<timestamp>[0-9]+)',
+        'timestamp': r'(?P<timestamp>[0-9]{1,32})',
         'signature': r'(?P<signature>[0-9a-f]{64})',
     })
 
     def authenticate(self, request):
         header = force_bytes(request.META.get('HTTP_AUTHORIZATION', '')).split()
 
-        if not header or header[0].lower() != API_AUTH_SCHEME.lower():
+        if not header or header[0].lower() != self._scheme.lower():
             return None
 
         if len(header) != 2:
             raise AuthenticationFailed
 
-        match = self.credentials_re.match(header[1])
+        match = self._credentials_regex.match(header[1])
         if not match:
             raise AuthenticationFailed
 
         credentials = match.groupdict()
-        client_app_label = force_text(credentials['app_label'])
+        client_username = force_text(credentials['username'])
         nonce = force_text(credentials['nonce'])
         timestamp = int(credentials['timestamp'])
         signature = force_str(credentials['signature'])
 
-        key = settings.DEMOS_VOTING_API_KEYS.get(client_app_label)
+        key = settings.DEMOS_VOTING_API_KEYS.get(client_username)
         if not key:
             raise AuthenticationFailed
 
-        if self.auth_nonce_cls.objects.filter(app_label=client_app_label, value=nonce).exists():
+        if APIAuthNonce.objects.filter(username=client_username, value=nonce).exists():
             raise AuthenticationFailed
 
         now_timestamp = int(time.time())
@@ -65,10 +65,8 @@ class APIAuthentication(BaseAuthentication):
         if not min_timestamp <= timestamp <= max_timestamp:
             raise AuthenticationFailed
 
-        h = hmac.new(force_bytes(key), digestmod=hashlib.sha256)
-
         data_to_sign = [
-            client_app_label,
+            client_username,
             nonce,
             timestamp,
             request.method,
@@ -77,14 +75,15 @@ class APIAuthentication(BaseAuthentication):
             request.body,
         ]
 
+        h = hmac.new(force_bytes(key), digestmod=hashlib.sha256)
         for d in data_to_sign:
             h.update(force_bytes(d))
 
         if not constant_time_compare(signature, h.hexdigest()):
             raise AuthenticationFailed
 
-        self.auth_nonce_cls.objects.create(app_label=client_app_label, value=nonce, timestamp=timestamp)
-        self.auth_nonce_cls.objects.filter(timestamp__lt=min_timestamp).delete()
+        APIAuthNonce.objects.create(username=client_username, value=nonce, timestamp=timestamp)
+        APIAuthNonce.objects.filter(timestamp__lt=min_timestamp).delete()
 
-        return (self.user_cls(client_app_label), None)
+        return (APIUser(client_username), None)
 

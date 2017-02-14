@@ -18,13 +18,13 @@ from django.utils.six.moves import range
 from django.utils.six.moves.urllib.parse import quote, urljoin
 from django.views.generic import View
 
-from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
+from demos_voting.base.authentication import APIAuthentication
 from demos_voting.base.utils import base32
-from demos_voting.vote_collector.authentication import APIAuthentication
 from demos_voting.vote_collector.models import Election, Ballot
 from demos_voting.vote_collector.serializers import ElectionSerializer, BallotSerializer
 
@@ -448,7 +448,7 @@ class ElectionViewSet(GenericViewSet):
     queryset = Election.objects.all()
     serializer_class = ElectionSerializer
     authentication_classes = (APIAuthentication,)
-    permission_classes = (DjangoModelPermissions,)
+    permission_classes = (IsAuthenticated,)
 
 
 class BallotViewSet(GenericViewSet):
@@ -458,7 +458,7 @@ class BallotViewSet(GenericViewSet):
     queryset = Ballot.objects.all()
     serializer_class = BallotSerializer
     authentication_classes = (APIAuthentication,)
-    permission_classes = (DjangoModelPermissions,)
+    permission_classes = (IsAuthenticated,)
 
 
 class TestAPIView(APIView):

@@ -489,14 +489,14 @@ class Task(models.Model):
 @python_2_unicode_compatible
 class APIAuthNonce(models.Model):
 
-    APP_LABEL_CHOICES = (
+    USERNAME_CHOICES = (
         ('ballot_distributor', _("Ballot Distributor")),
         ('bulletin_board', _("Bulletin Board")),
         ('election_authority',  _("Election Authority")),
         ('vote_collector', _("Vote Collector")),
     )
 
-    app_label = models.CharField(_("application label"), max_length=32, choices=APP_LABEL_CHOICES)
+    username = models.CharField(_("username"), max_length=32, choices=USERNAME_CHOICES)
     value = models.CharField(_("value"), max_length=32)
     timestamp = models.BigIntegerField(_("timestamp"))
 
@@ -505,14 +505,13 @@ class APIAuthNonce(models.Model):
     objects = managers.APIAuthNonceManager()
 
     class Meta:
-        abstract = True
-        unique_together = ['app_label', 'value']
+        unique_together = ['username', 'value']
         verbose_name = _("API authentication nonce")
         verbose_name_plural = _("API authentication nonces")
 
     def natural_key(self):
-        return (self.app_label, self.value, self.timestamp)
+        return (self.username, self.value, self.timestamp)
 
     def __str__(self):
-        return "%s: (%s, %s)" % (self.app_label, self.value, self.timestamp)
+        return "%s: (%s, %s)" % (self.username, self.value, self.timestamp)
 

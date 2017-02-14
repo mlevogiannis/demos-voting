@@ -19,7 +19,7 @@ from django.utils.functional import cached_property
 from django.utils.six.moves import range, zip
 from django.utils.translation import ugettext_lazy as _
 
-from demos_voting.base.models import Election, Question, Option, Ballot, Part, PQuestion, POption, Task, APIAuthNonce
+from demos_voting.base.models import Election, Question, Option, Ballot, Part, PQuestion, POption, Task
 from demos_voting.base.utils import base32, crypto
 from demos_voting.base.utils.hashers import get_hasher
 from demos_voting.election_authority import managers
@@ -318,8 +318,4 @@ class Trustee(models.Model):
 
     def __str__(self):
         return self.email
-
-
-class APIAuthNonce(APIAuthNonce):
-    pass
 
