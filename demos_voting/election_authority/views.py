@@ -176,7 +176,7 @@ class CreateView(View):
 
                     Option.objects.bulk_create(itertools.chain.from_iterable(optionss))
 
-                    setup_task.delay(election.id)
+                    setup_task.delay(election_id=election.id)
 
                 return redirect('election_authority:status', election_id=election.id)
 

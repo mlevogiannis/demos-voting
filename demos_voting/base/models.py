@@ -475,15 +475,15 @@ class Task(models.Model):
         abstract = True
         default_related_name = 'tasks'
         ordering = ['election', 'name']
-        unique_together = ['election', 'name']
+        unique_together = ['election', 'name', 'id']
         verbose_name = _("task")
         verbose_name_plural = _("tasks")
 
     def natural_key(self):
-        return self.election.natural_key() + (self.id,)
+        return self.election.natural_key() + (self.name, self.id)
 
     def __str__(self):
-        return "%s - %s" % (self.election.id, self.id)
+        return "%s - %s - %s" % (self.election.id, self.name, self.id)
 
 
 @python_2_unicode_compatible

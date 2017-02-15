@@ -70,10 +70,10 @@ class POptionManager(models.Manager):
 
 class TaskManager(models.Manager):
 
-    def get_by_natural_key(self, election_id, task_id):
+    def get_by_natural_key(self, election_id, task_name, task_id):
         election_manager = self.model._meta.get_field('election').related_model.objects.db_manager(self.db)
         election = election_manager.get_by_natural_key(election_id)
-        return self.get(election=election, task_id=task_id)
+        return self.get(election=election, name=task_name, id=task_id)
 
 
 class APIAuthNonceManager(models.Manager):

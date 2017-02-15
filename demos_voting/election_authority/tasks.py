@@ -15,7 +15,7 @@ from django.utils.six.moves import range, zip
 from celery import shared_task
 from celery.signals import task_failure
 
-from demos_voting.election_authority.models import Election, Ballot, Part, PQuestion, POption
+from demos_voting.election_authority.models import Election, Ballot, Part, PQuestion, POption, Task
 from demos_voting.election_authority.utils.mail import make_trustee_message
 
 logger = logging.getLogger(__name__)
@@ -100,8 +100,8 @@ def setup_task(election_id):
 
 @task_failure.connect(sender=setup_task)
 def setup_failure(**kwargs):
-    election_id = kwargs['kwargs'].get('election_id', kwargs['args'][0])
-    election = Election.objects.get(id=election_id)
+    election_id = kwargs['kwargs']['election_id']
+    election = Election.objects.only('state').get(id=election_id)
     election.ballots.all().delete()
     election.state = Election.STATE_FAILED
     election.save(update_fields=['state'])

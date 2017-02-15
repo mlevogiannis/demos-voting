@@ -7,6 +7,7 @@ from django.core import checks
 from django.db.models.signals import pre_delete
 from django.utils.translation import ugettext_lazy as _
 
+from demos_voting.base import tasks
 from demos_voting.base.checks import api_check, file_storage_check, security_check, privacy_check
 from demos_voting.base.signals import pre_delete_protect_handler
 
@@ -15,10 +16,6 @@ class AppConfig(AppConfig):
 
     name = 'demos_voting.base'
     verbose_name = _("DEMOS Voting: Base")
-
-    def ready(self):
-        super(AppConfig, self).ready()
-        from demos_voting.base import tasks
 
 
 class CommonMixin(object):
