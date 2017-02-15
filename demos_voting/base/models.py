@@ -112,7 +112,7 @@ class Election(models.Model):
 
     curve_name = models.CharField(_("elliptic curve name"), max_length=16, default='prime256v1')
 
-    _id = models.AutoField(primary_key=True, db_column='id')
+    _id = models.AutoField(primary_key=True, auto_created=True, db_column='id')
 
     # Custom methods and properties
 
@@ -465,7 +465,7 @@ class Task(models.Model):
     name = models.CharField(_("name"), max_length=128)
     id = models.UUIDField(_("id"), unique=True, db_column='_id')
 
-    _id = models.AutoField(primary_key=True, db_column='id')
+    _id = models.AutoField(primary_key=True, auto_created=True, db_column='id')
 
     # Default manager, meta options and natural key
 
