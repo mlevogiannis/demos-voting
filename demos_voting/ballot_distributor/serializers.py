@@ -5,6 +5,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from rest_framework import serializers
 
 from demos_voting.ballot_distributor.models import Election, Question, Option, Ballot, Part, PQuestion, POption
+from demos_voting.base.serializers import DynamicFieldsMixin
 
 
 class OptionSerializer(serializers.ModelSerializer):
@@ -23,7 +24,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         fields = ['index', 'name', 'min_choices', 'max_choices', 'table_layout', 'options']
 
 
-class ElectionSerializer(serializers.ModelSerializer):
+class ElectionSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
 
     questions = QuestionSerializer(many=True)
 
@@ -61,7 +62,7 @@ class PartSerializer(serializers.ModelSerializer):
         fields = ['tag', 'security_code', 'questions']
 
 
-class BallotSerializer(serializers.ModelSerializer):
+class BallotSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
 
     parts = PartSerializer(many=True)
 

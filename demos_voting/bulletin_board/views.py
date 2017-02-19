@@ -12,7 +12,7 @@ from base64 import b64decode
 from django import http
 from django.core.urlresolvers import reverse
 from django.db import transaction
-from django.db.models import Prefetch, Sum
+from django.db.models import Sum
 from django.middleware import csrf
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -32,6 +32,7 @@ from demos_voting.base.authentication import APIAuthentication
 from demos_voting.base.utils import base32
 from demos_voting.bulletin_board.models import Election, Ballot
 from demos_voting.bulletin_board.serializers import ElectionSerializer, BallotSerializer
+from demos_voting.bulletin_board.utils.query_params import FieldsParser
 
 logger = logging.getLogger(__name__)
 
@@ -281,33 +282,50 @@ class ApiVoteView(View):
         return http.HttpResponse()
 
 
-class ElectionViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
+class DynamicFieldsMixin(object):
+
+    def initial(self, request, *args, **kwargs):
+        super(DynamicFieldsMixin, self).initial(request, *args, **kwargs)
+        if request.method == 'GET':
+            serializer_class = self.get_serializer_class()
+            fields_str = request.query_params.get('fields')
+            self._fields = FieldsParser(serializer_class).parse(fields_str)
+
+    def get_queryset(self):
+        if self.request.method == 'GET':
+            if not hasattr(self, '_queryset'):
+                serializer_class = self.get_serializer_class()
+                self._queryset = serializer_class.get_prefetch_queryset(fields=self._fields)
+            return self._queryset
+        return super(DynamicFieldsMixin, self).get_queryset()
+
+    def get_serializer(self, *args, **kwargs):
+        if self.request.method == 'GET':
+            kwargs['fields'] = self._fields
+        return super(DynamicFieldsMixin, self).get_serializer(*args, **kwargs)
+
+
+class ElectionViewSet(DynamicFieldsMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet):
 
     lookup_field = 'id'
     lookup_value_regex = base32.regex + r'+'
-    queryset = Election.objects.none()
+    queryset = Election.objects.all()
     serializer_class = ElectionSerializer
     authentication_classes = (APIAuthentication,)
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
-    def get_queryset(self):
-        return Election.objects.prefetch_related('questions__options')
 
-
-class BallotViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
+class BallotViewSet(DynamicFieldsMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet):
 
     lookup_field = 'serial_number'
     lookup_value_regex = r'[0-9]+'
-    queryset = Ballot.objects.none()
+    queryset = Ballot.objects.all()
     serializer_class = BallotSerializer
     authentication_classes = (APIAuthentication,)
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get_queryset(self):
-        queryset = Ballot.objects.filter(election__id=self.kwargs['election_id'])
-        queryset = queryset.prefetch_related('parts__questions__options')
-        queryset = queryset.prefetch_related(Prefetch('election', Election.objects.only('state', 'votecode_type')))
-        return queryset
+        return super(BallotViewSet, self).get_queryset().filter(election__id=self.kwargs['election_id'])
 
 
 class TestAPIView(APIView):
