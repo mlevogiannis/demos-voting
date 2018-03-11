@@ -1,0 +1,24 @@
+{% extends 'base/includes/nav.html' %}
+
+{% load i18n %}
+
+{% block nav-tabs %}
+<li role="presentation" {% if request.resolver_match.view_name == 'vote-collector:home' %}class="active"{% endif %}>
+<a href="{% url 'vote-collector:home' %}">
+  <i class="fa fa-home fa-fw" aria-hidden="true"></i>
+  {% trans "Home" %}
+</a>
+</li>
+<li role="presentation" {% if request.resolver_match.view_name == 'vote-collector:election-list' or request.resolver_match.view_name == 'vote-collector:election-detail' or request.resolver_match.view_name == 'vote-collector:election-update' or request.resolver_match.namespace == 'vote-collector:voting-booth' %}class="active"{% endif %}>
+  <a href="{% url 'vote-collector:election-list' %}">
+    <i class="fa fa-envelope fa-fw" aria-hidden="true"></i>
+    {% trans "Elections" %}
+  </a>
+</li>
+<li role="presentation" {% if request.resolver_match.view_name == 'vote-collector:qr-code' %}class="active"{% endif %}>
+  <a href="{% url 'vote-collector:qr-code' %}">
+    <i class="fa fa-qrcode fa-fw" aria-hidden="true"></i>
+    {% trans "Scan QR code" %}
+  </a>
+</li>
+{% endblock %}

@@ -1,0 +1,3 @@
+{% block subject %}
+{% block prefix %}{% endblock %}{% block content %}{% endblock %}
+{% endblock %}

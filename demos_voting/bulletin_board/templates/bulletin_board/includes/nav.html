@@ -1,0 +1,24 @@
+{% extends 'base/includes/nav.html' %}
+
+{% load i18n %}
+
+{% block nav-tabs %}
+<li role="presentation" {% if request.resolver_match.view_name == 'bulletin-board:home' %}class="active"{% endif %}>
+  <a href="{% url 'bulletin-board:home' %}">
+    <i class="fa fa-home fa-fw" aria-hidden="true"></i>
+    {% trans "Home" %}
+  </a>
+</li>
+<li role="presentation" {% if request.resolver_match.view_name == 'bulletin-board:election-list' or request.resolver_match.view_name == 'bulletin-board:election-detail' or request.resolver_match.view_name == 'bulletin-board:election-update' or request.resolver_match.view_name == 'bulletin-board:ballot-detail' or request.resolver_match.view_name == 'bulletin-board:tally' %}class="active"{% endif %}>
+  <a href="{% url 'bulletin-board:election-list' %}">
+    <i class="fa fa-envelope fa-fw" aria-hidden="true"></i>
+    {% trans "Elections" %}
+  </a>
+</li>
+<li role="presentation" {% if request.resolver_match.namespace == 'bulletin-board:api' %}class="active"{% endif %}>
+  <a href="{% url 'bulletin-board:api:api-root' %}">
+    <i class="fa fa-code fa-fw" aria-hidden="true"></i>
+    {% trans "REST API Browser" %}
+  </a>
+</li>
+{% endblock %}

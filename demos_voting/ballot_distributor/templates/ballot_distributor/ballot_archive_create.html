@@ -1,0 +1,92 @@
+{% extends './base.html' %}
+
+{% load i18n %}
+
+{% block title %}
+{{ election.name }} | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div id="ballot-archive" class="container">
+  <div class="page-header">
+    <h3>{{ election.name }}
+      <small>({{ election.slug }})</small>
+    </h3>
+  </div>
+  <a class="btn btn-default" href="{% url 'ballot-distributor:election-detail' slug=election.slug %}" role="button">
+    <i class="fa fa-reply" aria-hidden="true"></i>
+    {% trans "Return" %}
+  </a>
+  {% if election.visibility == election.VISIBILITY_PRIVATE %}
+  <div class="alert alert-danger">
+    {% trans "Ballot archives cannot be created because the election's visibility is private." %}
+  </div>
+  {% else %}
+  <div class="page-header">
+    <h4>{% trans "Create a new ballot archive" %}</h4>
+  </div>
+  {% if election.state == election.STATE_BALLOT_DISTRIBUTION %}
+  <div class="alert alert-info" role="alert">
+    {% blocktrans with ballot_count=election.remaining_ballot_count %}Remaining ballots: {{ ballot_count }}{% endblocktrans %}
+  </div>
+  {% else %}
+  <div class="alert alert-warning" role="alert">
+    {% trans "The election is not in the ballot distribution phase." %}
+  </div>
+  {% endif %}
+  {% if form.non_field_errors %}
+  <div class="alert alert-danger" role="alert">
+    <ul class="list-unstyled">
+      {% for error in form.non_field_errors %}
+      <li>{{ error }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+  {% if election.state == election.STATE_BALLOT_DISTRIBUTION and election.remaining_ballot_count > 0 %}
+  <form class="form-horizontal" method="POST" novalidate>
+    {% csrf_token %}
+    <div class="form-group {% if form.ballot_count.errors %}has-error{% endif %}">
+      <label for="{{ form.ballot_count.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ form.ballot_count.label }}</label>
+      <div class="col-sm-9 col-md-10">
+        <input type="number" class="form-control" id="{{ form.ballot_count.auto_id }}" value="{{ form.ballot_count.value|default_if_none:'' }}" name="{{ form.ballot_count.html_name }}" min="{{ form.ballot_count.field.min_value }}" max="{{ form.ballot_count.field.max_value }}" aria-describedby="{{ form.ballot_count.auto_id }}-help-block">
+        <span id="{{ form.ballot_count.auto_id }}-help-block" class="help-block">
+          {% for error in form.ballot_count.errors %}
+          {{ error }}
+          {% endfor %}
+          {{ form.ballot_count.help_text }}
+          {% trans "The number of ballots that will be generated." %}
+        </span>
+      </div>
+    </div>
+    <div class="form-group {% if form.language.errors %}has-error{% endif %}">
+      <label for="{{ form.language.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ form.language.label }}</label>
+      <div class="col-sm-9 col-md-10">
+        <select class="form-control" id="{{ form.language.auto_id }}" name="{{ form.language.html_name }}" aria-describedby="{{ form.language.auto_id }}-help-block">
+          {% for value, name in form.language.field.choices %}
+          <option value="{{ value }}" {% if value == form.language.field.initial %}selected{% endif %}>{{ name }}</option>
+          {% endfor %}
+        </select>
+        <span id="{{ form.language.auto_id }}-help-block" class="help-block">
+          {% for error in form.language.errors %}
+          {{ error }}
+          {% endfor %}
+          {{ form.language.help_text }}
+          {% trans "The language in which the ballots will be generated." %}
+        </span>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-3 col-md-2 control-label">
+      </div>
+      <div class="col-sm-9 col-md-10">
+        <div class="button-wrap">
+          <button type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
+        </div>
+      </div>
+    </div>
+  </form>
+  {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

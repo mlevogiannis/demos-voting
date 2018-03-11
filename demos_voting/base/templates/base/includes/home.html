@@ -1,0 +1,13 @@
+{% load i18n %}
+
+<div class="page-header">
+  <h3>{% blocktrans with site_name=site_name %}Welcome to {{ site_name }}{% endblocktrans %}</h3>
+</div>
+<p>{% blocktrans with site_name='<strong>'|add:site_name|add:'</strong>'|safe %}{{ site_name }} is an end-to-end verifiable e-voting system that follows the code-voting approach.{% endblocktrans %}</p>
+<p>{% trans "It consists of the following entities:" %}</p>
+<ul>
+  <li>{% blocktrans %}The <strong>Election Authority</strong> that prepares the election on behalf of the trustees.{% endblocktrans %}</li>
+  <li>{% blocktrans %}The <strong>Ballot Distributor</strong> that authorizes the voters and distributes the ballots.{% endblocktrans %}</li>
+  <li>{% blocktrans %}The <strong>Vote Collector</strong> that is the ballot box where votes are submitted.{% endblocktrans %}</li>
+  <li>{% blocktrans %}The <strong>Bulletin Board</strong> that publishes the election results and all the information needed for verification.{% endblocktrans %}</li>
+</ul>

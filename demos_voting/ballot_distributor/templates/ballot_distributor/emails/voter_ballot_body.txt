@@ -1,0 +1,18 @@
+{% extends './base_body.txt' %}
+
+{% load i18n %}
+{% load demos_voting %}
+
+{% block content %}
+{% get_current_utc_offset as current_utc_offset %}
+{% blocktrans with election_slug=election.slug election_name=election.name ballot_serial_number=ballot.serial_number voting_starts_at=election.voting_starts_at|date:'j M Y H:i ('|add:current_utc_offset|add:')' voting_ends_at=election.voting_ends_at|date:'j M Y H:i ('|add:current_utc_offset|add:')' %}
+Dear {{ user_display_name }},
+
+You receive this email because you have been registered to vote in the election:
+
+Name: {{ election_name }}
+Identifier: {{ election_slug }}
+
+Your ballot's serial number is {{ ballot_serial_number }}. Please use the attached file to cast your vote during the voting period, which begins on {{ voting_starts_at }} and ends on {{ voting_ends_at }}.
+{% endblocktrans %}
+{% endblock %}

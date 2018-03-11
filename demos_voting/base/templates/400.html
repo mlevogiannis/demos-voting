@@ -1,0 +1,18 @@
+{% extends 'base/base.html' %}
+
+{% load i18n %}
+
+{% block title %}
+{% trans "Bad request" %} | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h3>{% trans "Bad request" %} <small>({% trans "Error 400" %})</small></h3>
+  </div>
+  <div class="alert alert-danger" role="alert">
+    <p>{% trans "Your browser sent a request that this server could not understand." %}</p>
+  </div>
+</div>
+{% endblock %}

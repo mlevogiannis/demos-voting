@@ -1,0 +1,7 @@
+{% extends 'base/emails/base_body.txt' %}
+
+{% load i18n %}
+
+{% block footer %}
+{% blocktrans with site_name=site_name %}{{ site_name }}: Election Authority{% endblocktrans %}
+{% endblock %}

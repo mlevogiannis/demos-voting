@@ -1,0 +1,53 @@
+{% extends 'rest_framework/base.html' %}
+
+{% load static %}
+
+{% block title %}
+{{ site_name }}
+{% endblock %}
+
+{% block meta %}
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="NONE,NOARCHIVE">
+{% endblock %}
+
+{% block bootstrap_theme %}{% endblock %}
+
+{% block style %}
+<link rel="shortcut icon" href="{% static 'base/img/favicon.ico' %}">
+<link rel="icon" type="image/png" href="{% static 'base/img/favicon.png' %}">
+<link rel="stylesheet" href="{% static 'base/vendor/bootstrap/3.3.7/css/bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'base/vendor/font-awesome/4.7.0/css/font-awesome.min.css' %}">
+<link rel="stylesheet" href="{% static 'base/css/base.css' %}">
+<link rel="stylesheet" href="{% static 'base/css/fonts.css' %}">
+<link rel="stylesheet" href="{% static 'base/css/header.css' %}">
+<link rel="stylesheet" href="{% static 'base/css/nav.css' %}">
+<link rel="stylesheet" href="{% static 'base/css/footer.css' %}">
+{{ block.super }}
+<style>
+#main-nav {
+  margin-bottom: 20px;
+}
+</style>
+{% endblock %}
+
+{% block navbar %}
+{% include './includes/detect_timezone.html' %}
+{% block header %}
+{% include './includes/header.html' %}
+{% endblock %}
+<main class="main">
+{% block nav %}
+{% endblock %}
+{% endblock %}
+
+{% block script %}
+{% block footer %}
+</main>
+{% include './includes/footer.html' %}
+{% endblock %}
+{{ block.super }}
+<script src="{% static 'base/js/base.js' %}"></script>
+{% endblock %}

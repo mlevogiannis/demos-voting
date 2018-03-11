@@ -1,0 +1,66 @@
+{% load i18n %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    {% block meta %}
+    {% endblock %}
+
+    <title>{% block title %}{{ site_name }}{% endblock %}</title>
+
+    <link rel="shortcut icon" href="{% static 'base/img/favicon.ico' %}">
+    <link rel="icon" type="image/png" href="{% static 'base/img/favicon.png' %}">
+
+    <link rel="stylesheet" href="{% static 'base/vendor/bootstrap/3.3.7/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'base/vendor/font-awesome/4.7.0/css/font-awesome.min.css' %}">
+
+    <link rel="stylesheet" href="{% static 'base/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'base/css/fonts.css' %}">
+    <link rel="stylesheet" href="{% static 'base/css/header.css' %}">
+    <link rel="stylesheet" href="{% static 'base/css/nav.css' %}">
+    <link rel="stylesheet" href="{% static 'base/css/footer.css' %}">
+
+    {% block style %}
+    {% endblock %}
+  </head>
+
+  <body>
+    {% include './includes/detect_timezone.html' %}
+
+    {% block header %}
+    {% include './includes/header.html' %}
+    {% endblock %}
+
+    {% block main %}
+    <main class="main">
+      {% block nav %}
+      {% if main_nav %}
+      {% include main_nav %}
+      {% endif %}
+      {% endblock %}
+      {% block messages %}
+      {% include './includes/messages.html' %}
+      {% endblock %}
+      {% block content %}
+      {% endblock %}
+    </main>
+    {% endblock %}
+
+    {% block footer %}
+    {% include './includes/footer.html' %}
+    {% endblock %}
+
+    <script src="{% static 'base/vendor/jquery/3.3.1/jquery.min.js' %}"></script>
+    <script src="{% static 'base/vendor/bootstrap/3.3.7/js/bootstrap.min.js' %}"></script>
+
+    <script src="{% static 'base/js/base.js' %}"></script>
+
+    {% block script %}
+    {% endblock %}
+  </body>
+</html>

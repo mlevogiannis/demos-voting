@@ -1,0 +1,23 @@
+# Byte-compiled / optimized files
+__pycache__/
+*.py[co]
+*$py.class
+
+# C extensions
+*.so
+
+# Translations
+*.mo
+*.pot
+
+# Virtualenv
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Django
+/media
+/emails
+/demos_voting/settings/local.py

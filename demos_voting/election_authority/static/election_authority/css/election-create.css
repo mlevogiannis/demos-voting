@@ -1,0 +1,84 @@
+/* Formsets */
+
+.form-group table {
+  border-bottom: 1px solid #ddd;
+}
+
+tbody.question-formset > tr,
+tbody.option-formset > tr {
+  cursor: grab;
+}
+
+.formset-form-actions {
+  min-width: 86px;
+}
+
+.formset-form-order,
+.formset-form-name {
+  vertical-align: middle !important;
+}
+
+.formset-form-name {
+  width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.formset-add {
+  margin-bottom: 10px;
+}
+
+.formset td > div > .help-block {
+  margin-bottom: 0;
+}
+
+/* Date/time pickers */
+
+.input-group.date > .input-group-addon {
+  background-color: #fff;
+}
+
+/* Bootstrap tags input */
+
+.bootstrap-tagsinput {
+  min-height: 80px;
+}
+.bootstrap-tagsinput.empty:not(.focus) {
+  padding: 6px 12px;
+}
+.bootstrap-tagsinput .placeholder {
+  color: #999;
+}
+.bootstrap-tagsinput:not(.empty) .placeholder,
+.bootstrap-tagsinput.focus .placeholder {
+  display: none;
+}
+
+/* Undo validation state (for nested form-groups) */
+
+.formset[data-formset-type="inline"] .form-group {
+  margin-bottom: 0px;
+}
+.formset[data-formset-type="inline"] .form-group:not(.has-error) .help-block {
+  color: #737373;
+}
+.formset[data-formset-type="inline"] .form-group:not(.has-error) .form-control {
+  border-color: #ccc;
+}
+.formset[data-formset-type="inline"] .form-group:not(.has-error) .form-control:focus {
+  border-color: #66afe9;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+}
+
+/* Ballot preview modal */
+
+#pdf-modal .modal-body {
+  height: 100vh;
+}
+
+#pdf-object {
+  height: 100%;
+  width: 100%;
+}

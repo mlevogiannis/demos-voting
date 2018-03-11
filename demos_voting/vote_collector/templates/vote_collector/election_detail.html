@@ -1,0 +1,48 @@
+{% extends './base.html' %}
+
+{% load i18n %}
+
+{% block meta %}
+{% if election.state == election.STATE_SETUP or election.state == election.STATE_BALLOT_DISTRIBUTION or election.state == election.STATE_VOTING %}
+<meta http-equiv="refresh" content="60">
+{% endif %}
+{% endblock %}
+
+{% block title %}
+{{ election.name }} | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h3>{{ election.name }}
+      <small>({{ election.slug }})</small>
+    </h3>
+  </div>
+  {% if election.state == election.STATE_COMPLETED %}
+  <div class="alert alert-info" role="alert">
+    {% blocktrans with bulletin_board_url=election.bulletin_board_url trimmed %}
+    Please visit the <a href="{{ bulletin_board_url }}" class="alert-link">Bulletin Board</a> to supervise the tally phase.
+    {% endblocktrans %}
+  </div>
+  {% endif %}
+  <p>{% trans "The Vote Collector is responsible for the voting phase of the election." %}</p>
+  <p>{% trans "The current state is:" %}&nbsp;
+    <span class="label label-{% if election.state == election.STATE_SETUP %}info{% elif election.state == election.STATE_BALLOT_DISTRIBUTION %}info{% elif election.state == election.STATE_VOTING %}primary{% elif election.state == election.STATE_COMPLETED %}success{% elif election.state == election.STATE_FAILED %}danger{% elif election.state == election.STATE_CANCELLED %}warning{% else %}default{% endif %}">
+      {{ election.get_state_display }}
+    </span>
+  </p>
+  {% if election.state == election.STATE_VOTING %}
+  <br>
+  <a class="btn btn-default" href="{% url 'vote-collector:election-update' slug=election.slug %}" role="button">
+    <i class="fa fa-cog" aria-hidden="true"></i>
+    {% trans "Manage" %}
+  </a>
+  {% endif %}
+  <!-- Links -->
+  <div class="page-header">
+    <h4>{% trans "Links" %}</h4>
+  </div>
+  <p><a href="{{ election.bulletin_board_url }}">{% trans "Bulletin Board" %}</a></p>
+</div>
+{% endblock %}

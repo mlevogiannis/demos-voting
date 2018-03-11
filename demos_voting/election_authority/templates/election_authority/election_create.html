@@ -1,0 +1,661 @@
+  {% extends './base.html' %}
+
+{% load i18n %}
+{% load static %}
+{% load tz %}
+{% load demos_voting %}
+
+{% block title %}
+{% trans "Create a new election" %} | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+{% trans "Some errors were found on the form, please correct them before submitting it again." as form_error_message %}
+{% with election_form=form %}
+<div class="container">
+  <div class="page-header">
+    <h3>{% trans "Create a new election" %}</h3>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      <form id="election-form" class="form-horizontal" method="POST" novalidate>
+        {% csrf_token %}
+        {% if not election_form.is_valid %}
+        <div class="form-group">
+          <div class="col-sm-offset-3 col-sm-9 col-md-offset-2 col-md-10">
+            <div class="alert alert-danger" role="alert">
+              {{ form_error_message }}
+              {{ election_form.non_field_errors }}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        <!-- Name -->
+        <div class="form-group {% if election_form.name.errors %}has-error{% endif %}">
+          <label for="{{ election_form.name.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ election_form.name.label }}</label>
+          <div class="col-sm-9 col-md-10">
+            <input type="text" class="form-control" id="{{ election_form.name.auto_id }}" placeholder="{% trans "My Election" %}" value="{{ election_form.name.value|default_if_none:'' }}" name="{{ election_form.name.html_name }}" maxlength="{{ election_form.name.field.max_length }}" aria-describedby="{{ election_form.name.auto_id }}-help-block">
+            <span id="{{ election_form.name.auto_id }}-help-block" class="help-block">
+              {% for error in election_form.name.errors %}
+              {{ error }}
+              {% endfor %}
+              {{ election_form.name.help_text }}
+              {% trans "A short and clear name." %}
+            </span>
+          </div>
+        </div>
+        <!-- Slug -->
+        <div class="form-group {% if election_form.slug.errors %}has-error{% endif %}">
+          <label for="{{ election_form.slug.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ election_form.slug.label }}</label>
+          <div class="col-sm-9 col-md-10">
+            <input type="text" class="form-control" id="{{ election_form.slug.auto_id }}" placeholder="{% trans "my-election" %}" value="{{ election_form.slug.value|default_if_none:'' }}" name="{{ election_form.slug.html_name }}" maxlength="{{ election_form.slug.field.max_length }}" aria-describedby="{{ election_form.slug.auto_id }}-help-block">
+              <span id="{{ election_form.slug.auto_id }}-help-block" class="help-block">
+                {% for error in election_form.slug.errors %}
+                {{ error }}
+                {% endfor %}
+                {{ election_form.slug.help_text }}
+                {% trans "It will be used in the election URL and it must consist only of letters, numbers, underscores or hyphens." %}
+              </span>
+          </div>
+        </div>
+        <!-- Type -->
+        <div class="form-group {% if election_form.type.errors %}has-error{% endif %}">
+          <label for="{{ election_form.type.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ election_form.type.label }}</label>
+          <div class="col-sm-9 col-md-10">
+            {% for radio in election_form.type %}
+            {% trans "Election with one or more questions and multiple options." as question_option_help_text %}
+            {% trans "Election with one or more parties and multiple candidates." as party_candidate_help_text %}
+            <div class="radio">
+              <label>
+                {{ radio.tag }}
+                {{ radio.choice_label }}
+                <span class="help-block">
+                  {% cycle question_option_help_text party_candidate_help_text %}
+                </span>
+              </label>
+            </div>
+            {% endfor %}
+            <span id="{{ election_form.type.auto_id }}-help-block" class="help-block">
+              {% for error in election_form.type.errors %}
+              {{ error }}
+              {% endfor %}
+              {{ election_form.type.help_text }}
+            </span>
+          </div>
+        </div>
+        <!-- Questions -->
+        {% with question_formset=election_form.question_formset %}
+        <div class="form-group {% if election_form.type.value != election_form.instance.TYPE_QUESTION_OPTION %}hidden{% endif %} {% if question_formset.non_form_errors %}has-error{% endif %}">
+          <label for="{{ question_formset.prefix }}-table" class="col-sm-3 col-md-2 control-label">{% trans "Questions" %}</label>
+          <div class="col-sm-9 col-md-10">
+            <table id="{{ question_formset.prefix }}-table" class="table table-hover">
+              <thead>
+                <tr>
+                  <th class="text-center">#</th>
+                  <th>{% trans "Name" %}</th>
+                  <th class="text-center">{% trans "Actions" %}</th>
+                  <th class="hidden">{{ question_formset.management_form }}</th>
+                </tr>
+              </thead>
+              <tbody class="formset question-formset" data-formset-prefix="{{ question_formset.prefix }}" data-formset-type="modal" data-formset-modal-title="{% trans "Question" %}">
+                {% for question_form in question_formset|list_append:question_formset.empty_form %}
+                <tr class="formset-form {% if forloop.last %}formset-form-empty hidden{% elif not question_form.is_valid %}danger{% endif %}" data-formset-form-prefix="{{ question_form.prefix }}">
+                  <th class="formset-form-index text-center" scope=row>{% if not forloop.last %}{{ forloop.counter }}{% endif %}</th>
+                  <td class="formset-form-name">{% if not forloop.last %}{{ question_form.name.value|default_if_none:'' }}{% endif %}</td>
+                  <td class="formset-form-actions text-center">
+                    <button type="button" class="btn btn-sm btn-default formset-form-edit" aria-label="{% trans "Edit" %}">
+                      <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-default formset-form-remove" aria-label="{% trans "Remove" %}">
+                      <i class="fa fa-trash-o" aria-hidden="true"></i>
+                    </button>
+                  </td>
+                  <td class="hidden">
+                    <div class="formset-form-fields">
+                      {{ question_form.id.as_hidden }}
+                      {{ question_form.ORDER.as_hidden }}
+                      {{ question_form.DELETE.as_hidden }}
+                      {% if not forloop.last and not question_form.is_valid %}
+                      <div class="alert alert-danger" role="alert">
+                        {{ form_error_message }}
+                        {{ question_form.non_field_errors }}
+                      </div>
+                      {% endif %}
+                      <!-- Name -->
+                      <div class="form-group {% if question_form.name.errors %}has-error{% endif %}">
+                        <label for="{{ question_form.name.id_for_label }}">{{ question_form.name.label }}</label>
+                        <input type="text" class="form-control" id="{{ question_form.name.auto_id }}" value="{{ question_form.name.value|default_if_none:'' }}" name="{{ question_form.name.html_name }}" maxlength="{{ question_form.name.field.max_length }}" aria-describedby="{{ question_form.name.auto_id }}-help-block">
+                        <span id="{{ question_form.name.auto_id }}-help-block" class="help-block">
+                          {% for error in question_form.name.errors %}
+                          {{ error }}
+                          {% endfor %}
+                          {{ question_form.name.help_text }}
+                        </span>
+                      </div>
+                      <!-- Options -->
+                      {% with option_formset=question_form.option_formset %}
+                      <div class="form-group {% if option_formset.non_form_errors %}has-error{% endif %}">
+                        <label for="{{ option_formset.prefix }}-table">{% trans "Options" %}</label>
+                        <table id="{{ option_formset.prefix }}-table" class="table table-hover">
+                          <thead>
+                            <tr>
+                              <th class="text-center">#</th>
+                              <th>{% trans "Name" %}</th>
+                              <th class="text-center">{% trans "Actions" %}</th>
+                              <th class="hidden">{{ option_formset.management_form }}</th>
+                            </tr>
+                          </thead>
+                          <tbody class="formset option-formset" data-formset-prefix="{{ option_formset.prefix }}" data-formset-type="inline">
+                            {% for option_form in option_formset|list_append:option_formset.empty_form %}
+                            <tr class="formset-form {% if forloop.last %}formset-form-empty hidden{% endif %}" data-formset-form-prefix="{{ option_form.prefix }}">
+                              <th class="formset-form-index text-center" scope=row>
+                                {{ forloop.counter }}
+                              </th>
+                              <td>
+                                <!-- Name -->
+                                <div class="{% if option_form.name.errors %}has-error{% endif %}">
+                                  <input type="text" class="form-control input-sm" id="{{ option_form.name.auto_id }}" value="{{ option_form.name.value|default_if_none:'' }}" name="{{ option_form.name.html_name }}" maxlength="{{ option_form.name.field.max_length }}" aria-label="{{ option_form.name.label }}" aria-describedby="{{ option_form.name.auto_id }}-help-block">
+                                  <span id="{{ option_form.name.auto_id }}-help-block" class="help-block">
+                                    {% for error in option_form.name.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                    {{ option_form.name.help_text }}
+                                  </span>
+                                </div>
+                              </td>
+                              <td class="formset-form-actions text-center">
+                                <button type="button" class="btn btn-sm btn-default formset-form-remove" aria-label="{% trans "Remove" %}">
+                                  <i class="fa fa-trash-o" aria-hidden="true"></i>
+                                </button>
+                              </td>
+                              <td class="hidden">
+                                {{ option_form.id.as_hidden }}
+                                {{ option_form.ORDER.as_hidden }}
+                                {{ option_form.DELETE.as_hidden }}
+                              </td>
+                            </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                        <div class="clearfix">
+                          <button type="button" class="btn btn-primary formset-add" data-formset-prefix="{{ option_formset.prefix }}" {% if option_formset.total_form_count >= option_formset.max_num %}disabled{% endif %}>
+                            <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                            {% trans "Add option" %}
+                          </button>
+                        </div>
+                        <span class="help-block">
+                          {% for error in option_formset.non_form_errors %}
+                          {{ error }}
+                          {% endfor %}
+                          {% trans "Drag-and-drop to reorder options." %}
+                        </span>
+                      </div>
+                      {% endwith %}
+                      <!-- Number of selections -->
+                      <div class="form-group {% if question_form.min_selection_count.errors or question_form.max_selection_count.errors %}has-error{% endif %}">
+                        <label>{% trans "Number of selections" %}</label>
+                        <div class="row">
+                          <div class="col-xs-6">
+                            <label class="sr-only" for="{{ question_form.min_selection_count.id_for_label }}">{{ question_form.min_selection_count.label }}</label>
+                            <input type="number" class="form-control" id="{{ question_form.min_selection_count.auto_id }}" placeholder="{% trans "minimum" %}" value="{{ question_form.min_selection_count.value|default_if_none:'' }}" name="{{ question_form.min_selection_count.html_name }}" min="{{ question_form.min_selection_count.field.min_value }}" max="{{ question_form.min_selection_count.field.max_value }}" aria-describedby="{{ question_form.min_selection_count.auto_id }}-help-block">
+                            <span id="{{ question_form.min_selection_count.auto_id }}-help-block" class="help-block">
+                              {% for error in question_form.min_selection_count.errors %}
+                              {{ error }}
+                              {% endfor %}
+                              {{ question_form.min_selection_count.help_text }}
+                            </span>
+                          </div>
+                          <div class="col-xs-6">
+                            <label class="sr-only" for="{{ question_form.max_selection_count.id_for_label }}">{{ question_form.min_selection_count.label }}</label>
+                            <input type="number" class="form-control" id="{{ question_form.max_selection_count.auto_id }}" placeholder="{% trans "maximum" %}" value="{{ question_form.max_selection_count.value|default_if_none:'' }}" name="{{ question_form.max_selection_count.html_name }}" min="{{ question_form.max_selection_count.field.min_value }}" max="{{ question_form.max_selection_count.field.max_value }}" aria-describedby="{{ question_form.max_selection_count.auto_id }}-help-block">
+                            <span id="{{ question_form.max_selection_count.auto_id }}-help-block" class="help-block">
+                              {% for error in question_form.max_selection_count.errors %}
+                              {{ error }}
+                              {% endfor %}
+                              {{ question_form.max_selection_count.help_text }}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Option table layout -->
+                      <div class="form-group {% if question_form.option_table_layout.errors %}has-error{% endif %}">
+                        <label for="{{ question_form.option_table_layout.id_for_label }}">{{ question_form.option_table_layout.label }}</label>
+                        {% for radio in question_form.option_table_layout %}
+                        {% trans "The option table in the ballot paper will have a one-column layout." as option_table_layout_1_column_help_text %}
+                        {% trans "The option table in the ballot paper will have a two-column layout." as option_table_layout_2_column_help_text %}
+                        <div class="radio">
+                          <label>
+                            {{ radio.tag }}
+                            {{ radio.choice_label }}
+                            <span class="help-block">
+                              {% cycle option_table_layout_1_column_help_text option_table_layout_2_column_help_text %}
+                            </span>
+                          </label>
+                        </div>
+                        {% endfor %}
+                        <span id="{{ question_form.option_table_layout.auto_id }}-help-block" class="help-block">
+                          {% for error in question_form.option_table_layout.errors %}
+                          {{ error }}
+                          {% endfor %}
+                          {{ question_form.option_table_layout.help_text }}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <div class="clearfix">
+              <button type="button" class="btn btn-primary formset-add" data-formset-prefix="{{ question_formset.prefix }}" {% if question_formset.total_form_count >= question_formset.max_num %}disabled{% endif %}>
+                <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                {% trans "Add question" %}
+              </button>
+            </div>
+            <span class="help-block">
+              {% for error in question_formset.non_form_errors %}
+              {{ error }}
+              {% endfor %}
+              {% trans "Drag-and-drop to reorder questions." %}
+            </span>
+          </div>
+        </div>
+        {% endwith %}
+        <!-- Parties -->
+        {% with party_formset=election_form.party_formset %}
+        <div class="form-group {% if election_form.type.value != election_form.instance.TYPE_PARTY_CANDIDATE %}hidden{% endif %} {% if party_formset.non_form_errors %}has-error{% endif %}">
+          <label for="{{ party_formset.prefix }}-table" class="col-sm-3 col-md-2 control-label">{% trans "Parties" %}</label>
+          <div class="col-sm-9 col-md-10">
+            <table id="{{ party_formset.prefix }}-table" class="table table-hover">
+              <thead>
+                <tr>
+                  <th class="text-center">#</th>
+                  <th>{% trans "Name" %}</th>
+                  <th class="text-center">{% trans "Actions" %}</th>
+                  <th class="hidden">{{ party_formset.management_form }}</th>
+                </tr>
+              </thead>
+              <tbody class="formset party-formset" data-formset-prefix="{{ party_formset.prefix }}" data-formset-type="modal" data-formset-modal-title="{% trans "Party" %}">
+                {% for party_form in party_formset|list_append:party_formset.empty_form %}
+                <tr class="formset-form {% if forloop.last %}formset-form-empty hidden{% elif not party_form.is_valid %}danger{% endif %}" data-formset-form-prefix="{{ party_form.prefix }}">
+                  <th class="formset-form-index text-center" scope=row>{% if not forloop.last %}{{ forloop.counter }}{% endif %}</th>
+                  <td class="formset-form-name">{% if not forloop.last %}{{ party_form.name.value|default_if_none:'' }}{% endif %}</td>
+                  <td class="formset-form-actions text-center">
+                    <button type="button" class="btn btn-sm btn-default formset-form-edit" aria-label="{% trans "Edit" %}">
+                      <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-default formset-form-remove" aria-label="{% trans "Remove" %}">
+                      <i class="fa fa-trash-o" aria-hidden="true"></i>
+                    </button>
+                  </td>
+                  <td class="hidden">
+                    <div class="formset-form-fields">
+                      {{ party_form.id.as_hidden }}
+                      {{ party_form.DELETE.as_hidden }}
+                      {% if not forloop.last and not party_form.is_valid %}
+                      <div class="alert alert-danger" role="alert">
+                        {{ form_error_message }}
+                        {{ party_form.non_field_errors }}
+                      </div>
+                      {% endif %}
+                      <!-- Name -->
+                      <div class="form-group {% if party_form.name.errors %}has-error{% endif %}">
+                        <label for="{{ party_form.name.id_for_label }}">{{ party_form.name.label }}</label>
+                        <input type="text" class="form-control" id="{{ party_form.name.auto_id }}" value="{{ party_form.name.value|default_if_none:'' }}" name="{{ party_form.name.html_name }}" maxlength="{{ party_form.name.field.max_length }}" aria-describedby="{{ party_form.name.auto_id }}-help-block">
+                        <span id="{{ party_form.name.auto_id }}-help-block" class="help-block">
+                          {% for error in party_form.name.errors %}
+                          {{ error }}
+                          {% endfor %}
+                          {{ party_form.name.help_text }}
+                        </span>
+                      </div>
+                      <!-- Candidates -->
+                      {% with candidate_formset=party_form.candidate_formset %}
+                      <div class="form-group {% if candidate_formset.non_form_errors %}has-error{% endif %}">
+                        <label for="{{ candidate_formset.prefix }}-table">{% trans "Candidates" %}</label>
+                        <table id="{{ candidate_formset.prefix }}-table" class="table table-hover">
+                          <thead>
+                            <tr>
+                              <th class="text-center">#</th>
+                              <th>{% trans "Name" %}</th>
+                              <th class="text-center">{% trans "Actions" %}</th>
+                              <th class="hidden">{{ candidate_formset.management_form }}</th>
+                            </tr>
+                          </thead>
+                          <tbody class="formset candidate-formset" data-formset-prefix="{{ candidate_formset.prefix }}" data-formset-type="inline">
+                            {% for candidate_form in candidate_formset|list_append:candidate_formset.empty_form %}
+                            <tr class="formset-form {% if forloop.last %}formset-form-empty hidden{% endif %}" data-formset-form-prefix="{{ candidate_form.prefix }}">
+                              <th class="formset-form-index text-center" scope=row>
+                                {{ forloop.counter }}
+                              </th>
+                              <td>
+                                <!-- Name -->
+                                <div class="form-group {% if candidate_form.name.errors %}has-error{% endif %}">
+                                  <input type="text" class="form-control input-sm" id="{{ candidate_form.name.auto_id }}" value="{{ candidate_form.name.value|default_if_none:'' }}" name="{{ candidate_form.name.html_name }}" maxlength="{{ candidate_form.name.field.max_length }}" aria-label="{{ candidate_form.name.label }}" aria-describedby="{{ candidate_form.name.auto_id }}-help-block">
+                                  <span id="{{ candidate_form.name.auto_id }}-help-block" class="help-block">
+                                    {% for error in candidate_form.name.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                    {{ candidate_form.name.help_text }}
+                                  </span>
+                                </div>
+                              </td>
+                              <td class="formset-form-actions text-center">
+                                <button type="button" class="btn btn-sm btn-default formset-form-remove" aria-label="{% trans "Remove" %}">
+                                  <i class="fa fa-trash-o" aria-hidden="true"></i>
+                                </button>
+                              </td>
+                              <td class="hidden">
+                                {{ candidate_form.id.as_hidden }}
+                                {{ candidate_form.DELETE.as_hidden }}
+                              </td>
+                            </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                        <div class="clearfix">
+                          <button type="button" class="btn btn-primary formset-add" data-formset-prefix="{{ candidate_formset.prefix }}" {% if candidate_formset.total_form_count >= candidate_formset.max_num %}disabled{% endif %}>
+                            <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                            {% trans "Add candidate" %}
+                          </button>
+                        </div>
+                        <span class="help-block">
+                          {% for error in candidate_formset.non_form_errors %}
+                          {{ error }}
+                          {% endfor %}
+                          {% trans "Candidates will be sorted alphabetically." %}
+                        </span>
+                      </div>
+                      {% endwith %}
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <div class="clearfix">
+              <button type="button" class="btn btn-primary formset-add" data-formset-prefix="{{ party_formset.prefix }}" {% if party_formset.total_form_count >= party_formset.max_num %}disabled{% endif %}>
+                <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                {% trans "Add party" %}
+              </button>
+            </div>
+            <span class="help-block">
+              {% for error in party_formset.non_form_errors %}
+              {{ error }}
+              {% endfor %}
+              {% trans "Parties will be sorted alphabetically." %}
+            </span>
+          </div>
+        </div>
+        {% endwith %}
+        <!-- Maximum number of selections (party-candidate only) -->
+        <div class="form-group {% if election_form.type.value != election_form.instance.TYPE_PARTY_CANDIDATE %}hidden{% endif %} {% if election_form.max_candidate_selection_count.errors %}has-error{% endif %}">
+          <label for="{{ election_form.max_candidate_selection_count.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ election_form.max_candidate_selection_count.label|capfirst }}</label>
+          <div class="col-sm-9 col-md-10">
+            <input type="number" class="form-control" id="{{ election_form.max_candidate_selection_count.auto_id }}" value="{{ election_form.max_candidate_selection_count.value|default_if_none:'' }}" name="{{ election_form.max_candidate_selection_count.html_name }}" min="{{ election_form.max_candidate_selection_count.field.min_value }}" max="{{ election_form.max_candidate_selection_count.field.max_value }}" aria-describedby="{{ election_form.max_candidate_selection_count.auto_id }}-help-block">
+            <span id="{{ election_form.max_candidate_selection_count.auto_id }}-help-block" class="help-block">
+              {% for error in election_form.max_candidate_selection_count.errors %}
+              {{ error }}
+              {% endfor %}
+              {{ election_form.max_candidate_selection_count.help_text }}
+              {% trans "The minimum number of candidate selections is 0 by default." %}
+            </span>
+          </div>
+        </div>
+        <!-- Option table layout (party-candidate only) -->
+        <div class="form-group  {% if election_form.type.value != election_form.instance.TYPE_PARTY_CANDIDATE %}hidden{% endif %}{% if election_form.candidate_option_table_layout.errors %}has-error{% endif %}">
+          <label for="{{ election_form.candidate_option_table_layout.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ election_form.candidate_option_table_layout.label }}</label>
+          <div class="col-sm-9 col-md-10">
+            {% for radio in election_form.candidate_option_table_layout %}
+            {% trans "The option table in the ballot paper will have a one-column layout." as option_table_layout_1_column_help_text %}
+            {% trans "The option table in the ballot paper will have a two-column layout." as option_table_layout_2_column_help_text %}
+            <div class="radio">
+              <label>
+                {{ radio.tag }}
+                {{ radio.choice_label }}
+                <span class="help-block">
+                  {% cycle option_table_layout_1_column_help_text option_table_layout_2_column_help_text %}
+                </span>
+              </label>
+            </div>
+            {% endfor %}
+            <span id="{{ election_form.candidate_option_table_layout.auto_id }}-help-block" class="help-block">
+              {% for error in election_form.candidate_option_table_layout.errors %}
+              {{ error }}
+              {% endfor %}
+              {{ election_form.candidate_option_table_layout.help_text }}
+            </span>
+          </div>
+        </div>
+        <!-- Voting start time -->
+        <div class="form-group {% if election_form.voting_starts_at.errors %}has-error{% endif %}">
+          <label for="{{ election_form.voting_starts_at.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ election_form.voting_starts_at.label }}</label>
+          <div class="col-sm-9 col-md-10">
+            <div class="input-group date">
+              <input type="text" class="form-control" data-date-format="{{ election_form.voting_starts_at.field.input_formats.2 }}" id="{{ election_form.voting_starts_at.auto_id }}" value="{{ election_form.voting_starts_at.value|default_if_none:'' }}" name="{{ election_form.voting_starts_at.html_name }}" aria-describedby="{{ election_form.voting_starts_at.auto_id }}-help-block">
+              <span class="input-group-addon btn">
+                <i class="fa fa-calendar" aria-hidden="true"></i>
+                /
+                <i class="fa fa-clock-o" aria-hidden="true"></i>
+              </span>
+            </div>
+            <span id="{{ election_form.voting_starts_at.auto_id }}-help-block" class="help-block">
+              {% for error in election_form.voting_starts_at.errors %}
+              {{ error }}
+              {% endfor %}
+              {{ election_form.voting_starts_at.help_text }}
+              {% trans "When ballot distribution will end and voting will start." %}
+            </span>
+          </div>
+        </div>
+        <!-- Voting end time -->
+        <div class="form-group {% if election_form.voting_ends_at.errors %}has-error{% endif %}">
+          <label for="{{ election_form.voting_ends_at.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ election_form.voting_ends_at.label }}</label>
+          <div class="col-sm-9 col-md-10">
+            <div class="input-group date">
+              <input type="text" class="form-control" data-date-format="{{ election_form.voting_ends_at.field.input_formats.2 }}" id="{{ election_form.voting_ends_at.auto_id }}" value="{{ election_form.voting_ends_at.value|default_if_none:'' }}" name="{{ election_form.voting_ends_at.html_name }}" aria-describedby="{{ election_form.voting_ends_at.auto_id }}-help-block">
+              <span class="input-group-addon btn">
+                <i class="fa fa-calendar" aria-hidden="true"></i>
+                /
+                <i class="fa fa-clock-o" aria-hidden="true"></i>
+              </span>
+            </div>
+            <span id="{{ election_form.voting_ends_at.auto_id }}-help-block" class="help-block">
+              {% for error in election_form.voting_ends_at.errors %}
+              {{ error }}
+              {% endfor %}
+              {{ election_form.voting_ends_at.help_text }}
+              {% trans "When voting will end and tally will start." %}
+            </span>
+          </div>
+        </div>
+        <!-- Visibility -->
+        <div class="form-group {% if election_form.visibility.errors %}has-error{% endif %}">
+          <label for="{{ election_form.visibility.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ election_form.visibility.label }}</label>
+          <div class="col-sm-9 col-md-10">
+            {% for radio in election_form.visibility %}
+            {% trans "The election will be visible to everyone." as visibility_public_help_text %}
+            {% trans "The election will be visible to anyone who knows the identifier, but it will not appear in the list of public elections." as visibility_hidden_help_text %}
+            {% trans "The election will be visible only to administrators, trustees and voters after they have been authenticated. Ballot distribution will be possible only via email." as visibility_private_help_text %}
+            <div class="radio">
+              <label>
+                {{ radio.tag }}
+                {{ radio.choice_label }}
+                <span class="help-block">
+                  {% cycle visibility_public_help_text visibility_hidden_help_text visibility_private_help_text %}
+                </span>
+              </label>
+            </div>
+            {% endfor %}
+            <span id="{{ election_form.visibility.auto_id }}-help-block" class="help-block">
+              {% for error in election_form.visibility.errors %}
+              {{ error }}
+              {% endfor %}
+              {{ election_form.visibility.help_text }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Number of ballots -->
+        <div class="form-group {% if election_form.ballot_count.errors %}has-error{% endif %}">
+          <label for="{{ election_form.ballot_count.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ election_form.ballot_count.label }}</label>
+          <div class="col-sm-9 col-md-10">
+            <input type="number" class="form-control" id="{{ election_form.ballot_count.auto_id }}" value="{{ election_form.ballot_count.value|default_if_none:'' }}" name="{{ election_form.ballot_count.html_name }}" min="{{ election_form.ballot_count.field.min_value }}" max="{{ election_form.ballot_count.field.max_value }}" aria-describedby="{{ election_form.ballot_count.auto_id }}-help-block">
+            <span id="{{ election_form.ballot_count.auto_id }}-help-block" class="help-block">
+              {% for error in election_form.ballot_count.errors %}
+              {{ error }}
+              {% endfor %}
+              {{ election_form.ballot_count.help_text }}
+              {% trans "The number of ballots that will be created." %}
+            </span>
+          </div>
+        </div>
+        <!-- Vote-code type -->
+        <div class="form-group {% if election_form.vote_code_type.errors %}has-error{% endif %}">
+          <label for="{{ election_form.vote_code_type.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ election_form.vote_code_type.label }}</label>
+          <div class="col-sm-9 col-md-10">
+            {% for radio in election_form.vote_code_type %}
+            {% trans "Standard security, standard usability." as vote_code_type_short_help_text %}
+            {% trans "Increased security, decreased usability." as vote_code_type_long_help_text %}
+            <div class="radio">
+              <label>
+                {{ radio.tag }}
+                {{ radio.choice_label }}
+                <span class="help-block">
+                  {% cycle vote_code_type_short_help_text vote_code_type_long_help_text %}
+                </span>
+              </label>
+            </div>
+            {% endfor %}
+            <span id="{{ election_form.vote_code_type.auto_id }}-help-block" class="help-block">
+              {% for error in election_form.vote_code_type.errors %}
+              {{ error }}
+              {% endfor %}
+              {{ election_form.vote_code_type.help_text }}
+            </span>
+          </div>
+        </div>
+        <!-- Disable security code -->
+        <div class="form-group {% if election_form.disable_security_code.errors %}has-error{% endif %} {% if election_form.vote_code_type.value == election_form.instance.VOTE_CODE_TYPE_LONG %}hidden{% endif %}">
+          <label class="col-sm-3 col-md-2 control-label">{% trans "Security code" %}</label>
+          <div class="col-sm-9 col-md-10">
+            <div class="checkbox">
+              <label>
+                {{ election_form.disable_security_code }}
+                {{ election_form.disable_security_code.label }}
+              </label>
+            </div>
+            <span id="{{ election_form.disable_security_code.auto_id }}-help-block" class="help-block">
+              {% for error in election_form.disable_security_code.errors %}
+              {{ error }}
+              {% endfor %}
+              {{ election_form.disable_security_code.help_text }}
+              {% trans "Tick the box to disable the security code and achieve the maximum usability. However, the votes will no longer be secret." %}
+            </span>
+          </div>
+        </div>
+        <!-- Trustee emails -->
+        <div class="form-group {% if election_form.trustee_emails.errors %}has-error{% endif %}">
+          <label for="{{ election_form.trustee_emails.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ election_form.trustee_emails.label }}</label>
+          <div class="col-sm-9 col-md-10">
+            <input type="text" id="{{ election_form.trustee_emails.auto_id }}" placeholder="alice@example.com, bob@example.com" value="{{ election_form.trustee_emails.value|default_if_none:'' }}" name="{{ election_form.trustee_emails.html_name }}" data-max-tags="{{ election_form.trustee_emails.field.max_num }}" data-max-chars="{{ election_form.trustee_emails.field.max_length }}" aria-describedby="{{ election_form.trustee_emails.auto_id }}-help-block">
+            <span id="{{ election_form.trustee_emails.auto_id }}-help-block" class="help-block">
+              {% for error in election_form.trustee_emails.errors %}
+              {{ error }}
+              {% endfor %}
+              {{ election_form.trustee_emails.help_text }}
+              {% blocktrans with carriage_return_symbol='&crarr;' %}Separate email addresses with commas or press {{ carriage_return_symbol }} after each email address that you enter.{% endblocktrans %}
+            </span>
+          </div>
+        </div>
+        <!-- Communication language -->
+        <div class="form-group {% if election_form.communication_language.errors %}has-error{% endif %}">
+          <label for="{{ election_form.communication_language.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ election_form.communication_language.label }}</label>
+          <div class="col-sm-9 col-md-10">
+            <select class="form-control" id="{{ election_form.communication_language.auto_id }}" name="{{ election_form.communication_language.html_name }}" aria-describedby="{{ election_form.communication_language.auto_id }}-help-block">
+              {% for value, name in election_form.communication_language.field.choices %}
+              <option value="{{ value }}" {% if value == election_form.communication_language.field.initial %}selected{% endif %}>{{ name }}</option>
+              {% endfor %}
+            </select>
+            <span id="{{ election_form.communication_language.auto_id }}-help-block" class="help-block">
+              {% for error in election_form.communication_language.errors %}
+              {{ error }}
+              {% endfor %}
+              {{ election_form.communication_language.help_text }}
+              {% trans "Messages to administrators, trustees and voters will be sent in this language. A translation in English will always be included." %}
+            </span>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-sm-offset-3 col-sm-9 col-md-offset-2 col-md-10">
+            <hr style="margin-top: 0px;">
+            <div class="button-wrap text-center-xs">
+              <button type="submit" name="preview_ballot" class="btn btn-default">{% trans "Preview ballot" %}</button>
+              <button type="submit" name="create_election" class="btn btn-primary">{% trans "Create election" %}</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endwith %}
+
+<div class="modal fade" id="formset-modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="formset-modal-label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="formset-modal-label"></h4>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-xs-12">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-dismiss="modal">{% trans "Cancel" %}</button>
+        <button type="button" class="btn btn-success formset-form-save">{% trans "Save" %}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if pdf_data %}
+<div class="modal fade" id="pdf-modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">{% trans "Preview ballot" %}</h4>
+      </div>
+      <div class="modal-body">
+        <object id="pdf-object" type="application/pdf" data="data:application/pdf;base64,{{ pdf_data }}">
+          <p class="text-center">{% trans "The PDF file cannot be previewed. Please download the file and open it with a PDF viewer." %}</p>
+        </object>
+      </div>
+      <div class="modal-footer">
+        <a id="pdf-download" class="btn btn-success" download="ballot.pdf" role="button"><i class="fa fa-download"></i> {% trans "Download" %}</a>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">{% trans "Close" %}</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'base/vendor/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css' %}">
+<link rel="stylesheet" href="{% static 'base/vendor/bootstrap-tagsinput/0.8.0/bootstrap-tagsinput.css' %}">
+<link rel="stylesheet" href="{% static 'election_authority/css/election-create.css' %}">
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'base/vendor/moment.js/2.21.0/moment.min.js' %}"></script>
+{% if LANGUAGE_CODE == 'el' %}<script src="{% static 'base/vendor/moment.js/2.21.0/locale/el.js' %}"></script>{% endif %}
+<script src="{% static 'base/vendor/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js' %}"></script>
+<script src="{% static 'base/vendor/bootstrap-tagsinput/0.8.0/bootstrap-tagsinput.min.js' %}"></script>
+<script src="{% static 'base/vendor/Sortable/1.6.0/Sortable.min.js' %}"></script>
+<script src="{% static 'base/vendor/Sortable/1.6.0/jquery.binding.js' %}"></script>
+<script src="{% static 'election_authority/js/election-create.js' %}"></script>
+{% endblock %}

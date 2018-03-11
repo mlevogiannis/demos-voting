@@ -1,0 +1,68 @@
+#election-results td {
+  padding: 10px;
+}
+
+#election-results th.option-index,
+#election-results td.option-index {
+  width: 10%;
+  text-align: left;
+}
+
+#election-results th.option-name,
+#election-results td.option-name {
+  text-align: left;
+}
+
+#election-results th.vote-count,
+#election-results td.vote-count {
+  width: 15%;
+  text-align: center;
+}
+
+#election-results th.vote-percent,
+#election-results td.vote-percent {
+  width: 15%;
+  text-align: center;
+}
+
+#election-results th.candidates,
+#election-results td.candidates {
+  font-size: 12px;
+  width: 5%;
+  text-align: center;
+}
+
+#election-results .table-responsive {
+  border: 0px;
+}
+
+#election-results  .candidates-row > td {
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
+#election-results .candidates-row .table-responsive {
+  padding-left: 10px;
+  padding-right: 10px;
+  border-left: 8px solid #ddd;
+  border-right: 8px solid transparent;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+#election-results .candidates-row .table-responsive .table {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+#election-results .party-clickable {
+  cursor: pointer;
+}
+
+#election-results .party-disabled {
+  cursor: not-allowed;
+}
+
+#election-results .party-disabled > td > .fa {
+  color: #ccc;
+}

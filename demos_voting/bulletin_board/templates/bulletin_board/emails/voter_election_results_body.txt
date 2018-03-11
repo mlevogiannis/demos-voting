@@ -1,0 +1,20 @@
+{% extends './base_body.txt' %}
+
+{% load i18n %}
+
+{% block content %}
+{% blocktrans with election_slug=election.slug election_name=election.name results_url=results_url %}
+Dear {{ user_display_name }},
+
+You receive this email because you have been registered to vote in the election:
+
+Name: {{ election_name }}
+Identifier: {{ election_slug }}
+
+The results of the election have been announced and can be found at the following link:
+
+  {{ results_url }}
+
+Thank you for your participation!
+{% endblocktrans %}
+{% endblock %}

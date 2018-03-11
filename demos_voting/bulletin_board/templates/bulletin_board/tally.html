@@ -1,0 +1,104 @@
+{% extends './base.html' %}
+
+{% load i18n %}
+{% load static %}
+
+{% block title %}
+{{ election.name }} | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h3>{{ election.name }}
+      <small>({{ election.slug }})</small>
+    </h3>
+  </div>
+  <a class="btn btn-default" href="{% url 'bulletin-board:election-detail' slug=election.slug %}" role="button">
+    <i class="fa fa-reply" aria-hidden="true"></i>
+    {% trans "Return" %}
+  </a>
+  <div class="page-header">
+    <h4>{% trans "Tally" %}</h4>
+  </div>
+  {% if election.state == election.STATE_TALLY %}
+  {% if trustee.has_submitted_tally_decommitment %}
+  <div class="alert alert-success" role="alert">
+    {% trans "The election results and the ballot audit data have already been submitted to the server. Thank you for participating!" %}
+  </div>
+  {% else %}
+  <div id="tally-error" class="hidden">
+    <div class="alert-placeholder">
+    </div>
+    <div class="button-wrap">
+      <a class="btn btn-default" href="{{ request.get_full_path }}" role="button">{% trans "Try again" %}</a>
+    </div>
+  </div>
+  <ul id="tally-nav" class="nav nav-tabs hidden" role="tablist">
+    <li role="presentation" class="active"><a href="#secret-key-tab" aria-controls="secret-key-tab" role="tab" data-toggle="tab"></a></li>
+    <li role="presentation"><a href="#worker-tab" aria-controls="worker-tab" role="tab" data-toggle="tab"></a></li>
+    <li role="presentation"><a href="#success-tab" aria-controls="success-tab" role="tab" data-toggle="tab"></a></li>
+  </ul>
+  <div id="tally-tab-content" class="tab-content">
+    <div role="tabpanel" class="tab-pane fade in active" id="secret-key-tab">
+      <div class="panel panel-default">
+        <div class="panel-body" style="padding-bottom: 5px;">
+          <p>{% trans "Please enter in the field below the secret key you received from the Election Authority. The secret key will be used to compute the election results and generate the ballot audit data. The secret key will not be submitted to the server." %}</p>
+          <p>{% trans "Note that the validity of the secret key cannot be verified, so enter it carefully." %}</p>
+        </div>
+      </div>
+      <form id="secret-key-form" novalidate>
+        <div class="form-group">
+          <label for="secret-key-input" class="control-label">{% trans "Secret key" %}</label>
+          <input type="text" class="form-control" id="secret-key-input" aria-describedby="secret-key-input-help">
+          <span id="secret-key-input-help" class="help-block"></span>
+        </div>
+        <button type="submit" class="btn btn-primary">{% trans "Next" %}</button>
+      </form>
+    </div>
+    <div role="tabpanel" class="tab-pane fade" id="worker-tab">
+      <div class="panel panel-default">
+        <div class="panel-body" style="padding-bottom: 5px;">
+          <p>{% trans "Computing the election results and generating the ballot audit data, please wait..." %}</p>
+          <p>{% trans "Do not close this window until processing completes." %}</p>
+        </div>
+      </div>
+      <div class="progress">
+        <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="1" aria-valuemin="0" aria-valuemax="100" style="width: 1%">
+        </div>
+      </div>
+    </div>
+    <div role="tabpanel" class="tab-pane fade" id="success-tab">
+      <div class="alert alert-success" role="alert">
+        {% trans "The election results and the ballot audit data have been submitted to the server. Thank you for participating!" %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% else %}
+  <div class="alert alert-warning" role="alert">
+    {% trans "There are no available actions." %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+  {% trans "This field is required." as required_field_message %}
+  var requiredFieldMessage = "{{ required_field_message|escapejs }}";
+  {% trans "The secret key's format is not valid." as invalid_secret_key_format_message %}
+  var invalidSecretKeyFormatMessage = "{{ invalid_secret_key_format_message|escapejs }}";
+  {% trans "An unknown error occurred. Please try again later." as unknown_error_message %}
+  var unknownErrorMessage = "{{ unknown_error_message|escapejs }}";
+  var electionUrl = "{% url 'bulletin-board:api:election-detail' slug=election.slug %}";
+  var questionCount = {{ election.question_count|escapejs }};
+  var castBallotCount = {{ cast_ballot_count|escapejs }};
+  var csrfToken = "{{ csrf_token|escapejs }}";
+  var workerScriptUrl = "{% static 'bulletin_board/js/tally-worker.js' %}";
+  var sjclScriptUrls = ["{% static 'base/vendor/sjcl/1.0.7/sjcl.js' %}", "{% static 'base/vendor/sjcl/1.0.7/core/bn.js' %}"];
+</script>
+<script src="{% static 'base/vendor/sjcl/1.0.7/sjcl.js' %}"></script>
+<script src="{% static 'base/vendor/sjcl/1.0.7/core/bn.js' %}"></script>
+<script src="{% static 'bulletin_board/js/tally.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,307 @@
+{% extends './base.html' %}
+
+{% load i18n %}
+{% load rules %}
+{% load static %}
+{% load demos_voting %}
+
+{% block title %}
+{{ election.name }} | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+{% has_perm 'bulletin_board.can_edit_election' request.user election as can_edit_election %}
+{% has_perm 'bulletin_board.can_tally_election' request.user election as can_tally_election %}
+<div class="container">
+  <div class="page-header">
+    <h3>{{ election.name }}
+      <small>({{ election.slug }})</small>
+    </h3>
+  </div>
+  <p>{% trans "The Bulletin Board is responsible for the tally phase of the election." %}</p>
+  <p>{% trans "The current state is:" %}&nbsp;
+    <span class="label label-{% if election.state == election.STATE_SETUP %}info{% elif election.state == election.STATE_BALLOT_DISTRIBUTION %}info{% elif election.state == election.STATE_VOTING %}info{% elif election.state == election.STATE_TALLY %}primary{% elif election.state == election.STATE_COMPLETED %}success{% elif election.state == election.STATE_FAILED %}danger{% elif election.state == election.STATE_CANCELLED %}warning{% else %}default{% endif %}">
+      {{ election.get_state_display }}
+    </span>
+  </p>
+  {% if election.state == election.STATE_TALLY %}
+  {% if can_edit_election or can_tally_election %}
+  <br>
+  <div class="button-wrap">
+    {% if can_edit_election %}
+    <a class="btn btn-default" href="{% url 'bulletin-board:election-update' slug=election.slug %}" role="button">
+      <i class="fa fa-cog" aria-hidden="true"></i>
+      {% trans "Manage" %}
+    </a>
+    {% endif %}
+    {% if can_tally_election %}
+    <a class="btn btn-default" href="{% url 'bulletin-board:tally' slug=election.slug %}" role="button">
+      <i class="fa fa-envelope-open" aria-hidden="true"></i>
+      {% trans "Tally" %}
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+  {% endif %}
+  <!-- Results -->
+  {% if election.state != election.STATE_FAILED and election.state != election.STATE_CANCELLED %}
+  <div class="page-header">
+    <h4>{% trans "Results" %}</h4>
+  </div>
+  <div id="election-results">
+    {% if election.state == election.STATE_COMPLETED %}
+    {% if election.type == election.TYPE_QUESTION_OPTION %}
+    {% for question in election.questions.all %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          {% blocktrans with index=question.index|add:1 name=question.get_name_display %}Question {{ index }}: {{ name }}{% endblocktrans %}
+        </h4>
+      </div>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="option-index">#</th>
+              <th class="option-name">{% trans "Option" %}</th>
+              <th class="vote-count">{% blocktrans context 'noun' %}Votes{% endblocktrans %}</th>
+              <th class="vote-percent">%</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for option in question.options.all %}
+            {% if not option.is_blank %}
+            <tr>
+              <td class="option-index">{{ option.index|add:1 }}</td>
+              <td class="option-name">{{ option.get_name_display }}</td>
+              <td class="vote-count">{{ option.vote_count }}</td>
+              <td class="vote-percent">{{ option.vote_percent|mult:100|floatformat:2 }}</td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endfor %}
+    {% elif election.type == election.TYPE_PARTY_CANDIDATE %}
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th class="option-index">#</th>
+            <th class="option-name">{% trans "Party" %}</th>
+            <th class="vote-count">{% blocktrans context 'noun' %}Votes{% endblocktrans %}</th>
+            <th class="vote-percent">%</th>
+            <th class="candidates"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% with candidate_options_per_party=election.questions.all.1.options.all|chunkify:candidate_count_per_party %}
+          {% for party_option, candidate_options in election.questions.all.0.options.all|zip:candidate_options_per_party %}
+          <tr class="party-row {% if not party_option.is_blank %}party-clickable{% else %}party-disabled{% endif %}" {% if not party_option.is_blank %}data-toggle="collapse" data-target="#party-{{ party_option.index }}-candidates-collapse" aria-expanded="false" aria-controls="party-{{ party_option.index }}-candidates-collapse"{% endif %}>
+            <td class="option-index">
+              {% ifchanged party_option.vote_count|default_if_none:blank_party_vote_count %}
+              {{ forloop.counter }}
+              {% else %}
+              -
+              {% endifchanged %}
+            </td>
+            <td class="option-name">
+              {% if party_option.is_blank %}<em>{% endif %}
+                {{ party_option.get_name_display }}
+                {% if party_option.is_blank %}</em>{% endif %}
+            </td>
+            <td class="vote-count">
+              {% if not party_option.is_blank %}
+              {{ party_option.vote_count }}
+              {% else %}
+              {{ blank_party_vote_count }}
+              {% endif %}
+            </td>
+            <td class="vote-percent">
+              {% if not party_option.is_blank %}
+              {{ party_option.vote_percent|mult:100|floatformat:2 }}
+              {% else %}
+              -
+              {% endif %}
+            </td>
+            <td class="candidates">
+              <i class="fa fa-chevron-right" aria-hidden="true"></i>
+            </td>
+          </tr>
+          {% if not party_option.is_blank %}
+          <tr class="candidates-row hidden">
+            <td colspan=5>
+              <div class="collapse" id="party-{{ party_option.index }}-candidates-collapse">
+                <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th class="option-index">#</th>
+                      <th class="option-name">{% trans "Candidate" %}</th>
+                      <th class="vote-count">{% blocktrans context 'noun' %}Votes{% endblocktrans %}</th>
+                      <th class="vote-percent">%</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for candidate_option in candidate_options %}
+                    {% if not candidate_option.is_blank %}
+                    <tr>
+                      <td class="option-index">
+                        {% ifchanged candidate_option.vote_count %}
+                        {{ forloop.counter }}
+                        {% else %}
+                        -
+                        {% endifchanged %}
+                      </td>
+                      <td class="option-name">
+                        {{ candidate_option.get_name_display }}
+                      </td>
+                      <td class="vote-count">
+                        {{ candidate_option.vote_count }}
+                      </td>
+                      <td class="vote-percent">
+                        {{ candidate_option.vote_percent|mult:100|floatformat:2 }}
+                      </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                  </tbody>
+                </table>
+                </div>
+              </div>
+            </td>
+          </tr>
+          {% endif %}
+          {% endfor %}
+          {% endwith %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="alert alert-warning" role="alert">
+    {% trans "The results will be announced after the end of the tally phase." %}
+  </div>
+  {% endif %}
+  <!-- Audit -->
+  <div class="page-header">
+    <h4>{% trans "Audit" %}</h4>
+  </div>
+  {% if election.state != election.STATE_SETUP %}
+  <div id="election-audit">
+    <form id="serial-number-form" novalidate>
+      <div class="form-group">
+        <label for="serial-number-input" class="control-label">{% trans "Ballot" %}</label>
+        <input type="number" class="form-control" id="serial-number-input" placeholder="{% trans "Serial number" %}" min="100" max="{{ election.ballot_count|add:99 }}" aria-describedby="serial-number-input-help">
+        <span id="serial-number-input-help" class="help-block"></span>
+      </div>
+      <button type="submit" class="btn btn-primary">{% trans "Open" %}</button>
+    </form>
+    <hr>
+    <div class="alert alert-info" role="alert">
+      {% trans "A lot of data may be downloaded if you click any of the coloured buttons. Data charges may apply." %}
+    </div>
+    <div>
+      <button type="button" class="btn btn-default" data-election-fields="commitment_key">
+        <i class="fa fa-key" aria-hidden="true"></i>
+        {% trans "Commitment key" %}
+      </button>
+      {% if election.vote_code_type == election.VOTE_CODE_TYPE_LONG %}
+      <a class="btn btn-default" href="{% url 'bulletin-board:media:election-certificate' slug=election.slug %}" role="button">
+        <i class="fa fa-certificate" aria-hidden="true"></i>
+        {% trans "Certificate" %}
+      </a>
+      {% endif %}
+      {% if election.state == election.STATE_TALLY or election.state == election.STATE_COMPLETED %}
+      <button type="button" class="btn btn-default" data-election-fields="coins">
+        <i class="fa fa-database" aria-hidden="true"></i>
+        {% trans "Coins" %}
+      </button>
+      {% endif %}
+    </div>
+    <br>
+    {% if election.state == election.STATE_TALLY or election.state == election.STATE_COMPLETED %}
+    {% for question in election.questions.all %}
+    <div class="panel panel-default question" data-question-index="{{ question.index }}">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          {% blocktrans with index=question.index|add:1 name=question.get_name_display count total=election.question_count trimmed %}
+          Question: {{ name }}
+          {% plural %}
+          Question {{ index }}: {{ name }}
+          {% endblocktrans %}
+        </h4>
+      </div>
+      <div class="panel-body">
+        <div class="button-wrap">
+          <button type="button" class="btn btn-danger" data-question-fields="tally_commitment">
+            <i class="fa fa-envelope" aria-hidden="true"></i>
+            {% trans "Tally commitment" %}
+          </button>
+          {% if election.state == election.STATE_COMPLETED %}
+          <button type="button" class="btn btn-success" data-question-fields="tally_decommitment">
+            <i class="fa fa-envelope-open" aria-hidden="true"></i>
+            {% trans "Tally decommitment" %}
+          </button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="alert alert-warning" role="alert">
+    {% trans "Auditing will be possible after the end of the setup phase." %}
+  </div>
+  {% endif %}
+  {% endif %}
+</div>
+<div class="modal fade" id="json-modal" tabindex="-1" role="dialog" aria-labelledby="json-modal-label">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="json-modal-label">{% trans "JSON Viewer" %}</h4>
+      </div>
+      <div class="modal-body">
+        <div id="json-modal-loading" class="text-center hidden">
+          <p><i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i></p>
+          <p>{% trans "Please wait..." %}</p>
+        </div>
+        <div id="json-modal-error" class="text-center hidden">
+          <p><i class="fa fa-ban fa-3x" aria-hidden="true"></i></p>
+          <p>{% trans "An error occurred, please try again later." %}</p>
+        </div>
+        <pre id="json-modal-content" class="pre-scrollable hidden">
+        </pre>
+      </div>
+      <div class="modal-footer button-wrap text-center-xs">
+        <button type="button" class="btn btn-default" id="json-modal-copy-to-clipboard" data-clipboard-target="#json-modal-content" disabled><i class="fa fa-clipboard" aria-hidden="true"></i> {% trans "Copy to clipboard" %}</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'bulletin_board/css/election-detail.css' %}">
+{% endblock %}
+
+{% block script %}
+<script>
+  var electionApiUrl = "{% url 'bulletin-board:api:election-detail' slug=election.slug %}";
+  var ballotsUrl = '{% url 'bulletin-board:election-detail' slug=election.slug %}ballots/';
+  var ballotCount = {{ election.ballot_count|escapejs }};
+  {% trans "This field is required." as required_field_message %}
+  var requiredFieldMessage = "{{ required_field_message|escapejs }}";
+  {% trans "The serial number is not valid." as invalid_serial_number_message %}
+  var invalidSerialNumberMessage = "{{ invalid_serial_number_message|escapejs }}";
+</script>
+<script src="{% static 'base/vendor/clipboard.js/2.0.0/clipboard.min.js' %}"></script>
+<script src="{% static 'bulletin_board/js/election-detail.js' %}"></script>
+{% endblock %}

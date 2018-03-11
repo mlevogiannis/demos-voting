@@ -1,0 +1,156 @@
+{% extends './base.html' %}
+
+{% load i18n %}
+{% load static %}
+
+{% block meta %}
+{% if election.state == election.STATE_SETUP or election.state == election.STATE_BALLOT_DISTRIBUTION %}
+<meta http-equiv="refresh" content="60">
+  {% endif %}
+  {% endblock %}
+
+{% block title %}
+{{ election.name }} | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h3>{{ election.name }}
+      <small>({{ election.slug }})</small>
+    </h3>
+  </div>
+  {% if election.state == election.STATE_COMPLETED %}
+  <div class="alert alert-info" role="alert">
+    {% blocktrans with vote_collector_url=election.vote_collector_url trimmed %}
+    Please visit the <a href="{{ vote_collector_url }}" class="alert-link">Vote Collector</a> to supervise the voting phase.
+    {% endblocktrans %}
+  </div>
+  {% endif %}
+  <p>{% trans "The Ballot Distributor is responsible for the ballot distribution phase of the election." %}</p>
+  <p>{% trans "The current state is:" %}&nbsp;
+    <span class="label label-{% if election.state == election.STATE_SETUP %}info{% elif election.state == election.STATE_BALLOT_DISTRIBUTION %}primary{% elif election.state == election.STATE_COMPLETED %}success{% elif election.state == election.STATE_FAILED %}danger{% elif election.state == election.STATE_CANCELLED %}warning{% else %}default{% endif %}">
+      {{ election.get_state_display }}
+    </span>
+  </p>
+  {% if election.state == election.STATE_BALLOT_DISTRIBUTION %}
+  <br>
+  <a class="btn btn-default" href="{% url 'ballot-distributor:election-update' slug=election.slug %}" role="button">
+    <i class="fa fa-cog" aria-hidden="true"></i>
+    {% trans "Manage" %}
+  </a>
+  {% endif %}
+  <!-- Voter lists -->
+  <div class="page-header">
+    <h4>{% trans "Voter lists" %}</h4>
+  </div>
+  {% with voter_lists=election.voter_lists.all %}
+  {% if voter_lists.count %}
+  <div class="panel panel-default">
+    <div class="table-responsive" id="voter-list-table">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>{% trans "Number of voters" %}</th>
+            <th>{% trans "Created at" %}</th>
+            <th>{% trans "State" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for voter_list in voter_lists %}
+          <tr>
+            <th scope="row">{{ forloop.counter }}</th>
+            <td>{% if voter_list.state == voter_list.STATE_COMPLETED %}{{ voter_list.voters.count }}{% else %}-{% endif %}</td>
+            <td>{{ voter_list.created_at }}</td>
+            <td>
+              <span class="label label-{% if voter_list.state == voter_list.STATE_PENDING %}info{% elif voter_list.state == voter_list.STATE_PROCESSING %}primary{% elif voter_list.state == voter_list.STATE_COMPLETED %}success{% elif voter_list.state == voter_list.STATE_FAILED %}danger{% elif voter_list.state == voter_list.STATE_CANCELLED %}warning{% else %}default{% endif %}">
+                <span {% if voter_list.error %}class="error-tooltip" data-toggle="tooltip" data-placement="left" title="{{ voter_list.get_error_display }}"{% endif %}>
+                  {{ voter_list.get_state_display }}
+                </span>
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="alert alert-warning" role="alert">
+    {% trans "There are no voter lists." %}
+  </div>
+  {% endif %}
+  {% endwith %}
+  {% if election.state == election.STATE_BALLOT_DISTRIBUTION %}
+  <a class="btn btn-default" href="{% url 'ballot-distributor:voter-list-create' slug=election.slug %}" role="button">
+    <i class="fa fa-users" aria-hidden="true"></i>
+    {% trans "Create a new voter list" %}
+  </a>
+  {% endif %}
+  <!-- Ballot archives -->
+  {% if not election.visibility == election.VISIBILITY_PRIVATE %}
+  <div class="page-header">
+    <h4>{% trans "Ballot archives" %}</h4>
+  </div>
+  {% with ballot_archives=election.ballot_archives.all %}
+  {% if ballot_archives.count %}
+  <div class="panel panel-default">
+    <div class="table-responsive" id="ballot-archive-table">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>{% trans "Number of ballots" %}</th>
+            <th>{% trans "Language" %}</th>
+            <th>{% trans "Created at" %}</th>
+            <th>{% trans "State" %}</th>
+            <th>{% trans "Download" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ballot_archive in ballot_archives %}
+          <tr>
+            <th scope="row">{{ forloop.counter }}</th>
+            <td>{{ ballot_archive.ballot_count }}</td>
+            <td>{{ ballot_archive.get_language_display }}</td>
+            <td>{{ ballot_archive.created_at }}</td>
+            <td>
+              <span class="label label-{% if ballot_archive.state == ballot_archive.STATE_PENDING %}info{% elif ballot_archive.state == ballot_archive.STATE_PROCESSING %}primary{% elif ballot_archive.state == ballot_archive.STATE_COMPLETED %}success{% elif ballot_archive.state == ballot_archive.STATE_FAILED %}danger{% elif ballot_archive.state == ballot_archive.STATE_CANCELLED %}warning{% else %}default{% endif %}">
+                {{ ballot_archive.get_state_display }}
+              </span>
+            </td>
+            <td class="{% if election.state != election.STATE_BALLOT_DISTRIBUTION and election.state != election.STATE_COMPLETED or ballot_archive.state != ballot_archive.STATE_COMPLETED or not ballot_archive.file %}disabled{% endif %}">
+              <a class="btn btn-default btn-sm {% if election.state != election.STATE_BALLOT_DISTRIBUTION and election.state != election.STATE_COMPLETED or ballot_archive.state != ballot_archive.STATE_COMPLETED or not ballot_archive.file %}disabled{% endif %}" href="{% url 'ballot-distributor:media:ballot-archive-file' slug=election.slug pk=ballot_archive.pk %}" role="button"><i class="fa fa-download" aria-hidden="true"></i></a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="alert alert-warning" role="alert">
+    {% trans "There are no ballot archives." %}
+  </div>
+  {% endif %}
+  {% endwith %}
+  {% if election.state == election.STATE_BALLOT_DISTRIBUTION %}
+  <a class="btn btn-default" href="{% url 'ballot-distributor:ballot-archive-create' slug=election.slug %}" role="button">
+    <i class="fa fa-file-archive-o" aria-hidden="true"></i>
+    {% trans "Create a new ballot archive" %}
+  </a>
+  {% endif %}
+  {% endif %}
+  <!-- Links -->
+  <div class="page-header">
+    <h4>{% trans "Links" %}</h4>
+  </div>
+  <p><a href="{{ election.vote_collector_url }}">{% trans "Vote Collector" %}</a></p>
+  <p><a href="{{ election.bulletin_board_url }}">{% trans "Bulletin Board" %}</a></p>
+</div>
+{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'ballot_distributor/css/election-detail.css' %}">
+{% endblock %}

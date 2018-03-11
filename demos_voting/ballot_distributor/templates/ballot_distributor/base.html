@@ -1,0 +1,15 @@
+{% extends 'base/base.html' %}
+
+{% load i18n %}
+
+{% block title %}
+{% trans "Ballot Distributor"  %} | {{ block.super }}
+{% endblock %}
+
+{% block header %}
+{% include './includes/header.html' %}
+{% endblock %}
+
+{% block nav %}
+{% include './includes/nav.html' %}
+{% endblock %}

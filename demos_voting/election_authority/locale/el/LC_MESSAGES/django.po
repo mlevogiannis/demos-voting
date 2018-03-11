@@ -1,0 +1,564 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-03-11 02:09+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: demos_voting/election_authority/apps.py:9
+#: demos_voting/election_authority/templates/election_authority/base.html:6
+#: demos_voting/election_authority/templates/election_authority/includes/header.html:7
+msgid "Election Authority"
+msgstr "Αρχή Ψηφοφοριών"
+
+#: demos_voting/election_authority/forms.py:24
+msgid "Trustee email addresses"
+msgstr "Διευθύνσεις email μελών εφορευτικής επιτροπής"
+
+#: demos_voting/election_authority/forms.py:30
+msgid "Disable security code (not recommended)"
+msgstr "Απενεργοποίηση κωδικού ασφαλείας (δεν συνιστάται)"
+
+#: demos_voting/election_authority/forms.py:37
+msgid "Maximum number of candidate selections"
+msgstr "Μέγιστος αριθμός επιλογών υποψηφίων"
+
+#: demos_voting/election_authority/forms.py:42
+msgid "Candidate table layout"
+msgstr "Διάταξη πίνακα υποψηφίων"
+
+#: demos_voting/election_authority/forms.py:95
+msgid "The voting start time cannot be in the past."
+msgstr "Η ώρα έναρξης της ψηφοφορίας δε μπορεί να είναι στο παρελθόν."
+
+#: demos_voting/election_authority/forms.py:101
+msgid "The voting end time cannot be in the past."
+msgstr "Η ώρα λήξης της ψηφοφορίας δε μπορεί να είναι στο παρελθόν."
+
+#: demos_voting/election_authority/forms.py:116
+msgid "The start time must be before the end time."
+msgstr "Η ώρα έναρξης πρέπει να είναι πριν την ώρα λήξης."
+
+#: demos_voting/election_authority/forms.py:311
+msgid ""
+"The minimum number of selections cannot be greater than the maximum number "
+"of selections."
+msgstr ""
+"Ο ελάχιστος αριθμός επιλογών δε μπορεί να είναι μεγαλύτερος από το μέγιστο "
+"αριθμό επιλογών."
+
+#: demos_voting/election_authority/forms.py:355
+msgid "Each question must have a unique name."
+msgstr "Κάθε ερώτημα πρέπει να έχει ένα μοναδικό όνομα."
+
+#: demos_voting/election_authority/forms.py:365
+msgid ""
+"At least one question must have a minimum number of selections greater or "
+"equal to 1 when the vote-code type is long."
+msgstr ""
+"Τουλάχιστον ένα ερώτημα πρέπει να έχει έναν ελάχιστο αριθμός επιλογών "
+"μεγαλύτερο ή ίσο του 1 όταν ο τύπος του κωδικού ψήφου είναι μακρύς."
+
+#: demos_voting/election_authority/forms.py:431
+msgid "Each option must have a unique name."
+msgstr "Κάθε επιλογή πρέπει να έχει ένα μοναδικό όνομα."
+
+#: demos_voting/election_authority/forms.py:512
+msgid "Each party must have a unique name."
+msgstr "Κάθε συνδυασμός πρέπει να έχει ένα μοναδικό όνομα."
+
+#: demos_voting/election_authority/forms.py:591
+msgid "Each candidate must have a unique name."
+msgstr "Κάθε υποψήφιος πρέπει να έχει ένα μοναδικό όνομα."
+
+#: demos_voting/election_authority/forms.py:620
+msgid "The election is not in the setup phase."
+msgstr "Η ψηφοφορία δε βρίσκεται στη φάση εγκατάστασης."
+
+#: demos_voting/election_authority/models.py:49
+msgid "Setup"
+msgstr "Εγκατάσταση"
+
+#: demos_voting/election_authority/models.py:50
+msgid "Completed"
+msgstr "Ολοκληρώθηκε"
+
+#: demos_voting/election_authority/models.py:51
+msgid "Failed"
+msgstr "Απέτυχε"
+
+#: demos_voting/election_authority/models.py:52
+msgid "Cancelled"
+msgstr "Ακυρώθηκε"
+
+#: demos_voting/election_authority/models.py:55
+msgid "private key"
+msgstr "ιδιωτικό κλειδί"
+
+#: demos_voting/election_authority/models.py:56
+msgid "state"
+msgstr "κατάσταση"
+
+#: demos_voting/election_authority/models.py:57
+msgid "setup started at"
+msgstr "η εγκατάσταση ξεκίνησε στις"
+
+#: demos_voting/election_authority/models.py:58
+msgid "setup ended at"
+msgstr "η εγκατάσταση έληξε στις"
+
+#: demos_voting/election_authority/models.py:202
+msgid "credential"
+msgstr "διαπιστευτήριο"
+
+#: demos_voting/election_authority/models.py:203
+msgid "credential hash"
+msgstr "κατακερματισμός διαπιστευτηρίου"
+
+#: demos_voting/election_authority/models.py:204
+msgid "security code"
+msgstr "κωδικός ασφαλείας"
+
+#: demos_voting/election_authority/models.py:267
+#: demos_voting/election_authority/models.py:381
+msgid "zero-knowledge proof ZK1"
+msgstr "απόδειξη μηδενικής γνώσης ZK1"
+
+#: demos_voting/election_authority/models.py:378
+msgid "vote-code"
+msgstr "κωδικός ψήφου"
+
+#: demos_voting/election_authority/models.py:379
+msgid "vote-code hash"
+msgstr "κατακερματισμός κωδικού ψήφου"
+
+#: demos_voting/election_authority/models.py:380
+msgid "commitment"
+msgstr "δέσμευση"
+
+#: demos_voting/election_authority/models.py:458
+msgid "secret key"
+msgstr "μυστικό κλειδί"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:9
+#: demos_voting/election_authority/templates/election_authority/election_create.html:17
+msgid "Create a new election"
+msgstr "Δημιουργία νέας ψηφοφορίας"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:13
+msgid ""
+"Some errors were found on the form, please correct them before submitting it "
+"again."
+msgstr ""
+"Εντοπίστηκαν ορισμένα σφάλματα στη φόρμα, παρακαλούμε διορθώστε τα πριν την "
+"υποβάλετε ξανά."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:37
+msgid "My Election"
+msgstr "Η ψηφοφορία μου"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:43
+msgid "A short and clear name."
+msgstr "Ένα σύντομο και σαφές όνομα."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:51
+msgid "my-election"
+msgstr "η-ψηφοφορία-μου"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:57
+msgid ""
+"It will be used in the election URL and it must consist only of letters, "
+"numbers, underscores or hyphens."
+msgstr ""
+"Θα χρησιμοποιηθεί στο URL της ψηφοφορίας και πρέπει να αποτελείται μόνο από "
+"γράμματα, αριθμούς, κάτω παύλες ή παύλες."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:66
+msgid "Election with one or more questions and multiple options."
+msgstr "Ψηφοφορία με ένα ή περισσότερα ερωτήματα και πολλαπλές επιλογές."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:67
+msgid "Election with one or more parties and multiple candidates."
+msgstr ""
+"Ψηφοφορία με έναν ή περισσότερους συνδυασμούς και πολλαπλούς υποψηφίους."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:89
+msgid "Questions"
+msgstr "Ερωτήματα"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:95
+#: demos_voting/election_authority/templates/election_authority/election_create.html:143
+#: demos_voting/election_authority/templates/election_authority/election_create.html:273
+#: demos_voting/election_authority/templates/election_authority/election_create.html:320
+msgid "Name"
+msgstr "Όνομα"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:96
+#: demos_voting/election_authority/templates/election_authority/election_create.html:144
+#: demos_voting/election_authority/templates/election_authority/election_create.html:274
+#: demos_voting/election_authority/templates/election_authority/election_create.html:321
+msgid "Actions"
+msgstr "Ενέργειες"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:100
+msgid "Question"
+msgstr "Ερώτημα"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:106
+#: demos_voting/election_authority/templates/election_authority/election_create.html:284
+msgid "Edit"
+msgstr "Επεξεργασία"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:109
+#: demos_voting/election_authority/templates/election_authority/election_create.html:167
+#: demos_voting/election_authority/templates/election_authority/election_create.html:287
+#: demos_voting/election_authority/templates/election_authority/election_create.html:344
+msgid "Remove"
+msgstr "Αφαίρεση"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:138
+msgid "Options"
+msgstr "Επιλογές"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:183
+msgid "Add option"
+msgstr "Προσθήκη επιλογής"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:190
+msgid "Drag-and-drop to reorder options."
+msgstr "Μπορείτε να αναδιατάξετε τις επιλογές με μεταφορά-και-απόθεση."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:196
+msgid "Number of selections"
+msgstr "Αριθμός επιλογών"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:200
+msgid "minimum"
+msgstr "ελάχιστος"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:210
+msgid "maximum"
+msgstr "μέγιστος"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:224
+#: demos_voting/election_authority/templates/election_authority/election_create.html:410
+msgid "The option table in the ballot paper will have a one-column layout."
+msgstr "Ο πίνακας επιλογών στο ψηφοδέλτιο θα έχει διάταξη μίας στήλης."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:225
+#: demos_voting/election_authority/templates/election_authority/election_create.html:411
+msgid "The option table in the ballot paper will have a two-column layout."
+msgstr "Ο πίνακας επιλογών στο ψηφοδέλτιο θα έχει διάταξη δύο στηλών."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:252
+msgid "Add question"
+msgstr "Προσθήκη ερωτήματος"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:259
+msgid "Drag-and-drop to reorder questions."
+msgstr "Μπορείτε να αναδιατάξετε τα ερωτήματα με μεταφορά-και-απόθεση."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:267
+msgid "Parties"
+msgstr "Συνδυασμοί"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:278
+msgid "Party"
+msgstr "Συνδυασμός"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:315
+msgid "Candidates"
+msgstr "Υποψήφιοι"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:359
+msgid "Add candidate"
+msgstr "Προσθήκη υποψηφίου"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:366
+msgid "Candidates will be sorted alphabetically."
+msgstr "Οι υποψήφιοι θα ταξινομηθούν αλφαβητικά."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:379
+msgid "Add party"
+msgstr "Προσθήκη συνδυασμού"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:386
+msgid "Parties will be sorted alphabetically."
+msgstr "Οι συνδυασμοί θα ταξινομηθούν αλφαβητικά."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:401
+msgid "The minimum number of candidate selections is 0 by default."
+msgstr "Ο ελάχιστος αριθμός επιλογών υποψηφίων είναι εξ ορισμού 0."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:447
+msgid "When ballot distribution will end and voting will start."
+msgstr "Πότε θα λήξει η διανομή των ψηφοδελτίων και θα ξεκινήσει η ψηφοφορία."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:468
+msgid "When voting will end and tally will start."
+msgstr "Πότε θα λήξει η ψηφοφορία και θα ξεκινήσει η καταμέτρηση."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:477
+msgid "The election will be visible to everyone."
+msgstr "Η ψηφοφορία θα είναι ορατή σε όλους."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:478
+msgid ""
+"The election will be visible to anyone who knows the identifier, but it will "
+"not appear in the list of public elections."
+msgstr ""
+"Η ψηφοφορία θα είναι ορατή σε οποιονδήποτε γνωρίζει το αναγνωριστικό, αλλά "
+"δε θα εμφανίζεται στη λίστα με τις δημόσιες ψηφοφορίες."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:479
+msgid ""
+"The election will be visible only to administrators, trustees and voters "
+"after they have been authenticated. Ballot distribution will be possible "
+"only via email."
+msgstr ""
+"Η ψηφοφορία θα είναι ορατή μόνο σε διαχειριστές, μέλη της εφορευτικής "
+"επιτροπής και ψηφοφόρους αφού πρώτα πιστοποιηθούν. Η διανομή των ψηφοδελτίων "
+"θα είναι δυνατή μόνο μέσω email."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:509
+msgid "The number of ballots that will be created."
+msgstr "Ο αριθμός των ψηφοδελτίων που θα δημιουργηθούν."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:518
+msgid "Standard security, standard usability."
+msgstr "Κανονική ασφάλεια, κανονική ευχρηστία."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:519
+msgid "Increased security, decreased usability."
+msgstr "Αυξημένη ασφάλεια, μειωμένη ευχρηστία."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:540
+msgid "Security code"
+msgstr "Κωδικός ασφαλείας"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:553
+msgid ""
+"Tick the box to disable the security code and achieve the maximum usability. "
+"However, the votes will no longer be secret."
+msgstr ""
+"Επιλέξτε το κουτάκι για να απενεργοποιήσετε τον κωδικό ασφαλείας και να "
+"επιτύχετε τη μέγιστη ευχρηστία. Ωστόσο οι ψήφοι δε θα είναι πλέον μυστικές."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:567
+#, python-format
+msgid ""
+"Separate email addresses with commas or press %(carriage_return_symbol)s "
+"after each email address that you enter."
+msgstr ""
+"Διαχωρίστε τις διευθύνσεις email με κόμμα ή πατήστε "
+"%(carriage_return_symbol)s μετά από κάθε διεύθυνση email που εισάγετε."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:585
+msgid ""
+"Messages to administrators, trustees and voters will be sent in this "
+"language. A translation in English will always be included."
+msgstr ""
+"Τα μηνύματα προς τους διαχειριστές, τα μέλη της εφορευτικής επιτροπής και "
+"τους ψηφοφόρους θα στέλνονται σε αυτή τη γλώσσα. Πάντα θα περιλαμβάνεται και "
+"μία μετάφραση στα Αγγλικά."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:593
+#: demos_voting/election_authority/templates/election_authority/election_create.html:630
+msgid "Preview ballot"
+msgstr "Προεπισκόπηση ψηφοδελτίου"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:594
+#: demos_voting/election_authority/templates/election_authority/includes/nav.html:21
+msgid "Create election"
+msgstr "Δημιουργία ψηφοφορίας"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:617
+msgid "Cancel"
+msgstr "Ακύρωση"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:618
+msgid "Save"
+msgstr "Αποθήκευση"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:634
+msgid ""
+"The PDF file cannot be previewed. Please download the file and open it with "
+"a PDF viewer."
+msgstr ""
+"Δεν είναι δυνατή η προεπισκόπηση του αρχείου PDF. Κάντε λήψη του αρχείου και "
+"ανοίξτε το με ένα πρόγραμμα προβολής PDF."
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:638
+msgid "Download"
+msgstr "Λήψη"
+
+#: demos_voting/election_authority/templates/election_authority/election_create.html:639
+#: demos_voting/election_authority/templates/election_authority/election_update.html:48
+msgid "Close"
+msgstr "Κλείσιμο"
+
+#: demos_voting/election_authority/templates/election_authority/election_detail.html:24
+#, python-format
+msgid ""
+"Please visit the <a href=\"%(ballot_distributor_url)s\" class=\"alert-link"
+"\">Ballot Distributor</a> to supervise the ballot distribution phase."
+msgstr ""
+"Επισκεφθείτε τον <a href=\"%(ballot_distributor_url)s\" class=\"alert-link"
+"\">Διανομέα Ψηφοδελτίων</a> για να επιβλέψετε τη φάση διανομής ψηφοδελτίων."
+
+#: demos_voting/election_authority/templates/election_authority/election_detail.html:29
+msgid ""
+"The Election Authority is responsible for the setup phase of the election."
+msgstr ""
+"Η Αρχή Ψηφοφοριών είναι υπεύθυνη για τη φάση εγκατάστασης της ψηφοφορίας."
+
+#: demos_voting/election_authority/templates/election_authority/election_detail.html:30
+msgid "The current state is:"
+msgstr "Η τρέχουσα κατάσταση είναι:"
+
+#: demos_voting/election_authority/templates/election_authority/election_detail.html:39
+#: demos_voting/election_authority/templates/election_authority/election_update.html:21
+msgid "Manage"
+msgstr "Διαχείριση"
+
+#: demos_voting/election_authority/templates/election_authority/election_detail.html:45
+msgid "Setup progress"
+msgstr "Πρόοδος εγκατάστασης"
+
+#: demos_voting/election_authority/templates/election_authority/election_detail.html:47
+msgid "Please wait..."
+msgstr "Παρακαλούμε περιμένετε..."
+
+#: demos_voting/election_authority/templates/election_authority/election_detail.html:50
+#, python-format
+msgid "%(percent)s%% Complete"
+msgstr "%(percent)s%% Ολοκληρώθηκε"
+
+#: demos_voting/election_authority/templates/election_authority/election_detail.html:56
+msgid "Links"
+msgstr "Σύνδεσμοι"
+
+#: demos_voting/election_authority/templates/election_authority/election_detail.html:58
+msgid "Ballot Distributor"
+msgstr "Διανομέας Ψηφοδελτίων"
+
+#: demos_voting/election_authority/templates/election_authority/election_detail.html:59
+msgid "Vote Collector"
+msgstr "Συλλέκτης Ψήφων"
+
+#: demos_voting/election_authority/templates/election_authority/election_detail.html:60
+msgid "Bulletin Board"
+msgstr "Πίνακας Ανακοινώσεων"
+
+#: demos_voting/election_authority/templates/election_authority/election_list.html:7
+#: demos_voting/election_authority/templates/election_authority/election_list.html:13
+#: demos_voting/election_authority/templates/election_authority/includes/nav.html:15
+msgid "Elections"
+msgstr "Ψηφοφορίες"
+
+#: demos_voting/election_authority/templates/election_authority/election_list.html:19
+msgid "There are no elections."
+msgstr "Δεν υπάρχουν ψηφοφορίες."
+
+#: demos_voting/election_authority/templates/election_authority/election_list.html:28
+msgid "State"
+msgstr "Κατάσταση"
+
+#: demos_voting/election_authority/templates/election_authority/election_list.html:30
+#, python-format
+msgid "Updated %(time_since)s ago."
+msgstr "Ενημερώθηκε πριν από %(time_since)s."
+
+#: demos_voting/election_authority/templates/election_authority/election_update.html:18
+msgid "Return"
+msgstr "Επιστροφή"
+
+#: demos_voting/election_authority/templates/election_authority/election_update.html:33
+#: demos_voting/election_authority/templates/election_authority/election_update.html:49
+msgid "Cancel election"
+msgstr "Ακύρωση ψηφοφορίας"
+
+#: demos_voting/election_authority/templates/election_authority/election_update.html:36
+msgid "There are no available actions."
+msgstr "Δεν υπάρχουν διαθέσιμες ενέργειες."
+
+#: demos_voting/election_authority/templates/election_authority/election_update.html:52
+msgid "Are you sure you want to cancel the election?"
+msgstr "Είστε σίγουροι ότι θέλετε να ακυρώσετε την ψηφοφορία;"
+
+#: demos_voting/election_authority/templates/election_authority/election_update.html:55
+msgid "No"
+msgstr "Όχι"
+
+#: demos_voting/election_authority/templates/election_authority/election_update.html:56
+msgid "Yes"
+msgstr "Ναι"
+
+#: demos_voting/election_authority/templates/election_authority/emails/base_body.txt:6
+#, python-format
+msgid "%(site_name)s: Election Authority"
+msgstr "%(site_name)s: Αρχή Ψηφοφοριών"
+
+#: demos_voting/election_authority/templates/election_authority/emails/trustee_secret_key_body.txt:6
+#, python-format
+msgid ""
+"\n"
+"Dear %(user_display_name)s,\n"
+"\n"
+"You receive this email because you have been selected to serve as a member "
+"of the committee of trustees responsible for computing and announcing the "
+"results of the election:\n"
+"\n"
+"Name: %(election_name)s\n"
+"Identifier: %(election_slug)s\n"
+"\n"
+"Your secret key is:\n"
+"\n"
+"  %(secret_key)s\n"
+"\n"
+"You will be notified via email with instructions on how to perform your "
+"share of operations after the voting period ends.\n"
+msgstr ""
+"\n"
+"Αγαπητέ/ή %(user_display_name)s,\n"
+"\n"
+"Λαμβάνετε αυτό το email επειδή έχετε επιλεγεί να υπηρετήσετε ως μέλος της "
+"εφορευτικής επιτροπής που είναι υπεύθυνη για τον υπολογισμό και την "
+"ανακοίνωση των αποτελεσμάτων της ψηφοφορίας:\n"
+"\n"
+"Όνομα: %(election_name)s\n"
+"Αναγνωριστικό: %(election_slug)s\n"
+"\n"
+"Το μυστικό κλειδί σας είναι:\n"
+"\n"
+"  %(secret_key)s\n"
+"\n"
+"Θα λάβετε οδηγίες μέσω email για το πως να εκτελέσετε το μερίδιο των "
+"λειτουργιών που σας αντιστοιχεί μετά το τέλος της περιόδου ψηφοφορίας.\n"
+
+#: demos_voting/election_authority/templates/election_authority/emails/trustee_secret_key_subject.txt:6
+#, python-format
+msgid "Trustee secret key (%(election_slug)s)"
+msgstr "Μυστικό κλειδί μέλους εφορευτικής επιτροπής (%(election_slug)s)"
+
+#: demos_voting/election_authority/templates/election_authority/home.html:6
+#: demos_voting/election_authority/templates/election_authority/includes/nav.html:9
+msgid "Home"
+msgstr "Αρχική"
+
+#: demos_voting/election_authority/templates/election_authority/home.html:12
+msgid "This is the Election Authority."
+msgstr "Αυτή είναι η Αρχή Ψηφοφοριών."

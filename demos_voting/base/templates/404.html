@@ -1,0 +1,18 @@
+{% extends 'base/base.html' %}
+
+{% load i18n %}
+
+{% block title %}
+{% trans "Page not found" %} | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h3>{% trans "Page not found" %} <small>({% trans "Error 404" %})</small></h3>
+  </div>
+  <div class="alert alert-danger" role="alert">
+    <p>{% blocktrans with url=request.path %}The requested URL {{ url }} was not found on this server.{% endblocktrans %}</p>
+  </div>
+</div>
+{% endblock %}

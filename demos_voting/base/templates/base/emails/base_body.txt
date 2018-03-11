@@ -1,0 +1,18 @@
+{% load i18n %}
+
+{% get_current_language as language_code %}
+
+{% if language_code|slice:':2' != 'en' %}--- A translation in English follows ---{% endif %}
+{% for i in '12' %}
+{% cycle language_code 'en' as current_language_code silent %}
+{% if forloop.first or language_code|slice:':2' != 'en' %}
+{% if forloop.last %}---{% endif %}
+{% language current_language_code %}
+{% block body %}
+{% block header %}{% endblock %}
+{% block content %}{% endblock %}
+{% block footer %}{% endblock %}
+{% endblock %}
+{% endlanguage %}
+{% endif %}
+{% endfor %}

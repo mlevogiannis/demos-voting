@@ -1,0 +1,18 @@
+{% extends 'base/base.html' %}
+
+{% load i18n %}
+
+{% block title %}
+{% trans "Server error" %} | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h3>{% trans "Server error" %} <small>({% trans "Error 500" %})</small></h3>
+  </div>
+  <div class="alert alert-danger" role="alert">
+    <p>{% trans "The server encountered an internal error or misconfiguration and was unable to complete your request." %}</p>
+  </div>
+</div>
+{% endblock %}

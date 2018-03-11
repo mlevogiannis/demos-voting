@@ -1,0 +1,22 @@
+{% load i18n %}
+
+<noscript>
+  <div class="container">
+    <div class="alert alert-danger" role="alert">
+      {% blocktrans %}We are sorry, but {{ site_name }} cannot work properly without JavaScript enabled.{% endblocktrans %}
+    </div>
+  </div>
+</noscript>
+
+{% if messages %}
+<div id="messages" class="container">
+  {% for message in messages %}
+  <div class="alert alert-dismissible {{ message.level_tag }}" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="{% trans "Close" %}'">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    {{ message }}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}

@@ -1,0 +1,18 @@
+#voter-list-table th,
+#voter-list-table td {
+  text-align: center;
+  vertical-align: middle;
+}
+#voter-list-table .error-tooltip {
+  border-bottom: dotted 1px white;
+  text-decoration: none;
+}
+
+#ballot-archive-table th,
+#ballot-archive-table td {
+  text-align: center;
+  vertical-align: middle;
+}
+#ballot-archive-table td.disabled {
+  cursor: not-allowed;
+}

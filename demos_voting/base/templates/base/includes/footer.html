@@ -1,0 +1,77 @@
+{% load i18n %}
+{% load static %}
+
+<footer class="footer">
+  <div class="container">
+    <div class="row">
+      <div class="col-xs-12">
+        <div id="footer-project-logo">
+          <a href="{{ project_url }}" target="_blank">
+            <img alt="DEMOS Voting" src="{% static 'base/img/LOGO_WHITE_1.png' %}">
+          </a>
+        </div>
+        <div id="footer-project-info">
+          <p>{% trans "DEMOS Voting is open source software." %}</p>
+          <p>
+            {% blocktrans with project_url=project_url source_code_url=source_code_url trimmed %}
+            For more information visit the project's <a href="{{ project_url }}" target="_blank">website</a> or download the <a href="{{ source_code_url }}" target="_blank">source code</a>.
+            {% endblocktrans %}
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-12">
+        <div id="footer-language-and-timezone">
+          <div class="pull-right">
+            <a role="button" data-toggle="modal" data-target="#language-and-timezone-modal">
+              <i class="fa fa-globe" aria-hidden="true"></i>
+              {% trans "Language" %}
+              /
+              <i class="fa fa-clock-o" aria-hidden="true"></i>
+              {% trans "Time zone" %}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div class="modal fade" id="language-and-timezone-modal" tabindex="-1" role="dialog" aria-labelledby="language-and-timezone-modal-label">
+  <div class="modal-dialog" role="document">
+    <form class="modal-content" id="language-and-timezone-form" action="{% url 'set-language-and-timezone' %}" method="POST" novalidate>
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="{% trans "Close" %}"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="language-and-timezone-modal-label">{% trans "Select language and time zone" %}</h4>
+      </div>
+      <div class="modal-body">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        {% for i in '12' %}
+        {% cycle set_language_and_timezone_form.language set_language_and_timezone_form.timezone as language_or_timezone silent %}
+        <div class="form-group {% if language_or_timezone.errors %}has-error{% endif %}">
+          <label for="{{ language_or_timezone.id_for_label }}">{{ language_or_timezone.label }}</label>
+          <select class="form-control" id="{{ language_or_timezone.auto_id }}" name="{{ language_or_timezone.html_name }}" aria-describedby="{{ language_or_timezone.auto_id }}-help-block">
+            {% spaceless %}
+            {% for value, name in language_or_timezone.field.choices %}
+            <option value="{{ value }}" {% if value == language_or_timezone.field.initial %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+            {% endspaceless %}
+          </select>
+          <span id="{{ language_or_timezone.auto_id }}-help-block" class="help-block">
+            {% for error in language_or_timezone.errors %}
+            {{ error }}
+            {% endfor %}
+            {{ language_or_timezone.help_text }}
+          </span>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
+        <button type="submit" class="btn btn-primary">{% trans "Save changes" %}</button>
+      </div>
+    </form>
+  </div>
+</div>

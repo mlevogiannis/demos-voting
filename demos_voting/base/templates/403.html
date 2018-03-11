@@ -1,0 +1,18 @@
+{% extends 'base/base.html' %}
+
+{% load i18n %}
+
+{% block title %}
+{% trans "Permission denied" %} | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h3>{% trans "Permission denied" %} <small>({% trans "Error 403" %})</small></h3>
+  </div>
+  <div class="alert alert-danger" role="alert">
+    <p>{% blocktrans with url=request.path %}You don't have permission to access {{ url }} on this server.{% endblocktrans %}</p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends './base.html' %}
+
+{% load i18n %}
+
+{% block meta %}
+{% if election.state == election.STATE_SETUP %}
+<meta http-equiv="refresh" content="10">
+{% endif %}
+{% endblock %}
+
+{% block title %}
+{{ election.name }} | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h3>{{ election.name }}
+      <small>({{ election.slug }})</small>
+    </h3>
+  </div>
+  {% if election.state == election.STATE_COMPLETED %}
+  <div class="alert alert-info" role="alert">
+    {% blocktrans with ballot_distributor_url=election.ballot_distributor_url trimmed %}
+    Please visit the <a href="{{ ballot_distributor_url }}" class="alert-link">Ballot Distributor</a> to supervise the ballot distribution phase.
+    {% endblocktrans %}
+  </div>
+  {% endif %}
+  <p>{% trans "The Election Authority is responsible for the setup phase of the election." %}</p>
+  <p>{% trans "The current state is:" %}&nbsp;
+    <span class="label label-{% if election.state == election.STATE_SETUP %}primary{% elif election.state == election.STATE_COMPLETED %}success{% elif election.state == election.STATE_FAILED %}danger{% elif election.state == election.STATE_CANCELLED %}warning{% else %}default{% endif %}">
+      {{ election.get_state_display }}
+    </span>
+  </p>
+  {% if election.state == election.STATE_SETUP %}
+  <br>
+  <a class="btn btn-default" href="{% url 'election-authority:election-update' slug=election.slug %}" role="button">
+    <i class="fa fa-cog" aria-hidden="true"></i>
+    {% trans "Manage" %}
+  </a>
+  {% endif %}
+  {% if election.state == election.STATE_SETUP %}
+  <!-- Setup progress -->
+  <div class="page-header">
+    <h4>{% trans "Setup progress" %}</h4>
+  </div>
+  <p>{% trans "Please wait..." %}</p>
+  <div class="progress">
+    <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ progress }}%">
+      <span class="sr-only">{% blocktrans with percent=progress %}{{ percent }}% Complete{% endblocktrans %}"</span>
+    </div>
+  </div>
+  {% endif %}
+  <!-- Links -->
+  <div class="page-header">
+    <h4>{% trans "Links" %}</h4>
+  </div>
+  <p><a href="{{ election.ballot_distributor_url }}">{% trans "Ballot Distributor" %}</a></p>
+  <p><a href="{{ election.vote_collector_url }}">{% trans "Vote Collector" %}</a></p>
+  <p><a href="{{ election.bulletin_board_url }}">{% trans "Bulletin Board" %}</a></p>
+</div>
+{% endblock %}

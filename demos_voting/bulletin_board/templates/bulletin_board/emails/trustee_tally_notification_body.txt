@@ -1,0 +1,20 @@
+{% extends './base_body.txt' %}
+
+{% load i18n %}
+
+{% block content %}
+{% blocktrans with election_slug=election.slug election_name=election.name tally_url=tally_url user_email=user_email %}
+Dear {{ user_display_name }},
+
+You receive this email because you are a member of the committee of trustees responsible for computing and announcing the results of the election:
+
+Name: {{ election_name }}
+Identifier: {{ election_slug }}
+
+Please visit the following link to perform your share of operations:
+
+  {{ tally_url }}
+
+You will have to sign up/sign in using the email address "{{ user_email }}", otherwise you will not be able to participate. Finally, you will be asked to enter the secret key you received from the Election Authority.
+{% endblocktrans %}
+{% endblock %}

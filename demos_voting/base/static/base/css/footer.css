@@ -1,0 +1,59 @@
+.footer {
+  width: 100%;
+  background-color: #000;
+  color: #fff;
+  font-family: "Roboto Slab", serif;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+@media (max-width: 767px) {
+  #footer-project-logo {
+    margin-bottom: 10px;
+  }
+  #footer-project-info,
+  #footer-project-logo,
+  #footer-language {
+    text-align: center;
+  }
+}
+@media (min-width: 768px) {
+  #footer-project-logo {
+    margin-bottom: 15px;
+  }
+}
+
+#footer-project-logo a {
+  text-decoration: none;
+  border-bottom: 0px solid transparent;
+}
+#footer-project-logo img {
+  width: 170px;
+}
+
+#footer-project-info a {
+  color: #fff;
+  border-bottom: 1px dotted #fff;
+}
+#footer-project-info a:focus,
+#footer-project-info a:hover {
+  color: #fff;
+  border-bottom: 1px solid #fff;
+  text-decoration: none;
+}
+
+#footer-language-and-timezone {
+  margin-top: 10px;
+  padding-top: 15px;
+  border-top: thin solid #fff;
+}
+
+#footer-language-and-timezone a {
+  color: #fff;
+}
+#footer-language-and-timezone a:focus,
+#footer-language-and-timezone a:hover {
+  color: #fff;
+  border-bottom: 1px solid #fff;
+  text-decoration: none;
+}

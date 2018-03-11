@@ -1,0 +1,16 @@
+{% extends './base_body.txt' %}
+
+{% load i18n %}
+
+{% block content %}
+{% blocktrans with election_slug=election.slug election_name=election.name %}
+Dear {{ user_display_name }},
+
+You receive this email because you submitted a voter list for the election:
+
+Name: {{ election_name }}
+Identifier: {{ election_slug }}
+
+The voter list you submitted could not be processed because it has errors. Please visit the election page for more information.
+{% endblocktrans %}
+{% endblock %}

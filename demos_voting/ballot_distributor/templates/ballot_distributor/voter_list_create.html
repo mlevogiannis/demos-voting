@@ -1,0 +1,111 @@
+{% extends './base.html' %}
+
+{% load i18n %}
+{% load static %}
+
+{% block title %}
+{{ election.name }} | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div id="voter-list" class="container">
+  <div class="page-header">
+    <h3>{{ election.name }}
+      <small>({{ election.slug }})</small>
+    </h3>
+  </div>
+  <a class="btn btn-default" href="{% url 'ballot-distributor:election-detail' slug=election.slug %}" role="button">
+    <i class="fa fa-reply" aria-hidden="true"></i>
+    {% trans "Return" %}
+  </a>
+  <div class="page-header">
+    <h4>{% trans "Create a new voter list" %}</h4>
+  </div>
+  {% if election.state == election.STATE_BALLOT_DISTRIBUTION %}
+  <div class="alert alert-info" role="alert">
+    {% blocktrans with ballot_count=election.remaining_ballot_count %}Remaining ballots: {{ ballot_count }}{% endblocktrans %}
+  </div>
+  {% else %}
+  <div class="alert alert-warning" role="alert">
+    {% trans "The election is not in the ballot distribution phase." %}
+  </div>
+  {% endif %}
+  {% if form.non_field_errors %}
+  <div class="alert alert-danger" role="alert">
+    <ul class="list-unstyled">
+      {% for error in form.non_field_errors %}
+      <li>{{ error }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+  {% if election.state == election.STATE_BALLOT_DISTRIBUTION and election.remaining_ballot_count > 0 %}
+  <form class="form-horizontal" method="POST" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+    <hr>
+    <div class="form-group {% if form.file.errors %}has-error{% endif %}">
+      <label for="{{ form.file.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ form.file.label }}</label>
+      <div class="col-sm-9 col-md-10">
+        <input type="file" name="{{ form.file.name }}" id="{{ form.file.auto_id }}">
+        <span id="{{ form.file.auto_id }}-help-block" class="help-block">
+          {% for error in form.file.errors %}
+          {{ error }}
+          {% endfor %}
+          {{ form.file.help_text }}
+          {% trans "Select a file that contains the voters' email addresses, one in each line." %}
+        </span>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-3 col-md-2 control-label">
+      </div>
+      <div class="col-sm-9 col-md-10">
+        <div class="button-wrap">
+          <button type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
+        </div>
+      </div>
+    </div>
+  </form>
+  <form class="form-horizontal" method="POST" novalidate>
+    {% csrf_token %}
+    <hr>
+    <div class="form-group {% if form.emails.errors %}has-error{% endif %}">
+      <label for="{{ form.emails.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ form.emails.label }}</label>
+      <div class="col-sm-9 col-md-10">
+        <input type="text" id="{{ form.emails.auto_id }}" placeholder="alice@example.com, bob@example.com" value="{{ form.emails.value|default_if_none:'' }}" name="{{ form.emails.html_name }}" data-max-tags="{{ form.emails.field.max_num }}" data-max-chars="{{ form.emails.field.max_length }}" aria-describedby="{{ form.emails.auto_id }}-help-block">
+        <span id="{{ form.emails.auto_id }}-help-block" class="help-block">
+          {% for error in form.emails.errors %}
+          {{ error }}
+          {% endfor %}
+          {{ form.emails.help_text }}
+          {% blocktrans with carriage_return_symbol='&crarr;' %}If you have a small number of email addresses then you may enter them in this field. Separate the values with commas or press {{ carriage_return_symbol }} after each value you enter.{% endblocktrans %}
+        </span>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-3 col-md-2 control-label">
+      </div>
+      <div class="col-sm-9 col-md-10">
+        <div class="button-wrap">
+          <button type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
+        </div>
+      </div>
+    </div>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block style %}
+{% if election.state == election.STATE_BALLOT_DISTRIBUTION %}
+<link rel="stylesheet" href="{% static 'base/vendor/bootstrap-tagsinput/0.8.0/bootstrap-tagsinput.css' %}">
+{% endif %}
+<link rel="stylesheet" href="{% static 'ballot_distributor/css/voter-list-create.css' %}">
+{% endblock %}
+
+{% block script %}
+{% if election.state == election.STATE_BALLOT_DISTRIBUTION %}
+<script src="{% static 'base/vendor/bootstrap-tagsinput/0.8.0/bootstrap-tagsinput.min.js' %}"></script>
+{% endif %}
+<script src="{% static 'ballot_distributor/js/voter-list-create.js' %}"></script>
+{% endblock %}

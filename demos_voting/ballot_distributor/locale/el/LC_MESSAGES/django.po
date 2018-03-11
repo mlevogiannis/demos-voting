@@ -1,0 +1,481 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-03-11 02:09+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: demos_voting/ballot_distributor/apps.py:9
+#: demos_voting/ballot_distributor/templates/ballot_distributor/base.html:6
+#: demos_voting/ballot_distributor/templates/ballot_distributor/includes/header.html:7
+msgid "Ballot Distributor"
+msgstr "Διανομέας Ψηφοδελτίων"
+
+#: demos_voting/ballot_distributor/forms.py:29
+#: demos_voting/ballot_distributor/templates/ballot_distributor/ballot_archive_create.html:22
+msgid ""
+"Ballot archives cannot be created because the election's visibility is "
+"private."
+msgstr ""
+"Δεν είναι δυνατό να δημιουργηθούν αρχειοθήκες ψηφοδελτίων επειδή η ορατότητα "
+"της ψηφοφορίας είναι κρυφή."
+
+#: demos_voting/ballot_distributor/forms.py:34
+msgid ""
+"New ballots cannot be generated because the election is not in the ballot "
+"distribution phase."
+msgstr ""
+"Δεν είναι δυνατό να δημιουργηθούν νέα ψηφοδέλτια επειδή η ψηφοφορία δε "
+"βρίσκεται στη φάση διανομής ψηφοδελτίων."
+
+#: demos_voting/ballot_distributor/forms.py:38
+msgid ""
+"New ballots cannot be generated because the ballot distribution phase is "
+"about to end."
+msgstr ""
+"Δεν είναι δυνατό να δημιουργηθούν νέα ψηφοδέλτια επειδή η φάση διανομής "
+"ψηφοδελτίων πρόκειται σύντομα να τελειώσει."
+
+#: demos_voting/ballot_distributor/forms.py:43
+#: demos_voting/ballot_distributor/forms.py:94
+msgid "There are no ballots remaining."
+msgstr "Δεν απομένουν άλλα ψηφοδέλτια."
+
+#: demos_voting/ballot_distributor/forms.py:47
+#: demos_voting/ballot_distributor/forms.py:114
+#, python-format
+msgid "There is only one ballot remaining."
+msgid_plural "There are only %(ballot_count)d ballots remaining."
+msgstr[0] "Απομένει μόνο ένα ψηφοδέλτιο."
+msgstr[1] "Απομένουν μόνο %(ballot_count)d ψηφοδέλτια."
+
+#: demos_voting/ballot_distributor/forms.py:70
+msgid "Voter email addresses"
+msgstr "Διευθύνσεις email ψηφοφόρων"
+
+#: demos_voting/ballot_distributor/forms.py:77
+msgid "Voter list file"
+msgstr "Αρχείο λίστας ψηφοφόρων"
+
+#: demos_voting/ballot_distributor/forms.py:86
+msgid ""
+"New voters cannot be registered because the election is not in the ballot "
+"distribution phase."
+msgstr ""
+"Δεν είναι δυνατό να εγγραφούν νέοι ψηφοφόροι επειδή η ψηφοφορία δε βρίσκεται "
+"στη φάση διανομής ψηφοδελτίων."
+
+#: demos_voting/ballot_distributor/forms.py:90
+msgid ""
+"New voters cannot be registered because the ballot distribution phase is "
+"about to end."
+msgstr ""
+"Δεν είναι δυνατό να εγγραφούν νέοι ψηφοφόροι επειδή η φάση διανομής "
+"ψηφοδελτίων πρόκειται σύντομα να τελειώσει."
+
+#: demos_voting/ballot_distributor/forms.py:101
+msgid "Please submit either a voter list file or a list of email addresses."
+msgstr ""
+"Παρακαλούμε υποβάλετε είτε ένα αρχείο λίστας ψηφοφόρων είτε μία λίστα από "
+"διευθύνσεις email."
+
+#: demos_voting/ballot_distributor/forms.py:155
+#: demos_voting/ballot_distributor/templates/ballot_distributor/ballot_archive_create.html:34
+#: demos_voting/ballot_distributor/templates/ballot_distributor/voter_list_create.html:30
+msgid "The election is not in the ballot distribution phase."
+msgstr "Η ψηφοφορία δε βρίσκεται στη φάση διανομής ψηφοδελτίων."
+
+#: demos_voting/ballot_distributor/models.py:28
+msgid "Setup"
+msgstr "Εγκατάσταση"
+
+#: demos_voting/ballot_distributor/models.py:29
+msgid "Ballot distribution"
+msgstr "Διανομή ψηφοδελτίων"
+
+#: demos_voting/ballot_distributor/models.py:30
+#: demos_voting/ballot_distributor/models.py:142
+#: demos_voting/ballot_distributor/models.py:187
+msgid "Completed"
+msgstr "Ολοκληρώθηκε"
+
+#: demos_voting/ballot_distributor/models.py:31
+#: demos_voting/ballot_distributor/models.py:143
+#: demos_voting/ballot_distributor/models.py:188
+msgid "Failed"
+msgstr "Απέτυχε"
+
+#: demos_voting/ballot_distributor/models.py:32
+#: demos_voting/ballot_distributor/models.py:144
+#: demos_voting/ballot_distributor/models.py:189
+msgid "Cancelled"
+msgstr "Ακυρώθηκε"
+
+#: demos_voting/ballot_distributor/models.py:35
+#: demos_voting/ballot_distributor/models.py:152
+#: demos_voting/ballot_distributor/models.py:205
+msgid "state"
+msgstr "κατάσταση"
+
+#: demos_voting/ballot_distributor/models.py:36
+msgid "ballot distribution started at"
+msgstr "η διανομή ψηφοδελτίων ξεκίνησε στις"
+
+#: demos_voting/ballot_distributor/models.py:37
+msgid "ballot distribution ended at"
+msgstr "η διανομή ψηφοδελτίων έληξε στις"
+
+#: demos_voting/ballot_distributor/models.py:80
+#: demos_voting/ballot_distributor/models.py:151
+#: demos_voting/ballot_distributor/models.py:204
+msgid "file"
+msgstr "αρχείο"
+
+#: demos_voting/ballot_distributor/models.py:98
+msgid "credential"
+msgstr "διαπιστευτήριο"
+
+#: demos_voting/ballot_distributor/models.py:99
+msgid "security code"
+msgstr "κωδικός ασφαλείας"
+
+#: demos_voting/ballot_distributor/models.py:110
+msgid "vote-code"
+msgstr "κωδικός ψήφου"
+
+#: demos_voting/ballot_distributor/models.py:140
+#: demos_voting/ballot_distributor/models.py:185
+msgid "Pending"
+msgstr "Εκκρεμεί"
+
+#: demos_voting/ballot_distributor/models.py:141
+#: demos_voting/ballot_distributor/models.py:186
+msgid "Processing"
+msgstr "Επεξεργασία"
+
+#: demos_voting/ballot_distributor/models.py:149
+msgid "number of ballots"
+msgstr "αριθμός ψηφοδελτίων"
+
+#: demos_voting/ballot_distributor/models.py:150
+msgid "language"
+msgstr "γλώσσα"
+
+#: demos_voting/ballot_distributor/models.py:153
+#: demos_voting/ballot_distributor/models.py:207
+msgid "created at"
+msgstr "δημιουργήθηκε στις"
+
+#: demos_voting/ballot_distributor/models.py:154
+#: demos_voting/ballot_distributor/models.py:208
+msgid "processing started at"
+msgstr "η επεξεργασία ξεκίνησε στις"
+
+#: demos_voting/ballot_distributor/models.py:155
+#: demos_voting/ballot_distributor/models.py:209
+msgid "processing ended at"
+msgstr "η επεξεργασία έληξε στις"
+
+#: demos_voting/ballot_distributor/models.py:160
+msgid "ballot archive"
+msgstr "αρχειοθήκη ψηφοδελτίων"
+
+#: demos_voting/ballot_distributor/models.py:161
+msgid "ballot archives"
+msgstr "αρχειοθήκες ψηφοδελτίων"
+
+#: demos_voting/ballot_distributor/models.py:196
+msgid "The file is not valid."
+msgstr "Το αρχείο δεν είναι έγκυρο."
+
+#: demos_voting/ballot_distributor/models.py:197
+msgid "The file is empty."
+msgstr "Το αρχείο είναι κενό."
+
+#: demos_voting/ballot_distributor/models.py:198
+msgid ""
+"The file contains more email addresses than the number of ballots available."
+msgstr ""
+"Το αρχείο περιέχει περισσότερες διευθύνσεις email από τον αριθμό των "
+"διαθέσιμων ψηφοδελτίων."
+
+#: demos_voting/ballot_distributor/models.py:206
+msgid "error"
+msgstr "σφάλμα"
+
+#: demos_voting/ballot_distributor/models.py:214
+msgid "voter list"
+msgstr "λίστα ψηφοφόρων"
+
+#: demos_voting/ballot_distributor/models.py:215
+msgid "voter lists"
+msgstr "λίστες ψηφοφόρων"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/ballot_archive_create.html:18
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_update.html:18
+#: demos_voting/ballot_distributor/templates/ballot_distributor/voter_list_create.html:19
+msgid "Return"
+msgstr "Επιστροφή"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/ballot_archive_create.html:26
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:141
+msgid "Create a new ballot archive"
+msgstr "Δημιουργία νέας αρχειοθήκης ψηφοδελτίων"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/ballot_archive_create.html:30
+#: demos_voting/ballot_distributor/templates/ballot_distributor/voter_list_create.html:26
+#, python-format
+msgid "Remaining ballots: %(ballot_count)s"
+msgstr "Ψηφοδέλτια που απομένουν: %(ballot_count)s"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/ballot_archive_create.html:58
+msgid "The number of ballots that will be generated."
+msgstr "Ο αριθμός των ψηφοδελτίων που θα δημιουργηθούν."
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/ballot_archive_create.html:75
+msgid "The language in which the ballots will be generated."
+msgstr "Η γλώσσα στην οποία θα δημιουργηθούν τα ψηφοδέλτια."
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/ballot_archive_create.html:84
+#: demos_voting/ballot_distributor/templates/ballot_distributor/voter_list_create.html:64
+#: demos_voting/ballot_distributor/templates/ballot_distributor/voter_list_create.html:90
+msgid "Submit"
+msgstr "Υποβολή"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:25
+#, python-format
+msgid ""
+"Please visit the <a href=\"%(vote_collector_url)s\" class=\"alert-link"
+"\">Vote Collector</a> to supervise the voting phase."
+msgstr ""
+"Επισκεφθείτε τον <a href=\"%(vote_collector_url)s\" class=\"alert-link"
+"\">Συλλέκτη Ψήφων</a> για να επιβλέψετε τη φάση ψηφοφορίας."
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:30
+msgid ""
+"The Ballot Distributor is responsible for the ballot distribution phase of "
+"the election."
+msgstr ""
+"Ο Διανομέας Ψηφοδελτίων είναι υπεύθυνος για τη φάση διανομής ψηφοδελτίων της "
+"ψηφοφορίας."
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:31
+msgid "The current state is:"
+msgstr "Η τρέχουσα κατάσταση είναι:"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:40
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_update.html:21
+msgid "Manage"
+msgstr "Διαχείριση"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:45
+msgid "Voter lists"
+msgstr "Λίστες ψηφοφόρων"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:55
+msgid "Number of voters"
+msgstr "Αριθμός ψηφοφόρων"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:56
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:106
+msgid "Created at"
+msgstr "Δημιουργήθηκε στις"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:57
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:107
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_list.html:28
+msgid "State"
+msgstr "Κατάσταση"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:81
+msgid "There are no voter lists."
+msgstr "Δεν υπάρχουν λίστες ψηφοφόρων."
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:88
+#: demos_voting/ballot_distributor/templates/ballot_distributor/voter_list_create.html:22
+msgid "Create a new voter list"
+msgstr "Δημιουργία νέας λίστας ψηφοφόρων"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:94
+msgid "Ballot archives"
+msgstr "Αρχειοθήκες ψηφοδελτίων"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:104
+msgid "Number of ballots"
+msgstr "Αριθμός ψηφοδελτίων"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:105
+msgid "Language"
+msgstr "Γλώσσα"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:108
+msgid "Download"
+msgstr "Λήψη"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:134
+msgid "There are no ballot archives."
+msgstr "Δεν υπάρχουν αρχειοθήκες ψηφοδελτίων."
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:147
+msgid "Links"
+msgstr "Σύνδεσμοι"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:149
+msgid "Vote Collector"
+msgstr "Συλλέκτης Ψήφων"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:150
+msgid "Bulletin Board"
+msgstr "Πίνακας Ανακοινώσεων"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_list.html:7
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_list.html:13
+#: demos_voting/ballot_distributor/templates/ballot_distributor/includes/nav.html:15
+msgid "Elections"
+msgstr "Ψηφοφορίες"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_list.html:19
+msgid "There are no elections."
+msgstr "Δεν υπάρχουν ψηφοφορίες."
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_list.html:30
+#, python-format
+msgid "Updated %(time_since)s ago."
+msgstr "Ενημερώθηκε πριν από %(time_since)s."
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_update.html:33
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_update.html:49
+msgid "Cancel election"
+msgstr "Ακύρωση ψηφοφορίας"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_update.html:36
+msgid "There are no available actions."
+msgstr "Δεν υπάρχουν διαθέσιμες ενέργειες."
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_update.html:48
+msgid "Close"
+msgstr "Κλείσιμο"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_update.html:52
+msgid "Are you sure you want to cancel the election?"
+msgstr "Είστε σίγουροι ότι θέλετε να ακυρώσετε την ψηφοφορία;"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_update.html:55
+msgid "No"
+msgstr "Όχι"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_update.html:56
+msgid "Yes"
+msgstr "Ναι"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/emails/administrator_voter_list_failed_body.txt:6
+#, python-format
+msgid ""
+"\n"
+"Dear %(user_display_name)s,\n"
+"\n"
+"You receive this email because you submitted a voter list for the election:\n"
+"\n"
+"Name: %(election_name)s\n"
+"Identifier: %(election_slug)s\n"
+"\n"
+"The voter list you submitted could not be processed because it has errors. "
+"Please visit the election page for more information.\n"
+msgstr ""
+"\n"
+"Αγαπητέ/ή %(user_display_name)s,\n"
+"\n"
+"Λαμβάνετε αυτό το email επειδή υποβάλατε μία λίστα ψηφοφόρων για την "
+"ψηφοφορία:\n"
+"\n"
+"Όνομα: %(election_name)s\n"
+"Αναγνωριστικό: %(election_slug)s\n"
+"\n"
+"Δεν ήταν δυνατή η επεξεργασία της λίστας ψηφοφόρων που υποβάλατε επειδή έχει "
+"σφάλματα. Επισκεφθείτε τη σελίδα της ψηφοφορίας για περισσότερες "
+"πληροφορίες.\n"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/emails/administrator_voter_list_failed_subject.txt:7
+#, python-format
+msgid "Voter list for election: %(election_slug)s"
+msgstr "Λίστα ψηφοφόρων για την ψηφοφορία: %(election_slug)s"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/emails/base_body.txt:6
+#, python-format
+msgid "%(site_name)s: Ballot Distributor"
+msgstr "%(site_name)s: Διανομέας Ψηφοδελτίων"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/emails/voter_ballot_body.txt:8
+#, python-format
+msgid ""
+"\n"
+"Dear %(user_display_name)s,\n"
+"\n"
+"You receive this email because you have been registered to vote in the "
+"election:\n"
+"\n"
+"Name: %(election_name)s\n"
+"Identifier: %(election_slug)s\n"
+"\n"
+"Your ballot's serial number is %(ballot_serial_number)s. Please use the "
+"attached file to cast your vote during the voting period, which begins on "
+"%(voting_starts_at)s and ends on %(voting_ends_at)s.\n"
+msgstr ""
+"\n"
+"Αγαπητέ/ή %(user_display_name)s,\n"
+"\n"
+"Λαμβάνετε αυτό το email επειδή έχετε εγγραφεί ως ψηφοφόρος στην ψηφοφορία:\n"
+"\n"
+"Όνομα: %(election_name)s\n"
+"Αναγνωριστικό: %(election_slug)s\n"
+"\n"
+"Ο σειριακός αριθμός του ψηφοδελτίου σας είναι %(ballot_serial_number)s. "
+"Παρακαλούμε χρησιμοποιήστε το συνημμένο αρχείο για να ψηφίσετε κατά την "
+"περίοδο ψηφοφορίας, η οποία ξεκινά στις %(voting_starts_at)s και λήγει στις "
+"%(voting_ends_at)s.\n"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/emails/voter_ballot_subject.txt:6
+#, python-format
+msgid "Voter registration (%(election_slug)s)"
+msgstr "Εγγραφή ψηφοφόρου (%(election_slug)s)"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/home.html:6
+#: demos_voting/ballot_distributor/templates/ballot_distributor/includes/nav.html:9
+msgid "Home"
+msgstr "Αρχική"
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/home.html:12
+msgid "This is the Ballot Distributor."
+msgstr "Αυτός είναι ο Διανομέας Ψηφοδελτίων."
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/voter_list_create.html:55
+msgid ""
+"Select a file that contains the voters' email addresses, one in each line."
+msgstr ""
+"Επιλέξτε ένα αρχείο που περιέχει τις διευθύνσεις email των ψηφοφόρων, μία σε "
+"κάθε γραμμή."
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/voter_list_create.html:81
+#, python-format
+msgid ""
+"If you have a small number of email addresses then you may enter them in "
+"this field. Separate the values with commas or press "
+"%(carriage_return_symbol)s after each value you enter."
+msgstr ""
+"Εάν έχετε ένα μικρό αριθμό διευθύνσεων email τότε μπορείτε να τις "
+"καταχωρήσετε σε αυτό το πεδίο. Διαχωρίστε τις διευθύνσεις email με κόμμα ή "
+"πατήστε %(carriage_return_symbol)s μετά από κάθε διεύθυνση email που "
+"εισάγετε."

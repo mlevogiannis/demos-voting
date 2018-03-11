@@ -1,0 +1,65 @@
+{% extends './base.html' %}
+
+{% load i18n %}
+{% load static %}
+
+{% block title %}
+{% trans "Scan QR code" %} | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h3>{% trans "Scan QR code" %}</h3>
+  </div>
+  <div id="alert-placeholder">
+  </div>
+  <div id="instructions">
+    <p>{% trans "To scan a QR code:" %}</p>
+    <ul>
+      <li>{% trans "Your device must have a camera." %}</li>
+      <li>{% trans "The web browser you are using must be supported." %}</li>
+      <li>{% trans "You have to allow this site to access the camera." %}</li>
+    </ul>
+    <p>{% trans "If this scanner is not working, please use a dedicated QR code scanner application." %}</p>
+    <br>
+    <button type="button" class="btn btn-primary">{% trans "Scan QR code" %}</button>
+  </div>
+  <div class="embed-responsive embed-responsive-16by9 hidden">
+    <video class="embed-responsive-item"></video>
+    <canvas id="qr-canvas" class="hidden"></canvas>
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'base/vendor/jsqrcode/grid.js' %}"></script>
+<script src="{% static 'base/vendor/jsqrcode/version.js' %}"></script>
+<script src="{% static 'base/vendor/jsqrcode/detector.js' %}"></script>
+<script src="{% static 'base/vendor/jsqrcode/formatinf.js' %}"></script>
+<script src="{% static 'base/vendor/jsqrcode/errorlevel.js' %}"></script>
+<script src="{% static 'base/vendor/jsqrcode/bitmat.js' %}"></script>
+<script src="{% static 'base/vendor/jsqrcode/datablock.js' %}"></script>
+<script src="{% static 'base/vendor/jsqrcode/bmparser.js' %}"></script>
+<script src="{% static 'base/vendor/jsqrcode/datamask.js' %}"></script>
+<script src="{% static 'base/vendor/jsqrcode/rsdecoder.js' %}"></script>
+<script src="{% static 'base/vendor/jsqrcode/gf256poly.js' %}"></script>
+<script src="{% static 'base/vendor/jsqrcode/gf256.js' %}"></script>
+<script src="{% static 'base/vendor/jsqrcode/decoder.js' %}"></script>
+<script src="{% static 'base/vendor/jsqrcode/qrcode.js' %}"></script>
+<script src="{% static 'base/vendor/jsqrcode/findpat.js' %}"></script>
+<script src="{% static 'base/vendor/jsqrcode/alignpat.js' %}"></script>
+<script src="{% static 'base/vendor/jsqrcode/databr.js' %}"></script>
+<script>
+  var validUrlPrefixes = [{% for valid_url_prefix in valid_url_prefixes %}"{{ valid_url_prefix }}"{% if not forloop.last %}, {% endif %}{% endfor %}];
+  {% trans 'Click "allow" to enable access to the camera.' as request_permission_message %}
+  var requestPermissionMessage = "{{ request_permission_message|escapejs }}";
+  {% trans "Access to the camera was denied. Please check the web browser's settings and try again." as permission_denied_message %}
+  var permissionDeniedMessage = "{{ permission_denied_message|escapejs }}";
+  {% trans "No camera was found." as camera_not_found_message %}
+  var cameraNotFoundMessage = "{{ camera_not_found_message|escapejs }}";
+  {% trans "This web browser is not supported. Please try another one or use a dedicated QR code scanner application." as unsupported_browser_message %}
+  var unsupportedBrowserMessage = "{{ unsupported_browser_message|escapejs }}";
+</script>
+<script src="{% static 'vote_collector/js/qr-code.js' %}"></script>
+{% endblock %}

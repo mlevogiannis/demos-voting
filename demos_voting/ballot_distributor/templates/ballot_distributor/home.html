@@ -1,0 +1,14 @@
+{% extends './base.html' %}
+
+{% load i18n %}
+
+{% block title %}
+{% trans "Home" %} | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  {% include 'base/includes/home.html' %}
+  <p>{% trans "This is the Ballot Distributor." %}</p>
+</div>
+{% endblock %}

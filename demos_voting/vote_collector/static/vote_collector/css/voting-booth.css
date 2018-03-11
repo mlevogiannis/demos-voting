@@ -1,0 +1,78 @@
+#select-interface-tab > .panel:first-child > .panel-body > .page-header,
+#vote-tab > .panel:first-child > .panel-body > .page-header,
+#confirm-vote-codes-tab > .panel:first-child > .panel-body > .page-header,
+#verify-receipts-tab > .panel:first-child > .panel-body > .page-header {
+  margin-top: 0px;
+}
+
+#select-interface-tab > .panel:first-child > .panel-body,
+#vote-tab > .panel:first-child > .panel-body,
+#confirm-vote-codes-tab > .panel:first-child > .panel-body,
+#verify-receipts-tab > .panel:first-child > .panel-body {
+  padding-bottom: 5px;
+}
+
+#select-interface input[type='text'],
+#vote-tab input[type='text'],
+#confirm-vote-codes-tab tbody > tr > td.vote-code,
+#verify-receipts-tab tbody > tr > td.vote-code,
+#verify-receipts-tab tbody > tr > td.receipt {
+  font-family: 'Roboto Mono';
+}
+
+#confirm-vote-codes-tab table td,
+#confirm-vote-codes-tab table th,
+#verify-receipts-tab table td,
+#verify-receipts-tab table th {
+  text-align: center;
+  vertical-align: middle !important;
+}
+
+#vote-tab .panel-body > h3 {
+  margin-top: 10px;
+}
+
+/* Custom checkbox, based on:
+ * https://bootsnipp.com/snippets/featured/animated-radios-amp-checkboxes-nojs */
+#vote-tab .checkbox > label {
+  padding-left: 0px;
+  margin-left: 1.8em;
+}
+#vote-tab .checkbox > label.disabled {
+  cursor: not-allowed !important;
+}
+#vote-tab .checkbox > label:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+#vote-tab .checkbox > label > .checkbox-icon {
+  position: relative;
+  display: inline-block;
+  border: 1px solid #a9a9a9;
+  border-radius: .25em;
+  width: 1.3em;
+  height: 1.3em;
+  float: left;
+  margin-right: .5em;
+  margin-left: -1.8em;
+}
+#vote-tab .checkbox > label > .checkbox-icon i {
+  position: absolute;
+  font-size: .8em;
+  line-height: 0;
+  top: 50%;
+  left: 20%;
+}
+#vote-tab .checkbox > label > input[type="checkbox"] {
+  display: none;
+}
+#vote-tab .checkbox > label > input[type="checkbox"] + .checkbox-icon > i {
+  opacity: 0;
+}
+#vote-tab .checkbox > label > input[type="checkbox"]:checked + .checkbox-icon > i {
+  opacity: 1;
+}
+#vote-tab .checkbox > label > input[type="checkbox"]:disabled + .checkbox-icon {
+  opacity: .5;
+}

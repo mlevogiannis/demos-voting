@@ -1,0 +1,18 @@
+{% extends 'base/includes/nav.html' %}
+
+{% load i18n %}
+
+{% block nav-tabs %}
+<li role="presentation" {% if request.resolver_match.view_name == 'ballot-distributor:home' %}class="active"{% endif %}>
+  <a href="{% url 'ballot-distributor:home' %}">
+    <i class="fa fa-home fa-fw" aria-hidden="true"></i>
+    {% trans "Home" %}
+  </a>
+</li>
+<li role="presentation" {% if request.resolver_match.view_name == 'ballot-distributor:election-list' or request.resolver_match.view_name == 'ballot-distributor:election-detail' or request.resolver_match.view_name == 'ballot-distributor:election-update' or request.resolver_match.view_name == 'ballot-distributor:ballot-archive-create' or request.resolver_match.view_name == 'ballot-distributor:voter-list-create' %}class="active"{% endif %}>
+  <a href="{% url 'ballot-distributor:election-list' %}">
+    <i class="fa fa-envelope fa-fw" aria-hidden="true"></i>
+    {% trans "Elections" %}
+  </a>
+</li>
+{% endblock %}

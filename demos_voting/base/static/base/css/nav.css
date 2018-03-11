@@ -1,0 +1,73 @@
+#main-nav {
+  padding-top: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+#main-nav .nav-tabs {
+  margin-bottom: -1px;
+  border-bottom: 0px solid transparent;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+#main-nav .nav-tabs > li {
+  margin-bottom: 0px;
+  float: none;
+  display: inline-block;
+}
+
+#main-nav .nav-tabs > li > a {
+  border: none;
+  color: #666;
+  background-color: transparent;
+}
+
+#main-nav .nav-tabs > li.active > a,
+#main-nav .nav-tabs > li.active > a:focus,
+#main-nav .nav-tabs > li.active > a:hover {
+  border-width: 0;
+  cursor: pointer;
+}
+
+#main-nav .nav-tabs > li > a::after {
+  content: "";
+  background: #000;
+  height: 2px;
+  position: absolute;
+  width: 100%;
+  left: 0px;
+  bottom: -1px;
+  -webkit-transform: scale(0);
+  -moz-transform: scale(0);
+  -ms-transform: scale(0);
+  transform: scale(0);
+}
+
+#main-nav .nav-tabs > li.active > a,
+#main-nav .nav-tabs > li > a:hover {
+  border: none;
+  color: #000 !important;
+  background: transparent;
+}
+
+#main-nav .nav-tabs > li.active > a::after,
+#main-nav .nav-tabs > li:hover > a::after {
+  -webkit-transform: scale(1);
+  -moz-transform: scale(1);
+  -ms-transform: scale(1);
+  transform: scale(1);
+}
+
+#main-nav .tab-nav > li > a::after {
+  background: #000 none repeat scroll 0% 0%;
+  color: #fff;
+}
+
+#main-nav .tab-pane {
+  padding: 15px 0;
+}
+
+#main-nav .tab-content {
+  padding: 20px
+}

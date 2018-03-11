@@ -1,0 +1,9 @@
+{% extends './base_subject.txt' %}
+
+{% load i18n %}
+
+{% block subject %}
+{% with election_slug=election.slug %}
+{% blocktrans %}Voter list for election: {{ election_slug }}{% endblocktrans %}
+{% endwith %}
+{% endblock %}

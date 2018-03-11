@@ -1,0 +1,263 @@
+{% extends './base.html' %}
+
+{% load i18n %}
+{% load static %}
+{% load demos_voting %}
+
+{% block title %}
+{{ election.name }} | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h3>{{ election.name }}
+      <small>({{ election.slug }})</small>
+    </h3>
+  </div>
+  <a class="btn btn-default" href="{% url 'bulletin-board:election-detail' slug=election.slug %}" role="button">
+    <i class="fa fa-reply" aria-hidden="true"></i>
+    {% trans "Return" %}
+  </a>
+  <div class="page-header">
+    <h4>{% blocktrans with serial_number=ballot.serial_number %}Ballot {{ serial_number }}{% endblocktrans %}</h4>
+  </div>
+  {% if election.state == election.STATE_SETUP %}
+  <div class="alert alert-warning" role="alert">
+    {% trans "Auditing will be possible after the end of the setup phase." %}
+  </div>
+  {% else %}
+  <div class="alert alert-info" role="alert">
+    {% trans "A lot of data may be downloaded if you click any of the coloured buttons. Data charges may apply." %}
+  </div>
+  <ul class="nav nav-tabs" role="tablist">
+    {% for ballot_part in ballot.parts.all %}
+    <li role="presentation" class="{% if forloop.first %}active{% endif %}"><a href="#part-{{ ballot_part.tag }}" aria-controls="part-{{ ballot_part.tag }}" role="tab" data-toggle="tab">{% blocktrans with tag=ballot_part.tag %}Part {{ tag }}{% endblocktrans %}</a></li>
+    {% endfor %}
+  </ul>
+  <br>
+  <div class="tab-content" id="ballot-audit">
+    {% for ballot_part in ballot.parts.all %}
+    <div id="part-{{ ballot_part.tag }}" class="tab-pane fade {% if forloop.first %}in active{% endif %}" data-part-tag="{{ ballot_part.tag }}" role="tabpanel">
+      <div>
+        <button type="button" class="btn btn-default" data-part-fields="credential credential_hash">
+          <i class="fa fa-id-card-o" aria-hidden="true"></i>
+          {% trans "Credential" %}
+        </button>
+      </div>
+      <br>
+      {% for ballot_question in ballot_part.questions.all %}
+      {% with election_question=ballot_question.election_question %}
+      <div class="panel panel-default" data-question-index="{{ election_question.index }}">
+        <div class="panel-heading">
+          <h4 class="panel-title">
+            {% blocktrans with index=election_question.index|add:1 name=election_question.get_name_display %}Question {{ index }}: {{ name }}{% endblocktrans %}
+          </h4>
+        </div>
+        <div class="panel-body">
+          <div class="button-wrap">
+            <button type="button" class="btn btn-warning" data-question-fields="zk1">
+              <i class="fa fa-folder" aria-hidden="true"></i>
+              {% trans "Pre-vote audit data" %}
+            </button>
+            {% if election.state == election.STATE_COMPLETED and ballot_part.is_cast %}
+            <button type="button" class="btn btn-success" data-question-fields="zk2">
+              <i class="fa fa-folder-open" aria-hidden="true"></i>
+              {% trans "Post-vote audit data" %}
+            </button>
+            {% endif %}
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                {% if election.state == election.STATE_TALLY and ballot_is_cast or election.state == election.STATE_COMPLETED and ballot_is_cast %}
+                {% if ballot_part.is_cast %}
+                <th>
+                  {% blocktrans context 'noun' %}Vote{% endblocktrans %}
+                </th>
+                {% elif election.state == election.STATE_COMPLETED %}
+                <th>#</th>
+                <th>
+                  {% if election.type == election.TYPE_QUESTION_OPTION %}
+                  {% trans "Option" %}
+                  {% elif election.type == election.TYPE_PARTY_CANDIDATE %}
+                  {% if election_question.index == 0 %}
+                  {% trans "Party name" %}
+                  {% elif election_question.index == 1 %}
+                  {% trans "Candidate name" %}
+                  {% endif %}
+                  {% endif %}
+                </th>
+                {% endif %}
+                {% endif %}
+                <th>
+                  {% if election.type == election.TYPE_QUESTION_OPTION %}
+                  {% trans "Vote-code" %}
+                  {% elif election.type == election.TYPE_PARTY_CANDIDATE %}
+                  {% if election_question.index == 0 %}
+                  {% trans "Party vote-code" %}
+                  {% elif election_question.index == 1 %}
+                  {% trans "Candidate vote-code" %}
+                  {% endif %}
+                  {% endif %}
+                </th>
+                <th>
+                  {% if election.type == election.TYPE_QUESTION_OPTION %}
+                  {% trans "Receipt" %}
+                  {% elif election.type == election.TYPE_PARTY_CANDIDATE %}
+                  {% if election_question.index == 0 %}
+                  {% trans "Party receipt" %}
+                  {% elif election_question.index == 1 %}
+                  {% trans "Candidate receipt" %}
+                  {% endif %}
+                  {% endif %}
+                </th>
+                <th>{% trans "Pre-vote audit data" %}</th>
+                <th>{% trans "Commitment" %}</th>
+                {% if election.state == election.STATE_COMPLETED and ballot_is_cast %}
+                {% if ballot_part.is_cast %}
+                <th>{% trans "Post-vote audit data" %}</th>
+                {% else %}
+                <th>{% trans "Decommitment" %}</th>
+                {% endif %}
+                {% endif %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for ballot_option in ballot_question.options.all %}
+              {% with election_option=ballot_option.election_option %}
+              <tr data-option-index="{{ ballot_option.index }}">
+                {% if election.state == election.STATE_TALLY and ballot_is_cast or election.state == election.STATE_COMPLETED and ballot_is_cast %}
+                {% if ballot_part.is_cast %}
+                <td>
+                  {% if ballot_option.is_voted %}
+                  <i class="fa fa-check-square-o fa-lg" aria-hidden="true"></i>
+                  <span class="sr-only">{% trans "True" %}</span>
+                  {% else %}
+                  <i class="fa fa-square-o fa-lg" aria-hidden="true"></i>
+                  <span class="sr-only">{% trans "False" %}</span>
+                  {% endif %}
+                </td>
+                {% elif election.state == election.STATE_COMPLETED %}
+                <td>
+                  {% if not election_option is None %}
+                  {{ election_option.index|add:1 }}
+                  {% else %}
+                  -
+                  {% endif %}
+                </td>
+                <td>
+                  {% if not election_option is None %}
+                  {{ election_option.get_name_display }}
+                  {% else %}
+                  <em>{% trans "Blank" %}</em>
+                  {% endif %}
+                  {% if election.type == election.TYPE_PARTY_CANDIDATE and election_question.index == 1 and ballot_is_cast and not ballot_part.is_cast %}
+                  <br>
+                  <small class="text-muted">
+                    {% if ballot_option.party_election_option_index is not None %}
+                    {% with party_option=ballot_part.questions.all.0.options.all|list_get:ballot_option.party_election_option_index %}
+                    ({{ party_option.election_option.get_name_display }})
+                    {% endwith %}
+                    {% else %}
+                    <em>({% trans "Blank" %})</em>
+                    {% endif %}
+                  </small>
+                  {% endif %}
+                </td>
+                {% endif %}
+                {% endif %}
+                <td>
+                  <button type="button" class="btn btn-primary" data-option-fields="vote_code vote_code_hash">
+                    {% if ballot_option.vote_code %}
+                    {{ ballot_option.get_vote_code_display }}
+                    {% else %}
+                    <i class="fa fa-lock" aria-hidden="true"></i>
+                    {% endif %}
+                  </button>
+                </td>
+                <td>
+                  <button type="button" class="btn btn-info" data-option-fields="receipt">
+                    {{ ballot_option.get_receipt_display }}
+                  </button>
+                </td>
+                <td>
+                  <button type="button" class="btn btn-warning" data-option-fields="zk1">
+                    <i class="fa fa-folder" aria-hidden="true"></i>
+                  </button>
+                </td>
+                <td>
+                  <button type="button" class="btn btn-danger" data-option-fields="commitment">
+                    <i class="fa fa-envelope" aria-hidden="true"></i>
+                  </button>
+                </td>
+                {% if election.state == election.STATE_COMPLETED and ballot_is_cast %}
+                {% if ballot_part.is_cast %}
+                <td>
+                  <button type="button" class="btn btn-success" data-option-fields="zk2">
+                    <i class="fa fa-folder-open" aria-hidden="true"></i>
+                  </button>
+                </td>
+                {% else %}
+                <td>
+                  <button type="button" class="btn btn-success" data-option-fields="decommitment">
+                    <i class="fa fa-envelope-open" aria-hidden="true"></i>
+                  </button>
+                </td>
+                {% endif %}
+                {% endif %}
+              </tr>
+              {% endwith %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endwith %}
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+<div class="modal fade" id="json-modal" tabindex="-1" role="dialog" aria-labelledby="json-modal-label">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="json-modal-label">{% trans "JSON Viewer" %}</h4>
+      </div>
+      <div class="modal-body">
+        <div id="json-modal-loading" class="text-center hidden">
+          <p><i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i></p>
+          <p>{% trans "Please wait..." %}</p>
+        </div>
+        <div id="json-modal-error" class="text-center hidden">
+          <p><i class="fa fa-ban fa-3x" aria-hidden="true"></i></p>
+          <p>{% trans "An error occurred, please try again later." %}</p>
+        </div>
+        <pre id="json-modal-content" class="pre-scrollable hidden">
+        </pre>
+      </div>
+      <div class="modal-footer button-wrap text-center-xs">
+        <button type="button" class="btn btn-default" id="json-modal-copy-to-clipboard" data-clipboard-target="#json-modal-content" disabled><i class="fa fa-clipboard" aria-hidden="true"></i> {% trans "Copy to clipboard" %}</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'bulletin_board/css/ballot-detail.css' %}">
+{% endblock %}
+
+{% block script %}
+<script>
+  var ballotApiUrl = "{% url 'bulletin-board:api:ballot-detail' election_slug=election.slug serial_number=ballot.serial_number %}";
+</script>
+<script src="{% static 'base/vendor/clipboard.js/2.0.0/clipboard.min.js' %}"></script>
+<script src="{% static 'bulletin_board/js/ballot-detail.js' %}"></script>
+{% endblock %}

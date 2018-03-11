@@ -1,0 +1,625 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-03-11 02:09+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: demos_voting/bulletin_board/apps.py:9
+#: demos_voting/bulletin_board/templates/bulletin_board/api.html:6
+#: demos_voting/bulletin_board/templates/bulletin_board/base.html:6
+#: demos_voting/bulletin_board/templates/bulletin_board/includes/header.html:7
+msgid "Bulletin Board"
+msgstr "Πίνακας Ανακοινώσεων"
+
+#: demos_voting/bulletin_board/forms.py:20
+msgid "The election is not in the tally phase."
+msgstr "Η ψηφοφορία δε βρίσκεται στη φάση καταμέτρησης."
+
+#: demos_voting/bulletin_board/models.py:27
+msgid "Setup"
+msgstr "Εγκατάσταση"
+
+#: demos_voting/bulletin_board/models.py:28
+msgid "Ballot distribution"
+msgstr "Διανομή ψηφοδελτίων"
+
+#: demos_voting/bulletin_board/models.py:29
+msgid "Voting"
+msgstr "Ψηφοφορία"
+
+#: demos_voting/bulletin_board/models.py:30
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:40
+#: demos_voting/bulletin_board/templates/bulletin_board/tally.html:22
+msgid "Tally"
+msgstr "Καταμέτρηση"
+
+#: demos_voting/bulletin_board/models.py:31
+msgid "Completed"
+msgstr "Ολοκληρώθηκε"
+
+#: demos_voting/bulletin_board/models.py:32
+msgid "Failed"
+msgstr "Απέτυχε"
+
+#: demos_voting/bulletin_board/models.py:33
+msgid "Cancelled"
+msgstr "Ακυρώθηκε"
+
+#: demos_voting/bulletin_board/models.py:36
+msgid "coins"
+msgstr "κέρματα"
+
+#: demos_voting/bulletin_board/models.py:37
+msgid "state"
+msgstr "κατάσταση"
+
+#: demos_voting/bulletin_board/models.py:38
+msgid "tally started at"
+msgstr "η καταμέτρηση ξεκίνησε στις"
+
+#: demos_voting/bulletin_board/models.py:39
+msgid "tally ended at"
+msgstr "η καταμέτρηση έληξε στις"
+
+#: demos_voting/bulletin_board/models.py:61
+msgid "tally commitment"
+msgstr "δέσμευση καταμέτρησης"
+
+#: demos_voting/bulletin_board/models.py:62
+msgid "tally decommitment"
+msgstr "αποδέσμευση καταμέτρησης"
+
+#: demos_voting/bulletin_board/models.py:84
+msgid "number of votes"
+msgstr "αριθμός ψήφων"
+
+#: demos_voting/bulletin_board/models.py:117
+msgid "credential"
+msgstr "διαπιστευτήριο"
+
+#: demos_voting/bulletin_board/models.py:118
+msgid "credential hash"
+msgstr "κατακερματισμός διαπιστευτηρίου"
+
+#: demos_voting/bulletin_board/models.py:119
+msgid "is cast"
+msgstr "έχει ριχτεί"
+
+#: demos_voting/bulletin_board/models.py:123
+#: demos_voting/bulletin_board/models.py:148
+msgid "zero-knowledge proof ZK1"
+msgstr "απόδειξη μηδενικής γνώσης ZK1"
+
+#: demos_voting/bulletin_board/models.py:124
+#: demos_voting/bulletin_board/models.py:149
+msgid "zero-knowledge proof ZK2"
+msgstr "απόδειξη μηδενικής γνώσης ZK2"
+
+#: demos_voting/bulletin_board/models.py:144
+msgid "vote-code"
+msgstr "κωδικός ψήφου"
+
+#: demos_voting/bulletin_board/models.py:145
+msgid "vote-code hash"
+msgstr "κατακερματισμός κωδικού ψήφου"
+
+#: demos_voting/bulletin_board/models.py:146
+msgid "commitment"
+msgstr "δέσμευση"
+
+#: demos_voting/bulletin_board/models.py:147
+msgid "decommitment"
+msgstr "αποδέσμευση"
+
+#: demos_voting/bulletin_board/models.py:150
+msgid "is voted"
+msgstr "έχει ψηφιστεί"
+
+#: demos_voting/bulletin_board/models.py:225
+msgid "partial tally decommitment"
+msgstr "μερική αποδέσμευση καταμέτρησης"
+
+#: demos_voting/bulletin_board/models.py:226
+msgid "partial tally decommitments"
+msgstr "μερικές αποδεσμεύσεις καταμέτρησης"
+
+#: demos_voting/bulletin_board/models.py:237
+msgid "partial decommitment"
+msgstr "μερική αποδέσμευση"
+
+#: demos_voting/bulletin_board/models.py:238
+msgid "partial decommitments"
+msgstr "μερικές αποδεσμεύσεις"
+
+#: demos_voting/bulletin_board/models.py:249
+#: demos_voting/bulletin_board/models.py:261
+msgid "partial zero-knowledge proof ZK2"
+msgstr "μερική απόδειξη μηδενικής γνώσης ZK2"
+
+#: demos_voting/bulletin_board/models.py:250
+#: demos_voting/bulletin_board/models.py:262
+msgid "partial zero-knowledge proofs ZK2"
+msgstr "μερικές αποδείξεις μηδενικής γνώσης ZK2"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/api.html:6
+#: demos_voting/bulletin_board/templates/bulletin_board/includes/nav.html:21
+msgid "REST API Browser"
+msgstr "Περιηγητής REST API"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:20
+#: demos_voting/bulletin_board/templates/bulletin_board/election_update.html:18
+#: demos_voting/bulletin_board/templates/bulletin_board/tally.html:19
+msgid "Return"
+msgstr "Επιστροφή"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:23
+#, python-format
+msgid "Ballot %(serial_number)s"
+msgstr "Ψηφοδέλτιο %(serial_number)s"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:27
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:258
+msgid "Auditing will be possible after the end of the setup phase."
+msgstr "Η επαλήθευση θα είναι εφικτή μετά τη λήξη της φάσης εγκατάστασης."
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:31
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:205
+msgid ""
+"A lot of data may be downloaded if you click any of the coloured buttons. "
+"Data charges may apply."
+msgstr ""
+"Μπορεί να ληφθούν πολλά δεδομένα αν κάνετε κλικ σε κάποιο από τα χρωματιστά "
+"κουμπιά. Eνδέχεται να ισχύουν χρεώσεις δεδομένων."
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:35
+#, python-format
+msgid "Part %(tag)s"
+msgstr "Μέρος %(tag)s"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:45
+msgid "Credential"
+msgstr "Διαπιστευτήριο"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:54
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:58
+#, python-format
+msgid "Question %(index)s: %(name)s"
+msgstr "Ερώτημα %(index)s: %(name)s"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:61
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:117
+msgid "Pre-vote audit data"
+msgstr "Αρχικά δεδομένα επαλήθευσης"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:66
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:121
+msgid "Post-vote audit data"
+msgstr "Τελικά δεδομένα επαλήθευσης"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:78
+msgctxt "noun"
+msgid "Vote"
+msgstr "Ψήφος"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:84
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:66
+msgid "Option"
+msgstr "Επιλογή"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:87
+msgid "Party name"
+msgstr "Όνομα συνδυασμού"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:89
+msgid "Candidate name"
+msgstr "Όνομα υποψηφίου"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:97
+msgid "Vote-code"
+msgstr "Κωδικός ψήφου"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:100
+msgid "Party vote-code"
+msgstr "Κωδικός ψήφου συνδυασμού"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:102
+msgid "Candidate vote-code"
+msgstr "Κωδικός ψήφου υποψηφίου"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:108
+msgid "Receipt"
+msgstr "Απόδειξη συνδυασμού"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:111
+msgid "Party receipt"
+msgstr "Απόδειξη"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:113
+msgid "Candidate receipt"
+msgstr "Απόδειξη υποψηφίου"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:118
+msgid "Commitment"
+msgstr "Δέσμευση"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:123
+msgid "Decommitment"
+msgstr "Αποδέσμευση"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:137
+msgid "True"
+msgstr "Αληθές"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:140
+msgid "False"
+msgstr "Ψευδές"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:155
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:165
+msgid "Blank"
+msgstr "Λευκό"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:230
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:268
+msgid "JSON Viewer"
+msgstr "Προβολή JSON"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:235
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:273
+msgid "Please wait..."
+msgstr "Παρακαλούμε περιμένετε..."
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:239
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:277
+msgid "An error occurred, please try again later."
+msgstr "Παρουσιάστηκε σφάλμα, παρακαλούμε δοκιμάστε ξανα αργότερα"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:245
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:283
+msgid "Copy to clipboard"
+msgstr "Αντιγραφή στο πρόχειρο"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/ballot_detail.html:246
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:284
+#: demos_voting/bulletin_board/templates/bulletin_board/election_update.html:48
+msgid "Close"
+msgstr "Κλείσιμο"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:21
+msgid "The Bulletin Board is responsible for the tally phase of the election."
+msgstr ""
+"Ο Πίνακας Ανακοινώσεων είναι υπεύθυνος για τη φάση καταμέτρησης της "
+"ψηφοφορίας."
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:22
+msgid "The current state is:"
+msgstr "Η τρέχουσα κατάσταση είναι:"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:34
+#: demos_voting/bulletin_board/templates/bulletin_board/election_update.html:21
+msgid "Manage"
+msgstr "Διαχείριση"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:49
+msgid "Results"
+msgstr "Αποτελέσματα"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:67
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:94
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:143
+msgctxt "noun"
+msgid "Votes"
+msgstr "Ψήφοι"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:93
+msgid "Party"
+msgstr "Συνδυασμός"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:142
+msgid "Candidate"
+msgstr "Υποψήφιος"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:186
+msgid "The results will be announced after the end of the tally phase."
+msgstr "Τα αποτελέσματα θα ανακοινωθούν μετά τη λήξη της φάσης καταμέτρησης."
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:191
+msgid "Audit"
+msgstr "Επαλήθευση"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:197
+msgid "Ballot"
+msgstr "Ψηφοδέλτιο"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:198
+msgid "Serial number"
+msgstr "Σειριακός αριθμός"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:201
+msgid "Open"
+msgstr "Άνοιγμα"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:210
+msgid "Commitment key"
+msgstr "Κλειδί δέσμευσης"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:215
+msgid "Certificate"
+msgstr "Πιστοποιητικό"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:221
+msgid "Coins"
+msgstr "Κέρματα"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:231
+#, python-format
+msgid "Question: %(name)s"
+msgid_plural "Question %(index)s: %(name)s"
+msgstr[0] "Ερώτημα: %(name)s"
+msgstr[1] "Ερώτημα %(index)s: %(name)s"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:242
+msgid "Tally commitment"
+msgstr "Δέσμευση καταμέτρησης"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:247
+msgid "Tally decommitment"
+msgstr "Αποδέσμευση καταμέτρησης"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:300
+#: demos_voting/bulletin_board/templates/bulletin_board/tally.html:88
+msgid "This field is required."
+msgstr "Αυτό το πεδίο είναι απαραίτητο."
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_detail.html:302
+msgid "The serial number is not valid."
+msgstr "Ο σειριακός αριθμός δεν είναι έγκυρος."
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_list.html:7
+#: demos_voting/bulletin_board/templates/bulletin_board/election_list.html:13
+#: demos_voting/bulletin_board/templates/bulletin_board/includes/nav.html:15
+msgid "Elections"
+msgstr "Ψηφοφορίες"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_list.html:19
+msgid "There are no elections."
+msgstr "Δεν υπάρχουν ψηφοφορίες."
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_list.html:28
+msgid "State"
+msgstr "Κατάσταση"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_list.html:30
+#, python-format
+msgid "Updated %(time_since)s ago."
+msgstr "Ενημερώθηκε πριν από %(time_since)s."
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_update.html:33
+#: demos_voting/bulletin_board/templates/bulletin_board/election_update.html:49
+msgid "Cancel election"
+msgstr "Ακύρωση ψηφοφορίας"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_update.html:36
+#: demos_voting/bulletin_board/templates/bulletin_board/tally.html:80
+msgid "There are no available actions."
+msgstr "Δεν υπάρχουν διαθέσιμες ενέργειες."
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_update.html:52
+msgid "Are you sure you want to cancel the election?"
+msgstr "Είστε σίγουροι ότι θέλετε να ακυρώσετε την ψηφοφορία;"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_update.html:55
+msgid "No"
+msgstr "Όχι"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/election_update.html:56
+msgid "Yes"
+msgstr "Ναι"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/emails/base_body.txt:6
+#, python-format
+msgid "%(site_name)s: Bulletin Board"
+msgstr "%(site_name)s: Πίνακας Ανακοινώσεων"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/emails/trustee_tally_notification_body.txt:6
+#, python-format
+msgid ""
+"\n"
+"Dear %(user_display_name)s,\n"
+"\n"
+"You receive this email because you are a member of the committee of trustees "
+"responsible for computing and announcing the results of the election:\n"
+"\n"
+"Name: %(election_name)s\n"
+"Identifier: %(election_slug)s\n"
+"\n"
+"Please visit the following link to perform your share of operations:\n"
+"\n"
+"  %(tally_url)s\n"
+"\n"
+"You will have to sign up/sign in using the email address \"%(user_email)s\", "
+"otherwise you will not be able to participate. Finally, you will be asked to "
+"enter the secret key you received from the Election Authority.\n"
+msgstr ""
+"\n"
+"Αγαπητέ/ή %(user_display_name)s,\n"
+"\n"
+"Λαμβάνετε αυτό το email επειδή είστε μέλος της εφορευτικής επιτροπής που "
+"είναι υπεύθυνη για τον υπολογισμό και την ανακοίνωση των αποτελεσμάτων της "
+"ψηφοφορίας:\n"
+"\n"
+"Όνομα: %(election_name)s\n"
+"Αναγνωριστικό: %(election_slug)s\n"
+"\n"
+"Επισκευθείτε τον ακόλουθο σύνδεσμο για να εκτελέσετε το μερίδιο των "
+"λειτουργιών που σας αντιστοιχεί:\n"
+"\n"
+"  %(tally_url)s\n"
+"\n"
+"Θα πρέπει να εγγραφείτε/συνδεθείτε χρησιμοποιώντας τη διεύθυνση email "
+"\"%(user_email)s\", διαφορετικά δε θα μπορέσετε να συμμετάσχετε. Τέλος, θα "
+"σας ζητηθεί να εισάγετε το μυστικό κλειδί που λάβατε από την Αρχή "
+"Ψηφοφοριών.\n"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/emails/trustee_tally_notification_subject.txt:6
+#, python-format
+msgid "Tally (%(election_slug)s)"
+msgstr "Καταμέτρηση (%(election_slug)s)"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/emails/voter_election_results_body.txt:6
+#, python-format
+msgid ""
+"\n"
+"Dear %(user_display_name)s,\n"
+"\n"
+"You receive this email because you have been registered to vote in the "
+"election:\n"
+"\n"
+"Name: %(election_name)s\n"
+"Identifier: %(election_slug)s\n"
+"\n"
+"The results of the election have been announced and can be found at the "
+"following link:\n"
+"\n"
+"  %(results_url)s\n"
+"\n"
+"Thank you for your participation!\n"
+msgstr ""
+"\n"
+"Αγαπητέ/ή %(user_display_name)s,\n"
+"\n"
+"Λαμβάνετε αυτό το email επειδή έχετε εγγραφεί ως ψηφοφόρος στην ψηφοφορία:\n"
+"\n"
+"Όνομα: %(election_name)s\n"
+"Αναγνωριστικό: %(election_slug)s\n"
+"\n"
+"Τα αποτελέσματα της ψηφοφορίας έχουν ανακοινωθεί και μπορείτε να τα βρείτε "
+"στον ακόλουθο σύνδεσμο:\n"
+"\n"
+"  %(results_url)s\n"
+"\n"
+"Ευχαριστούμε για τη συμμετοχή σας!\n"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/emails/voter_election_results_subject.txt:6
+#, python-format
+msgid "Election results (%(election_slug)s)"
+msgstr "Αποτελέσματα ψηφοφορίας (%(election_slug)s)"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/home.html:6
+#: demos_voting/bulletin_board/templates/bulletin_board/includes/nav.html:9
+msgid "Home"
+msgstr "Αρχική"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/home.html:12
+msgid "This is the Bulletin Board."
+msgstr "Αυτός είναι ο Πίνακας Ανακοινώσεων."
+
+#: demos_voting/bulletin_board/templates/bulletin_board/tally.html:27
+msgid ""
+"The election results and the ballot audit data have already been submitted "
+"to the server. Thank you for participating!"
+msgstr ""
+"Τα αποτελέσματα της ψηφοφορίας και τα δεδομένα επαλήθευσης των ψηφοδελτίων "
+"έχουν ήδη υποβληθεί στον εξυπηρετητή. Ευχαριστούμε για την συμμετοχή σας!"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/tally.html:34
+msgid "Try again"
+msgstr "Προσπαθήστε ξανά"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/tally.html:46
+msgid ""
+"Please enter in the field below the secret key you received from the "
+"Election Authority. The secret key will be used to compute the election "
+"results and generate the ballot audit data. The secret key will not be "
+"submitted to the server."
+msgstr ""
+"Εισαγάγετε στο παρακάτω πεδίο το μυστικό κλειδί που λάβατε από την Αρχή "
+"Ψηφοφοριών. Το μυστικό κλειδί θα χρησιμοποιηθεί για τον υπολογισμό των "
+"αποτελεσμάτων της ψηφοφορίας και τη δημιουργία των δεδομένων επαλήθευσης των "
+"ψηφοδελτίων. Το μυστικό κλειδί δε θα υποβληθεί στον εξυπηρετητή."
+
+#: demos_voting/bulletin_board/templates/bulletin_board/tally.html:47
+msgid ""
+"Note that the validity of the secret key cannot be verified, so enter it "
+"carefully."
+msgstr ""
+"Επισηµαίνεται ότι η εγκυρότητα του μυστικού κλειδιού δε μπορεί να "
+"επαληθευτεί, οπότε εισάγετέ το προσεκτικά."
+
+#: demos_voting/bulletin_board/templates/bulletin_board/tally.html:52
+msgid "Secret key"
+msgstr "Μυστικό κλειδί"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/tally.html:56
+msgid "Next"
+msgstr "Επόμενο"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/tally.html:62
+msgid ""
+"Computing the election results and generating the ballot audit data, please "
+"wait..."
+msgstr ""
+"Γίνεται υπολογισμός των αποτελεσμάτων της ψηφοφορίας και δημιουργία των "
+"δεδομένων επαλήθευσης των ψηφοδελτίων, παρακαλούμε περιμένετε..."
+
+#: demos_voting/bulletin_board/templates/bulletin_board/tally.html:63
+msgid "Do not close this window until processing completes."
+msgstr "Μην κλείσετε αυτό το παράθυρο μέχρι να ολοκληρωθεί η επεξεργασία."
+
+#: demos_voting/bulletin_board/templates/bulletin_board/tally.html:73
+msgid ""
+"The election results and the ballot audit data have been submitted to the "
+"server. Thank you for participating!"
+msgstr ""
+"Τα αποτελέσματα της ψηφοφορίας και τα δεδομένα επαλήθευσης των ψηφοδελτίων "
+"υποβλήθηκαν στον εξυπηρετητή. Ευχαριστούμε για την συμμετοχή σας!"
+
+#: demos_voting/bulletin_board/templates/bulletin_board/tally.html:90
+msgid "The secret key's format is not valid."
+msgstr "Η μορφή του μυστικού κλειδιού δεν είναι έγκυρη."
+
+#: demos_voting/bulletin_board/templates/bulletin_board/tally.html:92
+msgid "An unknown error occurred. Please try again later."
+msgstr "Παρουσιάστηκε ένα άγνωστο σφάλμα. Παρακαλούμε δοκιμάστε ξανα αργότερα"
+
+#: demos_voting/bulletin_board/utils/query_params.py:24
+#, python-format
+msgid "Syntax error at character %(position)d."
+msgstr "Συντακτικό σφάλμα στο χαρακτήρα %(position)d."
+
+#: demos_voting/bulletin_board/utils/query_params.py:25
+#, python-format
+msgid ""
+"Field `%(field_name)s` at character %(position)d was specified more than "
+"once."
+msgstr ""
+"Το πεδίο `%(field_name)s` στο χαρακτήρα %(position)d καθορίστηκε "
+"περισσότερες από μία φορές."
+
+#: demos_voting/bulletin_board/utils/query_params.py:26
+#, python-format
+msgid "Field `%(field_name)s` at character %(position)d does not exist."
+msgstr "Το πεδίο `%(field_name)s` στο χαρακτήρα %(position)d δεν υπάρχει."
+
+#: demos_voting/bulletin_board/utils/query_params.py:27
+#, python-format
+msgid ""
+"Field `%(field_name)s` at character %(position)d does not support sub-"
+"selection."
+msgstr ""
+"Το πεδίο `%(field_name)s` στο χαρακτήρα %(position)d δεν υποστηρίζει υπο-"
+"επιλογή."

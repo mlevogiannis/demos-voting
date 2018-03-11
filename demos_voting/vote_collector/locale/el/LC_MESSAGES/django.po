@@ -1,0 +1,645 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-03-11 02:09+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: demos_voting/vote_collector/apps.py:9
+#: demos_voting/vote_collector/templates/vote_collector/base.html:6
+#: demos_voting/vote_collector/templates/vote_collector/includes/header.html:7
+msgid "Vote Collector"
+msgstr "Συλλέκτης Ψήφων"
+
+#: demos_voting/vote_collector/forms.py:48
+msgid "One or more of the submitted vote-codes are not valid."
+msgstr ""
+"Ένας ή περισσότεροι από τους κωδικούς ψήφου που υποβλήθηκαν δεν είναι "
+"έγκυροι."
+
+#: demos_voting/vote_collector/forms.py:63
+msgid ""
+"One or more candidate vote-codes do not correspond to the party vote-code."
+msgstr ""
+"Ένας ή περισσότεροι κωδικοί ψήφου υποψηφίων δεν αντιστοιχούν στον κωδικό "
+"ψήφου συνδυασμού."
+
+#: demos_voting/vote_collector/forms.py:186
+msgid "The election is not in the voting phase."
+msgstr "Η ψηφοφορία δε βρίσκεται στη φάση ψηφοφορίας."
+
+#: demos_voting/vote_collector/forms.py:189
+msgid "The new voting end time must be after the old voting end time."
+msgstr ""
+"Η νέα ώρα λήξης της ψηφοφορίας πρέπει να είναι μετά την παλιά ώρα λήξης της "
+"ψηφοφορίας."
+
+#: demos_voting/vote_collector/models.py:16
+msgid "Setup"
+msgstr "Εγκατάσταση"
+
+#: demos_voting/vote_collector/models.py:17
+msgid "Ballot distribution"
+msgstr "Διανομή ψηφοδελτίων"
+
+#: demos_voting/vote_collector/models.py:18
+msgid "Voting"
+msgstr "Ψηφοφορία"
+
+#: demos_voting/vote_collector/models.py:19
+msgid "Completed"
+msgstr "Ολοκληρώθηκε"
+
+#: demos_voting/vote_collector/models.py:20
+msgid "Failed"
+msgstr "Απέτυχε"
+
+#: demos_voting/vote_collector/models.py:21
+msgid "Cancelled"
+msgstr "Ακυρώθηκε"
+
+#: demos_voting/vote_collector/models.py:24
+msgid "state"
+msgstr "κατάσταση"
+
+#: demos_voting/vote_collector/models.py:25
+msgid "voting started at"
+msgstr "η ψηφοφορία ξεκίνησε στις"
+
+#: demos_voting/vote_collector/models.py:26
+msgid "voting ended at"
+msgstr "η ψηφοφορία έληξε στις"
+
+#: demos_voting/vote_collector/models.py:45
+msgid "credential"
+msgstr "διαπιστευτήριο"
+
+#: demos_voting/vote_collector/models.py:46
+msgid "credential hash"
+msgstr "κατακερματισμός διαπιστευτηρίου"
+
+#: demos_voting/vote_collector/models.py:47
+msgid "is cast"
+msgstr "έχει ριχτεί"
+
+#: demos_voting/vote_collector/models.py:55
+msgid "vote-code"
+msgstr "κωδικός ψήφου"
+
+#: demos_voting/vote_collector/models.py:56
+msgid "vote-code hash"
+msgstr "κατακερματισμός κωδικού ψήφου"
+
+#: demos_voting/vote_collector/models.py:57
+msgid "is voted"
+msgstr "έχει ψηφιστεί"
+
+#: demos_voting/vote_collector/templates/vote_collector/election_detail.html:24
+#, python-format
+msgid ""
+"Please visit the <a href=\"%(bulletin_board_url)s\" class=\"alert-link"
+"\">Bulletin Board</a> to supervise the tally phase."
+msgstr ""
+"Επισκεφθείτε τον <a href=\"%(bulletin_board_url)s\" class=\"alert-link"
+"\">Πίνακα Ανακοινώσεων</a> για να επιβλέψετε τη φάση καταμέτρησης."
+
+#: demos_voting/vote_collector/templates/vote_collector/election_detail.html:29
+msgid "The Vote Collector is responsible for the voting phase of the election."
+msgstr ""
+"Ο Συλλέκτης Ψήφων είναι υπεύθυνος για τη φάση ψηφοφορίας της ψηφοφορίας."
+
+#: demos_voting/vote_collector/templates/vote_collector/election_detail.html:30
+msgid "The current state is:"
+msgstr "Η τρέχουσα κατάσταση είναι:"
+
+#: demos_voting/vote_collector/templates/vote_collector/election_detail.html:39
+#: demos_voting/vote_collector/templates/vote_collector/election_update.html:23
+msgid "Manage"
+msgstr "Διαχείριση"
+
+#: demos_voting/vote_collector/templates/vote_collector/election_detail.html:44
+msgid "Links"
+msgstr "Σύνδεσμοι"
+
+#: demos_voting/vote_collector/templates/vote_collector/election_detail.html:46
+msgid "Bulletin Board"
+msgstr "Πίνακας Ανακοινώσεων"
+
+#: demos_voting/vote_collector/templates/vote_collector/election_list.html:7
+#: demos_voting/vote_collector/templates/vote_collector/election_list.html:13
+#: demos_voting/vote_collector/templates/vote_collector/includes/nav.html:15
+msgid "Elections"
+msgstr "Ψηφοφορίες"
+
+#: demos_voting/vote_collector/templates/vote_collector/election_list.html:19
+msgid "There are no elections."
+msgstr "Δεν υπάρχουν ψηφοφορίες."
+
+#: demos_voting/vote_collector/templates/vote_collector/election_list.html:28
+msgid "State"
+msgstr "Κατάσταση"
+
+#: demos_voting/vote_collector/templates/vote_collector/election_list.html:30
+#, python-format
+msgid "Updated %(time_since)s ago."
+msgstr "Ενημερώθηκε πριν από %(time_since)s."
+
+#: demos_voting/vote_collector/templates/vote_collector/election_update.html:20
+msgid "Return"
+msgstr "Επιστροφή"
+
+#: demos_voting/vote_collector/templates/vote_collector/election_update.html:53
+msgid "When voting will end and tally will start."
+msgstr "Πότε θα λήξει η ψηφοφορία και θα ξεκινήσει η καταμέτρηση."
+
+#: demos_voting/vote_collector/templates/vote_collector/election_update.html:61
+msgid "Update election"
+msgstr "Ενημέρωση ψηφοφορίας"
+
+#: demos_voting/vote_collector/templates/vote_collector/election_update.html:62
+#: demos_voting/vote_collector/templates/vote_collector/election_update.html:82
+msgid "Cancel election"
+msgstr "Ακύρωση ψηφοφορίας"
+
+#: demos_voting/vote_collector/templates/vote_collector/election_update.html:69
+msgid "There are no available actions."
+msgstr "Δεν υπάρχουν διαθέσιμες ενέργειες."
+
+#: demos_voting/vote_collector/templates/vote_collector/election_update.html:81
+msgid "Close"
+msgstr "Κλείσιμο"
+
+#: demos_voting/vote_collector/templates/vote_collector/election_update.html:85
+msgid "Are you sure you want to cancel the election?"
+msgstr "Είστε σίγουροι ότι θέλετε να ακυρώσετε την ψηφοφορία;"
+
+#: demos_voting/vote_collector/templates/vote_collector/election_update.html:88
+msgid "No"
+msgstr "Όχι"
+
+#: demos_voting/vote_collector/templates/vote_collector/election_update.html:89
+msgid "Yes"
+msgstr "Ναι"
+
+#: demos_voting/vote_collector/templates/vote_collector/emails/base_body.txt:6
+#, python-format
+msgid "%(site_name)s: Vote Collector"
+msgstr "%(site_name)s: Συλλέκτης Ψήφων"
+
+#: demos_voting/vote_collector/templates/vote_collector/home.html:6
+#: demos_voting/vote_collector/templates/vote_collector/includes/nav.html:9
+msgid "Home"
+msgstr "Αρχική"
+
+#: demos_voting/vote_collector/templates/vote_collector/home.html:12
+msgid "This is the Vote Collector."
+msgstr "Αυτός είναι ο Συλλέκτης Ψήφων."
+
+#: demos_voting/vote_collector/templates/vote_collector/includes/nav.html:21
+#: demos_voting/vote_collector/templates/vote_collector/qr_code.html:7
+#: demos_voting/vote_collector/templates/vote_collector/qr_code.html:13
+#: demos_voting/vote_collector/templates/vote_collector/qr_code.html:26
+msgid "Scan QR code"
+msgstr "Σάρωση κωδικού QR"
+
+#: demos_voting/vote_collector/templates/vote_collector/qr_code.html:18
+msgid "To scan a QR code:"
+msgstr "Για να σαρώσετε έναν κωδικό QR:"
+
+#: demos_voting/vote_collector/templates/vote_collector/qr_code.html:20
+msgid "Your device must have a camera."
+msgstr "Η συσκευή σας πρέπει να διαθέτει κάμερα."
+
+#: demos_voting/vote_collector/templates/vote_collector/qr_code.html:21
+msgid "The web browser you are using must be supported."
+msgstr ""
+"Το πρόγραμμα περιήγησης ιστού που χρησιμοποιείτε πρέπει να υποστηρίζεται."
+
+#: demos_voting/vote_collector/templates/vote_collector/qr_code.html:22
+msgid "You have to allow this site to access the camera."
+msgstr ""
+"Πρέπει να επιτρέψετε σε αυτόν τον ιστότοπο να έχει πρόσβαση στην κάμερα."
+
+#: demos_voting/vote_collector/templates/vote_collector/qr_code.html:24
+msgid ""
+"If this scanner is not working, please use a dedicated QR code scanner "
+"application."
+msgstr ""
+"Εάν αυτός ο σαρωτής δε λειτουργεί, παρακαλούμε χρησιμοποιήστε μια "
+"εξειδικευμένη εφαρμογή σάρωσης κωδικών QR."
+
+#: demos_voting/vote_collector/templates/vote_collector/qr_code.html:55
+msgid "Click \"allow\" to enable access to the camera."
+msgstr ""
+"Κάντε κλικ στο \"να επιτρέπεται\" για να ενεργοποιήσετε την πρόσβαση στην "
+"κάμερα."
+
+#: demos_voting/vote_collector/templates/vote_collector/qr_code.html:57
+msgid ""
+"Access to the camera was denied. Please check the web browser's settings and "
+"try again."
+msgstr ""
+"Δεν επιτρέπεται η πρόσβαση στην κάμερα. Παρακαλούμε ελέγξτε τις ρυθμίσεις "
+"του προγράμματος περιήγησης ιστού και προσπαθήστε ξανά."
+
+#: demos_voting/vote_collector/templates/vote_collector/qr_code.html:59
+msgid "No camera was found."
+msgstr "Δε βρέθηκε κάμερα."
+
+#: demos_voting/vote_collector/templates/vote_collector/qr_code.html:61
+msgid ""
+"This web browser is not supported. Please try another one or use a dedicated "
+"QR code scanner application."
+msgstr ""
+"Αυτό το πρόγραμμα περιήγησης ιστού δεν υποστηρίζεται. Δοκιμάστε ένα άλλο ή "
+"χρησιμοποιήστε μια ειδική εφαρμογή σάρωσης κωδικών QR."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:8
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth_success.html:6
+msgid "Voting booth"
+msgstr "Κάλπη"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:22
+msgid "An error occurred."
+msgstr "Παρουσιάστηκε ένα σφάλμα."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:32
+msgid "Try again"
+msgstr "Προσπαθήστε ξανά"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:37
+#, python-format
+msgid "Voting ends at: %(voting_ends_at)s"
+msgstr "Η ψηφοφορία λήγει στις: %(voting_ends_at)s"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:45
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:55
+msgid "Step 1"
+msgstr "Βήμα 1"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:46
+msgid "Select voting interface"
+msgstr "Επιλέξτε διεπαφή ψηφοφορίας"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:57
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:67
+msgid "Step 2"
+msgstr "Βήμα 2"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:59
+msgid "Vote"
+msgstr "Ψηφίστε"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:69
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:79
+msgid "Step 3"
+msgstr "Βήμα 3"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:71
+msgid "Confirm vote-codes"
+msgstr "Επιβεβαιώστε τους κωδικούς ψήφου"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:81
+msgid "Step 4"
+msgstr "Βήμα 4"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:83
+msgid "Verify receipts"
+msgstr "Επαληθεύστε τις αποδείξεις"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:98
+msgid ""
+"You can enable a user friendly voting interface by entering the security "
+"code in the field below. The security code is required to restore the "
+"correspondence among options and vote-codes. If you do not trust this voting "
+"client with learning this correspondence, you may skip this step and vote by "
+"casting the vote-codes on your ballot."
+msgstr ""
+"Μπορείτε να ενεργοποιήσετε μία φιλική προς το χρήστη διεπαφή ψηφοφορίας "
+"εισάγοντας τον κωδικό ασφαλείας στο πεδίο που ακολουθεί. Ο κωδικός ασφαλείας "
+"απαιτείται για την αποκατάσταση της αντιστοιχίας μεταξύ των επιλογών και των "
+"κωδικών ψήφου. Εάν δεν εμπιστεύεστε αυτόν τον πελάτη ψηφοφορίας και δε "
+"θέλετε να μάθει αυτή την αντιστοιχία, μπορείτε να παραλείψετε αυτό το βήμα "
+"και να ψηφίσετε χρησιμοποιώντας τους κωδικούς ψήφου από το ψηφοδέλτιό σας."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:99
+msgid ""
+"Note that the validity of the security code cannot be verified, so enter it "
+"carefully."
+msgstr ""
+"Επισηµαίνεται ότι η εγκυρότητα του κωδικού ασφαλείας δε μπορεί να "
+"επαληθευτεί, οπότε εισάγετέ τον προσεκτικά."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:101
+msgid ""
+"You can enable a user friendly voting interface by entering the credential "
+"in the field below. The credential is required to generate the vote-codes "
+"that correspond to the options. If you do not trust this voting client with "
+"keeping the credential secret, you may skip this step and vote by casting "
+"the vote-codes on your ballot."
+msgstr ""
+"Μπορείτε να ενεργοποιήσετε μία φιλική προς το χρήστη διεπαφή ψηφοφορίας "
+"εισάγοντας το διαπιστευτήριο στο πεδίο που ακολουθεί. Το διαπιστευτήριο "
+"απαιτείται για τη δημιουργία των κωδικών ψήφου. Εάν δεν εμπιστεύεστε ότι ο "
+"αυτός ο πελάτης ψηφοφορίας θα διατηρήσει το διαπιστευτήριο μυστικό, μπορείτε "
+"να παραλείψετε αυτό το βήμα και να ψηφίσετε χρησιμοποιώντας τους κωδικούς "
+"ψήφου από το ψηφοδέλτιό σας."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:110
+msgid "Security code"
+msgstr "Κωδικός ασφαλείας"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:116
+msgid "Credential"
+msgstr "Διαπιστευτήριο"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:123
+msgid "Skip"
+msgstr "Παράλειψη"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:124
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:248
+msgid "Next"
+msgstr "Επόμενο"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:136
+msgid "Answer the questions by ticking the boxes."
+msgstr "Απαντήστε στα ερωτήματα σημειώνοντας τα κουτάκια."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:139
+msgid "Answer the questions by entering the vote-codes on your ballot."
+msgstr ""
+"Απαντήστε στα ερωτήματα εισάγοντας τους κωδικούς ψήφου από το ψηφοδέλτιό σας."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:152
+#, python-format
+msgid "Question"
+msgid_plural "Question %(index)s"
+msgstr[0] "Ερώτημα"
+msgstr[1] "Ερώτημα %(index)s"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:164
+#, python-format
+msgid "Select up to one option."
+msgid_plural "Select up to %(max_selection_count)s options."
+msgstr[0] "Επιλέξτε μέχρι μία επιλογή."
+msgstr[1] "Επιλέξτε μέχρι %(max_selection_count)s επιλογές."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:170
+#, python-format
+msgid "Select exactly one option."
+msgid_plural "Select exactly %(selection_count)s options."
+msgstr[0] "Επιλέξτε ακριβώς μία επιλογή."
+msgstr[1] "Επιλέξτε ακριβώς %(selection_count)s επιλογές."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:176
+#, python-format
+msgid "Select from one up to %(max_selection_count)s options."
+msgid_plural ""
+"Select from %(min_selection_count)s up to %(max_selection_count)s options."
+msgstr[0] "Επιλέξτε από μία μέχρι %(max_selection_count)s επιλογές."
+msgstr[1] ""
+"Επιλέξτε από %(min_selection_count)s μέχρι %(max_selection_count)s επιλογές."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:207
+#, python-format
+msgid "Enter up to one vote-code."
+msgid_plural "Enter up to %(max_selection_count)s vote-codes."
+msgstr[0] "Εισάγετε μέχρι έναν κωδικό ψήφου."
+msgstr[1] "Εισάγετε μέχρι %(max_selection_count)s κωδικούς ψήφου."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:213
+#, python-format
+msgid "Enter exactly one vote-code."
+msgid_plural "Enter exactly %(selection_count)s vote-codes."
+msgstr[0] "Εισάγετε ακριβώς έναν κωδικό ψήφου."
+msgstr[1] "Εισάγετε ακριβώς %(selection_count)s κωδικούς ψήφου."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:219
+#, python-format
+msgid "Enter from one up to %(max_selection_count)s vote-codes."
+msgid_plural ""
+"Enter from %(min_selection_count)s up to %(max_selection_count)s vote-codes."
+msgstr[0] "Εισάγετε από έναν μέχρι %(max_selection_count)s κωδικούς ψήφου."
+msgstr[1] ""
+"Εισάγετε από %(min_selection_count)s μέχρι %(max_selection_count)s κωδικούς "
+"ψήφου."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:233
+#, python-format
+msgid "Vote-code #%(counter)s"
+msgstr "Κωδικός ψήφου #%(counter)s"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:246
+msgid "Reset"
+msgstr "Επαναφορά"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:247
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:315
+msgid "Back"
+msgstr "Προηγούμενο"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:258
+msgid ""
+"Only the vote-codes will be submitted to the server, so make sure that the "
+"correspondence among the options and the vote-codes matches the one on your "
+"ballot."
+msgstr ""
+"Μόνο οι κωδικοί ψήφου θα υποβληθούν στον εξυπηρετητή, οπότε βεβαιωθείτε ότι "
+"η αντιστοιχία μεταξύ των επιλογών και των κωδικών ψήφου ταιριάζει με εκείνη "
+"στο ψηφοδέλτιό σας."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:261
+msgid "If not, go back to step 1 and correct the security code."
+msgstr "Αν όχι, επιστρέψτε στο βήμα 1 και διορθώστε τον κωδικό ασφαλείας."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:264
+msgid "If not, go back to step 1 and correct the credential."
+msgstr "Αν όχι, επιστρέψτε στο βήμα 1 και διορθώστε το διαπιστευτήριο."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:268
+msgid "Please confirm the vote-codes you entered."
+msgstr "Επιβεβαιώστε τους κωδικούς ψήφου που εισαγάγατε."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:270
+msgid ""
+"Once you click \"Submit\", your vote will be cast and you will not be able "
+"to make any further changes."
+msgstr ""
+"Αφού κάνετε κλικ στο κουμπί \"Υποβολή\", η ψήφος σας θα καταχωρηθεί και δε "
+"θα μπορείτε να κάνετε άλλες αλλαγές."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:277
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:332
+#, python-format
+msgid "Question: %(name)s"
+msgid_plural "Question %(index)s: %(name)s"
+msgstr[0] "Ερώτημα: %(name)s"
+msgstr[1] "Ερώτημα %(index)s: %(name)s"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:286
+msgid "No vote-codes will be submitted."
+msgstr "Δεν θα υποβληθούν κωδικοί ψήφου."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:294
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:347
+msgid "Option"
+msgstr "Επιλογή"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:296
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:347
+msgid "Party name"
+msgstr "Όνομα συνδυασμού"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:296
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:347
+msgid "Candidate name"
+msgstr "Όνομα υποψηφίου"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:301
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:350
+msgid "Vote-code"
+msgstr "Κωδικός ψήφου"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:303
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:352
+msgid "Party vote-code"
+msgstr "Κωδικός ψήφου συνδυασμού"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:303
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:352
+msgid "Candidate vote-code"
+msgstr "Κωδικός ψήφου υποψηφίου"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:316
+msgid "Submit"
+msgstr "Υποβολή"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:325
+msgid "Your vote has been cast!"
+msgstr "Η ψήφος σας καταχωρήθηκε!"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:325
+msgid ""
+"Please verify the receipts and click \"Finish\" to exit the voting booth."
+msgstr ""
+"Επαληθεύστε τις αποδείξεις και κάντε κλικ στο \"Τέλος\" για να βγείτε από "
+"την κάλπη."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:341
+msgid "No vote-codes were submitted."
+msgstr "Δεν υποβλήθηκαν κωδικοί ψήφου."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:357
+msgid "Receipt"
+msgstr "Απόδειξη"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:359
+msgid "Party receipt"
+msgstr "Απόδειξη συνδυασμού"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:359
+msgid "Candidate receipt"
+msgstr "Απόδειξη υποψηφίου"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:371
+msgid "Finish"
+msgstr "Τέλος"
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:381
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:386
+msgid "Please wait..."
+msgstr "Παρακαλούμε περιμένετε..."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:419
+msgid "Your vote was not accepted."
+msgstr "Η ψήφος σας δεν έγινε δεκτή."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:421
+msgid "An unknown error occurred. Please try again later."
+msgstr "Συνέβη ένα άγνωστο σφάλμα. Παρακαλούμε προσπαθήστε ξανά αργότερα."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:423
+msgid "This field is required."
+msgstr "Αυτό το πεδίο είναι απαραίτητο."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:426
+msgid "The security code's format is not valid."
+msgstr "Η μορφή του κωδικού ασφαλείας δεν είναι έγκυρη."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:429
+msgid "The credential's format is not valid."
+msgstr "Η μορφή του διαπιστευτηρίου δεν είναι έγκυρη."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:432
+msgid "This vote-code is not valid."
+msgstr "Αυτός ο κωδικός ψήφου δεν είναι έγκυρος."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:434
+msgid "This vote-code's format is not valid."
+msgstr "Η μορφή αυτού του κωδικού ψήφου δεν είναι έγκυρη."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:436
+msgid "This vote-code already exists."
+msgstr "Αυτός ο κωδικός ψήφου υπάρχει ήδη."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:438
+msgid "This candidate vote-code does not correspond to the party vote-code."
+msgstr ""
+"Αυτός ο κωδικός ψήφου υποψηφίου δεν αντιστοιχεί στον κωδικό ψήφου συνδυασμού."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:440
+msgid "The minimum number of selections has not been reached."
+msgstr "Δεν έχει συμπληρωθεί ο ελάχιστος αριθμός επιλογών."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:442
+msgid "The maximum number of selections has been reached."
+msgstr "Έχει συμπληρωθεί ο μέγιστος αριθμός επιλογών."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth.html:444
+msgid "The minimum number of vote-codes has not been reached."
+msgstr "Δεν έχει συμπληρωθεί ο ελάχιστος αριθμός κωδικών ψήφου."
+
+#: demos_voting/vote_collector/templates/vote_collector/voting_booth_success.html:17
+msgid "Your vote has been cast. Thank you for participating!"
+msgstr "Η ψήφος σας καταχωρήθηκε. Ευχαριστούμε για τη συμμετοχή σας!"
+
+#: demos_voting/vote_collector/views.py:124
+msgid "The election was cancelled."
+msgstr "Η ψηφοφορία ακυρώθηκε."
+
+#: demos_voting/vote_collector/views.py:127
+#, python-format
+msgid "The election starts in %(time_until)s."
+msgstr "Η ψηφοφορία ξεκινά σε %(time_until)s."
+
+#: demos_voting/vote_collector/views.py:133
+#, python-format
+msgid "The election ended %(time_since)s ago."
+msgstr "Η ψηφοφορία έληξε πριν από %(time_since)s."
+
+#: demos_voting/vote_collector/views.py:138
+msgid "The election has not started yet. Please try again later."
+msgstr ""
+"Η ψηφοφορία δεν έχει ξεκινήσει ακόμα. Παρακαλούμε δοκιμάστε ξανά αργότερα."
+
+#: demos_voting/vote_collector/views.py:149
+msgid "The credential in the URL is not valid."
+msgstr "Το διαπιστευτήριο στο URL δεν είναι έγκυρο."
+
+#: demos_voting/vote_collector/views.py:154
+msgid "This ballot has already been cast."
+msgstr "Αυτό το ψηφοδέλτιο έχει ήδη χρησιμοποιηθεί."

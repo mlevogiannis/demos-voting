@@ -1,0 +1,38 @@
+{% extends './base.html' %}
+
+{% load i18n %}
+{% load demos_voting %}
+
+{% block title %}
+{% trans "Elections" %} | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h3>{% trans "Elections" %} <span class="label label-default">{{ paginator.count }}</span></h3>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      {% if not election_list %}
+      <div class="alert alert-info" role="alert">
+        {% trans "There are no elections." %}
+      </div>
+      {% endif %}
+      {% for election in election_list %}
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <h4><a href="{{ election.get_absolute_url }}">{{ election.name }}</a></h4>
+          <p class="small text-muted">{{ election.slug }}</p>
+          <p class="small ">
+            {% trans "State" %}: <span class="label label-{% if election.state == election.STATE_SETUP %}info{% elif election.state == election.STATE_BALLOT_DISTRIBUTION %}info{% elif election.state == election.STATE_VOTING %}info{% elif election.state == election.STATE_TALLY %}primary{% elif election.state == election.STATE_COMPLETED %}success{% elif election.state == election.STATE_FAILED %}danger{% elif election.state == election.STATE_CANCELLED %}warning{% else %}default{% endif %}">{{ election.get_state_display }}</span>
+          </p>
+          <p class="small">{% blocktrans with time_since=election.updated_at|timesince %}Updated {{ time_since }} ago.{% endblocktrans %}</p>
+        </div>
+      </div>
+      {% endfor %}
+      {% include 'base/includes/pagination.html' %}
+    </div>
+  </div>
+</div>
+{% endblock %}

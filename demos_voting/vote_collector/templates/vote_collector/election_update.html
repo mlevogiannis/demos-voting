@@ -1,0 +1,108 @@
+{% extends './base.html' %}
+
+{% load i18n %}
+{% load static %}
+{% load demos_voting %}
+
+{% block title %}
+{{ election.name }} | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h3>{{ election.name }}
+      <small>({{ election.slug }})</small>
+    </h3>
+  </div>
+  <a class="btn btn-default" href="{% url 'vote-collector:election-detail' slug=election.slug %}" role="button">
+    <i class="fa fa-reply" aria-hidden="true"></i>
+    {% trans "Return" %}
+  </a>
+  <div class="page-header">
+    <h4>{% trans "Manage" %}</h4>
+  </div>
+  {% if form.non_field_errors %}
+  <div class="alert alert-danger" role="alert">
+    <ul class="list-unstyled">
+      {% for error in form.non_field_errors %}
+      <li>{{ error }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+  {% if election.state == election.STATE_VOTING %}
+  <form class="form-horizontal" method="POST">
+    {% csrf_token %}
+    <div class="form-group {% if form.voting_ends_at.errors %}has-error{% endif %}">
+      <label for="{{ form.voting_ends_at.id_for_label }}" class="col-sm-3 col-md-2 control-label">{{ form.voting_ends_at.label }}</label>
+      <div class="col-sm-9 col-md-10">
+        <div class="input-group date">
+          <input type="text" class="form-control" data-date-format="{{ form.voting_ends_at.field.input_formats.2 }}" id="{{ form.voting_ends_at.auto_id }}" value="{{ form.voting_ends_at.value|date_strftime:form.voting_ends_at.field.input_formats.2|default:form.voting_ends_at.value }}" name="{{ form.voting_ends_at.html_name }}" aria-describedby="{{ form.voting_ends_at.auto_id }}-help-block">
+          <span class="input-group-addon btn">
+            <i class="fa fa-calendar" aria-hidden="true"></i>
+            /
+            <i class="fa fa-clock-o" aria-hidden="true"></i>
+          </span>
+        </div>
+        <span id="{{ form.voting_ends_at.auto_id }}-help-block" class="help-block">
+          {% for error in form.voting_ends_at.errors %}
+          {{ error }}
+          {% endfor %}
+          {{ form.voting_ends_at.help_text }}
+          {% trans "When voting will end and tally will start." %}
+        </span>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-3 col-sm-9 col-md-offset-2 col-md-10">
+        <hr style="margin-top: 0px;">
+        <div class="button-wrap">
+          <button type="submit" class="btn btn-primary">{% trans "Update election" %}</button>
+          <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#cancel-election-modal">{% trans "Cancel election" %}</button>
+        </div>
+      </div>
+    </div>
+  </form>
+  {% else %}
+  <div class="alert alert-warning" role="alert">
+    {% trans "There are no available actions." %}
+  </div>
+  {% endif %}
+</div>
+
+{% if election.state == election.STATE_VOTING %}
+<form method="POST">
+  {% csrf_token %}
+  <div class="modal fade" id="cancel-election-modal" tabindex="-1" role="dialog" aria-labelledby="cancel-election-modal-label">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="{% trans "Close" %}"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="cancel-election-modal-label">{% trans "Cancel election" %}</h4>
+        </div>
+        <div class="modal-body">
+          {% trans "Are you sure you want to cancel the election?" %}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-success" data-dismiss="modal">{% trans "No" %}</button>
+          <button type="submit" class="btn btn-danger" name="cancel-election">{% trans "Yes" %}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+{% endif %}
+{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'base/vendor/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css' %}">
+<link rel="stylesheet" href="{% static 'vote_collector/css/election-update.css' %}">
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'base/vendor/moment.js/2.21.0/moment.min.js' %}"></script>
+{% if LANGUAGE_CODE == 'el' %}<script src="{% static 'base/vendor/moment.js/2.21.0/locale/el.js' %}"></script>{% endif %}
+<script src="{% static 'base/vendor/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js' %}"></script>
+<script src="{% static 'vote_collector/js/election-update.js' %}"></script>
+{% endblock %}

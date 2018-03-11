@@ -1,0 +1,13 @@
+#voter-list .bootstrap-tagsinput {
+  min-height: 80px;
+}
+#voter-list .bootstrap-tagsinput.empty:not(.focus) {
+  padding: 6px 12px;
+}
+#voter-list .bootstrap-tagsinput .placeholder {
+  color: #999;
+}
+#voter-list .bootstrap-tagsinput:not(.empty) .placeholder,
+#voter-list .bootstrap-tagsinput.focus .placeholder {
+  display: none;
+}

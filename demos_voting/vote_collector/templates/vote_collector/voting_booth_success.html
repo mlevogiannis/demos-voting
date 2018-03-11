@@ -1,0 +1,20 @@
+{% extends './base.html' %}
+
+{% load i18n %}
+
+{% block title %}
+{% trans "Voting booth" %} | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h3>{{ election.name }}
+      <small>({{ election.slug }})</small>
+    </h3>
+  </div>
+  <div class="alert alert-success">
+    {% trans "Your vote has been cast. Thank you for participating!" %}
+  </div>
+</div>
+{% endblock %}

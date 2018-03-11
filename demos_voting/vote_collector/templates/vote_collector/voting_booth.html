@@ -1,0 +1,452 @@
+{% extends './base.html' %}
+
+{% load i18n %}
+{% load static %}
+{% load demos_voting %}
+
+{% block title %}
+{% trans "Voting booth" %} | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h3>{{ election.name }}
+      <small>({{ election.slug }})</small>
+    </h3>
+  </div>
+  <div id="voting-booth-error" class="{% if not errors %}hidden{% endif %}">
+    <div class="alert-placeholder">
+      {% if errors %}
+      <div class="alert alert-danger" role="alert">
+        <h4>{% trans "An error occurred." %}</h4>
+        <ul>
+          {% for error in errors %}
+          <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </div>
+    <div class="button-wrap text-center-xs">
+      <a class="btn btn-default" href="{{ request.get_full_path }}" role="button">{% trans "Try again" %}</a>
+    </div>
+  </div>
+  {% if not errors %}
+  <div class="alert alert-warning" role="alert">
+    {% blocktrans with voting_ends_at=election.voting_ends_at trimmed %}
+    Voting ends at: {{ voting_ends_at }}
+    {% endblocktrans %}
+  </div>
+  <ul id="voting-booth-nav" class="nav nav-pills nav-justified thumbnail hidden-xs" role="tablist">
+    {% if election.vote_code_type == election.VOTE_CODE_TYPE_SHORT and election.security_code_length is not None or election.vote_code_type == election.VOTE_CODE_TYPE_LONG %}
+    <li class="active" role="presentation">
+      <a href="#select-interface-tab" aria-controls="select-interface-tab" role="tab" data-toggle="tab">
+        {% trans "Step 1" as select_interface_step_message %}
+        {% trans "Select voting interface" as select_interface_help_message %}
+        <h4>{{ select_interface_step_message }}</h4>
+        <p>{{ select_interface_help_message }}</p>
+      </a>
+    </li>
+    {% endif %}
+    <li class="{% if election.vote_code_type == election.VOTE_CODE_TYPE_SHORT and election.security_code_length is None %}active{% else %}disabled{% endif %}" role="presentation">
+      <a href="#vote-tab" aria-controls="vote-tab" role="tab" data-toggle="tab">
+        {% if election.vote_code_type == election.VOTE_CODE_TYPE_SHORT and election.security_code_length is None %}
+        {% trans "Step 1" as vote_step_message %}
+        {% else %}
+        {% trans "Step 2" as vote_step_message %}
+        {% endif %}
+        {% trans "Vote" as vote_help_message %}
+        <h4>{{ vote_step_message }}</h4>
+        <p>{{ vote_help_message }}</p>
+      </a>
+    </li>
+    <li class="disabled" role="presentation">
+      <a href="#confirm-vote-codes-tab" aria-controls="confirm-vote-codes-tab" role="tab" data-toggle="tab">
+        {% if election.vote_code_type == election.VOTE_CODE_TYPE_SHORT and election.security_code_length is None %}
+        {% trans "Step 2" as confirm_vote_codes_step_message %}
+        {% else %}
+        {% trans "Step 3" as confirm_vote_codes_step_message %}
+        {% endif %}
+        {% trans "Confirm vote-codes" as confirm_vote_codes_help_message %}
+        <h4>{{ confirm_vote_codes_step_message }}</h4>
+        <p>{{ confirm_vote_codes_help_message }}</p>
+      </a>
+    </li>
+    <li class="disabled" role="presentation">
+      <a href="#verify-receipts-tab" aria-controls="verify-receipts-tab" role="tab" data-toggle="tab">
+        {% if election.vote_code_type == election.VOTE_CODE_TYPE_SHORT and election.security_code_length is None %}
+        {% trans "Step 3" as verify_receipts_step_message %}
+        {% else %}
+        {% trans "Step 4" as verify_receipts_step_message %}
+        {% endif %}
+        {% trans "Verify receipts" as verify_receipts_help_message %}
+        <h4>{{ verify_receipts_step_message }}</h4>
+        <p>{{ verify_receipts_help_message }}</p>
+      </a>
+    </li>
+  </ul>
+  <div id="voting-booth-tab-content" class="tab-content {% if errors %}hidden{% endif %}">
+    {% if election.vote_code_type == election.VOTE_CODE_TYPE_SHORT and election.security_code_length is not None or election.vote_code_type == election.VOTE_CODE_TYPE_LONG %}
+    <div id="select-interface-tab" class="tab-pane fade in active" role="tabpanel">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div class="page-header visible-xs-block">
+            <h4>{{ select_interface_step_message }}: {{ select_interface_help_message }}</h4>
+          </div>
+          {% if election.vote_code_type == election.VOTE_CODE_TYPE_SHORT %}
+          <p>{% trans "You can enable a user friendly voting interface by entering the security code in the field below. The security code is required to restore the correspondence among options and vote-codes. If you do not trust this voting client with learning this correspondence, you may skip this step and vote by casting the vote-codes on your ballot." %}</p>
+          <p>{% trans "Note that the validity of the security code cannot be verified, so enter it carefully." %}</p>
+          {% elif election.vote_code_type == election.VOTE_CODE_TYPE_LONG %}
+          <p>{% trans "You can enable a user friendly voting interface by entering the credential in the field below. The credential is required to generate the vote-codes that correspond to the options. If you do not trust this voting client with keeping the credential secret, you may skip this step and vote by casting the vote-codes on your ballot." %}</p>
+          {% endif %}
+        </div>
+      </div>
+      <div class="alert-placeholder">
+      </div>
+      <form id="security-code-or-credential-form" novalidate>
+        {% if election.vote_code_type == election.VOTE_CODE_TYPE_SHORT %}
+        <div class="form-group">
+          <label for="security-code-input">{% trans "Security code" %}</label>
+          <input type="text" class="form-control" id="security-code-input" aria-describedby="security-code-input-help">
+          <span id="security-code-input-help" class="help-block"></span>
+        </div>
+        {% elif election.vote_code_type == election.VOTE_CODE_TYPE_LONG %}
+        <div class="form-group">
+          <label for="credential-input">{% trans "Credential" %}</label>
+          <input type="text" class="form-control" id="credential-input" aria-describedby="credential-input-help">
+          <span id="credential-input-help" class="help-block"></span>
+        </div>
+        {% endif %}
+        <hr>
+        <div class="button-wrap text-center-xs">
+          <button type="button" class="btn btn-default" id="select-interface-skip-button">{% trans "Skip" %}</button>
+          <button type="submit" class="btn btn-primary" id="select-interface-next-button">{% trans "Next" %}</button>
+        </div>
+      </form>
+    </div>
+    {% endif %}
+    <div id="vote-tab" class="tab-pane fade {% if election.vote_code_type == election.VOTE_CODE_TYPE_SHORT and election.security_code_length is None %}active in{% endif %}" role="tabpanel">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div class="page-header visible-xs-block">
+            <h4>{{ vote_step_message }}: {{ vote_help_message }}</h4>
+          </div>
+          <p class="checkbox-ui {% if election.vote_code_type == election.VOTE_CODE_TYPE_SHORT and election.security_code_length is not None or election.vote_code_type == election.VOTE_CODE_TYPE_LONG %}hidden{% endif %}">
+            {% trans "Answer the questions by ticking the boxes." %}
+          </p>
+          <p class="textinput-ui hidden">
+            {% trans "Answer the questions by entering the vote-codes on your ballot." %}
+          </p>
+        </div>
+      </div>
+      <div class="alert-placeholder">
+      </div>
+      <form id="voting-booth-form" method="POST" novalidate>
+        {% csrf_token %}
+        {% for option_formset in form.option_formsets %}
+        {% with question=option_formset.election_question %}
+        <div class="panel panel-default {% if election.type == election.TYPE_PARTY_CANDIDATE and question.index == 1 %}hidden{% endif %}">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              {% blocktrans with index=question.index|add:1 count total=election.question_count trimmed %}
+              Question
+              {% plural %}
+              Question {{ index }}
+              {% endblocktrans %}
+            </h4>
+          </div>
+          <div class="panel-body">
+            <h3>{{ question.get_name_display }}</h3>
+            <div class="checkbox-ui {% if election.vote_code_type == election.VOTE_CODE_TYPE_SHORT and election.security_code_length is not None or election.vote_code_type == election.VOTE_CODE_TYPE_LONG %}hidden{% endif %}">
+              <span class="text-muted">
+                {% if question.min_selection_count == 0 or election.type == election.TYPE_PARTY_CANDIDATE %}
+                {% blocktrans count max_selection_count=question.max_selection_count trimmed %}
+                Select up to one option.
+                {% plural %}
+                Select up to {{ max_selection_count }} options.
+                {% endblocktrans %}
+                {% elif question.min_selection_count == question.max_selection_count %}
+                {% blocktrans count selection_count=question.max_selection_count trimmed %}
+                Select exactly one option.
+                {% plural %}
+                Select exactly {{ selection_count }} options.
+                {% endblocktrans %}
+                {% else %}
+                {% blocktrans with max_selection_count=question.max_selection_count count min_selection_count=question.min_selection_count trimmed %}
+                Select from one up to {{ max_selection_count }} options.
+                {% plural %}
+                Select from {{ min_selection_count }} up to {{ max_selection_count }} options.
+                {% endblocktrans %}
+                {% endif %}
+              </span>
+              <hr>
+              <div class="alert-placeholder">
+              </div>
+              <div class="question" data-index="{{ question.index }}" data-option-count="{{ question.option_count }}" data-min-selection-count="{{ question.min_selection_count }}" data-max-selection-count="{{ question.max_selection_count }}">
+                {% for option in question.options.all %}
+                {% if election.type == election.TYPE_PARTY_CANDIDATE and question.index == 1 and option.index|divisibleby:candidate_count_per_party %}
+                <div class="candidate-group hidden" data-party-index="{{ option.index|floor_div:candidate_count_per_party }}">
+                {% endif %}
+                  <div class="checkbox {% if option.is_blank %}hidden{% endif %}">
+                    <label>
+                      <input type="checkbox" class="option {% if option.is_blank %}blank{% endif %}" data-index="{{ option.index }}">
+                      <span class="checkbox-icon"><i class="fa fa-check"></i></span>
+                      <span class="option-name">{% if option.is_blank %}<em>{% endif %}{{ option.get_name_display }}{% if option.is_blank %}</em>{% endif %}</span>
+                    </label>
+                  </div>
+                {% if election.type == election.TYPE_PARTY_CANDIDATE and question.index == 1 and option.index|add:1|divisibleby:candidate_count_per_party %}
+                </div>
+                {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+            <div class="textinput-ui hidden">
+              <span class="text-muted">
+                {% if question.min_selection_count == 0 %}
+                {% blocktrans count max_selection_count=question.max_selection_count trimmed %}
+                Enter up to one vote-code.
+                {% plural %}
+                Enter up to {{ max_selection_count }} vote-codes.
+                {% endblocktrans %}
+                {% elif question.min_selection_count == question.max_selection_count %}
+                {% blocktrans count selection_count=question.max_selection_count trimmed %}
+                Enter exactly one vote-code.
+                {% plural %}
+                Enter exactly {{ selection_count }} vote-codes.
+                {% endblocktrans %}
+                {% else %}
+                {% blocktrans with max_selection_count=question.max_selection_count count min_selection_count=question.min_selection_count trimmed %}
+                Enter from one up to {{ max_selection_count }} vote-codes.
+                {% plural %}
+                Enter from {{ min_selection_count }} up to {{ max_selection_count }} vote-codes.
+                {% endblocktrans %}
+                {% endif %}
+              </span>
+              <hr>
+              <div class="alert-placeholder">
+              </div>
+              <div class="question" data-index="{{ question.index }}" data-option-count="{{ question.option_count }}" data-min-selection-count="{{ question.min_selection_count }}" data-max-selection-count="{{ question.max_selection_count }}">
+                {{ option_formset.management_form }}
+                {% for option_form in option_formset %}
+                <div class="form-group">
+                  <input type="text" class="form-control option" id="{{ option_form.vote_code.auto_id }}" name="{{ option_form.vote_code.html_name }}" {% if option_form.vote_code.field.max_length %}maxlength="{{ option_form.vote_code.field.max_length }}" {% endif %} placeholder="{% blocktrans with counter=forloop.counter %}Vote-code #{{ counter }}{% endblocktrans %}" aria-describedby="{{ option_form.vote_code.auto_id }}-help">
+                  <span id="{{ option_form.vote_code.auto_id }}-help" class="help-block"></span>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+      </form>
+      <hr>
+      <div class="button-wrap text-center-xs">
+        <button type="button" class="btn btn-default hidden" id="vote-reset-button">{% trans "Reset" %}</button>
+        <button type="button" class="btn btn-default" id="vote-back-button">{% trans "Back" %}</button>
+        <button type="button" class="btn btn-primary" id="vote-next-button">{% trans "Next" %}</button>
+      </div>
+    </div>
+    <div id="confirm-vote-codes-tab" class="tab-pane fade" role="tabpanel">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div class="page-header visible-xs-block">
+            <h4>{{ confirm_vote_codes_step_message }}: {{ confirm_vote_codes_help_message }}</h4>
+          </div>
+          <p class="checkbox-ui {% if election.vote_code_type == election.VOTE_CODE_TYPE_SHORT and election.security_code_length is not None or election.vote_code_type == election.VOTE_CODE_TYPE_LONG %}hidden{% endif %}">
+            {% trans "Only the vote-codes will be submitted to the server, so make sure that the correspondence among the options and the vote-codes matches the one on your ballot." %}
+            {% if election.vote_code_type == election.VOTE_CODE_TYPE_SHORT %}
+            {% if election.security_code_length is not None %}
+            {% trans "If not, go back to step 1 and correct the security code." %}
+            {% endif %}
+            {% elif election.vote_code_type == election.VOTE_CODE_TYPE_LONG %}
+            {% trans "If not, go back to step 1 and correct the credential." %}
+            {% endif %}
+          </p>
+          <p class="textinput-ui hidden">
+            {% trans "Please confirm the vote-codes you entered." %}
+          </p>
+          <p>{% trans 'Once you click "Submit", your vote will be cast and you will not be able to make any further changes.' %}</p>
+        </div>
+      </div>
+      {% for question in election.questions.all %}
+      <div class="panel panel-default" data-question-index="{{ question.index }}">
+        <div class="panel-heading">
+          <span class="panel-title">
+            {% blocktrans with index=question.index|add:1 name=question.get_name_display count total=election.question_count trimmed %}
+            Question: {{ name }}
+            {% plural %}
+            Question {{ index }}: {{ name }}
+            {% endblocktrans %}
+          </span>
+        </div>
+        <div class="panel-body hidden">
+          <div class="text-center text-muted">
+            {% trans "No vote-codes will be submitted." %}
+          </div>
+        </div>
+        <table class="table hidden">
+          <thead>
+            <tr>
+              <th class="checkbox-ui {% if election.vote_code_type == election.VOTE_CODE_TYPE_SHORT and election.security_code_length is not None or election.vote_code_type == election.VOTE_CODE_TYPE_LONG %}hidden{% endif %}">
+                {% if election.type == election.TYPE_QUESTION_OPTION %}
+                {% trans "Option" %}
+                {% elif election.type == election.TYPE_PARTY_CANDIDATE %}
+                {% if question.index == 0 %}{% trans "Party name" %}{% elif question.index == 1 %}{% trans "Candidate name" %}{% endif %}
+                {% endif %}
+              </th>
+              <th>
+                {% if election.type == election.TYPE_QUESTION_OPTION %}
+                {% trans "Vote-code" %}
+                {% elif election.type == election.TYPE_PARTY_CANDIDATE %}
+                {% if question.index == 0 %}{% trans "Party vote-code" %}{% elif question.index == 1 %}{% trans "Candidate vote-code" %}{% endif %}
+                {% endif %}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+      {% endfor %}
+      <hr>
+      <div class="button-wrap text-center-xs">
+        <button type="button" class="btn btn-default" id="confirm-vote-codes-back-button">{% trans "Back" %}</button>
+        <button type="button" class="btn btn-primary" id="confirm-vote-codes-submit-button">{% trans "Submit" %}</button>
+      </div>
+    </div>
+    <div id="verify-receipts-tab" class="tab-pane fade" role="tabpanel">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div class="page-header visible-xs-block">
+            <h4>{{ verify_receipts_step_message }}: {{ verify_receipts_help_message }}</h4>
+          </div>
+          <p><strong>{% trans "Your vote has been cast!" %}</strong> {% trans 'Please verify the receipts and click "Finish" to exit the voting booth.' %}</p>
+        </div>
+      </div>
+      {% for question in election.questions.all %}
+      <div class="panel panel-default" data-question-index="{{ question.index }}">
+        <div class="panel-heading">
+          <span class="panel-title">
+            {% blocktrans with index=question.index|add:1 name=question.get_name_display count total=election.question_count trimmed %}
+            Question: {{ name }}
+            {% plural %}
+            Question {{ index }}: {{ name }}
+            {% endblocktrans %}
+          </span>
+        </div>
+        <div class="panel-body hidden">
+          <div class="text-center text-muted">
+            {% trans "No vote-codes were submitted." %}
+          </div>
+        </div>
+        <table class="table hidden">
+          <thead>
+            <tr>
+              <th class="checkbox-ui {% if election.vote_code_type == election.VOTE_CODE_TYPE_SHORT and election.security_code_length is not None or election.vote_code_type == election.VOTE_CODE_TYPE_LONG %}hidden{% endif %}">{% if election.type == election.TYPE_QUESTION_OPTION %}{% trans "Option" %}{% elif election.type == election.TYPE_PARTY_CANDIDATE %}{% if question.index == 0 %}{% trans "Party name" %}{% elif question.index == 1 %}{% trans "Candidate name" %}{% endif %}{% endif %}</th>
+              <th>
+                {% if election.type == election.TYPE_QUESTION_OPTION %}
+                {% trans "Vote-code" %}
+                {% elif election.type == election.TYPE_PARTY_CANDIDATE %}
+                {% if question.index == 0 %}{% trans "Party vote-code" %}{% elif question.index == 1 %}{% trans "Candidate vote-code" %}{% endif %}
+                {% endif %}
+              </th>
+              <th>
+                {% if election.type == election.TYPE_QUESTION_OPTION %}
+                {% trans "Receipt" %}
+                {% elif election.type == election.TYPE_PARTY_CANDIDATE %}
+                {% if question.index == 0 %}{% trans "Party receipt" %}{% elif question.index == 1 %}{% trans "Candidate receipt" %}{% endif %}
+                {% endif %}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+      {% endfor %}
+      <hr>
+      <div class="button-wrap text-center-xs">
+        <a class="btn btn-primary" href="{% url 'vote-collector:voting-booth:success' slug=election.slug %}" role="button" id="verify-receipts-finish-button">{% trans "Finish" %}</a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+<div class="modal fade" id="loading-modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false" aria-labelledby="loading-modal-label">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="loading-modal-label">{% trans "Please wait..." %}</h4>
+      </div>
+      <div class="modal-body">
+        <div class="text-center">
+          <p><i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i></p>
+          <p>{% trans "Please wait..." %}</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" href="{% static 'vote_collector/css/voting-booth.css' %}">
+{% endblock %}
+
+{% block script %}
+{% if not errors %}
+<script>
+  var typeIsQuestionOption = {% if election.type == election.TYPE_QUESTION_OPTION %}true{% else %}false{% endif %};
+  var typeIsPartyCandidate = {% if election.type == election.TYPE_PARTY_CANDIDATE %}true{% else %}false{% endif %};
+  var securityCodeLength = {% if election.vote_code_type == election.VOTE_CODE_TYPE_SHORT and election.security_code_length is not None %}{{ election.security_code_length|escapejs }}{% else %}null{% endif %};
+  var credentialLength = {{ election.credential_length|escapejs }};
+  var voteCodeTypeIsShort = {% if election.vote_code_type == election.VOTE_CODE_TYPE_SHORT %}true{% else %}false{% endif %};
+  var voteCodeTypeIsLong = {% if election.vote_code_type == election.VOTE_CODE_TYPE_LONG %}true{% else %}false{% endif %};
+  var voteCodeLength = {% if election.vote_code_type == election.VOTE_CODE_TYPE_LONG %}{{ election.vote_code_length|escapejs }}{% else %}null{% endif %};
+  var receiptLength = {{ election.receipt_length|escapejs }};
+  var optionCounts = [{% for question in election.questions.all %}{{ question.option_count|escapejs }}{% if not forloop.last %},{% endif %}{% endfor %}];
+  var serialNumber = {{ ballot_part.ballot.serial_number|escapejs }};
+  var tag = "{{ ballot_part.tag|escapejs }}";
+  var credential = {% if election.vote_code_type == election.VOTE_CODE_TYPE_SHORT %}"{{ credential|escapejs|default:'' }}"{% else %}null{% endif %};
+  var credentialHash = {% if election.vote_code_type == election.VOTE_CODE_TYPE_LONG %}"{{ ballot_part.credential_hash|escapejs }}"{% else %}null{% endif %};
+  var shortVoteCodes = {% if election.vote_code_type == election.VOTE_CODE_TYPE_SHORT %}[{% for ballot_question in ballot_part.questions.all %}[{% for ballot_option in ballot_question.options.all %}"{{ ballot_option.vote_code|escapejs }}"{% if not forloop.last %},{% endif %}{% endfor %}]{% if not forloop.last %},{% endif %}{% endfor %}]{% else %}null{% endif %};
+  var securityCode = null;
+  var permutations = null;
+  {% trans "Your vote was not accepted." as vote_not_accepted_message %}
+  var voteNotAcceptedMessage = "{{ vote_not_accepted_message|escapejs }}";
+  {% trans "An unknown error occurred. Please try again later." as unknown_error_message %}
+  var unknownErrorMessage = "{{ unknown_error_message|escapejs }}";
+  {% trans "This field is required." as required_field_message %}
+  var requiredFieldMessage = "{{ required_field_message|escapejs }}";
+  {% if election.vote_code_type == election.VOTE_CODE_TYPE_SHORT %}
+  {% trans "The security code's format is not valid." as invalid_security_code_format_message %}
+  var invalidSecurityCodeFormatMessage = "{{ invalid_security_code_format_message|escapejs }}";
+  {% elif election.vote_code_type == election.VOTE_CODE_TYPE_LONG %}
+  {% trans "The credential's format is not valid." as invalid_credential_format_message %}
+  var invalidCredentialFormatMessage = "{{ invalid_credential_format_message|escapejs }}";
+  {% endif %}
+  {% trans "This vote-code is not valid." as invalid_vote_code_message %}
+  var invalidVoteCodeMessage = "{{ invalid_vote_code_message|escapejs }}";
+  {% trans "This vote-code's format is not valid." as invalid_vote_code_format_message %}
+  var invalidVoteCodeFormatMessage = "{{ invalid_vote_code_format_message|escapejs }}";
+  {% trans "This vote-code already exists." as duplicate_vote_code_message %}
+  var duplicateVoteCodeMessage = "{{ duplicate_vote_code_message|escapejs }}";
+  {% trans "This candidate vote-code does not correspond to the party vote-code." as party_candidate_correspondence_message %}
+  var partyCandidateCorrespondenceMessage = "{{ party_candidate_correspondence_message|escapejs }}";
+  {% trans "The minimum number of selections has not been reached." as min_selection_count_message %}
+  var minSelectionCountMessage = "{{ min_selection_count_message|escapejs }}";
+  {% trans "The maximum number of selections has been reached." as max_selection_count_message %}
+  var maxSelectionCountMessage = "{{ max_selection_count_message|escapejs }}";
+  {% trans "The minimum number of vote-codes has not been reached." as min_vote_code_count_message %}
+  var minVoteCodeCountMessage = "{{ min_vote_code_count_message|escapejs }}";
+</script>
+<script src="{% static 'base/vendor/sjcl/1.0.7/sjcl.js' %}"></script>
+<script src="{% static 'base/vendor/sjcl/1.0.7/core/bn.js' %}"></script>
+<script src="{% static 'base/js/codec-base32.js' %}"></script>
+{% endif %}
+<script src="{% static 'vote_collector/js/voting-booth.js' %}"></script>
+{% endblock %}

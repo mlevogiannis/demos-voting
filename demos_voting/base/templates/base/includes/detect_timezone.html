@@ -1,0 +1,74 @@
+{% if detect_timezone %}
+<form class="hidden" action="{% url 'set-language-and-timezone' %}" method="POST" novalidate>
+  {% csrf_token %}
+  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+  <select id="timezone-select" name="{{ set_language_and_timezone_form.timezone.html_name }}">
+    {% spaceless %}
+    {% for value, name in set_language_and_timezone_form.timezone.field.choices %}
+    <option value="{{ value }}" {% if value == set_language_and_timezone_form.timezone.field.initial %}selected{% endif %}>{{ name }}</option>
+    {% endfor %}
+    {% endspaceless %}
+  </select>
+</form>
+<script>
+  var showLanguageAndTimezoneModal = false;
+  (function () {
+    // Check if cookies are enabled.
+    var cookieEnabled = navigator.cookieEnabled;
+    if (!cookieEnabled) {
+      document.cookie = "testcookie=;";
+      cookieEnabled = (document.cookie.indexOf("testcookie") != -1);
+      if (cookieEnabled) {
+        document.cookie = "testcookie=; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+      }
+    }
+    if (cookieEnabled) {
+      // Use the Internationalization API to determine and set the user's time
+      // zone. If it is not supported by the browser, let the user select the
+      // time zone. If cookies are not enabled then do not do anything.
+      var timezone;
+      try {
+        timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      } catch (e) {
+        // The Intl API is not supported.
+        showLanguageAndTimezoneModal = true;
+      }
+      if (timezone) {
+        var select = document.getElementById('timezone-select');
+        var form = select.form;
+        if (select.value == timezone) {
+          // The detected and the currently selected time zones are the same,
+          // so the page does not have to be reloaded. Do an AJAX request to
+          // save the time zone in the user's session.
+          var urlEncodedDataPairs = [
+            encodeURIComponent('csrfmiddlewaretoken') + '=' + encodeURIComponent('{{ csrf_token }}'),
+            encodeURIComponent(select.name) + '=' + encodeURIComponent(select.value),
+          ];
+          var urlEncodedData = urlEncodedDataPairs.join('&').replace(/%20/g, '+');
+          var xhr = new XMLHttpRequest();
+          xhr.open(form.method, form.action, true);
+          xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+          xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+          xhr.send(urlEncodedData);
+        } else {
+          // The detected time zone is different from the currently selected
+          // time zone. Submit the form to save the detected time zone in the
+          // user's session and reload the page.
+          var i, len;
+          for (i = 0, len = select.length; i < len; i++) {
+            if (select.options[i].value == timezone) {
+              select.value = timezone;
+              form.submit();
+              break;
+            }
+          }
+          if (i >= len) {
+            // The detected time zone is not recognized.
+            showLanguageAndTimezoneModal = true;
+          }
+        }
+      }
+    }
+  })();
+</script>
+{% endif %}
