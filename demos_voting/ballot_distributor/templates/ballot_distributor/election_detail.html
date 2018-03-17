@@ -6,8 +6,8 @@
 {% block meta %}
 {% if election.state == election.STATE_SETUP or election.state == election.STATE_BALLOT_DISTRIBUTION %}
 <meta http-equiv="refresh" content="60">
-  {% endif %}
-  {% endblock %}
+{% endif %}
+{% endblock %}
 
 {% block title %}
 {{ election.name }} | {{ block.super }}
@@ -28,7 +28,8 @@
   </div>
   {% endif %}
   <p>{% trans "The Ballot Distributor is responsible for the ballot distribution phase of the election." %}</p>
-  <p>{% trans "The current state is:" %}&nbsp;
+  <p>
+    {% trans "The current state is:" %}&nbsp;
     <span class="label label-{% if election.state == election.STATE_SETUP %}info{% elif election.state == election.STATE_BALLOT_DISTRIBUTION %}primary{% elif election.state == election.STATE_COMPLETED %}success{% elif election.state == election.STATE_FAILED %}danger{% elif election.state == election.STATE_CANCELLED %}warning{% else %}default{% endif %}">
       {{ election.get_state_display }}
     </span>
@@ -89,7 +90,7 @@
   </a>
   {% endif %}
   <!-- Ballot archives -->
-  {% if not election.visibility == election.VISIBILITY_PRIVATE %}
+  {% if election.visibility != election.VISIBILITY_PRIVATE %}
   <div class="page-header">
     <h4>{% trans "Ballot archives" %}</h4>
   </div>

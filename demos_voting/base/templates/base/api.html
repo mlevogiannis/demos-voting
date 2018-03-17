@@ -13,7 +13,8 @@
 <meta name="robots" content="NONE,NOARCHIVE">
 {% endblock %}
 
-{% block bootstrap_theme %}{% endblock %}
+{% block bootstrap_theme %}
+{% endblock %}
 
 {% block style %}
 <link rel="shortcut icon" href="{% static 'base/img/favicon.ico' %}">
@@ -26,26 +27,32 @@
 <link rel="stylesheet" href="{% static 'base/css/nav.css' %}">
 <link rel="stylesheet" href="{% static 'base/css/footer.css' %}">
 {{ block.super }}
-<style>
-#main-nav {
-  margin-bottom: 20px;
-}
-</style>
 {% endblock %}
 
-{% block navbar %}
+{% block bodyclass %}
+">
 {% include './includes/detect_timezone.html' %}
 {% block header %}
 {% include './includes/header.html' %}
 {% endblock %}
 <main class="main">
 {% block nav %}
+{% if main_nav %}
+{% include main_nav %}
+{% endif %}
 {% endblock %}
+{% block messages %}
+{% include './includes/messages.html' %}
+{% endblock %}
+<br class="
+{% endblock %}
+
+{% block navbar %}
 {% endblock %}
 
 {% block script %}
-{% block footer %}
 </main>
+{% block footer %}
 {% include './includes/footer.html' %}
 {% endblock %}
 {{ block.super }}

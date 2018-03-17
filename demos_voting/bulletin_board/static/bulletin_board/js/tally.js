@@ -41,9 +41,20 @@ $('#secret-key-form').on('submit', function(e) {
     }
 });
 
+$('#tally-nav a[href="#worker-tab"]').on('show.bs.tab', function (e) {
+    window.onbeforeunload = function(e) {
+        e.returnValue = undefined;
+        return undefined;
+    };
+});
+
+$('#tally-nav a[href="#worker-tab"]').on('hide.bs.tab', function (e) {
+    window.onbeforeunload = null;
+});
+
 $('#tally-nav a[href="#worker-tab"]').on('shown.bs.tab', function (e) {
     startWorkers($('#secret-key-input').val());
-})
+});
 
 function incrementProgressBar(value) {
     var progressBar = $('#worker-tab .progress-bar');

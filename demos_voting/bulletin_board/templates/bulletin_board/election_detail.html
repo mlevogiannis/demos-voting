@@ -5,6 +5,12 @@
 {% load static %}
 {% load demos_voting %}
 
+{% block meta %}
+{% if election.state == election.STATE_SETUP or election.state == election.STATE_BALLOT_DISTRIBUTION or election.state == election.STATE_VOTING or election.state == election.STATE_TALLY %}
+<meta http-equiv="refresh" content="60">
+{% endif %}
+{% endblock %}
+
 {% block title %}
 {{ election.name }} | {{ block.super }}
 {% endblock %}
@@ -19,7 +25,8 @@
     </h3>
   </div>
   <p>{% trans "The Bulletin Board is responsible for the tally phase of the election." %}</p>
-  <p>{% trans "The current state is:" %}&nbsp;
+  <p>
+    {% trans "The current state is:" %}&nbsp;
     <span class="label label-{% if election.state == election.STATE_SETUP %}info{% elif election.state == election.STATE_BALLOT_DISTRIBUTION %}info{% elif election.state == election.STATE_VOTING %}info{% elif election.state == election.STATE_TALLY %}primary{% elif election.state == election.STATE_COMPLETED %}success{% elif election.state == election.STATE_FAILED %}danger{% elif election.state == election.STATE_CANCELLED %}warning{% else %}default{% endif %}">
       {{ election.get_state_display }}
     </span>
@@ -55,7 +62,11 @@
     <div class="panel panel-default">
       <div class="panel-heading">
         <h4 class="panel-title">
-          {% blocktrans with index=question.index|add:1 name=question.get_name_display %}Question {{ index }}: {{ name }}{% endblocktrans %}
+          {% blocktrans with index=question.index|add:1 name=question.get_name_display count total=election.question_count trimmed %}
+          Question: {{ name }}
+          {% plural %}
+          Question {{ index }}: {{ name }}
+          {% endblocktrans %}
         </h4>
       </div>
       <div class="table-responsive">

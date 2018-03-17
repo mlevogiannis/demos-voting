@@ -32,6 +32,17 @@ $('#voting-booth-nav a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     $(window).scrollTop(element.offset().top - 10);
 });
 
+$('#voting-booth-nav a[href="#vote-tab"]').on('show.bs.tab', function (e) {
+    window.onbeforeunload = function(e) {
+        e.returnValue = undefined;
+        return undefined;
+    };
+});
+
+$('#voting-booth-nav a[href="#verify-receipts-tab"]').on('show.bs.tab', function (e) {
+    window.onbeforeunload = null;
+});
+
 function textInputSetErrorMessage(input, errorMessage) {
     input.data('isValid', !errorMessage);
     input.parent('.form-group').toggleClass('has-error', !!errorMessage);

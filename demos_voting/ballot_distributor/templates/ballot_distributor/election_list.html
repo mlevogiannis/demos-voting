@@ -14,11 +14,6 @@
   </div>
   <div class="row">
     <div class="col-xs-12">
-      {% if not election_list %}
-      <div class="alert alert-info" role="alert">
-        {% trans "There are no elections." %}
-      </div>
-      {% endif %}
       {% for election in election_list %}
       <div class="panel panel-default">
         <div class="panel-body">
@@ -29,6 +24,10 @@
           </p>
           <p class="small">{% blocktrans with time_since=election.updated_at|timesince %}Updated {{ time_since }} ago.{% endblocktrans %}</p>
         </div>
+      </div>
+      {% empty %}
+      <div class="alert alert-info" role="alert">
+        {% trans "There are no elections." %}
       </div>
       {% endfor %}
       {% include 'base/includes/pagination.html' %}

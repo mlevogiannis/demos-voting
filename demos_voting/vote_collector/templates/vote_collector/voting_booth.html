@@ -160,7 +160,8 @@
             <h3>{{ question.get_name_display }}</h3>
             <div class="checkbox-ui {% if election.vote_code_type == election.VOTE_CODE_TYPE_SHORT and election.security_code_length is not None or election.vote_code_type == election.VOTE_CODE_TYPE_LONG %}hidden{% endif %}">
               <span class="text-muted">
-                {% if question.min_selection_count == 0 or election.type == election.TYPE_PARTY_CANDIDATE %}
+                {% if election.type == election.TYPE_QUESTION_OPTION %}
+                {% if question.min_selection_count == 0 %}
                 {% blocktrans count max_selection_count=question.max_selection_count trimmed %}
                 Select up to one option.
                 {% plural %}
@@ -178,6 +179,18 @@
                 {% plural %}
                 Select from {{ min_selection_count }} up to {{ max_selection_count }} options.
                 {% endblocktrans %}
+                {% endif %}
+                {% elif election.type == election.TYPE_PARTY_CANDIDATE %}
+                {% if question.index == 0 %}
+                {% trans "Select up to one party." %}
+                {% elif question.index == 1 %}
+                {% blocktrans count max_selection_count=question.max_selection_count trimmed %}
+                Select up to one candidate.
+                {% plural %}
+                Select up to {{ max_selection_count }} candidates.
+                {% endblocktrans %}
+                {% endif %}
+                {% trans 'Select nothing to vote for "none of the above" (blank).' %}
                 {% endif %}
               </span>
               <hr>

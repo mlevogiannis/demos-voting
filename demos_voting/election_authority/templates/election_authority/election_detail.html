@@ -27,7 +27,8 @@
   </div>
   {% endif %}
   <p>{% trans "The Election Authority is responsible for the setup phase of the election." %}</p>
-  <p>{% trans "The current state is:" %}&nbsp;
+  <p>
+    {% trans "The current state is:" %}&nbsp;
     <span class="label label-{% if election.state == election.STATE_SETUP %}primary{% elif election.state == election.STATE_COMPLETED %}success{% elif election.state == election.STATE_FAILED %}danger{% elif election.state == election.STATE_CANCELLED %}warning{% else %}default{% endif %}">
       {{ election.get_state_display }}
     </span>
@@ -44,7 +45,7 @@
   <div class="page-header">
     <h4>{% trans "Setup progress" %}</h4>
   </div>
-  <p>{% trans "Please wait..." %}</p>
+  <p>{% trans "Please wait until the setup is completed. You can leave this page and come back to check the progress later." %}</p>
   <div class="progress">
     <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ progress }}%">
       <span class="sr-only">{% blocktrans with percent=progress %}{{ percent }}% Complete{% endblocktrans %}"</span>

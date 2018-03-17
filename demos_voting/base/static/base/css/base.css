@@ -24,10 +24,12 @@ body {
   padding-bottom: 30px;
 }
 
-#messages .alert:first-child {
+#messages .alert:first-child,
+noscript .alert {
   margin-top: 20px;
 }
-#messages .alert:last-child {
+#messages .alert:last-child,
+noscript .alert {
   margin-bottom: 0px;
 }
 

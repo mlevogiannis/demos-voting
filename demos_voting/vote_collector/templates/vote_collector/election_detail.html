@@ -27,7 +27,8 @@
   </div>
   {% endif %}
   <p>{% trans "The Vote Collector is responsible for the voting phase of the election." %}</p>
-  <p>{% trans "The current state is:" %}&nbsp;
+  <p>
+    {% trans "The current state is:" %}&nbsp;
     <span class="label label-{% if election.state == election.STATE_SETUP %}info{% elif election.state == election.STATE_BALLOT_DISTRIBUTION %}info{% elif election.state == election.STATE_VOTING %}primary{% elif election.state == election.STATE_COMPLETED %}success{% elif election.state == election.STATE_FAILED %}danger{% elif election.state == election.STATE_CANCELLED %}warning{% else %}default{% endif %}">
       {{ election.get_state_display }}
     </span>

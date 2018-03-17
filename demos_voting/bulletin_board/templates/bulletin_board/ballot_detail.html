@@ -51,7 +51,11 @@
       <div class="panel panel-default" data-question-index="{{ election_question.index }}">
         <div class="panel-heading">
           <h4 class="panel-title">
-            {% blocktrans with index=election_question.index|add:1 name=election_question.get_name_display %}Question {{ index }}: {{ name }}{% endblocktrans %}
+            {% blocktrans with index=election_question.index|add:1 name=election_question.get_name_display count total=election.question_count trimmed %}
+            Question: {{ name }}
+            {% plural %}
+            Question {{ index }}: {{ name }}
+            {% endblocktrans %}
           </h4>
         </div>
         <div class="panel-body">

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-11 02:09+0200\n"
+"POT-Creation-Date: 2018-03-18 01:12+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -231,7 +231,7 @@ msgid "Return"
 msgstr "Επιστροφή"
 
 #: demos_voting/ballot_distributor/templates/ballot_distributor/ballot_archive_create.html:26
-#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:141
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:142
 msgid "Create a new ballot archive"
 msgstr "Δημιουργία νέας αρχειοθήκης ψηφοδελτίων"
 
@@ -272,72 +272,72 @@ msgstr ""
 "Ο Διανομέας Ψηφοδελτίων είναι υπεύθυνος για τη φάση διανομής ψηφοδελτίων της "
 "ψηφοφορίας."
 
-#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:31
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:32
 msgid "The current state is:"
 msgstr "Η τρέχουσα κατάσταση είναι:"
 
-#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:40
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:41
 #: demos_voting/ballot_distributor/templates/ballot_distributor/election_update.html:21
 msgid "Manage"
 msgstr "Διαχείριση"
 
-#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:45
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:46
 msgid "Voter lists"
 msgstr "Λίστες ψηφοφόρων"
 
-#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:55
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:56
 msgid "Number of voters"
 msgstr "Αριθμός ψηφοφόρων"
 
-#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:56
-#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:106
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:57
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:107
 msgid "Created at"
 msgstr "Δημιουργήθηκε στις"
 
-#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:57
-#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:107
-#: demos_voting/ballot_distributor/templates/ballot_distributor/election_list.html:28
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:58
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:108
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_list.html:23
 msgid "State"
 msgstr "Κατάσταση"
 
-#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:81
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:82
 msgid "There are no voter lists."
 msgstr "Δεν υπάρχουν λίστες ψηφοφόρων."
 
-#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:88
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:89
 #: demos_voting/ballot_distributor/templates/ballot_distributor/voter_list_create.html:22
 msgid "Create a new voter list"
 msgstr "Δημιουργία νέας λίστας ψηφοφόρων"
 
-#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:94
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:95
 msgid "Ballot archives"
 msgstr "Αρχειοθήκες ψηφοδελτίων"
 
-#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:104
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:105
 msgid "Number of ballots"
 msgstr "Αριθμός ψηφοδελτίων"
 
-#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:105
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:106
 msgid "Language"
 msgstr "Γλώσσα"
 
-#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:108
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:109
 msgid "Download"
 msgstr "Λήψη"
 
-#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:134
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:135
 msgid "There are no ballot archives."
 msgstr "Δεν υπάρχουν αρχειοθήκες ψηφοδελτίων."
 
-#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:147
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:148
 msgid "Links"
 msgstr "Σύνδεσμοι"
 
-#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:149
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:150
 msgid "Vote Collector"
 msgstr "Συλλέκτης Ψήφων"
 
-#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:150
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_detail.html:151
 msgid "Bulletin Board"
 msgstr "Πίνακας Ανακοινώσεων"
 
@@ -347,14 +347,14 @@ msgstr "Πίνακας Ανακοινώσεων"
 msgid "Elections"
 msgstr "Ψηφοφορίες"
 
-#: demos_voting/ballot_distributor/templates/ballot_distributor/election_list.html:19
-msgid "There are no elections."
-msgstr "Δεν υπάρχουν ψηφοφορίες."
-
-#: demos_voting/ballot_distributor/templates/ballot_distributor/election_list.html:30
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_list.html:25
 #, python-format
 msgid "Updated %(time_since)s ago."
 msgstr "Ενημερώθηκε πριν από %(time_since)s."
+
+#: demos_voting/ballot_distributor/templates/ballot_distributor/election_list.html:30
+msgid "There are no elections."
+msgstr "Δεν υπάρχουν ψηφοφορίες."
 
 #: demos_voting/ballot_distributor/templates/ballot_distributor/election_update.html:33
 #: demos_voting/ballot_distributor/templates/ballot_distributor/election_update.html:49
