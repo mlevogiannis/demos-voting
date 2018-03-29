@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-11 02:09+0200\n"
+"POT-Creation-Date: 2018-03-29 23:58+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -869,11 +869,6 @@ msgid ""
 "  %(site_name)s. As a final step, please complete the following form:"
 msgstr ""
 
-#: demos_voting/base/utils/pdf.py:200
-#, python-format
-msgid "Election %(slug)s"
-msgstr "Ψηφοφορία %(slug)s"
-
 #: demos_voting/base/utils/pdf.py:201
 #, python-format
 msgid "Ballot %(serial_number)s"
@@ -960,3 +955,6 @@ msgstr "Ελληνικά"
 #: demos_voting/settings/base.py:114
 msgid "English"
 msgstr "Αγγλικά"
+
+#~ msgid "Election %(slug)s"
+#~ msgstr "Ψηφοφορία %(slug)s"

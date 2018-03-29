@@ -196,8 +196,8 @@ class BallotPDF(object):
         doc = BaseDocTemplate(
             filename=doc_file,
             pagesize=self.PAGE_SIZE,
-            author="DEMOS Voting",
-            subject=_("Election %(slug)s") % {'slug': self.election.slug},
+            author=settings.DEMOS_VOTING_SITE_NAME,
+            subject=self.election.slug,
             title=_("Ballot %(serial_number)s") % {'serial_number': ballot.serial_number},
         )
         flowables = []
