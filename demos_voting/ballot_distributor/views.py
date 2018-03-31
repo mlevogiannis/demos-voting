@@ -91,6 +91,8 @@ class BallotArchiveCreateView(SelectForUpdateMixin, PermissionRequiredMixin, Cre
 class BallotArchiveFileDownloadView(PermissionRequiredMixin, SingleObjectMixin, View):
     model = BallotArchive
     permission_required = 'ballot_distributor.can_create_ballot_archive'
+    slug_field = 'uuid'
+    slug_url_kwarg = 'uuid'
 
     @cached_property
     def election(self):

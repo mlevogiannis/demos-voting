@@ -30,7 +30,7 @@ urlpatterns = [
     ])),
     url(r'^media/', include([
         url(r'^elections/(?P<slug>[-\w]+)/', include([
-            url(r'^ballot-archives/(?P<pk>\d+)/ballots.zip$', BallotArchiveFileDownloadView.as_view(),
+            url(r'^ballot-archives/(?P<uuid>[0-9a-f-]+)/ballots.zip$', BallotArchiveFileDownloadView.as_view(),
                 name='ballot-archive-file'),
         ])),
     ], namespace='media')),

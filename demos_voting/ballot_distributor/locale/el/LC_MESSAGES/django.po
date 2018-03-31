@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-18 01:12+0200\n"
+"POT-Creation-Date: 2018-04-15 19:35+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -98,129 +98,129 @@ msgstr ""
 msgid "The election is not in the ballot distribution phase."
 msgstr "Η ψηφοφορία δε βρίσκεται στη φάση διανομής ψηφοδελτίων."
 
-#: demos_voting/ballot_distributor/models.py:28
+#: demos_voting/ballot_distributor/models.py:29
 msgid "Setup"
 msgstr "Εγκατάσταση"
 
-#: demos_voting/ballot_distributor/models.py:29
+#: demos_voting/ballot_distributor/models.py:30
 msgid "Ballot distribution"
 msgstr "Διανομή ψηφοδελτίων"
 
-#: demos_voting/ballot_distributor/models.py:30
-#: demos_voting/ballot_distributor/models.py:142
-#: demos_voting/ballot_distributor/models.py:187
+#: demos_voting/ballot_distributor/models.py:31
+#: demos_voting/ballot_distributor/models.py:143
+#: demos_voting/ballot_distributor/models.py:190
 msgid "Completed"
 msgstr "Ολοκληρώθηκε"
 
-#: demos_voting/ballot_distributor/models.py:31
-#: demos_voting/ballot_distributor/models.py:143
-#: demos_voting/ballot_distributor/models.py:188
+#: demos_voting/ballot_distributor/models.py:32
+#: demos_voting/ballot_distributor/models.py:144
+#: demos_voting/ballot_distributor/models.py:191
 msgid "Failed"
 msgstr "Απέτυχε"
 
-#: demos_voting/ballot_distributor/models.py:32
-#: demos_voting/ballot_distributor/models.py:144
-#: demos_voting/ballot_distributor/models.py:189
+#: demos_voting/ballot_distributor/models.py:33
+#: demos_voting/ballot_distributor/models.py:145
+#: demos_voting/ballot_distributor/models.py:192
 msgid "Cancelled"
 msgstr "Ακυρώθηκε"
 
-#: demos_voting/ballot_distributor/models.py:35
-#: demos_voting/ballot_distributor/models.py:152
-#: demos_voting/ballot_distributor/models.py:205
+#: demos_voting/ballot_distributor/models.py:36
+#: demos_voting/ballot_distributor/models.py:153
+#: demos_voting/ballot_distributor/models.py:208
 msgid "state"
 msgstr "κατάσταση"
 
-#: demos_voting/ballot_distributor/models.py:36
+#: demos_voting/ballot_distributor/models.py:37
 msgid "ballot distribution started at"
 msgstr "η διανομή ψηφοδελτίων ξεκίνησε στις"
 
-#: demos_voting/ballot_distributor/models.py:37
+#: demos_voting/ballot_distributor/models.py:38
 msgid "ballot distribution ended at"
 msgstr "η διανομή ψηφοδελτίων έληξε στις"
 
-#: demos_voting/ballot_distributor/models.py:80
-#: demos_voting/ballot_distributor/models.py:151
-#: demos_voting/ballot_distributor/models.py:204
+#: demos_voting/ballot_distributor/models.py:81
+#: demos_voting/ballot_distributor/models.py:152
+#: demos_voting/ballot_distributor/models.py:207
 msgid "file"
 msgstr "αρχείο"
 
-#: demos_voting/ballot_distributor/models.py:98
+#: demos_voting/ballot_distributor/models.py:99
 msgid "credential"
 msgstr "διαπιστευτήριο"
 
-#: demos_voting/ballot_distributor/models.py:99
+#: demos_voting/ballot_distributor/models.py:100
 msgid "security code"
 msgstr "κωδικός ασφαλείας"
 
-#: demos_voting/ballot_distributor/models.py:110
+#: demos_voting/ballot_distributor/models.py:111
 msgid "vote-code"
 msgstr "κωδικός ψήφου"
 
-#: demos_voting/ballot_distributor/models.py:140
-#: demos_voting/ballot_distributor/models.py:185
+#: demos_voting/ballot_distributor/models.py:141
+#: demos_voting/ballot_distributor/models.py:188
 msgid "Pending"
 msgstr "Εκκρεμεί"
 
-#: demos_voting/ballot_distributor/models.py:141
-#: demos_voting/ballot_distributor/models.py:186
+#: demos_voting/ballot_distributor/models.py:142
+#: demos_voting/ballot_distributor/models.py:189
 msgid "Processing"
 msgstr "Επεξεργασία"
 
-#: demos_voting/ballot_distributor/models.py:149
+#: demos_voting/ballot_distributor/models.py:150
 msgid "number of ballots"
 msgstr "αριθμός ψηφοδελτίων"
 
-#: demos_voting/ballot_distributor/models.py:150
+#: demos_voting/ballot_distributor/models.py:151
 msgid "language"
 msgstr "γλώσσα"
 
-#: demos_voting/ballot_distributor/models.py:153
-#: demos_voting/ballot_distributor/models.py:207
+#: demos_voting/ballot_distributor/models.py:154
+#: demos_voting/ballot_distributor/models.py:210
 msgid "created at"
 msgstr "δημιουργήθηκε στις"
 
-#: demos_voting/ballot_distributor/models.py:154
-#: demos_voting/ballot_distributor/models.py:208
+#: demos_voting/ballot_distributor/models.py:155
+#: demos_voting/ballot_distributor/models.py:211
 msgid "processing started at"
 msgstr "η επεξεργασία ξεκίνησε στις"
 
-#: demos_voting/ballot_distributor/models.py:155
-#: demos_voting/ballot_distributor/models.py:209
+#: demos_voting/ballot_distributor/models.py:156
+#: demos_voting/ballot_distributor/models.py:212
 msgid "processing ended at"
 msgstr "η επεξεργασία έληξε στις"
 
-#: demos_voting/ballot_distributor/models.py:160
+#: demos_voting/ballot_distributor/models.py:163
 msgid "ballot archive"
 msgstr "αρχειοθήκη ψηφοδελτίων"
 
-#: demos_voting/ballot_distributor/models.py:161
+#: demos_voting/ballot_distributor/models.py:164
 msgid "ballot archives"
 msgstr "αρχειοθήκες ψηφοδελτίων"
 
-#: demos_voting/ballot_distributor/models.py:196
+#: demos_voting/ballot_distributor/models.py:199
 msgid "The file is not valid."
 msgstr "Το αρχείο δεν είναι έγκυρο."
 
-#: demos_voting/ballot_distributor/models.py:197
+#: demos_voting/ballot_distributor/models.py:200
 msgid "The file is empty."
 msgstr "Το αρχείο είναι κενό."
 
-#: demos_voting/ballot_distributor/models.py:198
+#: demos_voting/ballot_distributor/models.py:201
 msgid ""
 "The file contains more email addresses than the number of ballots available."
 msgstr ""
 "Το αρχείο περιέχει περισσότερες διευθύνσεις email από τον αριθμό των "
 "διαθέσιμων ψηφοδελτίων."
 
-#: demos_voting/ballot_distributor/models.py:206
+#: demos_voting/ballot_distributor/models.py:209
 msgid "error"
 msgstr "σφάλμα"
 
-#: demos_voting/ballot_distributor/models.py:214
+#: demos_voting/ballot_distributor/models.py:217
 msgid "voter list"
 msgstr "λίστα ψηφοφόρων"
 
-#: demos_voting/ballot_distributor/models.py:215
+#: demos_voting/ballot_distributor/models.py:218
 msgid "voter lists"
 msgstr "λίστες ψηφοφόρων"
 

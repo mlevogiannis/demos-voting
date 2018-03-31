@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import csv
 import os
+import uuid
 import zipfile
 
 from django.conf import settings
@@ -153,18 +154,20 @@ class BallotArchive(models.Model):
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
     processing_started_at = models.DateTimeField(_("processing started at"), null=True, blank=True, default=None)
     processing_ended_at = models.DateTimeField(_("processing ended at"), null=True, blank=True, default=None)
+    uuid = models.UUIDField(default=uuid.uuid4)
 
     class Meta:
         default_related_name = 'ballot_archives'
         ordering = ['created_at']
+        unique_together = ['election', 'uuid']
         verbose_name = _("ballot archive")
         verbose_name_plural = _("ballot archives")
 
     def __str__(self):
-        return "%s" % self.file
+        return "%s" % self.uuid
 
     def generate_file(self, save=True):
-        self.file.save("%s.zip" % self.pk, ContentFile(''), save=save)
+        self.file.save("%d.zip" % self.uuid, ContentFile(''), save=save)
         with zipfile.ZipFile(self.file.path, mode='w', compression=zipfile.ZIP_DEFLATED, allowZip64=True) as zip_file:
             for ballot in self.ballots.iterator():
                 zip_file.write(ballot.file.path, os.path.basename(ballot.file.name))

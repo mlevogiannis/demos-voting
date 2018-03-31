@@ -122,7 +122,7 @@
               </span>
             </td>
             <td class="{% if election.state != election.STATE_BALLOT_DISTRIBUTION and election.state != election.STATE_COMPLETED or ballot_archive.state != ballot_archive.STATE_COMPLETED or not ballot_archive.file %}disabled{% endif %}">
-              <a class="btn btn-default btn-sm {% if election.state != election.STATE_BALLOT_DISTRIBUTION and election.state != election.STATE_COMPLETED or ballot_archive.state != ballot_archive.STATE_COMPLETED or not ballot_archive.file %}disabled{% endif %}" href="{% url 'ballot-distributor:media:ballot-archive-file' slug=election.slug pk=ballot_archive.pk %}" role="button"><i class="fa fa-download" aria-hidden="true"></i></a>
+              <a class="btn btn-default btn-sm {% if election.state != election.STATE_BALLOT_DISTRIBUTION and election.state != election.STATE_COMPLETED or ballot_archive.state != ballot_archive.STATE_COMPLETED or not ballot_archive.file %}disabled{% endif %}" href="{% url 'ballot-distributor:media:ballot-archive-file' slug=election.slug uuid=ballot_archive.uuid %}" role="button"><i class="fa fa-download" aria-hidden="true"></i></a>
             </td>
           </tr>
           {% endfor %}
