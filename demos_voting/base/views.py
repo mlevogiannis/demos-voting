@@ -22,7 +22,7 @@ class PermissionRequiredMixin(BasePermissionRequiredMixin):
     @property
     def raise_exception(self):
         """
-        Raise a PermissionDenied exception if the user is authenticated
+        Raise a PermissionDenied exception if the user is authenticated or
         redirect the user to the login page if the user is anonymous. For
         more, see Django's `PermissionRequiredMixin` and `AccessMixin` docs.
         """

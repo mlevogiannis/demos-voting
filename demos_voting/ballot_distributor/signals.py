@@ -26,7 +26,7 @@ def end_ballot_distribution_phase(election, **kwargs):
     try:
         # Notify the other servers that the ballot distribution phase has
         # ended. Do this is in reverse order to ensure that the Vote Collector
-        # will start the next phase only after the Bulleting Board has been
+        # will start the next phase only after the Bulletin Board has been
         # successfully notified.
         api_session_classes = [VoteCollectorAPISession, BulletinBoardAPISession]
         for api_session_class in reversed(api_session_classes):
