@@ -2,13 +2,16 @@
 
 {% load i18n %}
 
-{% block head_title %}{% trans "Social Network Login Failure" %}{% endblock %}
+{% block title %}
+{% trans "Sign-in error" %} | {{ block.super }}
+{% endblock %}
 
 {% block content %}
 <div class="container">
   <div class="page-header">
-    <h3>{% trans "Social Network Login Failure" %}</h3>
+    <h3>{% trans "Sign-in error" %}</h3>
   </div>
-  <p>{% trans "An error occurred while attempting to login via your social network account." %}</p>
+  {% url 'account_login' as login_url %}
+  <p>{% blocktrans %}An error occurred while attempting to sign you in via your third-party account. <a href="{{ login_url }}">Try again</a>.{% endblocktrans %}</p>
 </div>
 {% endblock %}

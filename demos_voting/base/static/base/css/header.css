@@ -57,6 +57,25 @@
   background-color: #000;
 }
 
+#header-account .dropdown-menu > li > form > .btn-link {
+  display: block;
+  padding: 3px 20px;
+  clear: both;
+  font-weight: 400;
+  line-height: 1.42857143;
+  color: #333;
+  white-space: nowrap;
+  width: 100%;
+  text-align: left;
+}
+
+#header-account .dropdown-menu > li > form > .btn-link:focus,
+#header-account .dropdown-menu > li > form > .btn-link:hover {
+  color: #262626;
+  text-decoration: none;
+  background-color: #f5f5f5;
+}
+
 /* Override the navbar's collapse breakpoint.
    https://stackoverflow.com/a/36289507 */
 @media (max-width: 991px) {

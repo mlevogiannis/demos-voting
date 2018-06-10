@@ -3,17 +3,21 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from allauth.account import app_settings as account_settings
 
 from django import http
+from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
+from django.urls import reverse
 from django.utils import translation
 from django.utils.functional import cached_property
 from django.utils.http import is_safe_url, urlunquote
 from django.views import View
-from django.views.generic import TemplateView
+from django.views.generic.edit import UpdateView
+
+from rest_framework.authtoken.models import Token
 
 from rules.contrib.views import PermissionRequiredMixin as BasePermissionRequiredMixin
 
-from demos_voting.base.forms import SetLanguageAndTimezoneForm
+from demos_voting.base.forms import SetLanguageAndTimezoneForm, UserForm
 
 
 # View mixins #################################################################
@@ -79,13 +83,25 @@ class RedirectMixin(object):
 
 # Views #######################################################################
 
-class ProfileView(LoginRequiredMixin, TemplateView):
-    template_name = 'account/profile.html'
+class ProfileView(LoginRequiredMixin, UpdateView):
+    form_class = UserForm
+    model = get_user_model()
+    template_name = 'base/profile.html'
+
+    def get_object(self, queryset=None):
+        return self.request.user
 
     def get_context_data(self, **kwargs):
         context = super(ProfileView, self).get_context_data(**kwargs)
         context['username_required'] = account_settings.USERNAME_REQUIRED
+        try:
+            context['api_token'] = Token.objects.get(user=self.request.user).key
+        except Token.DoesNotExist:
+            pass
         return context
+
+    def get_success_url(self):
+        return reverse("account_profile")
 
 
 class SetLanguageAndTimezoneView(RedirectMixin, View):

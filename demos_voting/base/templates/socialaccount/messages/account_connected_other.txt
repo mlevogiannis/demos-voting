@@ -1,0 +1,3 @@
+{% load i18n %}
+
+{% trans "This third-party account is already connected to a different user." %}

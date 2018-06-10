@@ -7,8 +7,10 @@ from django.contrib.auth.hashers import PBKDF2PasswordHasher
 
 from six.moves import range
 
+app_labels = ['ballot_distributor', 'bulletin_board', 'election_authority', 'vote_collector']
+
 installed_app_labels = []
-for app_label in ['ballot_distributor', 'bulletin_board', 'election_authority', 'vote_collector']:
+for app_label in app_labels:
     if apps.is_installed('demos_voting.%s' % app_label):
         installed_app_labels.append(app_label)
 

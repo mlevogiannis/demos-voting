@@ -3,23 +3,28 @@
 {% load i18n %}
 {% load bootstrap %}
 
-{% block head_title %}{% trans "Signup" %}{% endblock %}
+{% block title %}
+{% trans "Sign up" %} | {{ block.super }}
+{% endblock %}
 
 {% block content %}
 <div class="container">
   <div class="page-header">
-    <h3>{% trans "Sign Up" %}</h3>
+    <h3>{% trans "Sign up" %}</h3>
   </div>
-  <p>{% blocktrans with provider_name=account.get_provider.name site_name=site.name %}You are about to use your {{ provider_name }} account to login to
-  {{site_name}}. As a final step, please complete the following form:{% endblocktrans %}</p>
-  <form class="signup" id="signup_form" method="post" action="{% url 'socialaccount_signup' %}">
+  <p>
+    {% blocktrans with provider_name=account.get_provider.name trimmed %}
+    You are about to use your {{ provider_name }} account to sign up to this site. Please complete the following form:
+    {% endblocktrans %}
+  </p>
+  <form method="POST" action="{% url 'socialaccount_signup' %}">
     {% csrf_token %}
     {{ form|bootstrap }}
     {% if redirect_field_value %}
-    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
     {% endif %}
     <div class="button-wrap">
-      <button class="btn btn-primary" type="submit">{% trans "Sign Up" %}</button>
+      <button class="btn btn-primary" type="submit">{% trans "Sign up" %}</button>
     </div>
   </form>
 </div>

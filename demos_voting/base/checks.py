@@ -3,13 +3,12 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import tempfile
 
 from allauth.account import app_settings as account_settings
+from allauth.socialaccount import app_settings as socialaccount_settings
 
 from django.conf import settings
 from django.core.checks import Error, Warning, register
 
-from demos_voting.base.utils import installed_app_labels
-
-DEMOS_VOTING_APP_LABELS = ['ballot_distributor', 'bulletin_board', 'election_authority', 'vote_collector']
+from demos_voting.base.utils import app_labels, installed_app_labels
 
 
 @register(deploy=True)
@@ -22,10 +21,10 @@ def demos_voting_settings_check(app_configs, **kwargs):
         warning = Warning(
             id='base.W001',
             msg="DEMOS Voting applications must be isolated in order to protect the voters' privacy.",
-            hint="Install each application (%s) on a different server." % ', '.join(DEMOS_VOTING_APP_LABELS),
+            hint="Install each application (%s) on a different server." % ", ".join(app_labels),
         )
         messages.append(warning)
-    for app_label in DEMOS_VOTING_APP_LABELS:
+    for app_label in app_labels:
         if not settings.DEMOS_VOTING_URLS.get(app_label):
             error = Error(
                 id='base.E001',
@@ -108,11 +107,28 @@ def account_settings_check(app_configs, **kwargs):
             msg="ACCOUNT_UNIQUE_EMAIL setting must be set to True.",
         )
         messages.append(error)
-    if not all(username in account_settings.USERNAME_BLACKLIST for username in DEMOS_VOTING_APP_LABELS):
+    if not all(username in account_settings.USERNAME_BLACKLIST for username in app_labels):
         error = Error(
             id='base.E008',
-            msg="ACCOUNT_USERNAME_BLACKLIST setting must contain 'ballot_distributor', 'bulletin_board', "
-                "'election_authority' and 'vote_collector'.",
+            msg="ACCOUNT_USERNAME_BLACKLIST setting must contain %s." % ", ".join("'%s'" % s for s in app_labels),
+        )
+        messages.append(error)
+    if not socialaccount_settings.EMAIL_REQUIRED:
+        error = Error(
+            id='base.E009',
+            msg="SOCIALACCOUNT_EMAIL_REQUIRED setting must be set to True.",
+        )
+        messages.append(error)
+    if not socialaccount_settings.EMAIL_VERIFICATION:
+        error = Error(
+            id='base.E010',
+            msg="SOCIALACCOUNT_EMAIL_VERIFICATION setting must be set to True.",
+        )
+        messages.append(error)
+    if not socialaccount_settings.QUERY_EMAIL:
+        error = Error(
+            id='base.E011',
+            msg="SOCIALACCOUNT_QUERY_EMAIL setting must be set to True.",
         )
         messages.append(error)
     return messages

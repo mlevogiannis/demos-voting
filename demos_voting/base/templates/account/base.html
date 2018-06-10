@@ -3,27 +3,9 @@
 {% load i18n %}
 
 {% block title %}
-{% block head_title %}{% endblock %} | {% trans "Account" %} | {{ block.super }}
+{% trans "Account" %} | {{ block.super }}
 {% endblock %}
 
 {% block header %}
 {% include './includes/header.html' %}
-{% endblock %}
-
-{% block main %}
-{% with body_main=block.super %}
-{% block body %}
-{{ body_main }}
-{% endblock %}
-{% endwith %}
-{% endblock %}
-
-{% block style %}
-{% block extra_head %}
-{% endblock %}
-{% endblock %}
-
-{% block script %}
-{% block extra_body %}
-{% endblock %}
 {% endblock %}

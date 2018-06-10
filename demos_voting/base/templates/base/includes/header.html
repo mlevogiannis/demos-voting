@@ -19,7 +19,9 @@
       <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav navbar-right">
           {% for name, url, is_active in header_nav %}
-          <li {% if is_active %}class="active"{% endif %}><a href="{{ url }}">{{ name }}</a></li>
+          <li {% if is_active %}class="active"{% endif %}>
+            <a href="{{ url }}">{{ name }}</a>
+          </li>
           {% endfor %}
         </ul>
       </div>
@@ -47,15 +49,28 @@
             <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="header-user-dropdown-toggle">
               <li class="visible-xs-block"><a>{% user_display user %}</a></li>
               <li role="separator" class="divider visible-xs-block"></li>
-              <li><a href="{% url 'account_profile' %}"><i class="fa fa-user-circle-o" aria-hidden="true"></i> {% trans "Profile" %}</a></li>
-              <li><a href="{% url 'account_logout' %}"><i class="fa fa-sign-out" aria-hidden="true"></i> {% trans "Sign Out" %}</a></li>
+              <li>
+                <a href="{% url 'account_profile' %}">
+                  <i class="fa fa-user-circle-o" aria-hidden="true"></i>
+                  {% trans "Profile" %}
+                </a>
+              </li>
+              <li>
+                <form method="POST" action="{% url 'account_logout' %}">
+                  {% csrf_token %}
+                  <button class="btn btn-link" type="submit">
+                    <i class="fa fa-sign-out" aria-hidden="true"></i>
+                    {% trans "Sign out" %}
+                  </button>
+                </form>
+              </li>
             </ul>
           </div>
           {% else %}
           <div id="header-login">
             <a href="{% url 'account_login' %}">
               <i class="fa fa-sign-in" aria-hidden="true"></i>
-              {% trans "Sign In" %}
+              {% trans "Sign in" %}
             </a>
           </div>
           {% endif %}

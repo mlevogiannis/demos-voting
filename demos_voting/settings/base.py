@@ -147,26 +147,28 @@ SITE_ID = 1
 # Django Allauth
 # https://github.com/pennersr/django-allauth
 
-ACCOUNT_ADAPTER = 'demos_voting.base.account_adapters.AccountAdapter'
+ACCOUNT_ADAPTER = 'demos_voting.base.adapters.AccountAdapter'
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_FORMS = {
-    'add_email': 'demos_voting.base.forms.AddEmailForm',
-    'reset_password': 'demos_voting.base.forms.ResetPasswordForm',
-    'reset_password_key': 'demos_voting.base.forms.ResetPasswordKeyForm',
-    'set_password': 'demos_voting.base.forms.SetPasswordForm',
-    'signup': 'demos_voting.base.forms.SignupForm',
+    'add_email': 'demos_voting.base.forms.AccountAddEmailForm',
+    'change_password': 'demos_voting.base.forms.AccountChangePasswordForm',
+    'login': 'demos_voting.base.forms.AccountLoginForm',
+    'reset_password': 'demos_voting.base.forms.AccountResetPasswordForm',
+    'reset_password_from_key': 'demos_voting.base.forms.AccountResetPasswordKeyForm',
+    'set_password': 'demos_voting.base.forms.AccountSetPasswordForm',
+    'signup': 'demos_voting.base.forms.AccountSignupForm',
 }
 ACCOUNT_USER_DISPLAY = lambda user: user.email
 ACCOUNT_USERNAME_BLACKLIST = ['ballot_distributor', 'bulletin_board', 'election_authority', 'vote_collector']
 ACCOUNT_USERNAME_REQUIRED = False
 
-SOCIALACCOUNT_ADAPTER = 'demos_voting.base.account_adapters.SocialAccountAdapter'
-
-# The following custom settings are also available:
-# ACCOUNT_IS_OPEN_FOR_SIGNUP = False
-# SOCIALACCOUNT_IS_OPEN_FOR_SIGNUP = False
+SOCIALACCOUNT_ADAPTER = 'demos_voting.base.adapters.SocialAccountAdapter'
+SOCIALACCOUNT_FORMS = {
+    'disconnect': 'demos_voting.base.forms.SocialAccountDisconnectForm',
+    'signup': 'demos_voting.base.forms.SocialAccountSignupForm',
+}
 
 # Celery
 # http://docs.celeryproject.org/en/latest/django/index.html

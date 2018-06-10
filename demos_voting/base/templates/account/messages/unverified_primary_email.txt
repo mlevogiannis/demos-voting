@@ -1,0 +1,3 @@
+{% load i18n %}
+
+{% trans "Your primary email address must be verified." %}

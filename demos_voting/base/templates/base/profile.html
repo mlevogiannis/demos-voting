@@ -1,0 +1,76 @@
+{% extends 'account/base.html' %}
+
+{% load i18n %}
+{% load static %}
+{% load account %}
+{% load demos_voting %}
+
+{% block title %}
+{% trans "User profile" %} | {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="page-header">
+    <h3>{% trans "User profile" %}</h3>
+  </div>
+  <div class="page-header">
+    <h4>{% trans "Personal information" %}</h4>
+  </div>
+  <form method="POST">
+    {% csrf_token %}
+    <div class="form-group {% if form.first_name.errors %}has-error{% endif %}">
+      <label class="control-label" for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+      <input type="text" class="form-control" id="{{ form.first_name.auto_id }}" value="{{ form.first_name.value|default_if_none:'' }}" name="{{ form.first_name.html_name }}" aria-describedby="{{ form.first_name.auto_id }}-help-block">
+      <span id="{{ form.first_name.auto_id }}-help-block" class="help-block">
+        {% for error in form.first_name.errors %}
+        {{ error }}
+        {% endfor %}
+        {{ form.first_name.help_text }}
+      </span>
+    </div>
+    <div class="form-group {% if form.last_name.errors %}has-error{% endif %}">
+      <label class="control-label" for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+      <input type="text" class="form-control" id="{{ form.last_name.auto_id }}" value="{{ form.last_name.value|default_if_none:'' }}" name="{{ form.last_name.html_name }}" aria-describedby="{{ form.last_name.auto_id }}-help-block">
+      <span id="{{ form.last_name.auto_id }}-help-block" class="help-block">
+        {% for error in form.last_name.errors %}
+        {{ error }}
+        {% endfor %}
+        {{ form.last_name.help_text }}
+      </span>
+    </div>
+    <div class="form-group">
+      <div class="button-wrap">
+        <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
+      </div>
+    </div>
+  </form>
+  <div class="page-header">
+    <h4>{% trans "Account" %}</h4>
+  </div>
+  <ul class="list-group">
+    {% if request.user.has_usable_password %}
+    <li class="list-group-item">
+      <a href="{% url 'account_change_password' %}">{% trans "Change password" %}</a>
+    </li>
+    {% else %}
+    <li class="list-group-item">
+      <a href="{% url 'account_set_password' %}">{% trans "Set password" %}</a>
+    </li>
+    {% endif %}
+    <li class="list-group-item">
+      <a href="{% url 'account_email' %}">{% trans "Email addresses" %}</a>
+    </li>
+    <li class="list-group-item">
+      <a href="{% url 'socialaccount_connections' %}">{% trans "Third-party account connections" %}</a>
+    </li>
+  </ul>
+  {% if api_token %}
+  <div class="page-header">
+    <h4>{% trans "REST API access" %}</h4>
+  </div>
+  <p>{% blocktrans %}To use {{ site_name }} via its REST API you will need the following token:{% endblocktrans %}</p>
+  <pre>{{ api_token }}</pre>
+  {% endif %}
+</div>
+{% endblock %}

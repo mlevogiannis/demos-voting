@@ -1,0 +1,3 @@
+{% load i18n %}
+
+{% blocktrans with email_address=email %}The email address {{ email_address }} has been verified.{% endblocktrans %}

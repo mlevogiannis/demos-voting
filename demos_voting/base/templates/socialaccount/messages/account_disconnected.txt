@@ -1,0 +1,3 @@
+{% load i18n %}
+
+{% trans "The third-party account has been disconnected." %}

@@ -1,0 +1,18 @@
+{% load socialaccount %}
+
+{% get_providers as socialaccount_providers %}
+
+<ul class="list-group">
+  {% for provider in socialaccount_providers %}
+  {% if provider.id == "openid" %}
+  {% for brand in provider.get_brands %}
+  <li class="list-group-item">
+    <a title="{{ brand.name }}" href="{% provider_login_url provider.id openid=brand.openid_url process=process %}">{{ brand.name }}</a>
+  </li>
+  {% endfor %}
+  {% endif %}
+  <li class="list-group-item">
+    <a title="{{ provider.name }}" href="{% provider_login_url provider.id process=process scope=scope auth_params=auth_params %}">{{ provider.name }}</a>
+  </li>
+  {% endfor %}
+</ul>

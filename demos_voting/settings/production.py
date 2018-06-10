@@ -172,8 +172,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'
 
-ACCOUNT_IS_OPEN_FOR_SIGNUP = False  # custom setting
-SOCIALACCOUNT_IS_OPEN_FOR_SIGNUP = False  # custom setting
+if FORCE_SCRIPT_NAME:
+    ACCOUNT_LOGOUT_REDIRECT_URL = FORCE_SCRIPT_NAME
 
 # Celery
 # http://docs.celeryproject.org/en/latest/django/index.html

@@ -2,16 +2,21 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import pytz
 
-from allauth.account.adapter import get_adapter
-from allauth.account.forms import AddEmailForm, ResetPasswordForm, ResetPasswordKeyForm, SetPasswordForm, SignupForm
+from allauth.account import app_settings as account_settings, forms as account_forms
+from allauth.socialaccount import forms as socialaccount_forms
 
 from django import forms
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.utils import timezone, translation
 from django.utils.translation import ugettext_lazy as _
 
 
-# Language and timezone form ##################################################
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = get_user_model()
+        fields = ['first_name', 'last_name']
+
 
 class SetLanguageAndTimezoneForm(forms.Form):
     prefix = 'set-language-and-timezone'
@@ -40,44 +45,64 @@ class SetLanguageAndTimezoneForm(forms.Form):
 
 # Allauth forms ###############################################################
 
-class AddEmailForm(AddEmailForm):
-    def clean(self):
-        cleaned_data = super(AddEmailForm, self).clean()
-        if not get_adapter().is_open_for_signup(request=None):
-            self.add_error(None, forms.ValidationError(_("Adding new email addresses is not allowed.")))
-        return cleaned_data
+class RemoveWidgetPlaceholderMixin(object):
+    def __init__(self, *args, **kwargs):
+        super(RemoveWidgetPlaceholderMixin, self).__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs.pop('placeholder', None)
 
 
-class ResetPasswordForm(ResetPasswordForm):
-    def clean(self):
-        cleaned_data = super(ResetPasswordForm, self).clean()
-        users = getattr(self, 'users', [])
-        if users:
-            assert len(users) == 1
-            if not users[0].has_usable_password() and not get_adapter().is_open_for_signup(request=None):
-                self.add_error(None, forms.ValidationError(_("Password reset is not allowed.")))
-        return cleaned_data
+class SignupMixin(object):
+    def __init__(self, *args, **kwargs):
+        super(SignupMixin, self).__init__(*args, **kwargs)
+        email_field = self.fields['email']
+        email_field.label = _("Email address") if email_field.required else _("Email address (optional)")
+        email2_field = self.fields.get('email2')
+        if email2_field:
+            email2_field.label = _("Email address (again)")
 
 
-class ResetPasswordKeyForm(ResetPasswordKeyForm):
-    def clean(self):
-        cleaned_data = super(ResetPasswordKeyForm, self).clean()
-        if not self.user.has_usable_password() and not get_adapter().is_open_for_signup(request=None):
-            self.add_error(None, forms.ValidationError(_("Password reset is not allowed.")))
-        return cleaned_data
+class AccountAddEmailForm(RemoveWidgetPlaceholderMixin, account_forms.AddEmailForm):
+    def __init__(self, *args, **kwargs):
+        super(AccountAddEmailForm, self).__init__(*args, **kwargs)
+        self.fields['email'].label = _("Email address")
 
 
-class SetPasswordForm(SetPasswordForm):
-    def clean(self):
-        cleaned_data = super(SetPasswordForm, self).clean()
-        if not get_adapter().is_open_for_signup(request=None):
-            self.add_error(None, forms.ValidationError(_("Setting a password is not allowed.")))
-        return cleaned_data
+class AccountChangePasswordForm(RemoveWidgetPlaceholderMixin, account_forms.ChangePasswordForm):
+    pass
 
 
-class SignupForm(SignupForm):
-    def clean(self):
-        cleaned_data = super(SignupForm, self).clean()
-        if not get_adapter().is_open_for_signup(request=None):
-            self.add_error(None, forms.ValidationError(_("User registration is not allowed.")))
-        return cleaned_data
+class AccountLoginForm(RemoveWidgetPlaceholderMixin, account_forms.LoginForm):
+    def __init__(self, *args, **kwargs):
+        super(AccountLoginForm, self).__init__(*args, **kwargs)
+        login_field = self.fields['login']
+        if account_settings.AUTHENTICATION_METHOD == "email":
+            login_field.label = _("Email address")
+        elif account_settings.AUTHENTICATION_METHOD == "username_email":
+            login_field.label = _("Username or email address")
+
+
+class AccountResetPasswordForm(RemoveWidgetPlaceholderMixin, account_forms.ResetPasswordForm):
+    def __init__(self, *args, **kwargs):
+        super(AccountResetPasswordForm, self).__init__(*args, **kwargs)
+        self.fields['email'].label = _("Email address")
+
+
+class AccountResetPasswordKeyForm(RemoveWidgetPlaceholderMixin, account_forms.ResetPasswordKeyForm):
+    pass
+
+
+class AccountSetPasswordForm(RemoveWidgetPlaceholderMixin, account_forms.SetPasswordForm):
+    pass
+
+
+class AccountSignupForm(SignupMixin, RemoveWidgetPlaceholderMixin, account_forms.SignupForm):
+    pass
+
+
+class SocialAccountDisconnectForm(RemoveWidgetPlaceholderMixin, socialaccount_forms.DisconnectForm):
+    pass
+
+
+class SocialAccountSignupForm(SignupMixin, RemoveWidgetPlaceholderMixin, socialaccount_forms.SignupForm):
+    pass

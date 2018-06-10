@@ -3,17 +3,20 @@
 {% load i18n %}
 {% load account %}
 
-{% block head_title %}{% trans "Confirm E-mail Address" %}{% endblock %}
+{% block title %}
+{% trans "Verify your email address" %} | {{ block.super }}
+{% endblock %}
 
 {% block content %}
 <div class="container">
   <div class="page-header">
-    <h3>{% trans "Confirm E-mail Address" %}</h3>
+    <h3>{% trans "Verify your email address" %}</h3>
   </div>
   {% if confirmation %}
   {% user_display confirmation.email_address.user as user_display %}
-  <p>{% blocktrans with confirmation.email_address.email as email %}Please confirm that <a href="mailto:{{ email }}">{{ email }}</a> is an e-mail address for user {{ user_display }}.{% endblocktrans %}</p>
-  <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
+  <p>{% blocktrans with email_address=confirmation.email_address.email %}Please confirm that the email address {{ email_address }} belongs to user {{ user_display }}.{% endblocktrans %}</p>
+  <br>
+  <form method="POST" action="{% url 'account_confirm_email' confirmation.key %}">
     {% csrf_token %}
     <div class="button-wrap">
       <button class="btn btn-primary" type="submit">{% trans "Confirm" %}</button>
@@ -21,7 +24,7 @@
   </form>
   {% else %}
   {% url 'account_email' as email_url %}
-  <p>{% blocktrans %}This e-mail confirmation link expired or is invalid. Please <a href="{{ email_url }}">issue a new e-mail confirmation request</a>.{% endblocktrans %}</p>
+  <p>{% blocktrans %}The email verification link is invalid. <a href="{{ email_url }}">Request a new one</a>.{% endblocktrans %}</p>
   {% endif %}
 </div>
 {% endblock %}
