@@ -26,9 +26,9 @@ class CreateElectionForm(forms.ModelForm):
         max_num=settings.DEMOS_VOTING_MAX_TRUSTEES,
         case_insensitive=True,
     )
-    disable_security_code = forms.BooleanField(
-        label=_("Disable security code (not recommended)"),
-        initial=False,
+    enable_security_code = forms.BooleanField(
+        label=_("Enable security code"),
+        initial=True,
         required=False,
     )
 
@@ -166,7 +166,7 @@ class CreateElectionForm(forms.ModelForm):
         # Generate the remaining election attributes.
         update_fields = []
         if election.vote_code_type == election.VOTE_CODE_TYPE_SHORT:
-            if not self.cleaned_data.get('disable_security_code'):
+            if self.cleaned_data.get('enable_security_code'):
                 election.generate_security_code_length()
                 if commit:
                     update_fields.append('security_code_length')
@@ -258,7 +258,7 @@ class CreateElectionForm(forms.ModelForm):
         model = Election
         fields = [
             'slug', 'name', 'voting_starts_at', 'voting_ends_at', 'type', 'vote_code_type', 'visibility',
-            'communication_language', 'ballot_count', 'trustee_emails', 'disable_security_code',
+            'communication_language', 'ballot_count', 'trustee_emails', 'enable_security_code',
             'max_candidate_selection_count', 'candidate_option_table_layout',
         ]
         widgets = {

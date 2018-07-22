@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-18 01:12+0200\n"
+"POT-Creation-Date: 2018-07-22 16:08+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,8 +29,8 @@ msgid "Trustee email addresses"
 msgstr "Διευθύνσεις email μελών εφορευτικής επιτροπής"
 
 #: demos_voting/election_authority/forms.py:30
-msgid "Disable security code (not recommended)"
-msgstr "Απενεργοποίηση κωδικού ασφαλείας (δεν συνιστάται)"
+msgid "Enable security code"
+msgstr "Ενεργοποίηση κωδικού ασφαλείας"
 
 #: demos_voting/election_authority/forms.py:37
 msgid "Maximum number of candidate selections"
@@ -349,13 +349,15 @@ msgstr "Αυξημένη ασφάλεια, μειωμένη ευχρηστία."
 msgid "Security code"
 msgstr "Κωδικός ασφαλείας"
 
+#: demos_voting/election_authority/templates/election_authority/election_create.html:545
+msgid "Enable (recommended)"
+msgstr "Ενεργοποίηση (συνιστάται)"
+
 #: demos_voting/election_authority/templates/election_authority/election_create.html:553
 msgid ""
-"Tick the box to disable the security code and achieve the maximum usability. "
-"However, the votes will no longer be secret."
-msgstr ""
-"Επιλέξτε το κουτάκι για να απενεργοποιήσετε τον κωδικό ασφαλείας και να "
-"επιτύχετε τη μέγιστη ευχρηστία. Ωστόσο οι ψήφοι δε θα είναι πλέον μυστικές."
+"The security code protects the secrecy of the votes. However, it incurs a "
+"usability penalty."
+msgstr "Ο κωδικός ασφαλείας προστατεύει το απόρρητο των ψήφων. Ωστόσο, υπάρχει μία ποινή χρηστικότητας."
 
 #: demos_voting/election_authority/templates/election_authority/election_create.html:567
 #, python-format

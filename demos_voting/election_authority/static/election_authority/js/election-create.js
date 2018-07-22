@@ -74,10 +74,10 @@ $('#id_election-voting_starts_at, #id_election-voting_ends_at').parent('.date').
 // Hide the security code input if the vote-code type is long.
 
 $('input[type=radio][name="election-vote_code_type"]').change(function() {
-    var disableSecurityCodeCheckbox = $('#id_election-disable_security_code');
+    var enableSecurityCodeCheckbox = $('#id_election-enable_security_code');
     var disable = ($(this).val() == 'long');
-    disableSecurityCodeCheckbox.prop('disabled', disable);
-    disableSecurityCodeCheckbox.closest('.form-group').toggleClass('hidden', disable);
+    enableSecurityCodeCheckbox.prop('disabled', disable);
+    enableSecurityCodeCheckbox.closest('.form-group').toggleClass('hidden', disable);
 });
 
 // Trustee emails.

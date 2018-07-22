@@ -535,22 +535,22 @@
             </span>
           </div>
         </div>
-        <!-- Disable security code -->
-        <div class="form-group {% if election_form.disable_security_code.errors %}has-error{% endif %} {% if election_form.vote_code_type.value == election_form.instance.VOTE_CODE_TYPE_LONG %}hidden{% endif %}">
+        <!-- Enable security code -->
+        <div class="form-group {% if election_form.enable_security_code.errors %}has-error{% endif %} {% if election_form.vote_code_type.value == election_form.instance.VOTE_CODE_TYPE_LONG %}hidden{% endif %}">
           <label class="col-sm-3 col-md-2 control-label">{% trans "Security code" %}</label>
           <div class="col-sm-9 col-md-10">
             <div class="checkbox">
               <label>
-                {{ election_form.disable_security_code }}
-                {{ election_form.disable_security_code.label }}
+                {{ election_form.enable_security_code }}
+                {% trans "Enable (recommended)" %}
               </label>
             </div>
-            <span id="{{ election_form.disable_security_code.auto_id }}-help-block" class="help-block">
-              {% for error in election_form.disable_security_code.errors %}
+            <span id="{{ election_form.enable_security_code.auto_id }}-help-block" class="help-block">
+              {% for error in election_form.enable_security_code.errors %}
               {{ error }}
               {% endfor %}
-              {{ election_form.disable_security_code.help_text }}
-              {% trans "Tick the box to disable the security code and achieve the maximum usability. However, the votes will no longer be secret." %}
+              {{ election_form.enable_security_code.help_text }}
+              {% trans "The security code protects the secrecy of the votes. However, it incurs a usability penalty." %}
             </span>
           </div>
         </div>
