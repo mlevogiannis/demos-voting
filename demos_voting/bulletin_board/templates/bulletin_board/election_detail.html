@@ -3,7 +3,7 @@
 {% load i18n %}
 {% load rules %}
 {% load static %}
-{% load demos_voting %}
+{% load base.utils %}
 
 {% block meta %}
 {% if election.state == election.STATE_SETUP or election.state == election.STATE_BALLOT_DISTRIBUTION or election.state == election.STATE_VOTING or election.state == election.STATE_TALLY %}
